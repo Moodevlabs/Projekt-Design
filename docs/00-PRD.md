@@ -21,6 +21,8 @@ Jedno konto = jedna firma (workspace). Wielu użytkowników w jednym workspace �
 
 ## 4. Funkcje
 
+> **Zakres rozszerzony 2026-08-22.** Poniższe sekcje opisują parytet z prototypem `projekt.html`. Analiza arkusza klienta (`docs/FEATURES-Z-EXCELA.md`) dołożyła do fazy 1 dwie rzeczy, bez których nie da się przenieść cennika z Excela: **cennik parametryczny z pomieszczeniami** (usługa = baza + Σ ceny za pomieszczenie) oraz **rabaty procentowe i warunkowe**. Tryb godzinowy, auto-opisy, kalkulator terminu i pakiet dokumentów towarzyszących trafiły do fazy 1.5. Kolejność i zależności: `docs/06-TASKS.md`.
+
 ### 4.1 MVP (faza 1) — parytet z `projekt.html` + multi-tenant
 
 **Wycena (Quote)**

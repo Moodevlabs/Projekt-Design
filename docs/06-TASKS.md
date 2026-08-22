@@ -2,6 +2,10 @@
 
 Format: `- [ ] T-xx Nazwa` — czytaj: wymagane dokumenty → kryteria akceptacji. Po ukończeniu: `[x]` + notatka.
 
+**Numer to tożsamość zadania, nie kolejność.** Kolejność wykonania = pozycja na liście. Po wchłonięciu `FEATURES-Z-EXCELA.md` (2026-08-22) zadania T-30+ zostały wplecione **pomiędzy** T-11…T-17, bo część z nich musi wyprzedzić PDF i brand kit — inaczej pisalibyśmy je dwa razy. Stare numery zostawiono nietknięte, żeby notatki i commity dalej się zgadzały.
+
+Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełna specyfikacja, wzory z arkusza i model domenowy. Tutaj jest **kolejność, zależności i kolizje z istniejącym kodem**; nie duplikuję treści tamtego dokumentu.
+
 ## Faza 0 — Fundament
 
 - [x] **T-01 Bootstrap repo** (01-ARCHITECTURE)
@@ -171,16 +175,69 @@ Format: `- [ ] T-xx Nazwa` — czytaj: wymagane dokumenty → kryteria akceptacj
   >
   > Zapisy do biblioteki wyjechały ze strony do `useSaveToLibrary` — `QuoteEditorPage` miał 391 linii, a logiki w komponencie nie dało się sprawdzić na prawdziwym store.
 
+### Model wyceny v2 — musi wyprzedzić PDF
+
+> **Dlaczego tutaj, a nie na końcu.** `F1` (pomieszczenia i cennik parametryczny) oraz `F3` (rabaty procentowe i warunkowe) zmieniają **kształt `QuoteBody`**, a T-13 renderuje dokładnie ten kształt. Zrobienie PDF-a przed nimi oznacza napisanie go dwa razy: raz na płaskich pozycjach, drugi raz na blokach per pomieszczenie i osobnej liście rabatów. Ta sama logika dotyczy T-11 (szablon zapisuje `body`) i T-12 (formularz brandingu, do którego `F7.2` dokłada pola).
+>
+> Koszt tej decyzji: pierwszy PDF powstaje później. Uznałem to za tańsze niż przepisywanie — jeśli wolisz mieć PDF wcześniej, powiedz, wtedy T-13 idzie zaraz po T-30 w wersji „bez pomieszczeń", z jawnym długiem do spłaty.
+
+- [ ] **T-30 Wersjonowanie `body` + szkielet migracji** (F1.1 — część)
+  `bodyVersion` w `QuoteBodySchema` (**dziś tego pola nie ma — brak pola == v1**, migracja musi to rozpoznawać, a nie zakładać `bodyVersion: 1`). `domain/quote/migrate.ts` z `migrateBody(raw) → v2`; wpięcie przy odczycie w `quotes.repo` (miejsce gotowe — jest `safeParse` + `bodyError`) i **w `templates.repo`, który trzyma taki sam `body`**. Zapis zawsze w najnowszej wersji.
+  ✅ Stara wycena i stary szablon z bazy wczytują się bez zmiany totali; `bodyError` dalej łapie faktycznie uszkodzony JSON.
+  ⚠️ Snapshoty w `library_groups.items` to **osobny** schemat (`LibraryItemSnapshotSchema`) — ma własną ścieżkę zgodności (`qty` dodano z `default(1)`), nie podpinaj go pod `migrateBody`.
+
+- [ ] **T-31 Domena: pomieszczenia i reguły cenowe** (F1.1)
+  `Room`, `PricingRule` (`flat` / `per_room` / `per_frame`), rozszerzenia `Item`/`Section`/`QuoteBody`, `calcItemCents(item, rooms)`, przepięcie `calcQuoteTotals`.
+  ✅ Parytet z arkuszem: K95 (200 + 15×7 pomieszczeń) i K26 (350 + 50×kadry); pomieszczenie `includedInVisual=false` + `includedInTechnical=true` liczy się tylko do części technicznej.
+  ⚠️ **Rozstrzygnij przed kodowaniem, czym jest blok pomieszczenia.** `FEATURES` opisuje go jako nowy byt wewnątrz sekcji `kind:'rooms'`. Tymczasem DnD stoi dziś na trzech poziomach (`section` → `group` → `item`, cele `item-list`/`section-groups` w `dnd/drop-resolution.ts`), a `GroupBlock` ma już nagłówek, sumę, przełącznik zbiorczy i przeciąganie. Tańszą drogą jest **`Group.roomId`** — pomieszczenie to grupa wskazująca na `Room`. Wtedy przeciąganie, zapis zestawu do biblioteki i kaskada działają bez dopisywania czwartego poziomu. Jeśli wybierzesz osobny byt, policz w PR koszt duplikacji DnD.
+
+- [ ] **T-32 Domena: rabaty procentowe i warunkowe** (F3.1)
+  `Discount` (fixed/percent, scope quote/section/items, `condition`, `roundToCents`), `QuoteBody.discounts`, `calcDiscounts`, clamp do podstawy, migracja `kind:'discount'` → `Discount{type:'fixed'}`.
+  ✅ Parytet: K114 (5% tylko przy 5/5 TAK, `MROUND` 10 zł), 25% na pozycjach z tagiem `visualization`; 100% pokrycia `calcDiscounts`.
+  ⚠️ **To najbardziej rozlana zmiana w całym pakiecie.** `kind === 'discount'` siedzi dziś w ~20 plikach: `calc.ts`, `Money`, `ItemRow`, `GroupBlock`, `SectionBlock`, `TotalsCard`, `KindToggle`, `LibraryItemCard`, `GroupItemsList`, seed i komplet testów. Rabat w bibliotece i w snapshotach zestawów (T-10) też jedzie na `kind`. Zaplanuj to jako jedno przejście, nie „przy okazji".
+
+- [ ] **T-33 Słownik typów pomieszczeń** (F1.2)
+  Migracja `room_types` + seed 14 typów w `handle_new_user()`, `room-types.repo`, `useRoomTypes`.
+  ✅ Nowe konto dostaje 14 typów; usunięcie używanego typu to soft delete z ostrzeżeniem.
+  ⚠️ UI tego słownika mieszka w ustawieniach — rób go razem z **T-16**, nie osobno, żeby nie budować dwa razy tej samej strony.
+
+- [ ] **T-34 Biblioteka: reguły cenowe i macierz** (F1.3)
+  `library_items.pricing jsonb`, przełącznik trybu na karcie pozycji, macierz `pozycje × typy pomieszczeń`, import CSV.
+  ✅ Zmiana ceny w macierzy wchodzi do nowej wyceny; kaskada do otwartej wyceny obejmuje `pricing`.
+  ⚠️ Kaskada z T-10 przenosi dziś **wyłącznie `name`, `description`, `unitPriceCents`** (`cascadeFields` w `items/item-draft.ts` + `LibraryCascadePatch` w store). Dopisanie `pricing` to zmiana w obu miejscach plus test — nie dzieje się samo.
+  ⚠️ Nowa zależność `@tanstack/react-table` wymaga uzasadnienia w PR (CLAUDE.md „Czego NIE robić”). Rozważ najpierw zwykłą tabelę z inputami — macierz to kilkanaście kolumn, nie tysiąc wierszy.
+
+- [ ] **T-35 Edytor: panel pomieszczeń i bloki per pomieszczenie** (F1.4)
+  `RoomsPanel`, sekcja z blokami pomieszczeń, „dodaj pozycję do wszystkich pomieszczeń", warianty (3D/360), stepper kadrów, akcje store (`addRoom`/`updateRoom`/`removeRoom`/`setItemVariant`/`setItemFrames`), dopisek „baza + 7 pom." z tooltipem.
+  ✅ Scenariusz z arkusza: 7 pomieszczeń → 200 + Σ; wyłączenie T dla salonu zdejmuje 15 zł; `kuchnia x2` podwaja składnik.
+  ⚠️ Zależy od rozstrzygnięcia z T-31. Usunięcie pomieszczenia kasuje pozycje z jego `roomId` — przez `ConfirmDialog`, jak przy usuwaniu grupy.
+
+- [ ] **T-36 Edytor: UI rabatów** (F3.2)
+  `DiscountRow` (typ zł/%, zakres, warunek, zaokrąglenie), wyszarzony rabat niespełniony z licznikiem „3/5 pozycji", rabaty jako osobna zakładka biblioteki.
+  ✅ Sekcja `RABATY` z arkusza odwzorowana 1:1.
+
+- [ ] **T-37 Podsumowania per sekcja** (F7.3)
+  `calcQuoteTotals` zwraca `bySection` z uwzględnieniem rabatów zakresowych; rozwijany blok „Per etap” w `TotalsCard`.
+  ✅ Suma sekcji = pozycje sekcji − rabaty sekcji.
+  ⚠️ `calcSectionTotals` i `calcGroupTotals` **już istnieją** (`domain/quote/calc.ts`) — to rozszerzenie wyniku globalnego, nie nowa kalkulacja od zera.
+
+### Reszta Fazy 1
+
 - [ ] **T-11 Szablony** (00-PRD §4.1)
   ✅ Zapisz jako szablon, nowa z szablonu, nadpisz, usuń.
+  ⚠️ Po T-30: szablon zapisuje `body`, więc musi przejść tę samą migrację wersji co wycena.
 
-- [ ] **T-12 Brand kit — ustawienia + Storage** (04-PDF §3–4, 02-DATABASE storage)
+- [ ] **T-12 Brand kit — ustawienia + Storage** (04-PDF §3–4, 02-DATABASE storage) **+ F7.2**
   Formularz, upload logo do bucketa `brand`, signed URL, walidacja kolorów, kontrast.
-  ✅ Zapis i odczyt; logo widoczne po restarcie.
+  Z `F7.2`: `opening_hours jsonb` (max 4 wiersze), `signer_title`, `signer_name` — stopka „CZYNNE” i blok „wystawił”.
+  ✅ Zapis i odczyt; logo widoczne po restarcie; stopka zgodna z arkuszami.
+  ⚠️ Scalone świadomie: `F7.2` to trzy pola w tym samym formularzu i tej samej stopce PDF. Osobne zadanie znaczyłoby drugie przejście przez branding i drugą korektę layoutu stopki.
 
-- [ ] **T-13 PDF** (04-PDF)
+- [ ] **T-13 PDF** (04-PDF) **+ F1.5, F3.3**
   `QuotePdfDocument`, fonty, theme z brand kitu, worker, eksport przez Tauri `save_file` + `open_path`, live preview w ustawieniach brandingu, snapshot test renderu (pdf → png przez `pdf-to-img` w teście lub porównanie struktury).
-  ✅ PDF 10 stron < 3 s; polskie znaki; wyłączone pozycje wg ustawienia; numeracja stron.
+  Z `F1.5`: bloki pomieszczeń z `x2`, wiersz „Pomieszczenia: …” (`showRoomsSummary`), opcjonalny rozkład ceny (`showPriceBreakdown`, domyślnie **off**).
+  Z `F3.3`: sekcja rabatów z „−5% (etap funkcjonalny)”, niespełnione warunkowe pokazywane domyślnie (narzędzie sprzedażowe).
+  ✅ PDF 10 stron < 3 s; polskie znaki; wyłączone pozycje wg ustawienia; numeracja stron; snapshot z sekcją pomieszczeń i rabatami.
 
 - [ ] **T-14 Stripe — Edge Functions + webhook** (03-BILLING)
   3 funkcje + `_shared`, idempotencja, mapowanie statusów, testy Deno z mockiem.
@@ -190,13 +247,73 @@ Format: `- [ ] T-xx Nazwa` — czytaj: wymagane dokumenty → kryteria akceptacj
   `domain/billing/entitlement.ts` (parytet z SQL — test), `useSubscription`, `PaywallGate`, banner read-only, pasek triala, deep link `anzorge://billing/*`, polling po powrocie.
   ✅ Symulacja: ustaw `trial_ends_at` w przeszłość → edytor read-only, RLS odrzuca update; kup → `active` → edycja wraca.
 
-- [ ] **T-16 Ustawienia workspace + konto**
+- [ ] **T-16 Ustawienia workspace + konto** **+ UI z F1.2**
   Waluta, VAT, wzorzec numeracji, `showDisabledItems`, zmiana hasła, eksport danych (JSON), usuń konto (Edge fn `delete-account`).
-  ✅ Zmiana wzorca numeracji wpływa na kolejną wycenę.
+  Z `F1.2`: `RoomTypesSection` — lista typów pomieszczeń z inline-edit, dodawaniem, usuwaniem i kolejnością.
+  ✅ Zmiana wzorca numeracji wpływa na kolejną wycenę; typy pomieszczeń edytowalne.
+  ⚠️ `workspaces.settings` to JSONB bez migracji — `hourlyRateCents`, `defaultPricingBasis`, `scheduleTemplate` i `defaultValidDays.*` dokładają się tu bez ruszania schematu, ale **każde czytane przez zod** (CLAUDE.md §2). Pola pod F2/F5/F6 dodawaj razem z ich zadaniami, nie na zapas.
 
 - [ ] **T-17 Polish & release 1.0**
   Pusty stan onboardingu (3 kroki: logo → biblioteka → pierwsza wycena), obsługa błędów (ErrorBoundary, toasty), ikony aplikacji, `tauri build` Win+mac, podpisywanie (notarization macOS, cert Win — zanotuj w README co trzeba mieć), CHANGELOG.
   ✅ Instalator działa na czystej maszynie.
+
+## Faza 1.5 — reszta pakietu z Excela (zaraz po 1.0)
+
+> **Dlaczego to nie wchodzi do 1.0.** `F1` i `F3` są w Fazie 1, bo bez nich klient z tego arkusza **nie przeniesie swojego cennika** — to warunek wejścia. `F2`, `F4`, `F5` i `F6` są tym, co sprawi, że przestanie otwierać Excela, ale każde z nich to osobny moduł (harmonogram to własna domena, dat i świąt; pakiet dokumentów to trzy nowe generatory PDF). Wepchnięcie ich do 1.0 przesuwa premierę o miesiące przy zerowym zysku dla pierwszego wydania. Rekomenduję 1.1 wkrótce po 1.0 — jeśli uznasz inaczej, przenieś je do Fazy 1; zależności na to pozwalają.
+
+- [ ] **T-38 Silnik placeholderów w opisach** (F4.1)
+  `domain/quote/template-text.ts`, `renderText`, `{rooms}`, `{frames|kadr|kadry|kadrów}` z polską liczbą mnogą (reguła 12–14), nieznany placeholder zostaje dosłownie.
+  ✅ „kuchnia, salon x2.”; `1 kadr / 3 kadry / 5 kadrów / 22 kadry / 12 kadrów`.
+
+- [ ] **T-39 Auto-opisy w UI i PDF** (F4.2)
+  Render w podglądzie i PDF, surowy tekst w edycji, przycisk `{}` z listą placeholderów, seed opisów z placeholderami.
+  ✅ Zmiana pomieszczeń aktualizuje opis na żywo.
+
+- [ ] **T-40 Tryb godzinowy — domena** (F2.1)
+  `pricingBasis`, snapshot `hourlyRateCents` w `body`, `toCents()`, `minutesTotal`/`minutesBySection`.
+  ✅ Wycena przełączona amount↔time przy stawce 60 zł/h daje zgodne liczby.
+  ⚠️ **Pułapka nazw.** Decyzja z `FEATURES` (te same pola `*Cents` znaczą minuty w trybie `time`) jest tania w domenie, ale niebezpieczna na granicach: `formatMoney`, komponent `Money`, `MoneyInput` w bibliotece i **kaskada biblioteki** nie wiedzą o trybie. Pozycja zapisana do biblioteki z wyceny godzinowej wjedzie do wyceny kwotowej jako grosze (45 min → 0,45 zł). Albo zapisz `pricingBasis` przy wpisie bibliotecznym, albo zablokuj kaskadę między trybami — rozstrzygnij w tym zadaniu, nie w UI.
+
+- [ ] **T-41 Tryb godzinowy — UI** (F2.2)
+  Segment „Kwotowa | Godzinowa” w `QuoteHeader`, pole stawki, etykiety „min”, `45 min → 150 zł` w wierszu, „Pracochłonność” w `TotalsCard`, dialog przy zmianie trybu.
+  ✅ Przełączenie nie psuje autozapisu ani kaskady.
+
+- [ ] **T-42 Szacowanie pracochłonności** (F2.3)
+  Popover z minutami per sekcja, tag `communication`, `Item.tags`.
+  ✅ Suma minut zgodna z `OFERTA - DANE` U/R48 dla seedu.
+
+- [ ] **T-43 Harmonogram — domena** (F5.1)
+  `domain/schedule/`, `calcSchedule`, `domain/dates/workdays.ts` (polskie święta: stałe + Wielkanoc algorytmem Meeusa + Boże Ciało), szablon 11 etapów.
+  ✅ Święta 2026/2027, przejście przez rok, 6-dniowy tydzień inwestora.
+  ⚠️ `date-fns` to nowa zależność — uzasadnij w PR. Sama arytmetyka dni roboczych jest trywialna; `date-fns` bierzemy dla formatowania i bezpiecznych operacji na strefach, nie dla `addWorkdays`.
+
+- [ ] **T-44 Harmonogram — zakładka w edytorze** (F5.2)
+  Zakładki **Wycena | Termin | Dokumenty**, tabela etapów, karta wyniku, Gantt na czystym CSS, auto-sync etapów po tagach pozycji.
+  ✅ Zmiana pomieszczeń w zakładce Wycena zmienia wynik w zakładce Termin.
+  ⚠️ Zakładki zmieniają szkielet `QuoteEditorPage`, który dziś jest jednym widokiem z własnym paskiem (`handle.hideTopbar`). Zaplanuj, co się dzieje z autozapisem i `LibrarySheet` przy przełączaniu zakładek — store jest jeden na całą wycenę.
+
+- [ ] **T-45 PDF „Szacowany termin”** (F5.3)
+  `SchedulePdfDocument`, tabela pomieszczenia × etapy, blok „Ramy czasowe”, osobna ważność.
+  ✅ A4 mieści 18 pomieszczeń bez łamania wiersza w środku.
+
+- [ ] **T-46 Dokument „Etapy współpracy”** (F6.1)
+  Migracja `workspace_doc_templates`, seed 19 etapów, zakładka Dokumenty, `StagesPdfDocument`.
+  ✅ Parytet z arkuszem `ETAPY WSPÓŁPRACY`.
+  ⚠️ To **nie to samo** co T-11: tam szablon całej wyceny (tabela `templates`), tu szablon dokumentu towarzyszącego. Nazwy w UI muszą je rozróżniać, inaczej użytkownik utonie w dwóch „szablonach”.
+
+- [ ] **T-47 Dokument „Cennik usług dodatkowych”** (F6.2)
+  Przedziały cen, jednostka `zł/h`, termin realizacji, `formatMoneyRange`, `PriceListPdfDocument`, przycisk „Dodaj do wyceny jako pozycję”.
+  ✅ Parytet z arkuszem `CENNIK USŁUG DODATKOWYCH`.
+
+- [ ] **T-48 Eksport pakietu dokumentów** (F6.3)
+  Dialog wyboru dokumentów, scalanie do jednego PDF albo osobne pliki, nazwy `{number}-wycena.pdf`, ważność per dokument.
+  ✅ Pakiet 4 dokumentów < 5 s, ciągła numeracja stron w trybie „jeden plik”.
+  ⚠️ `pdf-lib` — nowa zależność, uzasadnij w PR.
+
+- [ ] **T-49 Rejestr ofert — pola z arkusza `OFERTY`** (F7.1)
+  `quotes.city`, `internal_notes`, `doc_kind`; kolumna „Miasto”, filtr, szybkie notatki; eksport CSV w układzie arkusza.
+  ✅ Eksport otwiera się w Excelu bez przekodowania (UTF-8 BOM, separator `;`).
+  ⚠️ Pokrywa się z **T-23** (import/eksport CSV) i **T-18** (klienci — `city` naturalnie należy do klienta, nie do wyceny). Zrób te trzy razem albo świadomie zduplikuj `city`.
 
 ## Faza 2
 
@@ -204,7 +321,7 @@ Format: `- [ ] T-xx Nazwa` — czytaj: wymagane dokumenty → kryteria akceptacj
 - [ ] T-19 Auto-update (tauri-plugin-updater, endpoint w Supabase Storage / GitHub Releases)
 - [ ] T-20 Wysyłka e-mail z PDF (Resend) + szablon wiadomości
 - [ ] T-21 Tryb ciemny + paleta komend ⌘K + skróty
-- [ ] T-22 Wersjonowanie wyceny
+- [ ] T-22 Wersjonowanie wyceny — historia wersji dokumentu dla użytkownika (nie mylić z **T-30**, które wersjonuje *schemat* `body` na potrzeby migracji)
 - [ ] T-23 Import/eksport CSV (biblioteka, lista wycen)
 - [ ] T-24 Wiele walut i lokalizacja liczb
 

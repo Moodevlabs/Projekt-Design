@@ -13,6 +13,7 @@ Ten plik jest źródłem prawdy o zasadach pracy. Szczegóły są w `docs/` — 
 | `docs/04-PDF.md` | Generowanie PDF i brand kit |
 | `docs/05-UI.md` | Design system, komponenty, layout |
 | `docs/06-TASKS.md` | Lista zadań w kolejności — pracuj po jednym |
+| `docs/FEATURES-Z-EXCELA.md` | Funkcje z arkusza klienta (cennik parametryczny, pomieszczenia, rabaty %, harmonogram, pakiet dokumentów) — model i wzory dla zadań T-30…T-49. **§8 zawiera korekty założeń wobec stanu kodu — przeczytaj przed startem chunku.** |
 
 ## Stack (nie negocjujemy bez powodu)
 
