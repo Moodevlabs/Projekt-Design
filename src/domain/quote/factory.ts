@@ -1,0 +1,98 @@
+import { newId } from '../id';
+import type { Group, Item, QuoteBody, Section } from './schema';
+
+/** Fabryki obiektow domenowych - kazdy nowy element dostaje wlasne id. */
+
+/** Nowa pozycja z sensownymi wartosciami domyslnymi. */
+export function newItem(partial: Partial<Item> = {}): Item {
+  return {
+    id: newId(),
+    kind: 'item',
+    name: 'Nowa pozycja',
+    description: '',
+    qty: 1,
+    unitPriceCents: 0,
+    enabled: true,
+    libraryItemId: null,
+    ...partial,
+  };
+}
+
+/** Nowa grupa (np. pomieszczenie). */
+export function newGroup(partial: Partial<Group> = {}): Group {
+  return {
+    id: newId(),
+    name: 'Nowa grupa',
+    items: [],
+    ...partial,
+  };
+}
+
+/** Nowa sekcja wyceny. */
+export function newSection(partial: Partial<Section> = {}): Section {
+  return {
+    id: newId(),
+    title: 'Nowa sekcja',
+    groups: [],
+    items: [],
+    ...partial,
+  };
+}
+
+/** Nowy, pusty dokument wyceny. */
+export function newQuoteBody(partial: Partial<QuoteBody> = {}): QuoteBody {
+  return {
+    title: 'Wycena',
+    subtitle: '',
+    intro: '',
+    projectDescription: '',
+    client: { name: '', phone: '', email: '' },
+    validDays: 7,
+    vatRate: 23,
+    pricesInclude: 'net',
+    sections: [],
+    preparedBy: '',
+    showDisabledItems: true,
+    ...partial,
+  };
+}
+
+/**
+ * Kopia dokumentu z nowymi identyfikatorami sekcji/grup/pozycji.
+ * Zachowuje wszystkie dane (lacznie z klientem) - uzywane przy "Duplikuj wycene".
+ */
+export function duplicateQuoteBody(body: QuoteBody): QuoteBody {
+  return {
+    ...structuredClone(body),
+    sections: regenerateSectionIds(body.sections),
+  };
+}
+
+/**
+ * Nowa wycena na bazie szablonu: struktura i teksty zostaja, dane inwestora
+ * sa czyszczone (szablon nie powinien przenosic klienta z poprzedniej oferty).
+ */
+export function fromTemplate(body: QuoteBody): QuoteBody {
+  return {
+    ...duplicateQuoteBody(body),
+    client: { name: '', phone: '', email: '' },
+  };
+}
+
+/** Gleboka kopia sekcji z podmienionymi identyfikatorami. */
+function regenerateSectionIds(sections: Section[]): Section[] {
+  return sections.map((section) => ({
+    ...structuredClone(section),
+    id: newId(),
+    items: section.items.map(cloneItemWithNewId),
+    groups: section.groups.map((group) => ({
+      ...structuredClone(group),
+      id: newId(),
+      items: group.items.map(cloneItemWithNewId),
+    })),
+  }));
+}
+
+function cloneItemWithNewId(item: Item): Item {
+  return { ...structuredClone(item), id: newId() };
+}
