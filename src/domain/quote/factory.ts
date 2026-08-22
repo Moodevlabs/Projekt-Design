@@ -60,6 +60,7 @@ export function newQuoteBody(partial: Partial<QuoteBody> = {}): QuoteBody {
     vatRate: 23,
     pricesInclude: 'net',
     rooms: [],
+    discounts: [],
     sections: [],
     preparedBy: '',
     showDisabledItems: true,

@@ -1,5 +1,6 @@
 export * from './schema';
 export * from './migrate';
 export * from './calc';
+export * from './discounts';
 export * from './factory';
 export * from './reorder';

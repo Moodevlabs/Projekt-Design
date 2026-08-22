@@ -15,7 +15,7 @@
  */
 
 /** Wersja, w której zapisujemy dokumenty. Podnieś ją razem z dopisaniem kroku. */
-export const CURRENT_BODY_VERSION = 2;
+export const CURRENT_BODY_VERSION = 3;
 
 export type BodyRecord = Record<string, unknown>;
 
@@ -31,6 +31,14 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
    * zmieniają**. Tu jest tylko to, czego zod sam by nie odtworzył.
    */
   1: (body) => ({ ...body, rooms: Array.isArray(body.rooms) ? body.rooms : [] }),
+
+  /**
+   * v3 = rabaty jako osobny byt (T-32). Dokument dostaje pustą listę rabatów.
+   * Istniejących pozycji `kind: 'discount'` **nie** przenosimy tutaj — zrobi to
+   * T-36 razem z UI. Gdyby przenieść je teraz, rabaty zniknęłyby z edytora,
+   * bo nie ma jeszcze czym ich narysować.
+   */
+  2: (body) => ({ ...body, discounts: Array.isArray(body.discounts) ? body.discounts : [] }),
 };
 
 export type MigrateResult = { ok: true; body: unknown } | { ok: false; error: string };

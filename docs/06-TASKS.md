@@ -206,10 +206,19 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - Zaokrąglamy **raz**, na wartości pozycji — składniki (cena za pomieszczenie × ilość) sumują się w pełnej precyzji.
   > - Pozycje wstawiane z biblioteki dostają na razie `pricing: flat`; własne reguły cenowe wpisów bibliotecznych to **T-34**.
 
-- [ ] **T-32 Domena: rabaty procentowe i warunkowe** (F3.1)
+- [x] **T-32 Domena: rabaty procentowe i warunkowe** (F3.1)
   `Discount` (fixed/percent, scope quote/section/items, `condition`, `roundToCents`), `QuoteBody.discounts`, `calcDiscounts`, clamp do podstawy, migracja `kind:'discount'` → `Discount{type:'fixed'}`.
   ✅ Parytet: K114 (5% tylko przy 5/5 TAK, `MROUND` 10 zł), 25% na pozycjach z tagiem `visualization`; 100% pokrycia `calcDiscounts`.
   ⚠️ **To najbardziej rozlana zmiana w całym pakiecie.** `kind === 'discount'` siedzi dziś w ~20 plikach: `calc.ts`, `Money`, `ItemRow`, `GroupBlock`, `SectionBlock`, `TotalsCard`, `KindToggle`, `LibraryItemCard`, `GroupItemsList`, seed i komplet testów. Rabat w bibliotece i w snapshotach zestawów (T-10) też jedzie na `kind`. Zaplanuj to jako jedno przejście, nie „przy okazji".
+  > **Zrobione.** `DiscountSchema`, `QuoteBody.discounts`, `domain/quote/discounts.ts` (`calcDiscounts`, `roundToStep`), `bodyVersion` 3 z krokiem migracji. **100% pokrycia `discounts.ts`** w każdym wymiarze (statements/branch/functions/lines). 415 testów jednostkowych + 37 integracyjnych.
+  > **Na co uważać:**
+  > - **Stare rabaty (`kind: 'discount'`) NIE zostały przeniesione — świadomie.** Migracja dodaje tylko pustą listę, a `calcQuoteTotals` sumuje **oba** źródła. Przeniesienie ich teraz znaczyłoby, że rabaty znikają z edytora, bo nie ma jeszcze czym ich narysować. **Konwersja + usunięcie `kind: 'discount'` należy do T-36** — dopiero tam robi się to „jedno przejście" po ~20 plikach. To celowy krok pośredni (expand teraz, contract przy UI), nie zapomniany dług.
+  > - **Rabaty liczą się od pozycji, nie od rabatów.** Pozycje `kind: 'discount'` są wyłączone z podstawy procentu — inaczej procent naliczałby się od cudzej obniżki.
+  > - **Rabat na całość liczy się od kwoty już pomniejszonej** o rabaty sekcyjne i pozycyjne (stąd sortowanie zakresów). Dwa rabaty po 50% dają 75%, a nie darmową wycenę.
+  > - **Suma rabatów jest przycinana do sumy pozycji** — arkusz tego nie pilnuje, my tak.
+  > - **Pusty zakres nie spełnia warunku kompletności.** „Wszystkie z zera” to brak etapu, nie kompletny etap.
+  > - `DiscountLine` zwraca `enabledInScope`/`itemsInScope` — to z tego T-36 zrobi etykietę „Warunek niespełniony (4/5 pozycji)". Bez niej zero wygląda jak błąd, a nie jak zachęta do dobrania etapu.
+  > - Test parytetu 25% zrobiony na `scope: 'items'`, a nie na tagu `visualization` — **tagi pozycji przychodzą dopiero z T-42**.
 
 - [ ] **T-33 Słownik typów pomieszczeń** (F1.2)
   Migracja `room_types` + seed 14 typów w `handle_new_user()`, `room-types.repo`, `useRoomTypes`.

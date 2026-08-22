@@ -1,4 +1,5 @@
 import { roundCents } from '../money';
+import { calcDiscounts } from './discounts';
 import type { Group, Item, PricesInclude, QuoteBody, Room, RoomScope, Section } from './schema';
 
 /** Podsumowanie kwotowe — wszystkie wartości to całkowite grosze. */
@@ -29,14 +30,27 @@ export interface TotalsOptions {
  */
 const DEFAULT_TOTALS_OPTIONS: TotalsOptions = { vatRate: 0, pricesInclude: 'net', rooms: [] };
 
-/** Podsumowanie całej wyceny (stawka VAT, tryb cen i pomieszczenia z `body`). */
+/**
+ * Podsumowanie całej wyceny (stawka VAT, tryb cen i pomieszczenia z `body`).
+ *
+ * `discountsCents` zbiera **oba** źródła obniżek: pozycje `kind: 'discount'`
+ * (rabaty kwotowe wpisane jako wiersz wyceny) oraz `body.discounts` (rabaty
+ * procentowe i warunkowe). Przeniesienie tych pierwszych do drugiego mechanizmu
+ * dzieje się razem z UI w T-36 — do tego czasu muszą się liczyć równolegle,
+ * inaczej istniejące wyceny nagle podrożałyby.
+ */
 export function calcQuoteTotals(body: QuoteBody): QuoteTotals {
   const sums = sumItems(body.sections.flatMap(sectionItems), body.rooms);
-  return buildTotals(sums, {
-    vatRate: body.vatRate,
-    pricesInclude: body.pricesInclude,
-    rooms: body.rooms,
-  });
+  const discounts = calcDiscounts(body, body.rooms);
+
+  return buildTotals(
+    { ...sums, discountsCents: sums.discountsCents + discounts.totalCents },
+    {
+      vatRate: body.vatRate,
+      pricesInclude: body.pricesInclude,
+      rooms: body.rooms,
+    },
+  );
 }
 
 /**

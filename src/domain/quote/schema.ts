@@ -104,6 +104,48 @@ export const SectionSchema = z.object({
 });
 export type Section = z.infer<typeof SectionSchema>;
 
+/** Na czym liczy się procent: cała wycena, jedna sekcja, wskazane pozycje. */
+export const DiscountScopeSchema = z.enum(['quote', 'section', 'items']);
+export type DiscountScope = z.infer<typeof DiscountScopeSchema>;
+
+/**
+ * Warunek naliczenia. `all_items_in_scope_enabled` to „rabat za kompletny etap”
+ * z arkusza (K114): 5% należy się tylko wtedy, gdy klient bierze **wszystkie**
+ * pozycje z zakresu.
+ */
+export const DiscountConditionSchema = z.enum(['always', 'all_items_in_scope_enabled']);
+export type DiscountCondition = z.infer<typeof DiscountConditionSchema>;
+
+/**
+ * Rabat jako osobny byt, nie pozycja wyceny.
+ *
+ * W arkuszu rabaty też mają własną sekcję — a procent musi wiedzieć, **od
+ * czego** liczy, czego pozycja z ceną jednostkową nie potrafi wyrazić.
+ * Kwotowe rabaty z pozycji (`kind: 'discount'`) dalej działają; przeniesienie
+ * ich tutaj razem z UI to T-36.
+ */
+export const DiscountSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(1),
+  description: z.string().default(''),
+  enabled: z.boolean().default(true),
+  type: z.enum(['fixed', 'percent']),
+  /** Dla `fixed` — wartość dodatnia, calc ją odejmuje. */
+  valueCents: z.number().int().nonnegative().optional(),
+  /** Dla `percent` — 0–100. */
+  percent: z.number().min(0).max(100).optional(),
+  scope: DiscountScopeSchema.default('quote'),
+  sectionId: z.string().uuid().nullable().default(null),
+  itemIds: z.array(z.string().uuid()).default([]),
+  condition: DiscountConditionSchema.default('always'),
+  /**
+   * Zaokrąglenie kwoty rabatu do wielokrotności groszy — odpowiednik
+   * `MROUND(…; 10)` z arkusza (`1000` = pełne 10 zł). `0` = bez zaokrąglania.
+   */
+  roundToCents: z.number().int().nonnegative().default(0),
+});
+export type Discount = z.infer<typeof DiscountSchema>;
+
 export const QuoteClientSchema = z.object({
   name: z.string().default(''),
   phone: z.string().default(''),
@@ -140,6 +182,8 @@ export const QuoteBodySchema = z.object({
   pricesInclude: PricesIncludeSchema.default('net'),
   /** Pomieszczenia wyceny — wymiar, po którym liczy się cennik parametryczny. */
   rooms: z.array(RoomSchema).default([]),
+  /** Rabaty procentowe i warunkowe. Kwotowe z pozycji (`kind`) działają nadal. */
+  discounts: z.array(DiscountSchema).default([]),
   sections: z.array(SectionSchema).default([]),
   preparedBy: z.string().default(''),
   showDisabledItems: z.boolean().default(true),
