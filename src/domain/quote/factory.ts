@@ -15,6 +15,9 @@ export function newItem(partial: Partial<Item> = {}): Item {
     unitPriceCents: 0,
     enabled: true,
     libraryItemId: null,
+    // Domyślnie `flat`, czyli zachowanie sprzed cennika parametrycznego.
+    pricing: { mode: 'flat' },
+    roomId: null,
     ...partial,
   };
 }
@@ -56,6 +59,7 @@ export function newQuoteBody(partial: Partial<QuoteBody> = {}): QuoteBody {
     validDays: 7,
     vatRate: 23,
     pricesInclude: 'net',
+    rooms: [],
     sections: [],
     preparedBy: '',
     showDisabledItems: true,

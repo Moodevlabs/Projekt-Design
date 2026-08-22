@@ -66,6 +66,10 @@ export function libraryItemToQuoteItem(
     unitPriceCents: libraryItem.unitPriceCents,
     enabled: true,
     libraryItemId: libraryItem.id,
+    // Wpisy biblioteczne dostaną własne reguły cenowe dopiero w T-34
+    // (`library_items.pricing`); do tego czasu wstawiamy pozycję stałocenową.
+    pricing: { mode: 'flat' },
+    roomId: null,
     ...overrides,
   };
 }
@@ -81,6 +85,8 @@ export function librarySnapshotToQuoteItem(snapshot: LibraryItemSnapshot): Item 
     unitPriceCents: snapshot.unitPriceCents,
     enabled: true,
     libraryItemId: snapshot.libraryItemId,
+    pricing: { mode: 'flat' },
+    roomId: null,
   };
 }
 

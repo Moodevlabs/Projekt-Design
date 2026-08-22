@@ -150,9 +150,11 @@ describe('templates.repo — CRUD', () => {
     const template = await makeTemplate('Sprzed wersjonowania');
 
     // Tak wygladaja dokumenty zapisane, zanim wprowadzilismy `bodyVersion`.
-    const body = template.body as unknown as Record<string, unknown>;
-    delete body.bodyVersion;
-    await getSupabase().from('quote_templates').update({ body }).eq('id', template.id);
+    const { bodyVersion: _bezWersji, ...body } = template.body!;
+    await getSupabase()
+      .from('quote_templates')
+      .update({ body })
+      .eq('id', template.id);
 
     const wczytany = await getTemplate(template.id);
     expect(wczytany.bodyError).toBeNull();

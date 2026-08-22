@@ -7,7 +7,7 @@ import {
   type BodyRecord,
   type MigrationStep,
 } from './migrate';
-import { newQuoteBody, parseQuoteBody } from './index';
+import { calcQuoteTotals, newItem, newQuoteBody, newSection, parseQuoteBody } from './index';
 
 describe('readBodyVersion', () => {
   it('brak pola to wersja 1 — dokumenty sprzed wersjonowania', () => {
@@ -122,6 +122,41 @@ describe('parseQuoteBody z migracja', () => {
     expect(result.body.title).toBe('Sprzed wersjonowania');
     expect(result.body.validDays).toBe(14);
     expect(result.body.bodyVersion).toBe(CURRENT_BODY_VERSION);
+  });
+
+  it('migracja do v2 nie rusza kwot starej wyceny', () => {
+    // Kryterium T-31: pozycje bez `pricing` dostaja tryb `flat`, czyli
+    // dokladnie dotychczasowe `qty × cena`.
+    const stara = newQuoteBody({
+      vatRate: 23,
+      sections: [
+        newSection({
+          items: [
+            newItem({ name: 'Projekt', qty: 2, unitPriceCents: 150_000 }),
+            newItem({ name: 'Rabat', kind: 'discount', unitPriceCents: 50_000 }),
+          ],
+        }),
+      ],
+    });
+    const przedMigracja = calcQuoteTotals(stara);
+
+    // Dokument tak, jak lezal w bazie przed v2: bez `bodyVersion` i bez `rooms`.
+    const surowy = JSON.parse(JSON.stringify(stara)) as BodyRecord;
+    delete surowy.bodyVersion;
+    delete surowy.rooms;
+    for (const section of surowy.sections as { items: BodyRecord[] }[]) {
+      for (const pozycja of section.items) {
+        delete pozycja.pricing;
+        delete pozycja.roomId;
+      }
+    }
+
+    const result = parseQuoteBody(surowy);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.body.rooms).toEqual([]);
+    expect(calcQuoteTotals(result.body)).toEqual(przedMigracja);
   });
 
   it('dokument z nowszej wersji ladnie ląduje w `bodyError`', () => {

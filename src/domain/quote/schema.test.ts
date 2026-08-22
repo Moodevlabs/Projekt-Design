@@ -22,6 +22,10 @@ describe('ItemSchema', () => {
       unitPriceCents: 15000,
       enabled: true,
       libraryItemId: null,
+      // Pozycja bez reguły cenowej liczy się jak przed cennikiem
+      // parametrycznym — `qty × cena`.
+      pricing: { mode: 'flat' },
+      roomId: null,
     });
   });
 

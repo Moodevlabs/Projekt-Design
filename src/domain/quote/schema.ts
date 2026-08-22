@@ -19,6 +19,57 @@ export type ItemKind = z.infer<typeof ItemKindSchema>;
 export const PricesIncludeSchema = z.enum(['net', 'gross']);
 export type PricesInclude = z.infer<typeof PricesIncludeSchema>;
 
+/**
+ * Który zestaw pomieszczeń liczy się do danej usługi. Odpowiednik dwóch kolumn
+ * z arkusza: `M` („w projekcie”, wizualny) i `A` („w części technicznej”).
+ * `all` znaczy „wszystkie pomieszczenia wyceny”, niezależnie od flag.
+ */
+export const RoomScopeSchema = z.enum(['visual', 'technical', 'all']);
+export type RoomScope = z.infer<typeof RoomScopeSchema>;
+
+/**
+ * Pomieszczenie w wycenie. `label` jest własnością tej wyceny („salon
+ * z jadalnią”), a `roomTypeId` wskazuje słownikowy typ, po którym cennik
+ * znajduje cenę. `null` = pomieszczenie spoza słownika — wtedy liczy się
+ * `defaultPerRoomCents`.
+ */
+export const RoomSchema = z.object({
+  id: z.string().uuid(),
+  roomTypeId: z.string().uuid().nullable().default(null),
+  label: z.string().min(1),
+  qty: z.number().int().positive().default(1),
+  includedInVisual: z.boolean().default(true),
+  includedInTechnical: z.boolean().default(true),
+});
+export type Room = z.infer<typeof RoomSchema>;
+
+/**
+ * Reguła wyceny pozycji. `flat` to dotychczasowe `qty × cena`; pozostałe dwa
+ * tryby odwzorowują cennik parametryczny z arkusza (usługa = baza + składnik
+ * za każde zaznaczone pomieszczenie).
+ *
+ * Wszystkie kwoty w groszach — zaokrąglenie dopiero przy wartości pozycji.
+ */
+export const PricingRuleSchema = z.discriminatedUnion('mode', [
+  z.object({ mode: z.literal('flat') }),
+  z.object({
+    mode: z.literal('per_room'),
+    baseCents: z.number().int().default(0),
+    /** Cena za pomieszczenie, po `roomTypeId`. Klucz spoza mapy → `defaultPerRoomCents`. */
+    perRoomCents: z.record(z.string(), z.number().int()).default({}),
+    defaultPerRoomCents: z.number().int().default(0),
+    roomScope: RoomScopeSchema.default('all'),
+  }),
+  z.object({
+    /** Wizualizacje: cena pomieszczenia + baza × liczba kadrów. */
+    mode: z.literal('per_frame'),
+    baseCents: z.number().int().default(0),
+    perRoomCents: z.record(z.string(), z.number().int()).default({}),
+    defaultPerRoomCents: z.number().int().default(0),
+  }),
+]);
+export type PricingRule = z.infer<typeof PricingRuleSchema>;
+
 export const ItemSchema = z.object({
   id: z.string().uuid(),
   kind: ItemKindSchema.default('item'),
@@ -29,6 +80,12 @@ export const ItemSchema = z.object({
   unitPriceCents: z.number().int(),
   enabled: z.boolean().default(true),
   libraryItemId: z.string().uuid().nullable().default(null),
+  /** Reguła wyceny. Brak = `flat`, czyli zachowanie sprzed cennika parametrycznego. */
+  pricing: PricingRuleSchema.default({ mode: 'flat' }),
+  /** Pozycja przypięta do konkretnego pomieszczenia (bloki per-room, tryb `per_frame`). */
+  roomId: z.string().uuid().nullable().default(null),
+  /** Liczba kadrów — tylko dla `per_frame`. */
+  frames: z.number().int().positive().optional(),
 });
 export type Item = z.infer<typeof ItemSchema>;
 
@@ -81,6 +138,8 @@ export const QuoteBodySchema = z.object({
   /** Stawka VAT w procentach (0–100). Ograniczona, żeby calc nie dzielił przez zero. */
   vatRate: z.number().min(0).max(100).default(23),
   pricesInclude: PricesIncludeSchema.default('net'),
+  /** Pomieszczenia wyceny — wymiar, po którym liczy się cennik parametryczny. */
+  rooms: z.array(RoomSchema).default([]),
   sections: z.array(SectionSchema).default([]),
   preparedBy: z.string().default(''),
   showDisabledItems: z.boolean().default(true),

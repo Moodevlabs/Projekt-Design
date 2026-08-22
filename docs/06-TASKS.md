@@ -187,16 +187,24 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   ⚠️ Snapshoty w `library_groups.items` to **osobny** schemat (`LibraryItemSnapshotSchema`) — ma własną ścieżkę zgodności (`qty` dodano z `default(1)`), nie podpinaj go pod `migrateBody`.
   > **Zrobione.** `domain/quote/migrate.ts`: `CURRENT_BODY_VERSION`, rejestr `MIGRATIONS`, `runMigrations`, `migrateBody`, `readBodyVersion`. `bodyVersion` w schemacie jako `z.literal(CURRENT).default(CURRENT)`, `newQuoteBody` stempluje nowe dokumenty. 376 testów jednostkowych + 37 integracyjnych.
   > **Na co uważać:**
-  > - **`CURRENT_BODY_VERSION` to na razie 1, a rejestr kroków jest pusty** — to celowe. Mechanizm wszedł przed pierwszą zmianą modelu, żeby dokumenty zapisywane od teraz miały stempel. **T-31 dopisuje krok `1:` do `MIGRATIONS` i podbija stałą na 2** — nic poza tym.
+  > - Mechanizm wszedł **przed** pierwszą zmianą modelu (wtedy `CURRENT_BODY_VERSION` = 1, rejestr pusty), żeby dokumenty zapisywane od tamtej chwili miały stempel. T-31 dopisał krok `1:` i podbił stałą na 2 — dokładnie tak, jak zaplanowano.
   > - **Migracja wpięta w `parseQuoteBody`, a nie w repozytoria.** Okazało się, że to jedno wejście dla `quotes.body` **i** `templates.body`, więc oba dostały migrację za darmo. Nie dubluj jej w repo.
   > - **Dokument z nowszej wersji jest odrzucany**, nie okrajany po cichu — ląduje w `bodyError` z „Zaktualizuj aplikację". Bez tego starsza apka zapisałaby z powrotem dokument bez pól, których nie rozumie, i skasowała dane.
   > - `bodyVersion` jest **literałem**, nie luźną liczbą: pominięcie migracji staje się wtedy natychmiastowym błędem walidacji zamiast cichego zapisu.
   > - Mechanizm ma testy na **sztucznym rejestrze** (`runMigrations` przyjmuje rejestr parametrem), więc dopisanie prawdziwego kroku w T-31 ich nie wywróci.
 
-- [ ] **T-31 Domena: pomieszczenia i reguły cenowe** (F1.1)
+- [x] **T-31 Domena: pomieszczenia i reguły cenowe** (F1.1)
   `Room`, `PricingRule` (`flat` / `per_room` / `per_frame`), rozszerzenia `Item`/`Section`/`QuoteBody`, `calcItemCents(item, rooms)`, przepięcie `calcQuoteTotals`.
   ✅ Parytet z arkuszem: K95 (200 + 15×7 pomieszczeń) i K26 (350 + 50×kadry); pomieszczenie `includedInVisual=false` + `includedInTechnical=true` liczy się tylko do części technicznej.
   ⚠️ **Rozstrzygnij przed kodowaniem, czym jest blok pomieszczenia.** `FEATURES` opisuje go jako nowy byt wewnątrz sekcji `kind:'rooms'`. Tymczasem DnD stoi dziś na trzech poziomach (`section` → `group` → `item`, cele `item-list`/`section-groups` w `dnd/drop-resolution.ts`), a `GroupBlock` ma już nagłówek, sumę, przełącznik zbiorczy i przeciąganie. Tańszą drogą jest **`Group.roomId`** — pomieszczenie to grupa wskazująca na `Room`. Wtedy przeciąganie, zapis zestawu do biblioteki i kaskada działają bez dopisywania czwartego poziomu. Jeśli wybierzesz osobny byt, policz w PR koszt duplikacji DnD.
+  > **Zrobione.** `RoomSchema`, `RoomScopeSchema`, `PricingRuleSchema` (unia po `mode`), `Item.pricing`/`roomId`/`frames`, `QuoteBody.rooms`, `calcItemCents(item, rooms)`; `bodyVersion` podbite do 2 wraz z krokiem migracji. 394 testy jednostkowe (17 parytetu cennika) + 37 integracyjnych.
+  > **Na co uważać:**
+  > - **`Section.kind: 'rooms'` świadomie NIE weszło.** Spór „grupa czy nowy byt” dotyczy układu i DnD, a nie liczenia — odłożony do **T-35**, żeby nie przesądzać go w domenie. Samo liczenie działa niezależnie od tego, jak pozycje są w dokumencie poukładane.
+  > - **`rooms` muszą dojechać do `calcSectionTotals` i `calcGroupTotals`** (`TotalsOptions.rooms`, domyślnie `[]`). Wołający bez nich policzy pozycji `per_room` **samą bazę** i nagłówek sekcji pokaże inną kwotę niż podsumowanie. Dziś to nieszkodliwe (nie da się jeszcze utworzyć pozycji parametrycznej z UI), ale **przy T-35 trzeba przejść po `SectionBlock`/`GroupBlock`/`TotalsCard` i podać `rooms`**.
+  > - **`qty` pozycji mnoży wynik w każdym trybie.** W arkuszu usługi parametryczne mają `qty = 1`, więc parytet jest zachowany, a `2` robi to, czego użytkownik się spodziewa.
+  > - **Pozycja `per_frame` bez `roomId` liczy się raz, po cenie domyślnej.** Cicha zerowa cena znaczyłaby, że wizualizacja „luzem” wypada z wyceny.
+  > - Zaokrąglamy **raz**, na wartości pozycji — składniki (cena za pomieszczenie × ilość) sumują się w pełnej precyzji.
+  > - Pozycje wstawiane z biblioteki dostają na razie `pricing: flat`; własne reguły cenowe wpisów bibliotecznych to **T-34**.
 
 - [ ] **T-32 Domena: rabaty procentowe i warunkowe** (F3.1)
   `Discount` (fixed/percent, scope quote/section/items, `condition`, `roundToCents`), `QuoteBody.discounts`, `calcDiscounts`, clamp do podstawy, migracja `kind:'discount'` → `Discount{type:'fixed'}`.

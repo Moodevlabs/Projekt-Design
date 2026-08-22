@@ -15,19 +15,23 @@
  */
 
 /** Wersja, w której zapisujemy dokumenty. Podnieś ją razem z dopisaniem kroku. */
-export const CURRENT_BODY_VERSION = 1;
+export const CURRENT_BODY_VERSION = 2;
 
 export type BodyRecord = Record<string, unknown>;
 
 /** Krok migracji: dostaje dokument w wersji `from`, oddaje w `from + 1`. */
 export type MigrationStep = (body: BodyRecord) => BodyRecord;
 
-/**
- * Kroki po numerze wersji WEJŚCIOWEJ: `1` podnosi z 1 na 2.
- * Pusty, dopóki model się nie zmienił — mechanizm jest tu wcześniej niż
- * pierwsza migracja, żeby dokumenty zapisywane od teraz miały już stempel.
- */
-export const MIGRATIONS: Record<number, MigrationStep> = {};
+/** Kroki po numerze wersji WEJŚCIOWEJ: `1` podnosi z 1 na 2. */
+export const MIGRATIONS: Record<number, MigrationStep> = {
+  /**
+   * v2 = cennik parametryczny (T-31). Dokument dostaje pustą listę pomieszczeń;
+   * pozycjom nie dopisujemy `pricing` ręcznie — schemat nadaje im `flat`, czyli
+   * dokładnie dotychczasowe `qty × cena`, więc **totale starych wycen się nie
+   * zmieniają**. Tu jest tylko to, czego zod sam by nie odtworzył.
+   */
+  1: (body) => ({ ...body, rooms: Array.isArray(body.rooms) ? body.rooms : [] }),
+};
 
 export type MigrateResult = { ok: true; body: unknown } | { ok: false; error: string };
 
