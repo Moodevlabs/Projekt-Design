@@ -55,7 +55,11 @@ export function moveGroup(body: QuoteBody, args: MoveGroupArgs): QuoteBody {
   if (targetSection === undefined) return body;
 
   found.list.splice(found.index, 1);
-  targetSection.groups.splice(clampIndex(args.toIndex, targetSection.groups.length), 0, found.group);
+  targetSection.groups.splice(
+    clampIndex(args.toIndex, targetSection.groups.length),
+    0,
+    found.group,
+  );
   return next;
 }
 

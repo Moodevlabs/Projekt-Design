@@ -18,11 +18,7 @@ const TOKEN = /\{(YYYY|YY|MM|DD|seq(?::(\d+))?)\}/g;
  * oraz `{seq:N}` (dopełnione do N cyfr). Nieznane tokeny zostają bez zmian.
  * Data brana jest w czasie lokalnym — tak jak `to_char(now(), ...)` w Postgresie.
  */
-export function generateQuoteNumber(
-  pattern: string,
-  seq: number,
-  date: Date = new Date(),
-): string {
+export function generateQuoteNumber(pattern: string, seq: number, date: Date = new Date()): string {
   const effectivePattern = pattern.trim() === '' ? DEFAULT_NUMBER_PATTERN : pattern;
   const year = String(date.getFullYear()).padStart(4, '0');
   const month = String(date.getMonth() + 1).padStart(2, '0');

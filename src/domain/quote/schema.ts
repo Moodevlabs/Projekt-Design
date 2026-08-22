@@ -70,9 +70,7 @@ export const QuoteBodySchema = z.object({
 export type QuoteBody = z.infer<typeof QuoteBodySchema>;
 
 /** Wynik bezpiecznego parsowania `quotes.body` z bazy. */
-export type ParseQuoteBodyResult =
-  | { ok: true; body: QuoteBody }
-  | { ok: false; error: string };
+export type ParseQuoteBodyResult = { ok: true; body: QuoteBody } | { ok: false; error: string };
 
 /**
  * Bezpieczny parse dokumentu wyceny (używany przy odczycie z bazy).

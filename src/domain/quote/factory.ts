@@ -1,9 +1,9 @@
 import { newId } from '../id';
 import type { Group, Item, QuoteBody, Section } from './schema';
 
-/** Fabryki obiektow domenowych - kazdy nowy element dostaje wlasne id. */
+/** Fabryki obiektów domenowych — każdy nowy element dostaje własne `id`. */
 
-/** Nowa pozycja z sensownymi wartosciami domyslnymi. */
+/** Nowa pozycja z sensownymi wartościami domyślnymi. */
 export function newItem(partial: Partial<Item> = {}): Item {
   return {
     id: newId(),
@@ -59,7 +59,7 @@ export function newQuoteBody(partial: Partial<QuoteBody> = {}): QuoteBody {
 
 /**
  * Kopia dokumentu z nowymi identyfikatorami sekcji/grup/pozycji.
- * Zachowuje wszystkie dane (lacznie z klientem) - uzywane przy "Duplikuj wycene".
+ * Zachowuje wszystkie dane (łącznie z klientem) — używane przy „Duplikuj wycenę”.
  */
 export function duplicateQuoteBody(body: QuoteBody): QuoteBody {
   return {
@@ -69,8 +69,8 @@ export function duplicateQuoteBody(body: QuoteBody): QuoteBody {
 }
 
 /**
- * Nowa wycena na bazie szablonu: struktura i teksty zostaja, dane inwestora
- * sa czyszczone (szablon nie powinien przenosic klienta z poprzedniej oferty).
+ * Nowa wycena na bazie szablonu: struktura i teksty zostają, dane inwestora
+ * są czyszczone (szablon nie powinien przenosić klienta z poprzedniej oferty).
  */
 export function fromTemplate(body: QuoteBody): QuoteBody {
   return {
@@ -79,7 +79,7 @@ export function fromTemplate(body: QuoteBody): QuoteBody {
   };
 }
 
-/** Gleboka kopia sekcji z podmienionymi identyfikatorami. */
+/** Głęboka kopia sekcji z podmienionymi identyfikatorami. */
 function regenerateSectionIds(sections: Section[]): Section[] {
   return sections.map((section) => ({
     ...structuredClone(section),

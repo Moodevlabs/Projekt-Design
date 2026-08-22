@@ -12,18 +12,18 @@ const LI = '22222222-2222-4222-8222-222222222222';
 
 describe('LibraryItemSchema', () => {
   it('uzupełnia wartości domyślne zgodne z migracją', () => {
-    expect(LibraryItemSchema.parse({ id: LI, workspaceId: WS, name: 'Projekt koncepcyjny' })).toEqual(
-      {
-        id: LI,
-        workspaceId: WS,
-        category: 'Inne',
-        kind: 'item',
-        name: 'Projekt koncepcyjny',
-        description: '',
-        unitPriceCents: 0,
-        sortOrder: 0,
-      },
-    );
+    expect(
+      LibraryItemSchema.parse({ id: LI, workspaceId: WS, name: 'Projekt koncepcyjny' }),
+    ).toEqual({
+      id: LI,
+      workspaceId: WS,
+      category: 'Inne',
+      kind: 'item',
+      name: 'Projekt koncepcyjny',
+      description: '',
+      unitPriceCents: 0,
+      sortOrder: 0,
+    });
   });
 
   it('odrzuca cenę ułamkową i pustą nazwę', () => {

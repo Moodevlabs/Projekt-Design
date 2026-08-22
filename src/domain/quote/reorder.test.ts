@@ -1,13 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { newGroup, newItem, newQuoteBody, newSection } from './factory';
-import {
-  moveGroup,
-  moveItem,
-  moveSection,
-  nudgeGroup,
-  nudgeItem,
-  nudgeSection,
-} from './reorder';
+import { moveGroup, moveItem, moveSection, nudgeGroup, nudgeItem, nudgeSection } from './reorder';
 import type { QuoteBody } from './schema';
 
 /**
