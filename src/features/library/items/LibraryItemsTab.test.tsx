@@ -125,6 +125,35 @@ describe('LibraryItemsTab — filtry', () => {
     expect(screen.getByText(pl.library.itemsNoResultsTitle)).toBeInTheDocument();
   });
 
+  it('dodanie pozycji czysci fraze, zeby nowa pozycja nie zniknela z widoku', async () => {
+    const user = userEvent.setup();
+    render(<LibraryItemsTab />);
+
+    const search = screen.getByLabelText(pl.library.searchPlaceholder);
+    await user.type(search, 'blat');
+    await user.click(screen.getByRole('button', { name: pl.library.addItem }));
+
+    // „Nowa pozycja" nie pasuje do frazy „blat" — bez czyszczenia przycisk
+    // wygladalby na zepsuty: pozycja powstaje, ale nie ma jej na ekranie.
+    expect(createMutate).toHaveBeenCalledWith({ name: pl.library.newItemName });
+    expect(search).toHaveValue('');
+    expect(lastFilters().search).toBeUndefined();
+  });
+
+  it('dodanie pozycji zostawia kategorie i wklada w nia nowa pozycje', async () => {
+    const user = userEvent.setup();
+    render(<LibraryItemsTab />);
+
+    await user.click(screen.getByRole('button', { name: 'Instalacje' }));
+    await user.click(screen.getByRole('button', { name: pl.library.addItem }));
+
+    expect(createMutate).toHaveBeenCalledWith({
+      name: pl.library.newItemName,
+      category: 'Instalacje',
+    });
+    expect(lastFilters().category).toBe('Instalacje');
+  });
+
   it('pokazuje blad wczytywania z mozliwoscia ponowienia', () => {
     const refetch = vi.fn();
     mockItems([], { isError: true, refetch });

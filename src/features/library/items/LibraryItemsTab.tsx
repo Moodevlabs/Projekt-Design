@@ -40,6 +40,20 @@ export function LibraryItemsTab() {
   const rows = items.data ?? [];
   const hasFilters = category !== null || search.trim().length > 0;
 
+  /**
+   * Nowa pozycja nazywa się „Nowa pozycja", więc przy wpisanej frazie nie
+   * przeszłaby przez filtr i zniknęłaby zaraz po dodaniu — z zewnątrz wygląda
+   * to jak przycisk, który nic nie robi. Frazę czyścimy; kategorię przeciwnie,
+   * zostawiamy i wkładamy do niej pozycję, bo tam użytkownik właśnie patrzy.
+   */
+  const handleAdd = () => {
+    setSearch('');
+    createItem.mutate({
+      name: pl.library.newItemName,
+      ...(category ? { category } : {}),
+    });
+  };
+
   const handleSave = (item: LibraryItem, draft: ItemDraft) => {
     updateItem.mutate(
       { id: item.id, patch: draft },
@@ -58,14 +72,7 @@ export function LibraryItemsTab() {
         category={category}
         onCategoryChange={setCategory}
         adding={createItem.isPending}
-        onAdd={() =>
-          createItem.mutate({
-            name: pl.library.newItemName,
-            // Nowa pozycja ląduje w aktualnie filtrowanej kategorii — inaczej
-            // znikałaby z widoku zaraz po dodaniu.
-            ...(category ? { category } : {}),
-          })
-        }
+        onAdd={handleAdd}
       />
 
       <datalist id={CATEGORY_LIST_ID}>

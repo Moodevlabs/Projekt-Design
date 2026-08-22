@@ -27,6 +27,14 @@ export const LibraryItemSnapshotSchema = z.object({
   name: z.string().min(1),
   description: z.string().default(''),
   kind: ItemKindSchema.default('item'),
+  /**
+   * Ilość jest częścią zestawu, nie tylko wyceny: „Kuchnia” to 14 m² projektu
+   * i 3 wizualizacje, a nie po jednej sztuce wszystkiego. Bez tego pola zapis
+   * zestawu z wyceny gubiłby liczby wpisane ręcznie, a seed (który `qty` podaje)
+   * rozjeżdżał się ze schematem. `default(1)` trzyma zgodność ze starymi
+   * wpisami w jsonb.
+   */
+  qty: z.number().positive().default(1),
   unitPriceCents: z.number().int().default(0),
   libraryItemId: z.string().uuid().nullable().default(null),
 });
@@ -69,9 +77,42 @@ export function librarySnapshotToQuoteItem(snapshot: LibraryItemSnapshot): Item 
     kind: snapshot.kind,
     name: snapshot.name,
     description: snapshot.description,
-    qty: 1,
+    qty: snapshot.qty,
     unitPriceCents: snapshot.unitPriceCents,
     enabled: true,
     libraryItemId: snapshot.libraryItemId,
+  };
+}
+
+/**
+ * Zamienia pozycję wyceny na snapshot do zestawu bibliotecznego.
+ *
+ * `enabled` i `id` zostają w wycenie — wyłączona pozycja to decyzja w tej
+ * konkretnej ofercie, a nie cecha zestawu. `libraryItemId` przenosimy, bo dzięki
+ * niemu pozycja wstawiona z zestawu dalej łapie kaskadę zmian z biblioteki.
+ */
+export function quoteItemToLibrarySnapshot(item: Item): LibraryItemSnapshot {
+  return {
+    name: item.name,
+    description: item.description,
+    kind: item.kind,
+    qty: item.qty,
+    unitPriceCents: item.unitPriceCents,
+    libraryItemId: item.libraryItemId,
+  };
+}
+
+/**
+ * Snapshot z pozycji bibliotecznej — na potrzeby „dodaj pozycję do zestawu”
+ * w bibliotece. Ilość startowa to 1; użytkownik poprawia ją na karcie zestawu.
+ */
+export function libraryItemToSnapshot(libraryItem: LibraryItem): LibraryItemSnapshot {
+  return {
+    name: libraryItem.name,
+    description: libraryItem.description,
+    kind: libraryItem.kind,
+    qty: 1,
+    unitPriceCents: libraryItem.unitPriceCents,
+    libraryItemId: libraryItem.id,
   };
 }

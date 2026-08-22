@@ -8,6 +8,7 @@ import { ItemRow } from './ItemRow';
 import { ItemToggle } from './ItemToggle';
 import { AddLink } from './AddLink';
 import { LibraryPicker } from './LibraryPicker';
+import { SaveToLibraryButton } from './SaveToLibraryButton';
 import { DragHandle } from './DragHandle';
 import { useStableIds } from '../dnd/useStableIds';
 import { ConfirmDialog } from '@/components/shared';
@@ -37,6 +38,7 @@ export interface GroupBlockProps {
   onRemoveItem: (itemId: string) => void;
   onInsertItems: (sectionId: string, groupId: string | null, items: Item[]) => void;
   onSaveItemToLibrary: (item: Item) => void;
+  onSaveGroupToLibrary: (group: Group) => void;
 }
 
 export const GroupBlock = memo(function GroupBlock({
@@ -55,9 +57,14 @@ export const GroupBlock = memo(function GroupBlock({
   onRemoveItem,
   onInsertItems,
   onSaveItemToLibrary,
+  onSaveGroupToLibrary,
 }: GroupBlockProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const totals = calcGroupTotals(group, { vatRate, pricesInclude });
+
+  // Do biblioteki idą tylko nazwane pozycje (snapshot wymaga nazwy), więc po
+  // nich poznajemy też, czy jest w ogóle co zapisywać.
+  const namedItems = group.items.filter((item) => item.name.trim().length > 0);
 
   // Stan przelacznika grupy wyliczamy z pozycji — nie trzymamy go w modelu.
   const enabledCount = group.items.filter((item) => item.enabled).length;
@@ -126,6 +133,17 @@ export const GroupBlock = memo(function GroupBlock({
         <span className="amount text-[13px] text-[var(--doc-ink-soft)]">
           {formatMoney(totals.netCents, currency)}
         </span>
+
+        {editing ? (
+          <SaveToLibraryButton
+            label={`${pl.editor.saveGroupToLibrary}: ${group.name || pl.editor.newGroupName}`}
+            savedLabel={`${pl.editor.savedGroupToLibrary}: ${group.name || pl.editor.newGroupName}`}
+            // Zestaw bez nazwy albo bez pozycji nie ma czego zapisać —
+            // snapshot wymaga nazwy, a pusty zestaw nic nie wnosi do biblioteki.
+            disabled={group.name.trim().length === 0 || namedItems.length === 0}
+            onSave={() => onSaveGroupToLibrary(group)}
+          />
+        ) : null}
 
         {editing ? (
           <button

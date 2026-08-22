@@ -41,6 +41,7 @@ export interface SectionBlockProps {
   onInsertItems: (sectionId: string, groupId: string | null, items: Item[]) => void;
   onInsertGroup: (sectionId: string, group: Group) => void;
   onSaveItemToLibrary: (item: Item) => void;
+  onSaveGroupToLibrary: (group: Group) => void;
 }
 
 export const SectionBlock = memo(function SectionBlock({
@@ -62,6 +63,7 @@ export const SectionBlock = memo(function SectionBlock({
   onInsertItems,
   onInsertGroup,
   onSaveItemToLibrary,
+  onSaveGroupToLibrary,
 }: SectionBlockProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const totals = calcSectionTotals(section, { vatRate, pricesInclude });
@@ -209,6 +211,7 @@ export const SectionBlock = memo(function SectionBlock({
               onRemoveItem={onRemoveItem}
               onInsertItems={onInsertItems}
               onSaveItemToLibrary={onSaveItemToLibrary}
+              onSaveGroupToLibrary={onSaveGroupToLibrary}
             />
           ))}
         </SortableContext>

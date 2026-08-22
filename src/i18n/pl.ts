@@ -99,6 +99,11 @@ export const pl = {
     saveAllToLibraryDone: (count: number) =>
       count === 1 ? 'Zapisano 1 pozycję w bibliotece' : `Zapisano ${count} pozycji w bibliotece`,
     saveAllToLibraryEmpty: 'Nie ma czego zapisać — nazwij najpierw pozycje.',
+    saveGroupToLibrary: 'Zapisz zestaw do biblioteki',
+    savedGroupToLibrary: 'Zapisano zestaw w bibliotece',
+    saveGroupToLibraryDone: (name: string) => `Zestaw „${name}” jest w bibliotece`,
+    saveGroupToLibraryEmpty: 'Pusty zestaw nie ma czego zapisać — dodaj najpierw pozycje.',
+    saveGroupToLibraryUnnamed: 'Nazwij najpierw grupę — zestaw bez nazwy nie da się odnaleźć.',
     pickerSearch: 'Szukaj w bibliotece',
     pickerEmpty: 'Nic nie pasuje',
     pickerLibraryEmpty: 'Biblioteka jest pusta',
@@ -263,6 +268,16 @@ export const pl = {
       `„${name}” zniknie z biblioteki. Wyceny zbudowane z tej grupy zostają nietknięte.`,
     groupTotal: 'Suma netto',
     groupItemsEmpty: 'Ta grupa nie ma jeszcze pozycji.',
+
+    // Zawartość zestawu — dodawanie i usuwanie pozycji na karcie grupy.
+    groupAddItem: 'Dodaj pozycję',
+    groupAddItemFor: (name: string) => `Dodaj pozycję do zestawu: ${name}`,
+    groupPickerSearch: 'Szukaj w bibliotece',
+    groupPickerEmpty: 'Nic nie pasuje',
+    groupPickerNoItems: 'Najpierw dodaj pozycje w zakładce „Pozycje”.',
+    groupRemoveItem: (name: string) => `Usuń z zestawu: ${name}`,
+    groupItemQty: (name: string) => `Ilość: ${name}`,
+    groupItemsHint: 'Zmiany zawartości zapisują się od razu.',
     showGroupItems: (name: string) => `Pokaż pozycje grupy: ${name}`,
     hideGroupItems: (name: string) => `Ukryj pozycje grupy: ${name}`,
     groupsEmptyTitle: 'Nie masz jeszcze żadnej grupy',

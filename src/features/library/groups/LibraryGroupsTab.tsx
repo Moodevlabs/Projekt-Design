@@ -61,6 +61,7 @@ export function LibraryGroupsTab() {
               group={group}
               saving={updateGroup.isPending}
               onRename={(name) => updateGroup.mutate({ id: group.id, patch: { name } })}
+              onItemsChange={(items) => updateGroup.mutate({ id: group.id, patch: { items } })}
               onDelete={() => setPendingDelete(group)}
             />
           ))}

@@ -92,6 +92,7 @@ function Harness() {
       onInsertItems={noop}
       onInsertGroup={noop}
       onSaveItemToLibrary={noop}
+      onSaveGroupToLibrary={noop}
     />
   );
 }

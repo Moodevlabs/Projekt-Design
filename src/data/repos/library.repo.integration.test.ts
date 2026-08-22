@@ -84,6 +84,7 @@ async function makeGroup(name: string) {
         name: 'Pozycja A',
         description: 'A',
         kind: 'item',
+        qty: 1,
         unitPriceCents: 10_000,
         libraryItemId: null,
       },
@@ -91,6 +92,7 @@ async function makeGroup(name: string) {
         name: 'Rabat',
         description: '',
         kind: 'discount',
+        qty: 1,
         unitPriceCents: 1_000,
         libraryItemId: null,
       },
@@ -223,8 +225,11 @@ describe('library.repo — grupy', () => {
 
     expect(kitchen).toBeDefined();
     expect(kitchen?.items).toHaveLength(3);
-    // Snapshot z seeda ma pola pozycji wyceny (`id`, `qty`) — zod je odcina.
-    expect(kitchen?.items[0]).not.toHaveProperty('qty');
+    // Snapshot z seeda ma nadmiarowe `id` pozycji wyceny — zod je odcina.
+    expect(kitchen?.items[0]).not.toHaveProperty('id');
+    // `qty` natomiast NALEŻY do zestawu: „Kuchnia" to 14 m² projektu, nie jedna
+    // sztuka. Wcześniej schemat je odcinał i wstawienie zestawu gubiło metraż.
+    expect(kitchen?.items[0]?.qty).toBe(14);
     expect(kitchen?.items[0]?.libraryItemId).toBeTruthy();
   });
 
@@ -234,7 +239,14 @@ describe('library.repo — grupy', () => {
     const updated = await updateLibraryGroup(group.id, {
       name: 'Grupa po edycji',
       items: [
-        { name: 'Jedyna', description: '', kind: 'item', unitPriceCents: 1, libraryItemId: null },
+        {
+          name: 'Jedyna',
+          description: '',
+          kind: 'item',
+          qty: 1,
+          unitPriceCents: 1,
+          libraryItemId: null,
+        },
       ],
     });
 

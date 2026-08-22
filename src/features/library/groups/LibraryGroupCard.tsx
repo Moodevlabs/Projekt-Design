@@ -4,13 +4,20 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Money } from '@/components/shared';
 import { calcGroupTotals } from '@/domain/quote';
-import { librarySnapshotToQuoteItem, type LibraryGroup } from '@/domain/library/schema';
+import {
+  librarySnapshotToQuoteItem,
+  type LibraryGroup,
+  type LibraryItemSnapshot,
+} from '@/domain/library/schema';
+import { GroupItemsList } from './GroupItemsList';
 import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
 
 type LibraryGroupCardProps = {
   group: LibraryGroup;
   onRename: (name: string) => void;
+  /** Zawartość zestawu zapisuje się od razu, bez przycisku „Zapisz". */
+  onItemsChange: (items: LibraryItemSnapshot[]) => void;
   onDelete: () => void;
   saving?: boolean;
 };
@@ -26,6 +33,7 @@ type LibraryGroupCardProps = {
 export function LibraryGroupCard({
   group,
   onRename,
+  onItemsChange,
   onDelete,
   saving = false,
 }: LibraryGroupCardProps) {
@@ -98,25 +106,9 @@ export function LibraryGroupCard({
       </button>
 
       {open ? (
-        <ul id={listId} className="border-hair flex flex-col gap-2 border-t pt-3">
-          {group.items.length === 0 ? (
-            <li className="text-ink-soft text-sm">{pl.library.groupItemsEmpty}</li>
-          ) : (
-            group.items.map((item, index) => (
-              <li
-                key={`${item.libraryItemId ?? item.name}-${index}`}
-                className="flex items-baseline justify-between gap-3 text-sm"
-              >
-                <span className="text-ink min-w-0 truncate">{item.name}</span>
-                <Money
-                  cents={item.unitPriceCents}
-                  variant={item.kind === 'discount' ? 'discount' : 'default'}
-                  className="text-sm"
-                />
-              </li>
-            ))
-          )}
-        </ul>
+        <div id={listId}>
+          <GroupItemsList groupName={label} items={group.items} onChange={onItemsChange} />
+        </div>
       ) : null}
 
       {dirty ? (

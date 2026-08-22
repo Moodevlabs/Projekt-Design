@@ -158,6 +158,15 @@ Format: `- [ ] T-xx Nazwa` — czytaj: wymagane dokumenty → kryteria akceptacj
   > - Pytanie pojawia się tylko, gdy zmieniło się kaskadujące pole **i** w otwartej wycenie są powiązane pozycje — inaczej dialog byłby czystym hałasem.
   > - Wstawiona z biblioteki pozycja dostaje `libraryItemId` i to jest jedyny haczyk, po którym kaskada ją później odnajduje.
   > - Kierunek zależności: **edytor wystawia operację, biblioteka o nią prosi** (`useLibraryCascade`). Odwrotny kierunek robił z tego w prototypie plątaninę.
+  >
+  > **Domknięte po przeglądzie (2026-08-22).** Przegląd gotowego T-10 wykazał, że część biblioteki tylko wyglądała na skończoną:
+  > - **Picker w edytorze nie otwierał się w ogóle.** `AddLink` brał tylko `icon`/`children`/`onClick` i wyrzucał resztę propsów, więc jako dziecko `PopoverTrigger asChild` zjadał ref i atrybuty stanu od Radiksa — popover przełączał stan, ale nie miał kotwicy. Testy tego nie widziały, bo w jsdom treść i tak trafia do DOM; test sprawdza teraz `aria-expanded`/`data-state`, nie sam tekst.
+  > - **Zestawów nie dało się wypełnić.** Grupę biblioteczną można było stworzyć tylko pustą i przemianować — żadna ścieżka UI nie zapisywała `items`. Doszło: „zapisz zestaw do biblioteki" przy grupie w edytorze oraz dodawanie/usuwanie pozycji i edycja ilości na karcie zestawu.
+  > - **Snapshot zestawu gubił `qty`.** Seed zapisywał ilości (Kuchnia = 14 m² projektu), a schemat je wycinał. `qty` jest teraz w `LibraryItemSnapshotSchema` z `default(1)`, więc stare wpisy w jsonb dalej się parsują.
+  > - **Pozycja zapisana z wyceny nie dostawała `libraryItemId`** — czyli kaskada omijała pozycję, z której wpis dopiero co powstał. Teraz wiąże się po udanym zapisie.
+  > - **„Dodaj pozycję" przy wpisanej frazie wyglądało na zepsute** — nowa pozycja nie pasowała do filtra i znikała. Fraza jest czyszczona; kategoria przeciwnie, zostaje i nowa pozycja do niej wpada.
+  >
+  > Zapisy do biblioteki wyjechały ze strony do `useSaveToLibrary` — `QuoteEditorPage` miał 391 linii, a logiki w komponencie nie dało się sprawdzić na prawdziwym store.
 
 - [ ] **T-11 Szablony** (00-PRD §4.1)
   ✅ Zapisz jako szablon, nowa z szablonu, nadpisz, usuń.

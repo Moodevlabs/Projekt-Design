@@ -1,16 +1,20 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { LibraryGroup } from '@/domain/library/schema';
+import type { LibraryGroup, LibraryItemSnapshot } from '@/domain/library/schema';
 import { pl } from '@/i18n/pl';
 
 const useLibraryGroups = vi.hoisted(() => vi.fn());
+// Karta zestawu pozwala dołożyć pozycję z biblioteki, więc zakładka sięga
+// też po listę pozycji.
+const useLibraryItems = vi.hoisted(() => vi.fn());
 const createMutate = vi.hoisted(() => vi.fn());
 const updateMutate = vi.hoisted(() => vi.fn());
 const deleteMutate = vi.hoisted(() => vi.fn());
 
 vi.mock('@/data/queries/useLibrary', () => ({
   useLibraryGroups,
+  useLibraryItems,
   useCreateLibraryGroup: () => ({ mutate: createMutate, isPending: false }),
   useUpdateLibraryGroup: () => ({ mutate: updateMutate, isPending: false }),
   useDeleteLibraryGroup: () => ({ mutate: deleteMutate, isPending: false }),
@@ -28,6 +32,7 @@ function group(partial: Partial<LibraryGroup> = {}): LibraryGroup {
         name: 'Zabudowa',
         description: '',
         kind: 'item',
+        qty: 1,
         unitPriceCents: 300_000,
         libraryItemId: null,
       },
@@ -35,6 +40,7 @@ function group(partial: Partial<LibraryGroup> = {}): LibraryGroup {
         name: 'Montaż',
         description: '',
         kind: 'item',
+        qty: 1,
         unitPriceCents: 100_000,
         libraryItemId: null,
       },
@@ -42,6 +48,7 @@ function group(partial: Partial<LibraryGroup> = {}): LibraryGroup {
         name: 'Rabat',
         description: '',
         kind: 'discount',
+        qty: 1,
         unitPriceCents: 50_000,
         libraryItemId: null,
       },
@@ -64,6 +71,7 @@ function mockGroups(rows: LibraryGroup[], overrides: Record<string, unknown> = {
 beforeEach(() => {
   vi.clearAllMocks();
   mockGroups([group()]);
+  useLibraryItems.mockReturnValue({ data: [] });
 });
 
 describe('LibraryGroupsTab', () => {
@@ -127,5 +135,100 @@ describe('LibraryGroupsTab', () => {
     expect(screen.getByText(pl.library.groupsEmptyTitle)).toBeInTheDocument();
     await user.click(screen.getAllByRole('button', { name: pl.library.addGroup })[1]!);
     expect(createMutate).toHaveBeenCalledWith({ name: pl.library.newGroupName });
+  });
+});
+
+/**
+ * Zawartosc zestawu. Bez tego zestaw dawalo sie tylko stworzyc pusty
+ * i przemianowac — a wstawienie takiego zestawu do wyceny nie dawalo nic.
+ */
+describe('LibraryGroupsTab — zawartosc zestawu', () => {
+  const expand = async (user: ReturnType<typeof userEvent.setup>) =>
+    user.click(screen.getByRole('button', { name: pl.library.showGroupItems('Kuchnia pod klucz') }));
+
+  /** Pozycje z pierwszego zapisu zestawu — mock jest nietypowany, wiec bierzemy go raz. */
+  function savedItems(): LibraryItemSnapshot[] {
+    const call = updateMutate.mock.calls[0]?.[0] as
+      | { patch?: { items?: LibraryItemSnapshot[] } }
+      | undefined;
+    return call?.patch?.items ?? [];
+  }
+
+  it('dodaje pozycje z biblioteki do zestawu jako snapshot', async () => {
+    const user = userEvent.setup();
+    useLibraryItems.mockReturnValue({
+      data: [
+        {
+          id: '99999999-9999-4999-8999-999999999999',
+          workspaceId: '22222222-2222-4222-8222-222222222222',
+          category: 'Kuchnia',
+          kind: 'item',
+          name: 'Blat kamienny',
+          description: 'Konglomerat',
+          unitPriceCents: 220_000,
+          sortOrder: 0,
+        },
+      ],
+    });
+    render(<LibraryGroupsTab />);
+
+    await expand(user);
+    await user.click(
+      screen.getByRole('button', { name: pl.library.groupAddItemFor('Kuchnia pod klucz') }),
+    );
+    await user.click(await screen.findByText('Blat kamienny'));
+
+    const items = savedItems();
+    expect(items).toHaveLength(4);
+    // Snapshot, nie klucz obcy — ale z `libraryItemId`, zeby kaskada dalej dzialala.
+    expect(items[3]).toEqual({
+      name: 'Blat kamienny',
+      description: 'Konglomerat',
+      kind: 'item',
+      qty: 1,
+      unitPriceCents: 220_000,
+      libraryItemId: '99999999-9999-4999-8999-999999999999',
+    });
+  });
+
+  it('usuwa pozycje z zestawu', async () => {
+    const user = userEvent.setup();
+    render(<LibraryGroupsTab />);
+
+    await expand(user);
+    await user.click(screen.getByRole('button', { name: pl.library.groupRemoveItem('Montaż') }));
+
+    expect(savedItems().map((item) => item.name)).toEqual(['Zabudowa', 'Rabat']);
+  });
+
+  it('zapisuje ilosc dopiero po wyjsciu z pola, nie po kazdym klawiszu', async () => {
+    const user = userEvent.setup();
+    render(<LibraryGroupsTab />);
+
+    await expand(user);
+    const qty = screen.getByLabelText(pl.library.groupItemQty('Zabudowa'));
+    await user.clear(qty);
+    await user.type(qty, '14');
+
+    // Kazdy klawisz osobnym zapisem to 14 round-tripow na jedna liczbe.
+    expect(updateMutate).not.toHaveBeenCalled();
+
+    await user.tab();
+    expect(savedItems()[0]?.qty).toBe(14);
+  });
+
+  it('nie zapisuje ilosci, ktorej domena by nie przyjela', async () => {
+    const user = userEvent.setup();
+    render(<LibraryGroupsTab />);
+
+    await expand(user);
+    const qty = screen.getByLabelText(pl.library.groupItemQty('Zabudowa'));
+    await user.clear(qty);
+    await user.type(qty, '0');
+    await user.tab();
+
+    // `qty` jest w domenie `positive()` — zero wrocilo by z bledem walidacji.
+    expect(updateMutate).not.toHaveBeenCalled();
+    expect(qty).toHaveValue('1');
   });
 });
