@@ -481,9 +481,20 @@
  * przenoszony wiersz, a informację „trzymam" niesie KURSOR. Musi obowiązywać
  * na całej stronie, bo w trakcie przeciągania wskaźnik dawno opuścił uchwyt.
  */
+/*
+ * WŁASNY kursor „łapki". Chrome na Windows rysuje systemowe `grab`/`grabbing`
+ * jako BIAŁĄ rączkę z cienkim obrysem — na białej kartce wyceny jest wtedy
+ * praktycznie niewidoczna. Nasza jest atramentowa z białą otoczką
+ * (`paint-order: stroke`), więc czyta się i na bieli, i na ciemnym tle.
+ * Po przecinku zostaje systemowy zapas na wypadek, gdyby obrazek nie wczytał się.
+ */
+.cursor-grip {
+  cursor: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><g fill='%2316181C' stroke='%23ffffff' stroke-width='1.7' paint-order='stroke'><rect x='6.0' y='11.4' width='12.4' height='9.4' rx='4.2'/><rect x='6.4' y='3.6' width='2.7' height='9.4' rx='1.35'/><rect x='9.5' y='3.6' width='2.7' height='9.4' rx='1.35'/><rect x='12.6' y='3.6' width='2.7' height='9.4' rx='1.35'/><rect x='15.7' y='3.6' width='2.7' height='9.4' rx='1.35'/><rect x='3.2' y='12.2' width='2.7' height='6.2' rx='1.35' transform='rotate(-28 4.55 15.3)'/></g></svg>") 12 12, grab;
+}
+
 body.is-dragging,
 body.is-dragging * {
-  cursor: grabbing !important;
+  cursor: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><g fill='%2316181C' stroke='%23ffffff' stroke-width='1.7' paint-order='stroke'><rect x='6.0' y='11.4' width='12.4' height='9.4' rx='4.2'/><rect x='6.4' y='7.0' width='2.7' height='6.2' rx='1.35'/><rect x='9.5' y='7.0' width='2.7' height='6.2' rx='1.35'/><rect x='12.6' y='7.0' width='2.7' height='6.2' rx='1.35'/><rect x='15.7' y='7.0' width='2.7' height='6.2' rx='1.35'/><rect x='3.2' y='12.2' width='2.7' height='6.2' rx='1.35' transform='rotate(-28 4.55 15.3)'/></g></svg>") 12 12, grabbing !important;
 }
 
 /* Zaznaczanie tekstu w trakcie przeciągania tylko przeszkadza. */

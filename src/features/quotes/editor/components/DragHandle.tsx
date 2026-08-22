@@ -19,8 +19,8 @@ export function DragHandle({
       type="button"
       aria-label={label}
       className={cn(
-        'flex w-[18px] shrink-0 cursor-grab items-center justify-center text-[var(--doc-ink-soft)]',
-        'transition-colors hover:text-[var(--doc-ink)] active:cursor-grabbing',
+        'cursor-grip flex w-[18px] shrink-0 items-center justify-center text-[var(--doc-ink-soft)]',
+        'transition-colors hover:text-[var(--doc-ink)]',
         'focus-visible:ring-ring rounded-[3px] focus-visible:ring-2 focus-visible:outline-none',
         className,
       )}
