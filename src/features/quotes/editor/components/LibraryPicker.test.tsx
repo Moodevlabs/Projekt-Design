@@ -99,6 +99,42 @@ describe('LibraryPicker', () => {
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
   });
 
+  it('wstawia zestaw jako grupę wyceny z jej pozycjami', async () => {
+    const user = userEvent.setup();
+    const onPickGroup = vi.fn();
+    useLibraryGroups.mockReturnValue({
+      data: [
+        {
+          id: 'g1',
+          workspaceId: 'ws',
+          name: 'Kuchnia',
+          sortOrder: 0,
+          items: [
+            {
+              name: 'Projekt koncepcyjny',
+              description: '',
+              kind: 'item',
+              qty: 14,
+              unitPriceCents: 9_000,
+              libraryItemId: null,
+            },
+          ],
+        },
+      ],
+    });
+    render(<LibraryPicker onPickItem={vi.fn()} onPickGroup={onPickGroup} />);
+
+    await user.click(screen.getByRole('button', { name: pl.editor.fromLibrary }));
+    await user.click(screen.getByRole('button', { name: pl.editor.pickerGroupsTab }));
+    await user.click(await screen.findByText('Kuchnia'));
+
+    expect(onPickGroup).toHaveBeenCalledTimes(1);
+    const grupa = onPickGroup.mock.calls[0]?.[0] as { name: string; items: { qty: number }[] };
+    expect(grupa.name).toBe('Kuchnia');
+    // Ilość ma przyjechać z zestawu, nie zostać zresetowana do 1.
+    expect(grupa.items[0]?.qty).toBe(14);
+  });
+
   it('bez obsługi grup nie pokazuje zakładek', async () => {
     const user = userEvent.setup();
     render(<LibraryPicker onPickItem={vi.fn()} />);
