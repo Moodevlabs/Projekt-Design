@@ -38,6 +38,18 @@
   --danger: #c53030;
   --discount: #b9634a;
 
+  /*
+   * Barwy statusu wyceny. Liczba odcinków niesie POSTĘP (szkic → wysłana →
+   * rozstrzygnięcie), barwa niesie KONDYCJĘ oferty: bursztyn = jeszcze u nas,
+   * zieleń = poszła do klienta i im ciemniejsza, tym bliżej domknięcia.
+   * Napis zostaje neutralny, żeby nie tracić kontrastu na drobnym stopniu.
+   */
+  --status-draft: #de8b2c;
+  --status-sent: #6ab98a;
+  --status-accepted: #2c7a51;
+  --status-rejected: #c05a4e;
+  --status-expired: #9aa0aa;
+
   /* --- szkło ---
      Prawdziwe „liquid glass" to nie sam blur: potrzebne są cztery
      rzeczy naraz — rozmycie tła, podbicie nasycenia (inaczej wychodzi
@@ -351,18 +363,23 @@
    T-12 nadpisze je inline ze stylu brand kitu, dlatego sÄ… zmiennymi.
    --------------------------------------------------------------- */
 .quote-doc {
-  --doc-bg: #faf7f1;
+  --doc-bg: #ffffff;
   --doc-surface: #ffffff;
-  --doc-ink: #21201c;
-  --doc-ink-soft: #6b6862;
-  --doc-hair: #e1dcd0;
-  --doc-hair-strong: #cbc4b2;
-  --doc-sage: #4a4842;
-  --doc-sage-light: #e7e5de;
-  --doc-terracotta: #b9634a;
-  --doc-toggle-off: #dcd7c9;
-  --doc-price-off: #b9b4a6;
-  --doc-danger-wash: #f0e4e0;
+  --doc-ink: #16181c;
+  --doc-ink-soft: #6a6e76;
+  --doc-hair: #e6e8ec;
+  --doc-hair-strong: #d3d7dd;
+  /* Kolor etykiet sekcyjnych i linków „+ dodaj". Nazwa historyczna po
+     prototypie (był tam oliwkowy „sage"); dziś to po prostu przygaszony
+     atrament, żeby nie konkurował z nazwami pozycji. */
+  --doc-sage: #4c515a;
+  --doc-sage-light: #f1f2f5;
+  /* Rabaty. Jedyna barwa w dokumencie — ujemna kwota musi się odróżniać
+     od zwykłej pozycji także wtedy, gdy ktoś czyta wycenę pobieżnie. */
+  --doc-terracotta: #b0563c;
+  --doc-toggle-off: #dcdfe4;
+  --doc-price-off: #a6abb3;
+  --doc-danger-wash: #eff1f4;
 
   background: var(--doc-bg);
   color: var(--doc-ink);
@@ -456,57 +473,4 @@
   transition:
     opacity 220ms var(--ease-out-soft),
     transform 320ms var(--ease-liquid);
-}
-
-
-/* ---------------------------------------------------------------
-   Nawigacja zwinieta — WCIECIE aktywnej pozycji.
-
-   To nie jest naklejka na szyne, tylko wgryzienie sie tresci w jej
-   krawedz: ksztalt lezki wypelniony DOKLADNIE tym samym polem swiatla
-   co tlo strony, zakotwiczonym w widoku (`background-attachment: fixed`).
-   Dzieki temu czyta sie jak dziura, a nie jak plamka w przyblizonym
-   kolorze — i nie rozjezdza sie z tlem przy przewijaniu.
-
-   Rozwiniety pasek zostaje przy pigulce: pelnej szerokosci wiersz lubi
-   tlo, waska szyna ikon lubi znacznik na krawedzi.
-   --------------------------------------------------------------- */
-.nav-notch-body {
-  height: 100%;
-  width: 100%;
-  transform-origin: center;
-  background-color: var(--canvas);
-  background-image: var(--field);
-  background-attachment: fixed;
-  /*
-   * Lezka OBEJMUJACA ikone: okragla kieszen po lewej (miesci ikone
-   * aktywnego ekranu) rozlewajaca sie w prawo az do krawedzi szyny,
-   * gdzie wtapia sie w nia dwoma WKLESLYMI barkami. Dzieki temu wybrany
-   * ekran zlewa sie z trescia zamiast lezec na nawigacji.
-   *
-   * Wspolrzedne w px — element ma staly rozmiar 64x74
-   * (46 px wiersza + 2 x 14 px barku).
-   */
-  clip-path: path(
-    'M 64 0 A 14 14 0 0 1 50 14 L 23 14 A 23 23 0 0 0 23 60 L 50 60 A 14 14 0 0 1 64 74 Z'
-  );
-}
-
-.nav-notch-body[data-travelling='true'] {
-  animation: nav-notch-stretch var(--dur-slide) var(--ease-liquid);
-}
-
-@keyframes nav-notch-stretch {
-  0% {
-    transform: scaleY(1);
-  }
-  38% {
-    transform: scaleY(1.14);
-  }
-  70% {
-    transform: scaleY(0.98);
-  }
-  100% {
-    transform: scaleY(1);
-  }
 }

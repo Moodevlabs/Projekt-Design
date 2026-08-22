@@ -52,3 +52,20 @@ describe('InlineText', () => {
     expect(onCommit).not.toHaveBeenCalled();
   });
 });
+
+describe('InlineText — podgląd', () => {
+  it('renderuje tekst, a nie pole formularza', () => {
+    render(<InlineText value="anna.nowak@example.com" onCommit={vi.fn()} readOnly ariaLabel="E-mail" />);
+
+    // Długie wartości muszą się zawijać — `readonly` input by je uciął.
+    expect(screen.getByLabelText('E-mail')).toHaveTextContent('anna.nowak@example.com');
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+  });
+
+  it('pustej wartości nie renderuje wcale', () => {
+    const { container } = render(
+      <InlineText value="" onCommit={vi.fn()} readOnly ariaLabel="Telefon" />,
+    );
+    expect(container).toBeEmptyDOMElement();
+  });
+});

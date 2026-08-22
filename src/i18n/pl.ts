@@ -6,6 +6,8 @@ export const pl = {
   app: {
     name: 'Anzorge',
     tagline: 'Interaktywne wyceny',
+    /** Podpis wytłoczony w tle aplikacji. Nazwy własne — nie tłumaczymy. */
+    credit: 'Developed by AnzorgeDesign & Moodevlabs',
   },
   nav: {
     dashboard: 'Pulpit',

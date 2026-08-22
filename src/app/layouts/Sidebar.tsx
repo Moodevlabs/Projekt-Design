@@ -24,22 +24,11 @@ import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
 
 /**
- * Łezka obejmuje ikonę, więc sięga od krawędzi szyny aż za ikonę.
- * Wysokość = wiersz + dwa barki wtapiające się w krawędź.
- */
-const NOTCH_SHOULDER = 14;
-const NOTCH_HEIGHT = NAV_ROW_HEIGHT + NOTCH_SHOULDER * 2;
-const NOTCH_WIDTH = 64;
-
-/**
- * Wskaźnik aktywnej pozycji.
+ * Wskaźnik aktywnej pozycji — jedna kulka przejeżdżająca między wierszami,
+ * a nie siedem niezależnych teł. Dzięki temu widać ruch, a nie przeskok.
  *
- * Zwinięty pasek: **wcięcie** w prawej krawędzi szyny — treść wgryza się
- * w nawigację. Rozwinięty: pigułka pod całym wierszem. Wąska szyna ikon
- * lubi znacznik na krawędzi, wiersz pełnej szerokości lubi tło.
- *
- * W obu przypadkach jest to JEDEN element przejeżdżający między pozycjami,
- * a nie siedem niezależnych teł — dzięki temu widać ruch, a nie przeskok.
+ * Zwinięty pasek: kółko pod ikoną. Rozwinięty: pigułka pod całym wierszem.
+ * Na ciemnej szynie kulka jest biała, więc aktywna ikona idzie w atrament.
  */
 function ActiveIndicator({ index, expanded }: { index: number; expanded: boolean }) {
   const [travelling, setTravelling] = useState(false);
@@ -58,40 +47,19 @@ function ActiveIndicator({ index, expanded }: { index: number; expanded: boolean
 
   if (index < 0) return null;
 
-  const rowTop = index * NAV_ROW_STEP;
-
-  if (expanded) {
-    return (
-      <span
-        aria-hidden
-        data-testid="nav-active-marker"
-        data-variant="pill"
-        data-index={index}
-        className="nav-pill-track pointer-events-none absolute top-0 left-0 w-full"
-        style={{ transform: `translateY(${rowTop}px)`, height: NAV_ROW_HEIGHT }}
-      >
-        <span className="nav-pill-body block" data-travelling={travelling} />
-      </span>
-    );
-  }
-
-  // Wcięcie sięga prawej krawędzi szyny (stąd ujemny `right`, żeby wyjść
-  // poza padding) i obejmuje ikonę, która dzięki temu leży na jasnym tle.
   return (
     <span
       aria-hidden
       data-testid="nav-active-marker"
-      data-variant="notch"
       data-index={index}
-      className="nav-notch-track pointer-events-none absolute top-0"
+      className="nav-pill-track pointer-events-none absolute top-0 left-0"
       style={{
-        transform: `translateY(${rowTop - NOTCH_SHOULDER}px)`,
-        height: NOTCH_HEIGHT,
-        width: NOTCH_WIDTH,
-        right: 'calc(-1 * var(--nav-inline-padding))',
+        transform: `translateY(${index * NAV_ROW_STEP}px)`,
+        height: NAV_ROW_HEIGHT,
+        width: expanded ? '100%' : NAV_ROW_HEIGHT,
       }}
     >
-      <span className="nav-notch-body block" data-travelling={travelling} />
+      <span className="nav-pill-body block" data-travelling={travelling} />
     </span>
   );
 }
@@ -217,12 +185,7 @@ export function Sidebar({ subscriptionOk = true }: { subscriptionOk?: boolean })
     <nav
       aria-label={pl.app.name}
       data-expanded={expanded}
-      style={
-        {
-          width: expanded ? 244 : 76,
-          '--nav-inline-padding': expanded ? '16px' : '15px',
-        } as React.CSSProperties
-      }
+      style={{ width: expanded ? 244 : 76 }}
       className={cn(
         'glass-dark relative z-10 flex shrink-0 flex-col py-5',
         expanded ? 'px-4' : 'items-center px-[15px]',

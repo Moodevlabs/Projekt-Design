@@ -91,6 +91,28 @@ export function InlineText({
     ),
   };
 
+  /*
+   * W podglądzie renderujemy zwykły tekst, a NIE `readonly` input.
+   * Input nie potrafi zawijać — długa wartość (najczęściej e-mail) była
+   * po prostu ucinana na krawędzi pola. Tekst zawija się i jest czytany
+   * przez czytniki ekranu jako treść, a nie jako pole formularza.
+   */
+  if (readOnly) {
+    if (!draft) return null;
+    return (
+      <div
+        aria-label={ariaLabel}
+        className={cn(
+          shared.className,
+          'break-words',
+          multiline && 'whitespace-pre-wrap',
+        )}
+      >
+        {draft}
+      </div>
+    );
+  }
+
   if (multiline) {
     return (
       <textarea

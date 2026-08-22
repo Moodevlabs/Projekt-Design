@@ -12,32 +12,27 @@ export interface QuoteHeaderProps {
   onPatchClient: (patch: Partial<QuoteBody['client']>) => void;
 }
 
-/** Pole „Etykieta: wartość" z siatki metadanych. */
+/**
+ * Pole siatki metadanych: etykieta NAD wartością.
+ *
+ * Wcześniej etykieta i wartość stały w jednym wierszu, przez co na wartość
+ * zostawało kilkadziesiąt pikseli i dłuższe adresy e-mail się nie mieściły.
+ * Ułożenie pionowe oddaje wartości całą szerokość kolumny.
+ */
 function MetaField({
   label,
-  value,
-  onCommit,
-  editing,
-  placeholder,
+  children,
 }: {
   label: string;
-  value: string;
-  onCommit: (next: string) => void;
-  editing: boolean;
-  placeholder?: string;
+  children: React.ReactNode;
 }) {
   return (
-    <p className="flex items-baseline gap-1.5 text-[14px] text-[var(--doc-ink-soft)]">
-      <span className="shrink-0">{label}:</span>
-      <InlineText
-        value={value}
-        onCommit={onCommit}
-        readOnly={!editing}
-        placeholder={placeholder}
-        ariaLabel={label}
-        className="inline-field min-w-0 flex-1"
-      />
-    </p>
+    <div className="min-w-0">
+      <p className="text-[10.5px] font-semibold tracking-[0.09em] text-[var(--doc-sage)] uppercase">
+        {label}
+      </p>
+      <div className="mt-1 text-[14px] text-[var(--doc-ink)]">{children}</div>
+    </div>
   );
 }
 
@@ -79,44 +74,52 @@ export function QuoteHeader({
         />
       ) : null}
 
-      <div className="mt-5 grid max-w-[640px] grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-x-6 gap-y-1">
-        <MetaField
-          label={pl.editor.investor}
-          value={body.client.name}
-          onCommit={(name) => onPatchClient({ name })}
-          editing={editing}
-        />
+      <div className="mt-7 grid max-w-[680px] grid-cols-[repeat(auto-fit,minmax(184px,1fr))] gap-x-8 gap-y-5">
+        <MetaField label={pl.editor.investor}>
+          <InlineText
+            value={body.client.name}
+            onCommit={(name) => onPatchClient({ name })}
+            readOnly={!editing}
+            ariaLabel={pl.editor.investor}
+            className="inline-field w-full"
+          />
+        </MetaField>
 
-        <p className="flex items-baseline gap-1.5 text-[14px] text-[var(--doc-ink-soft)]">
-          <span className="shrink-0">{pl.editor.date}:</span>
+        <MetaField label={pl.editor.date}>
           {editing ? (
             <input
               type="date"
               value={issueDate}
               aria-label={pl.editor.date}
               onChange={(event) => onPatch({ issueDate: event.target.value || null })}
-              className="inline-field min-w-0 flex-1 bg-transparent px-1"
+              className="inline-field w-full bg-transparent px-2 py-1"
             />
           ) : (
             <span>{new Date(issueDate).toLocaleDateString('pl-PL')}</span>
           )}
-        </p>
+        </MetaField>
 
-        <MetaField
-          label={pl.editor.phone}
-          value={body.client.phone}
-          onCommit={(phone) => onPatchClient({ phone })}
-          editing={editing}
-        />
-        <MetaField
-          label={pl.editor.email}
-          value={body.client.email}
-          onCommit={(email) => onPatchClient({ email })}
-          editing={editing}
-        />
+        <MetaField label={pl.editor.phone}>
+          <InlineText
+            value={body.client.phone}
+            onCommit={(phone) => onPatchClient({ phone })}
+            readOnly={!editing}
+            ariaLabel={pl.editor.phone}
+            className="inline-field w-full"
+          />
+        </MetaField>
 
-        <p className="flex items-baseline gap-1.5 text-[14px] text-[var(--doc-ink-soft)]">
-          <span className="shrink-0">{pl.editor.validity}:</span>
+        <MetaField label={pl.editor.email}>
+          <InlineText
+            value={body.client.email}
+            onCommit={(email) => onPatchClient({ email })}
+            readOnly={!editing}
+            ariaLabel={pl.editor.email}
+            className="inline-field w-full"
+          />
+        </MetaField>
+
+        <MetaField label={pl.editor.validity}>
           {editing ? (
             <input
               type="number"
@@ -127,12 +130,12 @@ export function QuoteHeader({
                 const next = Number.parseInt(event.target.value, 10);
                 onPatch({ validDays: Number.isFinite(next) && next >= 0 ? next : 0 });
               }}
-              className="inline-field amount w-16 bg-transparent px-1"
+              className="inline-field amount w-20 bg-transparent px-2 py-1"
             />
           ) : (
             <span>{pl.editor.days(body.validDays)}</span>
           )}
-        </p>
+        </MetaField>
       </div>
 
       {editing || body.intro ? (

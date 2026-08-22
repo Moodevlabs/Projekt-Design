@@ -32,16 +32,6 @@ describe('Sidebar — aktywna pozycja', () => {
     expect(marker).toHaveAttribute('data-index', String(expected));
   });
 
-  it('zwinięty pasek oznacza wybór wcięciem, rozwinięty pigułką', async () => {
-    const user = userEvent.setup();
-    renderAt('/wyceny');
-
-    expect(screen.getByTestId('nav-active-marker')).toHaveAttribute('data-variant', 'notch');
-
-    await user.click(screen.getByRole('button', { name: pl.nav.expand }));
-    expect(screen.getByTestId('nav-active-marker')).toHaveAttribute('data-variant', 'pill');
-  });
-
   it('oznacza aktywny link atrybutem aria-current', () => {
     renderAt('/wyceny');
     // Regresja: `TooltipTrigger asChild` scala className jako string, więc

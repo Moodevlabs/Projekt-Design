@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
+import { AppCredit } from '@/app/AppCredit';
 import { registerDeepLinks } from '@/app/deep-links';
 import { routes } from '@/app/routes';
 
@@ -24,5 +25,10 @@ export function RootLayout() {
     };
   }, [navigate]);
 
-  return <Outlet />;
+  return (
+    <>
+      <AppCredit />
+      <Outlet />
+    </>
+  );
 }

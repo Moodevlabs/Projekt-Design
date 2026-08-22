@@ -36,8 +36,11 @@ describe('ItemRow', () => {
     expect(screen.queryByLabelText(pl.editor.itemPriceLabel)).not.toBeInTheDocument();
     expect(screen.queryByLabelText(pl.editor.itemQtyLabel)).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Usuń pozycję/ })).not.toBeInTheDocument();
-    // Nazwa zostaje, ale tylko do odczytu.
-    expect(screen.getByLabelText(pl.editor.itemNameLabel)).toHaveAttribute('readonly');
+    // Nazwa zostaje, ale jako TEKST, nie pole formularza. `readonly` input
+    // nie potrafi zawijać, więc dłuższe wartości byłyby ucinane; poza tym
+    // czytnik ekranu ogłaszałby podgląd jako formularz.
+    expect(screen.getByLabelText(pl.editor.itemNameLabel)).toBeInTheDocument();
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
   });
 
   it('wylaczona pozycja zmienia kolor, a NIE znika i nie jest przekreslona', () => {

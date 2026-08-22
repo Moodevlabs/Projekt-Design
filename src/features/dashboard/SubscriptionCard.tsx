@@ -5,12 +5,12 @@ import { useSubscription } from '@/data/queries/useSubscription';
 import type { Subscription, SubscriptionStatus } from '@/data/repos/subscription.repo';
 import { routes } from '@/app/routes';
 import { formatDate } from '@/lib/dates';
+import { trialTone } from './trial-tone';
 import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
 
 const TRIAL_DAYS = 14;
 /** Poniżej tylu dni trial robi się „ostrzegawczy". */
-const WARNING_DAYS = 3;
 
 /**
  * Subskrypcja — cicha karta w prawej szynie. Zamiast generycznego paska
@@ -70,19 +70,23 @@ function SubscriptionBody({ data }: { data: Subscription | null }) {
   );
 }
 
-/** 14 tyknięć-dni; informację niesie tekst wyżej, więc `aria-hidden`. */
+/**
+ * 14 tyknięć-dni; informację niesie tekst wyżej, więc `aria-hidden`.
+ *
+ * Barwa pozostałych tyknięć wędruje od zieleni przez bursztyn do czerwieni
+ * w miarę kurczenia się zapasu — patrz `trial-tone.ts`. Kolor jest drugim
+ * sygnałem obok liczby dni, nie jedynym.
+ */
 function TrialTicks({ daysLeft }: { daysLeft: number }) {
-  const low = daysLeft <= WARNING_DAYS;
+  const tone = trialTone(daysLeft, TRIAL_DAYS);
 
   return (
     <div aria-hidden className="mt-3 flex gap-1">
       {Array.from({ length: TRIAL_DAYS }, (_, index) => (
         <span
           key={index}
-          className={cn(
-            'h-1.5 flex-1 rounded-full',
-            index < daysLeft ? (low ? 'bg-ink/45' : 'bg-cta') : 'bg-[var(--hair)]',
-          )}
+          style={index < daysLeft ? { backgroundColor: tone } : undefined}
+          className={cn('h-1.5 flex-1 rounded-full', index >= daysLeft && 'bg-[var(--hair)]')}
         />
       ))}
     </div>

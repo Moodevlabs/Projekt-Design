@@ -30,8 +30,10 @@ export function ItemToggle({
       className={cn(
         'relative h-[26px] w-[46px] shrink-0 rounded-full transition-colors duration-[180ms] ease-out',
         'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
+        // Włączony przełącznik idzie w pełny atrament — na białym dokumencie
+        // przygaszona szarość czytałaby się jak stan nieaktywny.
         checked || indeterminate
-          ? 'bg-[var(--doc-sage)]'
+          ? 'bg-[var(--doc-ink)]'
           : 'bg-[var(--doc-toggle-off)]',
         className,
       )}
