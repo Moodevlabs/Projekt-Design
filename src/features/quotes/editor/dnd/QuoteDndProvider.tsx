@@ -1,7 +1,6 @@
-import { useCallback, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, type ReactNode } from 'react';
 import {
   DndContext,
-  DragOverlay,
   KeyboardSensor,
   PointerSensor,
   closestCenter,
@@ -16,6 +15,9 @@ import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { resolveDrop, type DragData, type DropData } from './drop-resolution';
 import { useEditorStore } from '../editor.store';
 import { pl } from '@/i18n/pl';
+
+/** Klasa na `<body>` wymuszająca kursor „trzymam" na całej stronie. */
+const DRAGGING_CLASS = 'is-dragging';
 
 /** Rodzaj przenoszonego elementu — do komunikatów dla czytników ekranu. */
 function kindLabel(data: DragData): string {
@@ -45,8 +47,6 @@ export function QuoteDndProvider({
   enabled: boolean;
   children: ReactNode;
 }) {
-  const [dragged, setDragged] = useState<DragData | null>(null);
-
   const moveItem = useEditorStore((state) => state.moveItem);
   const moveGroup = useEditorStore((state) => state.moveGroup);
   const moveSection = useEditorStore((state) => state.moveSection);
@@ -58,13 +58,17 @@ export function QuoteDndProvider({
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
-  const onDragStart = useCallback((event: DragStartEvent) => {
-    setDragged((event.active.data.current as DragData | undefined) ?? null);
+  const onDragStart = useCallback((_event: DragStartEvent) => {
+    document.body.classList.add(DRAGGING_CLASS);
   }, []);
+
+  // Gdyby komponent zniknął w trakcie przeciągania (przeładowanie wyceny,
+  // wyjście z edytora), kursor „trzymam" zostałby na stałe.
+  useEffect(() => () => document.body.classList.remove(DRAGGING_CLASS), []);
 
   const onDragEnd = useCallback(
     (event: DragEndEvent) => {
-      setDragged(null);
+      document.body.classList.remove(DRAGGING_CLASS);
 
       const active = event.active.data.current as DragData | undefined;
       const over = event.over?.data.current as DropData | undefined;
@@ -107,28 +111,9 @@ export function QuoteDndProvider({
       accessibility={{ announcements }}
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
-      onDragCancel={() => setDragged(null)}
+      onDragCancel={() => document.body.classList.remove(DRAGGING_CLASS)}
     >
       {children}
-      {/*
-        Podgląd pod kursorem MUSI być ciemny. Wycena jest białą kartką, więc
-        jasna plakietka z włosem obramowania po prostu na niej znika — a to
-        jedyna rzecz, która w trakcie przeciągania mówi, co się dzieje.
-        Pokazujemy nazwę elementu, nie sam jego rodzaj.
-      */}
-      <DragOverlay dropAnimation={null}>
-        {dragged ? (
-          <div
-            data-testid="drag-preview"
-            className="bg-cta text-cta-fg flex max-w-[280px] items-center gap-2 rounded-[var(--radius-pill)] py-2 pr-4 pl-3 text-xs font-medium shadow-[0_12px_28px_-8px_rgba(20,22,28,0.6)]"
-          >
-            <span aria-hidden className="opacity-60">
-              {kindLabel(dragged)}
-            </span>
-            <span className="truncate">{nameLabel(dragged)}</span>
-          </div>
-        ) : null}
-      </DragOverlay>
     </DndContext>
   );
 }

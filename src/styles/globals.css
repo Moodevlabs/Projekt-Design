@@ -474,3 +474,19 @@
     opacity 220ms var(--ease-out-soft),
     transform 320ms var(--ease-liquid);
 }
+
+
+/*
+ * Przeciąganie w edytorze. Nie ma plakietki pod kursorem — podglądem jest sam
+ * przenoszony wiersz, a informację „trzymam" niesie KURSOR. Musi obowiązywać
+ * na całej stronie, bo w trakcie przeciągania wskaźnik dawno opuścił uchwyt.
+ */
+body.is-dragging,
+body.is-dragging * {
+  cursor: grabbing !important;
+}
+
+/* Zaznaczanie tekstu w trakcie przeciągania tylko przeszkadza. */
+body.is-dragging {
+  user-select: none;
+}

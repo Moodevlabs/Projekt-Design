@@ -19,11 +19,11 @@ function Dnd({ ids, children }: { ids: string[]; children: ReactNode }) {
 
 function setup(overrides: Partial<Item> = {}, editing = true) {
   const item = newItem({ name: 'Blat kuchenny', unitPriceCents: 120_000, ...overrides });
-  const handlers = { onToggle: vi.fn(), onPatch: vi.fn(), onRemove: vi.fn(), onNudge: vi.fn() };
+  const handlers = { onToggle: vi.fn(), onPatch: vi.fn(), onRemove: vi.fn() };
 
   render(
     <Dnd ids={[item.id]}>
-      <ItemRow item={item} editing={editing} currency="PLN" index={0} count={2} {...handlers} />
+      <ItemRow item={item} editing={editing} currency="PLN" {...handlers} />
     </Dnd>,
   );
   return { item, ...handlers };
@@ -85,12 +85,9 @@ describe('ItemRow', () => {
           item={a}
           editing={false}
           currency="PLN"
-          index={0}
-          count={1}
           onToggle={vi.fn()}
           onPatch={vi.fn()}
           onRemove={vi.fn()}
-          onNudge={vi.fn()}
         />
       </Dnd>,
     );
@@ -104,12 +101,9 @@ describe('ItemRow', () => {
           item={b}
           editing={false}
           currency="PLN"
-          index={0}
-          count={1}
           onToggle={vi.fn()}
           onPatch={vi.fn()}
           onRemove={vi.fn()}
-          onNudge={vi.fn()}
         />
       </Dnd>,
     );
@@ -121,45 +115,15 @@ describe('ItemRow', () => {
     expect(screen.getByText(/300,00/)).toBeInTheDocument();
   });
 
-  it('daje uchwyt przeciagania i strzalki tylko w trybie edycji', () => {
+  it('daje uchwyt przeciagania tylko w trybie edycji', () => {
     setup({}, false);
     expect(screen.queryByRole('button', { name: /Przenieś pozycję/ })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /Przesuń wyżej/ })).not.toBeInTheDocument();
   });
 
   it('uchwyt przeciagania jest przyciskiem z etykieta — sensor klawiatury tego wymaga', () => {
     setup();
     const handle = screen.getByRole('button', { name: /Przenieś pozycję: Blat kuchenny/ });
     expect(handle).toBeInTheDocument();
-  });
-
-  it('strzalka w gore jest wylaczona dla pierwszej pozycji', () => {
-    const item = newItem({ name: 'Pierwsza' });
-    render(
-      <Dnd ids={[item.id]}>
-        <ItemRow
-          item={item}
-          editing
-          currency="PLN"
-          index={0}
-          count={3}
-          onToggle={vi.fn()}
-          onPatch={vi.fn()}
-          onRemove={vi.fn()}
-          onNudge={vi.fn()}
-        />
-      </Dnd>,
-    );
-    expect(screen.getByRole('button', { name: /Przesuń wyżej/ })).toBeDisabled();
-    expect(screen.getByRole('button', { name: /Przesuń niżej/ })).toBeEnabled();
-  });
-
-  it('przesuwa pozycje strzalka', async () => {
-    const user = userEvent.setup();
-    const { item, onNudge } = setup();
-
-    await user.click(screen.getByRole('button', { name: /Przesuń niżej/ }));
-    expect(onNudge).toHaveBeenCalledWith(item.id, 'down');
   });
 
   it('usuwa pozycje', async () => {

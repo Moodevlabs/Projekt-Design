@@ -69,7 +69,6 @@ function Harness() {
   const updateItem = useEditorStore((state) => state.updateItem);
   const toggleItem = useEditorStore((state) => state.toggleItem);
   const removeItem = useEditorStore((state) => state.removeItem);
-  const nudgeItem = useEditorStore((state) => state.nudgeItem);
 
   if (!section) return null;
 
@@ -80,11 +79,6 @@ function Harness() {
       currency="PLN"
       vatRate={23}
       pricesInclude="net"
-      index={0}
-      count={1}
-      onNudgeItem={nudgeItem}
-      onNudgeGroup={noop}
-      onNudgeSection={noop}
       onRename={noop}
       onRemove={noop}
       onAddGroup={noop}

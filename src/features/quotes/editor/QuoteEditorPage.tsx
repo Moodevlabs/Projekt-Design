@@ -175,9 +175,6 @@ function EditorSurface({
   const updateItem = useEditorStore((state) => state.updateItem);
   const toggleItem = useEditorStore((state) => state.toggleItem);
   const removeItem = useEditorStore((state) => state.removeItem);
-  const nudgeItem = useEditorStore((state) => state.nudgeItem);
-  const nudgeGroup = useEditorStore((state) => state.nudgeGroup);
-  const nudgeSection = useEditorStore((state) => state.nudgeSection);
 
   /**
    * `addItem` w store zawsze dodaje zwykla pozycje; dla rabatu poprawiamy `kind`
@@ -241,7 +238,7 @@ function EditorSurface({
 
               <div className="mt-10">
                 <SortableContext items={sectionIds} strategy={verticalListSortingStrategy}>
-                  {body.sections.map((section, sectionIndex) => (
+                  {body.sections.map((section) => (
                     <SectionBlock
                       key={section.id}
                       section={section}
@@ -249,8 +246,6 @@ function EditorSurface({
                       currency="PLN"
                       vatRate={body.vatRate}
                       pricesInclude={body.pricesInclude}
-                      index={sectionIndex}
-                      count={body.sections.length}
                       onRename={renameSection}
                       onRemove={removeSection}
                       onAddGroup={addGroup}
@@ -261,9 +256,6 @@ function EditorSurface({
                       onToggleItem={toggleItem}
                       onPatchItem={updateItem}
                       onRemoveItem={removeItem}
-                      onNudgeItem={nudgeItem}
-                      onNudgeGroup={nudgeGroup}
-                      onNudgeSection={nudgeSection}
                     />
                   ))}
                 </SortableContext>

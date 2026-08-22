@@ -8,14 +8,12 @@ import { ItemRow } from './ItemRow';
 import { ItemToggle } from './ItemToggle';
 import { AddLink } from './AddLink';
 import { DragHandle } from './DragHandle';
-import { MoveButtons } from './MoveButtons';
 import { useStableIds } from '../dnd/useStableIds';
 import { ConfirmDialog } from '@/components/shared';
 import {
   calcGroupTotals,
   type Group,
   type Item,
-  type NudgeDirection,
   type PricesInclude,
 } from '@/domain/quote';
 import { formatMoney } from '@/domain/money';
@@ -29,8 +27,6 @@ export interface GroupBlockProps {
   currency: string;
   vatRate: number;
   pricesInclude: PricesInclude;
-  index: number;
-  count: number;
   onRename: (groupId: string, name: string) => void;
   onRemove: (groupId: string) => void;
   onToggleGroup: (groupId: string) => void;
@@ -38,8 +34,6 @@ export interface GroupBlockProps {
   onToggleItem: (itemId: string) => void;
   onPatchItem: (itemId: string, patch: Partial<Item>) => void;
   onRemoveItem: (itemId: string) => void;
-  onNudgeItem: (itemId: string, direction: NudgeDirection) => void;
-  onNudgeGroup: (groupId: string, direction: NudgeDirection) => void;
 }
 
 export const GroupBlock = memo(function GroupBlock({
@@ -49,8 +43,6 @@ export const GroupBlock = memo(function GroupBlock({
   currency,
   vatRate,
   pricesInclude,
-  index,
-  count,
   onRename,
   onRemove,
   onToggleGroup,
@@ -58,8 +50,6 @@ export const GroupBlock = memo(function GroupBlock({
   onToggleItem,
   onPatchItem,
   onRemoveItem,
-  onNudgeItem,
-  onNudgeGroup,
 }: GroupBlockProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const totals = calcGroupTotals(group, { vatRate, pricesInclude });
@@ -98,25 +88,18 @@ export const GroupBlock = memo(function GroupBlock({
       style={{ transform: CSS.Translate.toString(transform), transition }}
       className={cn(
         'mt-[34px] [&_+_&]:border-t-[1.5px] [&_+_&]:border-[var(--doc-hair-strong)] [&_+_&]:pt-[26px]',
-        isDragging && 'relative z-10 opacity-40',
+        isDragging &&
+          'relative z-20 rounded-[var(--radius-card)] bg-[var(--doc-surface)] shadow-[0_16px_34px_-12px_rgba(20,22,28,0.45)]',
       )}
     >
       <div className="flex items-center gap-3 pb-1">
         {editing ? (
-          <>
-            <DragHandle
-              ref={setActivatorNodeRef}
-              label={`${pl.editor.dragGroup}: ${group.name}`}
-              {...attributes}
-              {...listeners}
-            />
-            <MoveButtons
-              label={group.name}
-              canMoveUp={index > 0}
-              canMoveDown={index < count - 1}
-              onMove={(direction) => onNudgeGroup(group.id, direction)}
-            />
-          </>
+          <DragHandle
+            ref={setActivatorNodeRef}
+            label={`${pl.editor.dragGroup}: ${group.name}`}
+            {...attributes}
+            {...listeners}
+          />
         ) : null}
 
         <ItemToggle
@@ -163,18 +146,15 @@ export const GroupBlock = memo(function GroupBlock({
         )}
       >
         <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
-          {group.items.map((item, itemIndex) => (
+          {group.items.map((item) => (
             <ItemRow
               key={item.id}
               item={item}
               editing={editing}
               currency={currency}
-              index={itemIndex}
-              count={group.items.length}
               onToggle={onToggleItem}
               onPatch={onPatchItem}
               onRemove={onRemoveItem}
-              onNudge={onNudgeItem}
             />
           ))}
         </SortableContext>

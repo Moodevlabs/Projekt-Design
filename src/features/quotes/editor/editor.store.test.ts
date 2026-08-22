@@ -329,15 +329,6 @@ describe('editor.store — kolejność', () => {
     expect(store().body?.sections[1]?.id).toBe(first);
   });
 
-  it('przyciski góra/dół przesuwają o jedno miejsce', () => {
-    const { group } = ids();
-    const [pierwsza, druga] = group.items;
-    if (!pierwsza || !druga) throw new Error('brak pozycji');
-
-    store().nudgeItem(druga.id, 'up');
-    expect(store().body?.sections[0]?.groups[0]?.items[0]?.id).toBe(druga.id);
-  });
-
   it('każda zmiana kolejności brudzi dokument', () => {
     const { section } = ids();
     expect(store().saveState).toBe('idle');
@@ -345,17 +336,25 @@ describe('editor.store — kolejność', () => {
     expect(store().saveState).toBe('dirty');
   });
 
-  it('ruch bez efektu NIE brudzi dokumentu', () => {
-    const { group } = ids();
-    const pierwsza = group.items[0];
-    if (!pierwsza) throw new Error('brak pozycji');
+  it('ruch nieznanego elementu NIE brudzi dokumentu', () => {
+    const { section } = ids();
 
-    // Dojechanie do krawędzi listy nie może uruchamiać autozapisu.
-    store().nudgeItem(pierwsza.id, 'up');
+    // Domena zwraca to samo wejście, gdy id nie istnieje; store porównuje
+    // referencje i wtedy nie budzi autozapisu.
+    store().moveSection({ sectionId: 'nie-ma-takiej', toIndex: 0 });
     expect(store().saveState).toBe('idle');
 
-    store().nudgeItem('nie-ma-takiej', 'down');
+    store().moveItem({
+      itemId: 'nie-ma-takiej',
+      toSectionId: section.id,
+      toGroupId: null,
+      toIndex: 0,
+    });
     expect(store().saveState).toBe('idle');
+
+    // Uwaga: upuszczenie elementu TAM, GDZIE JUŻ JEST, store'a nie interesuje —
+    // domena i tak zwraca nowy dokument. Takie ruchy odsiewa `resolveDrop`
+    // z warstwy przeciągania (patrz `dnd/drop-resolution.test.ts`).
   });
 
   it('nie wywraca się na szkicu immera (structuredClone proxy)', () => {

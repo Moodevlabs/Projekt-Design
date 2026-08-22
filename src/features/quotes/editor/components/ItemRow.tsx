@@ -6,9 +6,8 @@ import { InlineText } from './InlineText';
 import { InlineMoney } from './InlineMoney';
 import { ItemToggle } from './ItemToggle';
 import { DragHandle } from './DragHandle';
-import { MoveButtons } from './MoveButtons';
 import { formatMoney } from '@/domain/money';
-import type { Item, NudgeDirection } from '@/domain/quote';
+import type { Item } from '@/domain/quote';
 import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
 
@@ -16,13 +15,9 @@ export interface ItemRowProps {
   item: Item;
   editing: boolean;
   currency: string;
-  /** Pozycja w swojej liście — steruje wyłączaniem strzałek na krańcach. */
-  index: number;
-  count: number;
   onToggle: (itemId: string) => void;
   onPatch: (itemId: string, patch: Partial<Item>) => void;
   onRemove: (itemId: string) => void;
-  onNudge: (itemId: string, direction: NudgeDirection) => void;
 }
 
 /**
@@ -39,12 +34,9 @@ export const ItemRow = memo(function ItemRow({
   item,
   editing,
   currency,
-  index,
-  count,
   onToggle,
   onPatch,
   onRemove,
-  onNudge,
 }: ItemRowProps) {
   const isDiscount = item.kind === 'discount';
   const valueCents = Math.round(item.qty * item.unitPriceCents);
@@ -70,26 +62,20 @@ export const ItemRow = memo(function ItemRow({
       className={cn(
         'flex items-center gap-[14px] border-b py-[13px]',
         'border-[var(--doc-hair)]',
-        // Przeciągany wiersz zostaje widoczny, tylko przygaszony — jak w prototypie.
-        isDragging && 'relative z-10 opacity-40',
+        // Bez plakietki pod kursorem to SAM WIERSZ jest podglądem przeciągania,
+        // więc musi zostać w pełni czytelny — tylko unosi się nad resztą.
+        isDragging &&
+          'relative z-20 rounded-[var(--radius-control)] bg-[var(--doc-surface)] shadow-[0_14px_30px_-10px_rgba(20,22,28,0.45)]',
       )}
       data-testid="item-row"
     >
       {editing ? (
-        <>
-          <DragHandle
-            ref={setActivatorNodeRef}
-            label={`${pl.editor.dragItem}: ${item.name || pl.editor.newItemName}`}
-            {...attributes}
-            {...listeners}
-          />
-          <MoveButtons
-            label={item.name || pl.editor.newItemName}
-            canMoveUp={index > 0}
-            canMoveDown={index < count - 1}
-            onMove={(direction) => onNudge(item.id, direction)}
-          />
-        </>
+        <DragHandle
+          ref={setActivatorNodeRef}
+          label={`${pl.editor.dragItem}: ${item.name || pl.editor.newItemName}`}
+          {...attributes}
+          {...listeners}
+        />
       ) : null}
 
       <ItemToggle

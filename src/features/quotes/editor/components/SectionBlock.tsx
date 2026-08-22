@@ -8,13 +8,11 @@ import { ItemRow } from './ItemRow';
 import { GroupBlock } from './GroupBlock';
 import { AddLink } from './AddLink';
 import { DragHandle } from './DragHandle';
-import { MoveButtons } from './MoveButtons';
 import { useStableIds } from '../dnd/useStableIds';
 import { ConfirmDialog } from '@/components/shared';
 import {
   calcSectionTotals,
   type Item,
-  type NudgeDirection,
   type PricesInclude,
   type Section,
 } from '@/domain/quote';
@@ -28,8 +26,6 @@ export interface SectionBlockProps {
   currency: string;
   vatRate: number;
   pricesInclude: PricesInclude;
-  index: number;
-  count: number;
   onRename: (sectionId: string, title: string) => void;
   onRemove: (sectionId: string) => void;
   onAddGroup: (sectionId: string) => void;
@@ -40,9 +36,6 @@ export interface SectionBlockProps {
   onToggleItem: (itemId: string) => void;
   onPatchItem: (itemId: string, patch: Partial<Item>) => void;
   onRemoveItem: (itemId: string) => void;
-  onNudgeItem: (itemId: string, direction: NudgeDirection) => void;
-  onNudgeGroup: (groupId: string, direction: NudgeDirection) => void;
-  onNudgeSection: (sectionId: string, direction: NudgeDirection) => void;
 }
 
 export const SectionBlock = memo(function SectionBlock({
@@ -51,8 +44,6 @@ export const SectionBlock = memo(function SectionBlock({
   currency,
   vatRate,
   pricesInclude,
-  index,
-  count,
   onRename,
   onRemove,
   onAddGroup,
@@ -63,9 +54,6 @@ export const SectionBlock = memo(function SectionBlock({
   onToggleItem,
   onPatchItem,
   onRemoveItem,
-  onNudgeItem,
-  onNudgeGroup,
-  onNudgeSection,
 }: SectionBlockProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const totals = calcSectionTotals(section, { vatRate, pricesInclude });
@@ -103,26 +91,22 @@ export const SectionBlock = memo(function SectionBlock({
     <section
       ref={setNodeRef}
       style={{ transform: CSS.Translate.toString(transform), transition }}
-      className={cn('mb-10', isDragging && 'relative z-10 opacity-40')}
+      className={cn(
+        'mb-10',
+        isDragging &&
+          'relative z-20 rounded-[var(--radius-card)] bg-[var(--doc-surface)] px-4 shadow-[0_18px_38px_-12px_rgba(20,22,28,0.45)]',
+      )}
     >
       {/* Kreska pod tytulem sekcji jest CZARNA — mocniejsza niz szara przy
           grupie i jasna przy wierszu. Trzystopniowa hierarchia z prototypu. */}
       <div className="flex items-center gap-3 border-b border-[var(--doc-ink)] pb-2.5">
         {editing ? (
-          <>
-            <DragHandle
-              ref={setActivatorNodeRef}
-              label={`${pl.editor.dragSection}: ${section.title}`}
-              {...attributes}
-              {...listeners}
-            />
-            <MoveButtons
-              label={section.title}
-              canMoveUp={index > 0}
-              canMoveDown={index < count - 1}
-              onMove={(direction) => onNudgeSection(section.id, direction)}
-            />
-          </>
+          <DragHandle
+            ref={setActivatorNodeRef}
+            label={`${pl.editor.dragSection}: ${section.title}`}
+            {...attributes}
+            {...listeners}
+          />
         ) : null}
 
         <InlineText
@@ -162,18 +146,15 @@ export const SectionBlock = memo(function SectionBlock({
         )}
       >
         <SortableContext items={looseItemIds} strategy={verticalListSortingStrategy}>
-          {section.items.map((item, itemIndex) => (
+          {section.items.map((item) => (
             <ItemRow
               key={item.id}
               item={item}
               editing={editing}
               currency={currency}
-              index={itemIndex}
-              count={section.items.length}
               onToggle={onToggleItem}
               onPatch={onPatchItem}
               onRemove={onRemoveItem}
-              onNudge={onNudgeItem}
             />
           ))}
         </SortableContext>
@@ -196,7 +177,7 @@ export const SectionBlock = memo(function SectionBlock({
         )}
       >
         <SortableContext items={groupIds} strategy={verticalListSortingStrategy}>
-          {section.groups.map((group, groupIndex) => (
+          {section.groups.map((group) => (
             <GroupBlock
               key={group.id}
               group={group}
@@ -205,8 +186,6 @@ export const SectionBlock = memo(function SectionBlock({
               currency={currency}
               vatRate={vatRate}
               pricesInclude={pricesInclude}
-              index={groupIndex}
-              count={section.groups.length}
               onRename={onRenameGroup}
               onRemove={onRemoveGroup}
               onToggleGroup={onToggleGroup}
@@ -214,8 +193,6 @@ export const SectionBlock = memo(function SectionBlock({
               onToggleItem={onToggleItem}
               onPatchItem={onPatchItem}
               onRemoveItem={onRemoveItem}
-              onNudgeItem={onNudgeItem}
-              onNudgeGroup={onNudgeGroup}
             />
           ))}
         </SortableContext>
