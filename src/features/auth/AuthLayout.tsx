@@ -25,8 +25,7 @@ export function AuthLayout({
         aria-hidden
         className="pointer-events-none absolute top-1/2 left-1/2 size-[46rem] -translate-x-1/2 -translate-y-1/2"
         style={{
-          background:
-            'radial-gradient(closest-side, var(--canvas-light), transparent)',
+          background: 'radial-gradient(closest-side, var(--canvas-light), transparent)',
         }}
       />
 

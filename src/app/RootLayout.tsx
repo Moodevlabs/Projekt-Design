@@ -25,6 +25,7 @@ export function RootLayout() {
     };
   }, [navigate]);
 
+  // Podpis renderujemy PRZED treścią, żeby panele rysowały się nad nim.
   return (
     <>
       <AppCredit />
