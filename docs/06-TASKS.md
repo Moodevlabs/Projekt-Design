@@ -146,9 +146,18 @@ Format: `- [ ] T-xx Nazwa` — czytaj: wymagane dokumenty → kryteria akceptacj
   > - **Klawiaturowa ścieżka a11y zostaje mimo usunięcia strzałek**: uchwyt jest przyciskiem dostępnym tabem, a `KeyboardSensor` obsługuje `Space` → strzałki → `Space`.
   > - **Ruch „w to samo miejsce" odsiewa `resolveDrop`, nie store.** Domena przy poprawnych id zawsze zwraca nowy dokument, więc store nie ma jak rozpoznać ruchu bez efektu — porównanie referencji chroni tylko przed nieznanym id.
 
-- [ ] **T-10 Biblioteka** (00-PRD §4.1)
+- [x] **T-10 Biblioteka** (00-PRD §4.1)
   Strona biblioteki, `LibraryPicker` w edytorze, „zapisz do biblioteki", „zapisz wszystko", kaskada zmian do otwartej wyceny (dialog).
   ✅ Scenariusz: edytuj cenę w bibliotece → pyta → aktualizuje pozycję w otwartej wycenie powiązaną `libraryItemId`.
+  > **Zrobione.** Strona biblioteki (zakładki Pozycje/Grupy, edycja w miejscu, kategorie, szukajka), `LibraryPicker` w edytorze (popover z szukajką, kategoria kontekstu na górze, druga zakładka z zestawami), „zapisz do biblioteki" przy pozycji i „zapisz wszystko" w menu paska, kaskada z dialogiem.
+  > **✅ ZWERYFIKOWANE:** 328 testów jednostkowych + 35 integracyjnych. Scenariusz z kryterium ma własny test na **prawdziwym store edytora** (`items/useCascadePrompt.test.ts`).
+  > **Na co uważać:**
+  > - **Biblioteka musi dać się otworzyć Z WNĘTRZA edytora** i dlatego jest też panelem bocznym (`LibrarySheet`), nie tylko stroną. Przejście na `/biblioteka` odmontowuje edytor, ten przy odmontowaniu **czyści wycenę ze store'u i wyłącza autozapis** — czyli nie ma już „otwartej wyceny", do której cokolwiek mogłoby skaskadować. Kaskada zbudowana wyłącznie pod stronę nigdy by nie zadziałała; w prototypie biblioteka też była modalem nad wyceną i to jest ten sam powód.
+  > - **Kaskadują tylko nazwa, opis i cena**, i to wyłącznie te **zmienione**. `enabled`, `qty` i kolejność należą do konkretnej wyceny — zmiana wpisu bibliotecznego nie ma prawa ich nadpisać.
+  > - **Najpierw zapis w bibliotece, potem pytanie.** Odmowa zostawia zmianę w bibliotece i nie dotyka wyceny; to dwa niezależne byty.
+  > - Pytanie pojawia się tylko, gdy zmieniło się kaskadujące pole **i** w otwartej wycenie są powiązane pozycje — inaczej dialog byłby czystym hałasem.
+  > - Wstawiona z biblioteki pozycja dostaje `libraryItemId` i to jest jedyny haczyk, po którym kaskada ją później odnajduje.
+  > - Kierunek zależności: **edytor wystawia operację, biblioteka o nią prosi** (`useLibraryCascade`). Odwrotny kierunek robił z tego w prototypie plątaninę.
 
 - [ ] **T-11 Szablony** (00-PRD §4.1)
   ✅ Zapisz jako szablon, nowa z szablonu, nadpisz, usuń.

@@ -1,7 +1,7 @@
-import { memo } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Trash2 } from 'lucide-react';
+import { Bookmark, Check, Trash2 } from 'lucide-react';
 import { InlineText } from './InlineText';
 import { InlineMoney } from './InlineMoney';
 import { ItemToggle } from './ItemToggle';
@@ -18,6 +18,7 @@ export interface ItemRowProps {
   onToggle: (itemId: string) => void;
   onPatch: (itemId: string, patch: Partial<Item>) => void;
   onRemove: (itemId: string) => void;
+  onSaveToLibrary: (item: Item) => void;
 }
 
 /**
@@ -37,6 +38,7 @@ export const ItemRow = memo(function ItemRow({
   onToggle,
   onPatch,
   onRemove,
+  onSaveToLibrary,
 }: ItemRowProps) {
   const isDiscount = item.kind === 'discount';
   const valueCents = Math.round(item.qty * item.unitPriceCents);
@@ -155,6 +157,10 @@ export const ItemRow = memo(function ItemRow({
       </div>
 
       {editing ? (
+        <SaveToLibraryButton item={item} onSave={onSaveToLibrary} />
+      ) : null}
+
+      {editing ? (
         <button
           type="button"
           aria-label={`${pl.editor.removeItem}: ${item.name || pl.editor.newItemName}`}
@@ -172,3 +178,44 @@ export const ItemRow = memo(function ItemRow({
     </div>
   );
 });
+
+/**
+ * „Zapisz do biblioteki" z krótkim potwierdzeniem: ikona zamienia się w ptaszka
+ * na 900 ms i przycisk jest wtedy nieaktywny. Mikrodetal wzięty z prototypu —
+ * daje pewność, że kliknięcie zadziałało, bez wyskakującego komunikatu.
+ */
+function SaveToLibraryButton({ item, onSave }: { item: Item; onSave: (item: Item) => void }) {
+  const [saved, setSaved] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => (timer.current ? clearTimeout(timer.current) : undefined), []);
+
+  const label = saved ? pl.editor.savedToLibrary : pl.editor.saveToLibrary;
+  const disabled = saved || item.name.trim().length === 0;
+
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      aria-label={`${label}: ${item.name || pl.editor.newItemName}`}
+      onClick={() => {
+        onSave(item);
+        setSaved(true);
+        timer.current = setTimeout(() => setSaved(false), 900);
+      }}
+      className={cn(
+        'flex size-[22px] shrink-0 items-center justify-center rounded-full transition-colors',
+        saved
+          ? 'text-[var(--doc-sage)]'
+          : 'text-[var(--doc-ink-soft)] hover:bg-[var(--doc-sage-light)] hover:text-[var(--doc-sage)]',
+        item.name.trim().length === 0 && !saved && 'opacity-30',
+      )}
+    >
+      {saved ? (
+        <Check className="size-[13px]" aria-hidden />
+      ) : (
+        <Bookmark className="size-[13px]" aria-hidden />
+      )}
+    </button>
+  );
+}

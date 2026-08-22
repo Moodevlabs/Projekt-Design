@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 import { AlertTriangle, Plus } from 'lucide-react';
+import { toast } from 'sonner';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useEditorStore } from './editor.store';
 import { QuoteDndProvider } from './dnd/QuoteDndProvider';
@@ -12,12 +13,14 @@ import { QuoteHeader } from './components/QuoteHeader';
 import { SectionBlock } from './components/SectionBlock';
 import { TotalsCard } from './components/TotalsCard';
 import { AddLink } from './components/AddLink';
+import { LibrarySheet } from './components/LibrarySheet';
 import { useCreateQuote, useQuote } from '@/data/queries/useQuotes';
 import { EmptyState } from '@/components/shared';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { newItem } from '@/domain/quote';
 import type { Item } from '@/domain/quote';
+import { useSaveItemsToLibrary } from '@/data/queries/useLibrary';
 import { routes } from '@/app/routes';
 import { pl } from '@/i18n/pl';
 
@@ -175,6 +178,10 @@ function EditorSurface({
   const updateItem = useEditorStore((state) => state.updateItem);
   const toggleItem = useEditorStore((state) => state.toggleItem);
   const removeItem = useEditorStore((state) => state.removeItem);
+  const insertItems = useEditorStore((state) => state.insertItems);
+  const insertGroup = useEditorStore((state) => state.insertGroup);
+  const saveToLibrary = useSaveItemsToLibrary();
+  const [libraryOpen, setLibraryOpen] = useState(false);
 
   /**
    * `addItem` w store zawsze dodaje zwykla pozycje; dla rabatu poprawiamy `kind`
@@ -199,6 +206,54 @@ function EditorSurface({
 
   const sectionIds = useStableIds(body?.sections ?? []);
 
+  /**
+   * „Zapisz do biblioteki" dla pojedynczej pozycji. Kategorię zostawiamy
+   * repozytorium (wpada domyślna) — zgadywanie jej z nazwy grupy dawałoby
+   * śmieciowe kategorie przy pierwszym lepszym „Nowa grupa".
+   */
+  const handleSaveItemToLibrary = useCallback(
+    (item: Item) => {
+      saveToLibrary.mutate(
+        [
+          {
+            name: item.name,
+            description: item.description,
+            kind: item.kind,
+            unitPriceCents: item.unitPriceCents,
+          },
+        ],
+        { onError: (error) => toast.error(error.message) },
+      );
+    },
+    [saveToLibrary],
+  );
+
+  /** „Zapisz wszystko z tej wyceny do biblioteki" (00-PRD §4.1). */
+  const handleSaveAllToLibrary = useCallback(() => {
+    const current = useEditorStore.getState().body;
+    if (!current) return;
+
+    const items = current.sections
+      .flatMap((section) => [...section.items, ...section.groups.flatMap((group) => group.items)])
+      .filter((item) => item.name.trim().length > 0)
+      .map((item) => ({
+        name: item.name,
+        description: item.description,
+        kind: item.kind,
+        unitPriceCents: item.unitPriceCents,
+      }));
+
+    if (items.length === 0) {
+      toast.info(pl.editor.saveAllToLibraryEmpty);
+      return;
+    }
+
+    saveToLibrary.mutate(items, {
+      onSuccess: (saved) => toast.success(pl.editor.saveAllToLibraryDone(saved.length)),
+      onError: (error) => toast.error(error.message),
+    });
+  }, [saveToLibrary]);
+
   if (!body) return <EditorSkeleton />;
 
   const editing = mode === 'edit';
@@ -217,7 +272,11 @@ function EditorSurface({
           onModeChange={setMode}
           onRetry={onRetry}
           onReload={onReload}
+          onSaveAllToLibrary={handleSaveAllToLibrary}
+          onOpenLibrary={() => setLibraryOpen(true)}
         />
+
+        <LibrarySheet open={libraryOpen} onOpenChange={setLibraryOpen} />
 
         {saveState === 'conflict' ? (
           <Alert variant="destructive" className="mx-7 mt-4 w-auto">
@@ -256,6 +315,9 @@ function EditorSurface({
                       onToggleItem={toggleItem}
                       onPatchItem={updateItem}
                       onRemoveItem={removeItem}
+                    onInsertItems={insertItems}
+                    onInsertGroup={insertGroup}
+                    onSaveItemToLibrary={handleSaveItemToLibrary}
                     />
                   ))}
                 </SortableContext>

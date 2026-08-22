@@ -38,6 +38,7 @@ export const pl = {
     all: 'Wszystkie',
     logout: 'Wyloguj',
     soon: 'Wkrótce',
+    more: 'Więcej',
   },
   status: {
     draft: 'Szkic',
@@ -91,7 +92,19 @@ export const pl = {
     addGroup: 'Dodaj grupę',
     addItem: 'Dodaj pozycję',
     fromLibrary: 'Z biblioteki',
+    fromLibraryGroup: 'Grupa z biblioteki',
     saveToLibrary: 'Zapisz do biblioteki',
+    savedToLibrary: 'Zapisano w bibliotece',
+    saveAllToLibrary: 'Zapisz wszystko do biblioteki',
+    saveAllToLibraryDone: (count: number) =>
+      count === 1 ? 'Zapisano 1 pozycję w bibliotece' : `Zapisano ${count} pozycji w bibliotece`,
+    saveAllToLibraryEmpty: 'Nie ma czego zapisać — nazwij najpierw pozycje.',
+    pickerSearch: 'Szukaj w bibliotece',
+    pickerEmpty: 'Nic nie pasuje',
+    pickerLibraryEmpty: 'Biblioteka jest pusta',
+    pickerItemsTab: 'Pozycje',
+    pickerGroupsTab: 'Grupy',
+    pickerGroupItems: (count: number) => `${count} poz.`,
     summary: 'Podsumowanie',
     itemsTotal: 'Suma pozycji',
     discounts: 'Rabaty',
@@ -199,11 +212,83 @@ export const pl = {
   },
   library: {
     title: 'Biblioteka',
+    sheetHint: 'Zmiany cen i nazw możesz od razu przenieść na otwartą wycenę.',
     items: 'Pozycje',
     groups: 'Grupy',
     category: 'Kategoria',
     emptyTitle: 'Biblioteka jest pusta',
     emptyDescription: 'Dodaj pozycje, których używasz najczęściej — wstawisz je do wyceny jednym kliknięciem.',
+
+    // Zakładki i filtry.
+    tabsLabel: 'Sekcje biblioteki',
+    searchPlaceholder: 'Szukaj po nazwie lub opisie',
+    clearSearch: 'Wyczyść wyszukiwanie',
+    filterByCategory: 'Filtruj po kategorii',
+    clearFilters: 'Wyczyść filtry',
+    loadError: 'Nie udało się wczytać biblioteki.',
+    saveError: 'Nie udało się zapisać zmian w bibliotece.',
+
+    // Pozycje.
+    addItem: 'Dodaj pozycję',
+    newItemName: 'Nowa pozycja',
+    itemNameLabel: 'Nazwa pozycji',
+    itemDescriptionLabel: 'Opis pozycji',
+    itemDescriptionPlaceholder: 'Opis (opcjonalny)',
+    itemCategoryLabel: 'Kategoria pozycji',
+    itemPriceLabel: 'Cena pozycji',
+    itemKindLabel: 'Rodzaj pozycji',
+    kindItem: 'Pozycja',
+    kindDiscount: 'Rabat',
+    saveItem: (name: string) => `Zapisz pozycję: ${name}`,
+    cancelItem: (name: string) => `Odrzuć zmiany w pozycji: ${name}`,
+    deleteItem: (name: string) => `Usuń pozycję: ${name}`,
+    deleteItemTitle: 'Usunąć pozycję z biblioteki?',
+    deleteItemDescription: (name: string) =>
+      `„${name}” zniknie z biblioteki. Wyceny, w których już jej użyto, zostają nietknięte.`,
+    itemsEmptyTitle: 'Biblioteka pozycji jest pusta',
+    itemsEmptyDescription:
+      'Dodaj pierwszą pozycję — nazwę, opis i cenę wstawisz potem do wyceny jednym kliknięciem.',
+    itemsNoResultsTitle: 'Brak pozycji dla tych filtrów',
+    itemsNoResultsDescription: 'Zmień kategorię albo wyczyść wyszukiwanie.',
+
+    // Grupy.
+    addGroup: 'Dodaj grupę',
+    newGroupName: 'Nowa grupa',
+    groupNameLabel: 'Nazwa grupy',
+    saveGroup: (name: string) => `Zapisz grupę: ${name}`,
+    cancelGroup: (name: string) => `Odrzuć zmiany w grupie: ${name}`,
+    deleteGroup: (name: string) => `Usuń grupę: ${name}`,
+    deleteGroupTitle: 'Usunąć grupę z biblioteki?',
+    deleteGroupDescription: (name: string) =>
+      `„${name}” zniknie z biblioteki. Wyceny zbudowane z tej grupy zostają nietknięte.`,
+    groupTotal: 'Suma netto',
+    groupItemsEmpty: 'Ta grupa nie ma jeszcze pozycji.',
+    showGroupItems: (name: string) => `Pokaż pozycje grupy: ${name}`,
+    hideGroupItems: (name: string) => `Ukryj pozycje grupy: ${name}`,
+    groupsEmptyTitle: 'Nie masz jeszcze żadnej grupy',
+    groupsEmptyDescription:
+      'Grupa to gotowy zestaw pozycji — wstawisz nim do wyceny cały etap prac naraz.',
+    /** Mianownik liczby mnogiej: 1 pozycja / 2 pozycje / 5 pozycji. */
+    itemsCount: (count: number) => {
+      if (count === 1) return '1 pozycja';
+      const mod10 = count % 10;
+      const mod100 = count % 100;
+      const few = mod10 >= 2 && mod10 <= 4 && !(mod100 >= 12 && mod100 <= 14);
+      return `${count} ${few ? 'pozycje' : 'pozycji'}`;
+    },
+
+    // Kaskada zmian do otwartej wyceny (T-10).
+    cascadeTitle: 'Zaktualizować otwartą wycenę?',
+    /** Biernik liczby mnogiej: 1 pozycję / 2 pozycje / 5 pozycji. */
+    cascadeDescription: (count: number, name: string) => {
+      const mod10 = count % 10;
+      const mod100 = count % 100;
+      const few = mod10 >= 2 && mod10 <= 4 && !(mod100 >= 12 && mod100 <= 14);
+      const phrase = count === 1 ? '1 pozycję' : `${count} ${few ? 'pozycje' : 'pozycji'}`;
+      return `W otwartej wycenie ${phrase} pochodzi z „${name}”. Przepiszemy tam nazwę, opis i cenę — ilości i przełączniki TAK/NIE zostaną nietknięte.`;
+    },
+    cascadeConfirm: 'Zaktualizuj wycenę',
+    cascadeDismiss: 'Zostaw wycenę bez zmian',
   },
   templates: {
     title: 'Szablony',

@@ -19,6 +19,25 @@ import {
 } from '@/domain/quote';
 import type { Quote } from '@/data/repos/quotes.repo';
 
+/**
+ * Pola, które kaskadują z biblioteki do wyceny. Świadomie WĄSKI zestaw:
+ * `enabled`, `qty` i kolejność należą do konkretnej wyceny, nie do biblioteki,
+ * więc edycja wpisu bibliotecznego nie ma prawa ich nadpisać.
+ */
+export type LibraryCascadePatch = Partial<Pick<Item, 'name' | 'description' | 'unitPriceCents'>>;
+
+/**
+ * Ile pozycji dokumentu pochodzi z danej pozycji biblioteki.
+ * Czysta funkcja — UI pyta o to PRZED pokazaniem pytania o kaskadę, żeby nie
+ * zawracać głowy dialogiem, gdy nie ma czego aktualizować.
+ */
+export function countLinkedItems(body: QuoteBody | null, libraryItemId: string): number {
+  if (!body) return 0;
+  return itemLists(body)
+    .flat()
+    .filter((item) => item.libraryItemId === libraryItemId).length;
+}
+
 /** Stan wskaznika zapisu przy numerze wyceny (05-UI §3). */
 export type SaveState = 'idle' | 'dirty' | 'saving' | 'saved' | 'error' | 'conflict';
 
@@ -83,6 +102,20 @@ export interface EditorState {
   updateItem: (itemId: string, patch: Partial<Item>) => void;
   toggleItem: (itemId: string) => void;
   removeItem: (itemId: string) => void;
+
+  /** Wstawia gotowe pozycje (np. z biblioteki) na koniec wskazanej listy. */
+  insertItems: (sectionId: string, groupId: string | null, items: Item[]) => void;
+  /** Wstawia gotową grupę (np. zestaw z biblioteki) na koniec sekcji. */
+  insertGroup: (sectionId: string, group: Group) => void;
+
+  /**
+   * Kaskada z biblioteki (T-10): przepisuje zmienione pola na WSZYSTKIE pozycje
+   * otwartej wyceny powiązane daną pozycją biblioteczną.
+   *
+   * Jedna akcja, nie pętla po `updateItem` — inaczej w autozapisie i w historii
+   * zmian zrobiłoby się z tego kilkanaście osobnych operacji.
+   */
+  applyLibraryUpdate: (libraryItemId: string, patch: LibraryCascadePatch) => void;
 
   // --- kolejność (T-09). Zmiana kolejności idzie wyłącznie przeciąganiem. ---
   moveItem: (args: MoveItemArgs) => void;
@@ -332,6 +365,47 @@ export const useEditorStore = create<EditorState>()(
             return;
           }
         }
+      }),
+
+    insertItems: (sectionId, groupId, items) =>
+      set((state) => {
+        if (!state.body || items.length === 0) return;
+        const section = findSection(state.body, sectionId);
+        if (!section) return;
+
+        const target = groupId
+          ? section.groups.find((group) => group.id === groupId)?.items
+          : section.items;
+        if (!target) return;
+
+        target.push(...items);
+        state.saveState = 'dirty';
+      }),
+
+    insertGroup: (sectionId, group) =>
+      set((state) => {
+        if (!state.body) return;
+        const section = findSection(state.body, sectionId);
+        if (!section) return;
+
+        section.groups.push(group);
+        state.saveState = 'dirty';
+      }),
+
+    applyLibraryUpdate: (libraryItemId, patch) =>
+      set((state) => {
+        if (!state.body) return;
+
+        let changed = 0;
+        for (const list of itemLists(state.body)) {
+          for (const item of list) {
+            if (item.libraryItemId !== libraryItemId) continue;
+            Object.assign(item, patch);
+            changed += 1;
+          }
+        }
+
+        if (changed > 0) state.saveState = 'dirty';
       }),
 
     moveItem: (args) => set(reorderWith((body) => moveItemIn(body, args))),

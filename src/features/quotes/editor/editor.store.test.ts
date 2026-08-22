@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { useEditorStore } from './editor.store';
+import { countLinkedItems, useEditorStore } from './editor.store';
 import { newGroup, newItem, newQuoteBody, newSection, type QuoteBody } from '@/domain/quote';
 import type { Quote } from '@/data/repos/quotes.repo';
 
@@ -367,5 +367,67 @@ describe('editor.store — kolejność', () => {
         toIndex: 0,
       });
     }).not.toThrow();
+  });
+});
+
+describe('editor.store — kaskada z biblioteki', () => {
+  const LIB_ID = 'lib-1';
+
+  beforeEach(() => {
+    // Dwie pozycje z tej samej pozycji bibliotecznej + jedna niepowiązana.
+    const body = makeBody();
+    const group = body.sections[0]?.groups[0];
+    const loose = body.sections[0]?.items[0];
+    if (!group || !loose) throw new Error('brak danych');
+    group.items[0]!.libraryItemId = LIB_ID;
+    loose.libraryItemId = LIB_ID;
+
+    useEditorStore.getState().reset();
+    useEditorStore.getState().load(makeQuote(body));
+  });
+
+  it('liczy pozycje powiązane z biblioteką', () => {
+    expect(countLinkedItems(store().body, LIB_ID)).toBe(2);
+    expect(countLinkedItems(store().body, 'inne-id')).toBe(0);
+    expect(countLinkedItems(null, LIB_ID)).toBe(0);
+  });
+
+  it('aktualizuje wszystkie powiązane pozycje naraz', () => {
+    store().applyLibraryUpdate(LIB_ID, { unitPriceCents: 99_900, name: 'Nowa nazwa' });
+
+    const body = store().body;
+    expect(body?.sections[0]?.items[0]?.unitPriceCents).toBe(99_900);
+    expect(body?.sections[0]?.items[0]?.name).toBe('Nowa nazwa');
+    expect(body?.sections[0]?.groups[0]?.items[0]?.unitPriceCents).toBe(99_900);
+  });
+
+  it('nie rusza pozycji niepowiązanych', () => {
+    const przed = store().body?.sections[0]?.groups[0]?.items[1]?.unitPriceCents;
+    store().applyLibraryUpdate(LIB_ID, { unitPriceCents: 99_900 });
+    expect(store().body?.sections[0]?.groups[0]?.items[1]?.unitPriceCents).toBe(przed);
+  });
+
+  it('NIE nadpisuje stanu TAK/NIE ani ilości — to należy do wyceny, nie do biblioteki', () => {
+    const itemId = store().body?.sections[0]?.items[0]?.id;
+    if (!itemId) throw new Error('brak pozycji');
+    store().updateItem(itemId, { enabled: false, qty: 3 });
+
+    store().applyLibraryUpdate(LIB_ID, { unitPriceCents: 1000 });
+
+    const item = store().body?.sections[0]?.items[0];
+    expect(item?.enabled).toBe(false);
+    expect(item?.qty).toBe(3);
+    expect(item?.unitPriceCents).toBe(1000);
+  });
+
+  it('brak powiązanych pozycji nie brudzi dokumentu', () => {
+    expect(store().saveState).toBe('idle');
+    store().applyLibraryUpdate('nie-ma-takiej', { unitPriceCents: 1 });
+    expect(store().saveState).toBe('idle');
+  });
+
+  it('kaskada brudzi dokument, żeby autozapis ją utrwalił', () => {
+    store().applyLibraryUpdate(LIB_ID, { unitPriceCents: 1 });
+    expect(store().saveState).toBe('dirty');
   });
 });

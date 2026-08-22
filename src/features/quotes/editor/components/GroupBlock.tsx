@@ -7,6 +7,7 @@ import { InlineText } from './InlineText';
 import { ItemRow } from './ItemRow';
 import { ItemToggle } from './ItemToggle';
 import { AddLink } from './AddLink';
+import { LibraryPicker } from './LibraryPicker';
 import { DragHandle } from './DragHandle';
 import { useStableIds } from '../dnd/useStableIds';
 import { ConfirmDialog } from '@/components/shared';
@@ -34,6 +35,8 @@ export interface GroupBlockProps {
   onToggleItem: (itemId: string) => void;
   onPatchItem: (itemId: string, patch: Partial<Item>) => void;
   onRemoveItem: (itemId: string) => void;
+  onInsertItems: (sectionId: string, groupId: string | null, items: Item[]) => void;
+  onSaveItemToLibrary: (item: Item) => void;
 }
 
 export const GroupBlock = memo(function GroupBlock({
@@ -50,6 +53,8 @@ export const GroupBlock = memo(function GroupBlock({
   onToggleItem,
   onPatchItem,
   onRemoveItem,
+  onInsertItems,
+  onSaveItemToLibrary,
 }: GroupBlockProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const totals = calcGroupTotals(group, { vatRate, pricesInclude });
@@ -155,6 +160,7 @@ export const GroupBlock = memo(function GroupBlock({
               onToggle={onToggleItem}
               onPatch={onPatchItem}
               onRemove={onRemoveItem}
+              onSaveToLibrary={onSaveItemToLibrary}
             />
           ))}
         </SortableContext>
@@ -168,6 +174,10 @@ export const GroupBlock = memo(function GroupBlock({
           <AddLink onClick={() => onAddItem(sectionId, group.id, 'discount')}>
             {pl.editor.addDiscount}
           </AddLink>
+          <LibraryPicker
+            priorityCategory={group.name}
+            onPickItem={(item) => onInsertItems(sectionId, group.id, [item])}
+          />
         </div>
       ) : null}
 

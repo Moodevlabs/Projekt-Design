@@ -7,11 +7,13 @@ import { InlineText } from './InlineText';
 import { ItemRow } from './ItemRow';
 import { GroupBlock } from './GroupBlock';
 import { AddLink } from './AddLink';
+import { LibraryPicker } from './LibraryPicker';
 import { DragHandle } from './DragHandle';
 import { useStableIds } from '../dnd/useStableIds';
 import { ConfirmDialog } from '@/components/shared';
 import {
   calcSectionTotals,
+  type Group,
   type Item,
   type PricesInclude,
   type Section,
@@ -36,6 +38,9 @@ export interface SectionBlockProps {
   onToggleItem: (itemId: string) => void;
   onPatchItem: (itemId: string, patch: Partial<Item>) => void;
   onRemoveItem: (itemId: string) => void;
+  onInsertItems: (sectionId: string, groupId: string | null, items: Item[]) => void;
+  onInsertGroup: (sectionId: string, group: Group) => void;
+  onSaveItemToLibrary: (item: Item) => void;
 }
 
 export const SectionBlock = memo(function SectionBlock({
@@ -54,6 +59,9 @@ export const SectionBlock = memo(function SectionBlock({
   onToggleItem,
   onPatchItem,
   onRemoveItem,
+  onInsertItems,
+  onInsertGroup,
+  onSaveItemToLibrary,
 }: SectionBlockProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const totals = calcSectionTotals(section, { vatRate, pricesInclude });
@@ -155,6 +163,7 @@ export const SectionBlock = memo(function SectionBlock({
               onToggle={onToggleItem}
               onPatch={onPatchItem}
               onRemove={onRemoveItem}
+              onSaveToLibrary={onSaveItemToLibrary}
             />
           ))}
         </SortableContext>
@@ -166,6 +175,11 @@ export const SectionBlock = memo(function SectionBlock({
           <AddLink onClick={() => onAddItem(section.id, null, 'discount')}>
             {pl.editor.addDiscount}
           </AddLink>
+          <LibraryPicker
+            priorityCategory={section.title}
+            onPickItem={(item) => onInsertItems(section.id, null, [item])}
+            onPickGroup={(group) => onInsertGroup(section.id, group)}
+          />
         </div>
       ) : null}
 
@@ -193,6 +207,8 @@ export const SectionBlock = memo(function SectionBlock({
               onToggleItem={onToggleItem}
               onPatchItem={onPatchItem}
               onRemoveItem={onRemoveItem}
+              onInsertItems={onInsertItems}
+              onSaveItemToLibrary={onSaveItemToLibrary}
             />
           ))}
         </SortableContext>

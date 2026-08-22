@@ -1,9 +1,15 @@
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Eye, Pencil } from 'lucide-react';
+import { ArrowLeft, Eye, MoreHorizontal, Pencil } from 'lucide-react';
 import { InlineText } from './InlineText';
 import { SaveIndicator } from './SaveIndicator';
 import { StatusMark } from '@/components/shared';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import type { EditorMode, SaveState } from '../editor.store';
 import type { QuoteStatus } from '@/domain/quote';
 import { routes } from '@/app/routes';
@@ -20,6 +26,8 @@ export function EditorTopbar({
   onModeChange,
   onRetry,
   onReload,
+  onSaveAllToLibrary,
+  onOpenLibrary,
 }: {
   number: string | null;
   status: QuoteStatus;
@@ -30,6 +38,8 @@ export function EditorTopbar({
   onModeChange: (next: EditorMode) => void;
   onRetry: () => void;
   onReload: () => void;
+  onSaveAllToLibrary: () => void;
+  onOpenLibrary: () => void;
 }) {
   return (
     <div className="glass relative z-10 flex h-[68px] shrink-0 items-center gap-4 px-7">
@@ -57,7 +67,8 @@ export function EditorTopbar({
         />
       </div>
 
-      <div className="ml-auto flex items-center rounded-[var(--radius-pill)] border border-white/60 bg-white/45 p-0.5">
+      <div className="ml-auto flex items-center gap-2">
+      <div className="flex items-center rounded-[var(--radius-pill)] border border-white/60 bg-white/45 p-0.5">
         {(['edit', 'preview'] as const).map((value) => {
           const Icon = value === 'edit' ? Pencil : Eye;
           const label = value === 'edit' ? pl.editor.edit : pl.editor.preview;
@@ -79,6 +90,21 @@ export function EditorTopbar({
             </button>
           );
         })}
+      </div>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" aria-label={pl.common.more} className="size-9">
+              <MoreHorizontal className="size-4" aria-hidden />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-64">
+            <DropdownMenuItem onSelect={onOpenLibrary}>{pl.library.title}</DropdownMenuItem>
+            <DropdownMenuItem onSelect={onSaveAllToLibrary}>
+              {pl.editor.saveAllToLibrary}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
