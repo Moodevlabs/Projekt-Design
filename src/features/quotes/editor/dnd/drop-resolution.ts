@@ -1,10 +1,16 @@
 import type { MoveGroupArgs, MoveItemArgs, MoveSectionArgs, QuoteBody } from '@/domain/quote';
 
-/** Co jest przeciągane. Trafia do `data` elementu w @dnd-kit. */
+/**
+ * Co jest przeciągane. Trafia do `data` elementu w @dnd-kit.
+ *
+ * `label` nie bierze udziału w rozstrzyganiu celu — jest wyłącznie po to,
+ * żeby podgląd pod kursorem i komunikat dla czytnika ekranu mówiły, CO się
+ * właśnie przenosi, a nie tylko jakiego jest rodzaju.
+ */
 export type DragData =
-  | { kind: 'item'; itemId: string }
-  | { kind: 'group'; groupId: string }
-  | { kind: 'section'; sectionId: string };
+  | { kind: 'item'; itemId: string; label?: string }
+  | { kind: 'group'; groupId: string; label?: string }
+  | { kind: 'section'; sectionId: string; label?: string };
 
 /**
  * Nad czym można upuścić. Poza samymi elementami są też **puste pojemniki** —

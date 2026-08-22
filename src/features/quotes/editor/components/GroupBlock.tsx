@@ -77,7 +77,11 @@ export const GroupBlock = memo(function GroupBlock({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: group.id, data: { kind: 'group', groupId: group.id }, disabled: !editing });
+  } = useSortable({
+    id: group.id,
+    data: { kind: 'group', groupId: group.id, label: group.name },
+    disabled: !editing,
+  });
 
   // Osobny cel upuszczenia na LISTĘ pozycji — bez niego nie dałoby się
   // przenieść pozycji do pustej grupy, bo nie byłoby czego dotknąć.

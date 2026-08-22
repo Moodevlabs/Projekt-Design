@@ -81,7 +81,7 @@ export const SectionBlock = memo(function SectionBlock({
     isDragging,
   } = useSortable({
     id: section.id,
-    data: { kind: 'section', sectionId: section.id },
+    data: { kind: 'section', sectionId: section.id, label: section.title },
     disabled: !editing,
   });
 

@@ -141,6 +141,7 @@ Format: `- [ ] T-xx Nazwa` — czytaj: wymagane dokumenty → kryteria akceptacj
   > - **Ruch bez efektu nie brudzi dokumentu** — domena zwraca to samo wejście, store porównuje referencje. Bez tego dojechanie strzałką do krańca listy budziłoby autozapis.
   > - Puste grupy i sekcje mają **własne cele upuszczenia** (`item-list`, `section-groups`) — bez nich nie dałoby się niczego do nich przenieść, bo nie byłoby czego dotknąć.
   > - Uchwyt przeciągania jest **przyciskiem z etykietą**, nie ikoną: sensor klawiatury potrzebuje czegoś, na co da się przejść tabem.
+  > - **Podgląd pod kursorem musi być ciemny.** Pierwsza wersja była biała (`bg-surface`) i na białej kartce wyceny po prostu znikała — a to jedyna informacja zwrotna w trakcie przeciągania. Pokazuje też **nazwę** przenoszonego elementu, nie sam jego rodzaj.
   > - Przyciski ▲▼ to **równorzędna ścieżka**, nie ozdoba — przeciąganie bywa niewykonalne (trackpad, ograniczona motoryka).
 
 - [ ] **T-10 Biblioteka** (00-PRD §4.1)

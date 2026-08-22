@@ -17,11 +17,16 @@ import { resolveDrop, type DragData, type DropData } from './drop-resolution';
 import { useEditorStore } from '../editor.store';
 import { pl } from '@/i18n/pl';
 
-/** Etykieta przenoszonego elementu — używana w komunikatach dla czytników. */
-function labelOf(data: DragData): string {
+/** Rodzaj przenoszonego elementu — do komunikatów dla czytników ekranu. */
+function kindLabel(data: DragData): string {
   if (data.kind === 'item') return pl.editor.item;
   if (data.kind === 'group') return pl.editor.group;
   return pl.editor.section;
+}
+
+/** Nazwa własna przenoszonego elementu, gdy jest; inaczej sam rodzaj. */
+function nameLabel(data: DragData): string {
+  return data.label?.trim() || kindLabel(data);
 }
 
 /**
@@ -82,14 +87,14 @@ export function QuoteDndProvider({
 
   const announcements: Announcements = {
     onDragStart: ({ active }) =>
-      pl.editor.dnd.start(labelOf(active.data.current as DragData)),
+      pl.editor.dnd.start(nameLabel(active.data.current as DragData)),
     onDragOver: ({ active, over }) =>
       over
-        ? pl.editor.dnd.over(labelOf(active.data.current as DragData), String(over.id))
+        ? pl.editor.dnd.over(nameLabel(active.data.current as DragData), String(over.id))
         : undefined,
-    onDragEnd: ({ active }) => pl.editor.dnd.dropped(labelOf(active.data.current as DragData)),
+    onDragEnd: ({ active }) => pl.editor.dnd.dropped(nameLabel(active.data.current as DragData)),
     onDragCancel: ({ active }) =>
-      pl.editor.dnd.cancelled(labelOf(active.data.current as DragData)),
+      pl.editor.dnd.cancelled(nameLabel(active.data.current as DragData)),
   };
 
   if (!enabled) return <>{children}</>;
@@ -105,10 +110,22 @@ export function QuoteDndProvider({
       onDragCancel={() => setDragged(null)}
     >
       {children}
+      {/*
+        Podgląd pod kursorem MUSI być ciemny. Wycena jest białą kartką, więc
+        jasna plakietka z włosem obramowania po prostu na niej znika — a to
+        jedyna rzecz, która w trakcie przeciągania mówi, co się dzieje.
+        Pokazujemy nazwę elementu, nie sam jego rodzaj.
+      */}
       <DragOverlay dropAnimation={null}>
         {dragged ? (
-          <div className="bg-surface border-hair rounded-[var(--radius-control)] border px-3 py-2 text-xs font-medium shadow-[var(--glass-shadow)]">
-            {labelOf(dragged)}
+          <div
+            data-testid="drag-preview"
+            className="bg-cta text-cta-fg flex max-w-[280px] items-center gap-2 rounded-[var(--radius-pill)] py-2 pr-4 pl-3 text-xs font-medium shadow-[0_12px_28px_-8px_rgba(20,22,28,0.6)]"
+          >
+            <span aria-hidden className="opacity-60">
+              {kindLabel(dragged)}
+            </span>
+            <span className="truncate">{nameLabel(dragged)}</span>
           </div>
         ) : null}
       </DragOverlay>

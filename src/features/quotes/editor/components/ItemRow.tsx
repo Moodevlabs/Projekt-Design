@@ -59,7 +59,7 @@ export const ItemRow = memo(function ItemRow({
     isDragging,
   } = useSortable({
     id: item.id,
-    data: { kind: 'item', itemId: item.id },
+    data: { kind: 'item', itemId: item.id, label: item.name },
     disabled: !editing,
   });
 
