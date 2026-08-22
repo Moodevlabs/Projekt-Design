@@ -181,10 +181,17 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
 >
 > Koszt tej decyzji: pierwszy PDF powstaje później. Uznałem to za tańsze niż przepisywanie — jeśli wolisz mieć PDF wcześniej, powiedz, wtedy T-13 idzie zaraz po T-30 w wersji „bez pomieszczeń", z jawnym długiem do spłaty.
 
-- [ ] **T-30 Wersjonowanie `body` + szkielet migracji** (F1.1 — część)
+- [x] **T-30 Wersjonowanie `body` + szkielet migracji** (F1.1 — część)
   `bodyVersion` w `QuoteBodySchema` (**dziś tego pola nie ma — brak pola == v1**, migracja musi to rozpoznawać, a nie zakładać `bodyVersion: 1`). `domain/quote/migrate.ts` z `migrateBody(raw) → v2`; wpięcie przy odczycie w `quotes.repo` (miejsce gotowe — jest `safeParse` + `bodyError`) i **w `templates.repo`, który trzyma taki sam `body`**. Zapis zawsze w najnowszej wersji.
   ✅ Stara wycena i stary szablon z bazy wczytują się bez zmiany totali; `bodyError` dalej łapie faktycznie uszkodzony JSON.
   ⚠️ Snapshoty w `library_groups.items` to **osobny** schemat (`LibraryItemSnapshotSchema`) — ma własną ścieżkę zgodności (`qty` dodano z `default(1)`), nie podpinaj go pod `migrateBody`.
+  > **Zrobione.** `domain/quote/migrate.ts`: `CURRENT_BODY_VERSION`, rejestr `MIGRATIONS`, `runMigrations`, `migrateBody`, `readBodyVersion`. `bodyVersion` w schemacie jako `z.literal(CURRENT).default(CURRENT)`, `newQuoteBody` stempluje nowe dokumenty. 376 testów jednostkowych + 37 integracyjnych.
+  > **Na co uważać:**
+  > - **`CURRENT_BODY_VERSION` to na razie 1, a rejestr kroków jest pusty** — to celowe. Mechanizm wszedł przed pierwszą zmianą modelu, żeby dokumenty zapisywane od teraz miały stempel. **T-31 dopisuje krok `1:` do `MIGRATIONS` i podbija stałą na 2** — nic poza tym.
+  > - **Migracja wpięta w `parseQuoteBody`, a nie w repozytoria.** Okazało się, że to jedno wejście dla `quotes.body` **i** `templates.body`, więc oba dostały migrację za darmo. Nie dubluj jej w repo.
+  > - **Dokument z nowszej wersji jest odrzucany**, nie okrajany po cichu — ląduje w `bodyError` z „Zaktualizuj aplikację". Bez tego starsza apka zapisałaby z powrotem dokument bez pól, których nie rozumie, i skasowała dane.
+  > - `bodyVersion` jest **literałem**, nie luźną liczbą: pominięcie migracji staje się wtedy natychmiastowym błędem walidacji zamiast cichego zapisu.
+  > - Mechanizm ma testy na **sztucznym rejestrze** (`runMigrations` przyjmuje rejestr parametrem), więc dopisanie prawdziwego kroku w T-31 ich nie wywróci.
 
 - [ ] **T-31 Domena: pomieszczenia i reguły cenowe** (F1.1)
   `Room`, `PricingRule` (`flat` / `per_room` / `per_frame`), rozszerzenia `Item`/`Section`/`QuoteBody`, `calcItemCents(item, rooms)`, przepięcie `calcQuoteTotals`.

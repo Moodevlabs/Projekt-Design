@@ -1,4 +1,5 @@
 import { newId } from '../id';
+import { CURRENT_BODY_VERSION } from './migrate';
 import type { Group, Item, QuoteBody, Section } from './schema';
 
 /** Fabryki obiektów domenowych — każdy nowy element dostaje własne `id`. */
@@ -42,6 +43,9 @@ export function newSection(partial: Partial<Section> = {}): Section {
 /** Nowy, pusty dokument wyceny. */
 export function newQuoteBody(partial: Partial<QuoteBody> = {}): QuoteBody {
   return {
+    // Nowy dokument rodzi się w bieżącej wersji modelu — bez tego trafiłby
+    // do bazy bez stempla i przy odczycie udawał dokument sprzed wersjonowania.
+    bodyVersion: CURRENT_BODY_VERSION,
     title: 'Wycena',
     subtitle: '',
     intro: '',

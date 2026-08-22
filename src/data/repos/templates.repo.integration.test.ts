@@ -13,7 +13,7 @@ import {
   overwriteTemplate,
   templateSummary,
 } from './templates.repo';
-import { newGroup, newItem, newQuoteBody, newSection } from '@/domain/quote';
+import { CURRENT_BODY_VERSION, newGroup, newItem, newQuoteBody, newSection } from '@/domain/quote';
 
 const DEMO_EMAIL = 'demo@anzorge.local';
 const DEMO_PASSWORD = 'demo1234';
@@ -144,6 +144,37 @@ describe('templates.repo — CRUD', () => {
     expect(broken.bodyError).toContain('sections');
     expect(broken.itemCount).toBe(0);
     expect(broken.totalNetCents).toBe(0);
+  });
+
+  it('szablon sprzed wersjonowania wczytuje sie bez zmiany tresci', async () => {
+    const template = await makeTemplate('Sprzed wersjonowania');
+
+    // Tak wygladaja dokumenty zapisane, zanim wprowadzilismy `bodyVersion`.
+    const body = template.body as unknown as Record<string, unknown>;
+    delete body.bodyVersion;
+    await getSupabase().from('quote_templates').update({ body }).eq('id', template.id);
+
+    const wczytany = await getTemplate(template.id);
+    expect(wczytany.bodyError).toBeNull();
+    expect(wczytany.body?.bodyVersion).toBe(CURRENT_BODY_VERSION);
+    expect(wczytany.itemCount).toBeGreaterThan(0);
+  });
+
+  it('szablon z nowszej wersji aplikacji nie jest po cichu okrajany', async () => {
+    const template = await makeTemplate('Z przyszlosci');
+
+    await getSupabase()
+      .from('quote_templates')
+      .update({
+        body: { ...(template.body as object), bodyVersion: CURRENT_BODY_VERSION + 1 },
+      })
+      .eq('id', template.id);
+
+    const zPrzyszlosci = await getTemplate(template.id);
+    // Lepiej powiedziec "zaktualizuj aplikacje" niz zapisac z powrotem dokument
+    // bez pol, ktorych ta wersja nie rozumie.
+    expect(zPrzyszlosci.body).toBeNull();
+    expect(zPrzyszlosci.bodyError).toMatch(/nowsz/i);
   });
 });
 

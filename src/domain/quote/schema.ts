@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { CURRENT_BODY_VERSION, migrateBody } from './migrate';
 
 /**
  * Model dokumentu wyceny (zod = jedno źródło typów i walidacji).
@@ -54,6 +55,13 @@ export const QuoteClientSchema = z.object({
 export type QuoteClient = z.infer<typeof QuoteClientSchema>;
 
 export const QuoteBodySchema = z.object({
+  /**
+   * Wersja kształtu dokumentu. Dokument z bazy przechodzi przez `migrateBody`,
+   * zanim tu trafi, więc tutaj może być już tylko wersja bieżąca — literał
+   * zamiast luźnej liczby, żeby pominięcie migracji było błędem widocznym od
+   * razu, a nie cichym zapisem okrojonego dokumentu.
+   */
+  bodyVersion: z.literal(CURRENT_BODY_VERSION).default(CURRENT_BODY_VERSION),
   title: z.string().default('Wycena'),
   subtitle: z.string().default(''),
   intro: z.string().default(''),
@@ -88,7 +96,14 @@ export type ParseQuoteBodyResult = { ok: true; body: QuoteBody } | { ok: false; 
  * „wycena uszkodzona”, zamiast wywalać aplikację.
  */
 export function parseQuoteBody(input: unknown): ParseQuoteBodyResult {
-  const result = QuoteBodySchema.safeParse(input);
+  // Najpierw migracja, potem walidacja — schemat opisuje WYŁĄCZNIE bieżącą
+  // wersję modelu, więc starszy dokument musi najpierw przyjąć jej kształt.
+  // To jedyne wejście dla `quotes.body` i `templates.body`, więc oba
+  // repozytoria dostają migrację stąd.
+  const migrated = migrateBody(input);
+  if (!migrated.ok) return { ok: false, error: migrated.error };
+
+  const result = QuoteBodySchema.safeParse(migrated.body);
   if (result.success) {
     return { ok: true, body: result.data };
   }
