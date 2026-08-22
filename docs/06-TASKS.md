@@ -75,8 +75,17 @@ Format: `- [ ] T-xx Nazwa` — czytaj: wymagane dokumenty → kryteria akceptacj
   > - `SubscriptionStatusSchema` siedzi tymczasowo w `subscription.repo.ts`; przenieść do `domain/billing/` przy T-15.
   > - **`pnpm test:db` ≠ `pnpm db:test`**: pierwsze to testy integracyjne repozytoriów (Vitest), drugie to testy RLS w pgTAP. Oba wymagają `pnpm db:start`.
 
-- [ ] **T-07 Lista wycen + dashboard (dane realne)** (05-UI §3)
+- [x] **T-07 Lista wycen + dashboard (dane realne)** (05-UI §3)
   ✅ Filtry, szukaj, sort, menu ⋯ (duplikuj/archiwizuj); dashboard liczy statystyki z `quotes`.
+  > **Zrobione.** Lista: pigułki statusów, szukajka, sortowanie (4 warianty), tabela, menu ⋯ z edycją/duplikacją/archiwizacją (z potwierdzeniem). Pulpit: 4 kafle z `calcDashboardStats`, 5 ostatnich wycen, karta subskrypcji z paskiem triala.
+  > **✅ ZWERYFIKOWANE:** 176 testów jednostkowych (w tym 6 dla statystyk i 7 dla listy) + 35 integracyjnych; obejrzane na żywo na danych z seeda — kafle liczą się zgodnie z danymi (średnia 3840 zł = (4050+3630)/2), filtr statusu robi realny round-trip do bazy.
+  > **Na co uważać:**
+  > - **Filtrowanie, szukanie i sortowanie robi Postgres**, nie przeglądarka — filtry wchodzą do klucza zapytania. Nie „optymalizuj" tego na filtrowanie w JS, bo lista ma rosnąć do tysięcy wycen.
+  > - **Statystyki liczą się z listy, która i tak jest w cache** — pulpit nie bije po bazie drugi raz. Jeśli lista kiedyś dostanie paginację, kafle trzeba przenieść na osobne zapytanie agregujące.
+  > - Wszystkie cztery kafle dotyczą **bieżącego miesiąca liczonego w strefie użytkownika**, nie w UTC. Zmiana zakresu = zmiana etykiet w `i18n/pl.ts`.
+  > - `acceptanceRate` ma w mianowniku tylko **rozstrzygnięte** (accepted + rejected). Gdyby liczyć też `sent`, wskaźnik spadałby za każdym razem, gdy ktoś wyśle świeżą ofertę.
+  > - Pusta lista rozróżnia „nie masz jeszcze wycen" od „filtr nic nie zwrócił" — są na to osobne teksty i test.
+  > **Nie przeklikane ręcznie:** zawartość rozwijanego menu ⋯ (Radix otwiera się na `pointerdown`, nie da się tego wyklikać skryptem). Obecność przycisku per wiersz pokrywa test jednostkowy, a same akcje `duplicateQuote`/`archiveQuote` mają testy integracyjne na żywej bazie.
 
 - [ ] **T-08 Edytor wyceny — rdzeń** (05-UI §3, 01-ARCHITECTURE §3)
   `editor.store.ts` (Zustand+immer), `QuoteHeader`, `SectionBlock`, `GroupBlock`, `ItemRow`, `TotalsCard`, tryb edycja/podgląd, inline edit, toggle, dodawanie/usuwanie, autosave z wskaźnikiem, numer z `next_quote_number`.

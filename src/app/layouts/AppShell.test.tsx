@@ -3,7 +3,6 @@ import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
 import { AppShell } from './AppShell';
 import { AuthStub } from '@/features/auth/test-utils';
-import { DashboardPage } from '@/features/dashboard/DashboardPage';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { pl } from '@/i18n/pl';
 
@@ -14,7 +13,9 @@ function renderShell(path: string) {
         path: '/',
         element: <AppShell />,
         children: [
-          { index: true, element: <DashboardPage />, handle: { title: pl.dashboard.title } },
+          // Celowo prosta strona — AppShell testujemy w izolacji od pulpitu,
+          // ktory ciagnie za soba TanStack Query i zapytania do Supabase.
+          { index: true, element: <p>Tresc pulpitu</p>, handle: { title: pl.dashboard.title } },
           { path: 'biblioteka', element: <p>Biblioteka</p>, handle: { title: pl.library.title } },
         ],
       },
@@ -45,6 +46,6 @@ describe('AppShell', () => {
   it('renderuje nawigację i treść trasy', () => {
     renderShell('/');
     expect(screen.getByRole('link', { name: pl.nav.quotes })).toBeInTheDocument();
-    expect(screen.getByText(pl.dashboard.recentQuotes)).toBeInTheDocument();
+    expect(screen.getByText('Tresc pulpitu')).toBeInTheDocument();
   });
 });
