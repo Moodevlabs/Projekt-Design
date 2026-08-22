@@ -159,3 +159,98 @@ describe('useAutosave', () => {
     expect(useEditorStore.getState().saveError).toBe('brak sieci');
   });
 });
+
+/**
+ * Debounce zostawial okno 800 ms, w ktorym zmiana istniala wylacznie w pamieci.
+ * Wyjscie z edytora kasowalo timer i nie zapisywalo niczego — praca przepadala
+ * bez sladu, a najczestszy scenariusz to „poprawiam cene i klikam Wyceny".
+ */
+describe('useAutosave — wyjscie z edytora', () => {
+  it('zapisuje zmiane zrobiona tuz przed wyjsciem', async () => {
+    vi.mocked(saveQuote).mockResolvedValue(makeQuote());
+    const { unmount } = renderHook(() => useAutosave(), { wrapper });
+
+    act(() => useEditorStore.getState().updateItem(firstItemId(), { name: 'Tuz przed wyjsciem' }));
+    // Uzytkownik wychodzi przed uplywem debounce'a.
+    act(() => void vi.advanceTimersByTime(300));
+
+    await act(async () => {
+      unmount();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(saveQuote).toHaveBeenCalledTimes(1);
+    const zapisane = vi.mocked(saveQuote).mock.calls[0]?.[0] as {
+      body: { sections: { items: { name: string }[] }[] };
+    };
+    expect(zapisane.body.sections[0]?.items[0]?.name).toBe('Tuz przed wyjsciem');
+  });
+
+  it('wyjscie bez zmian nie generuje zapisu', async () => {
+    vi.mocked(saveQuote).mockResolvedValue(makeQuote());
+    const { unmount } = renderHook(() => useAutosave(), { wrapper });
+
+    await act(async () => {
+      unmount();
+      await Promise.resolve();
+    });
+
+    expect(saveQuote).not.toHaveBeenCalled();
+  });
+
+  it('po konflikcie wyjscie tez nie zapisuje', async () => {
+    vi.mocked(saveQuote).mockRejectedValue(new ConflictError());
+    const { unmount } = renderHook(() => useAutosave(), { wrapper });
+
+    act(() => useEditorStore.getState().updateItem(firstItemId(), { name: 'Nowa' }));
+    await act(async () => {
+      vi.advanceTimersByTime(AUTOSAVE_DELAY_MS);
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(useEditorStore.getState().saveState).toBe('conflict');
+
+    await act(async () => {
+      unmount();
+      await Promise.resolve();
+    });
+
+    // Wciaz jeden — ten z konfliktu. Wyjscie nie probuje nadpisac cudzych zmian.
+    expect(saveQuote).toHaveBeenCalledTimes(1);
+  });
+
+  it('zapis wracajacy po wyjsciu nie rusza wyceny, ktora jest juz w edytorze', async () => {
+    let resolveSave: ((quote: Quote) => void) | undefined;
+    vi.mocked(saveQuote).mockReturnValue(
+      new Promise<Quote>((resolve) => {
+        resolveSave = resolve;
+      }),
+    );
+    const { unmount } = renderHook(() => useAutosave(), { wrapper });
+
+    act(() => useEditorStore.getState().updateItem(firstItemId(), { name: 'Stara wycena' }));
+    await act(async () => {
+      vi.advanceTimersByTime(AUTOSAVE_DELAY_MS);
+      await Promise.resolve();
+    });
+
+    // Wyjscie i otwarcie INNEJ wyceny, zanim tamten zapis wrocil.
+    unmount();
+    act(() => {
+      useEditorStore.getState().reset();
+      useEditorStore.getState().load({ ...makeQuote(), id: 'q2' });
+    });
+
+    await act(async () => {
+      resolveSave?.({ ...makeQuote(), updatedAt: '2026-08-01T12:00:00Z' });
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    // Gdyby `markSaved` poszlo na slepo, nowa wycena dostalaby `updated_at`
+    // starej — i nastepny jej zapis wywalilby sie konfliktem.
+    expect(useEditorStore.getState().quoteId).toBe('q2');
+    expect(useEditorStore.getState().lastSeenUpdatedAt).toBe('2026-08-01T10:00:00Z');
+  });
+});

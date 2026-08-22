@@ -219,18 +219,23 @@ describe('library.repo — grupy', () => {
     expect(group.items[1]?.kind).toBe('discount');
   });
 
-  it('zwraca grupy z seeda z kompletem pozycji', async () => {
+  it('parsuje snapshoty grupy z seeda', async () => {
     const groups = await listLibraryGroups(workspaceId);
     const kitchen = groups.find((group) => group.name === 'Kuchnia');
 
     expect(kitchen).toBeDefined();
-    expect(kitchen?.items).toHaveLength(3);
+    // Bez liczby pozycji: zestawy są edytowalne z poziomu aplikacji, więc
+    // asercja na „dokładnie 3" psuła się po pierwszym kliknięciu w bibliotece.
+    expect(kitchen?.items.length).toBeGreaterThan(0);
+
+    const projekt = kitchen?.items.find((item) => item.name === 'Projekt koncepcyjny wnętrza');
+    expect(projekt).toBeDefined();
     // Snapshot z seeda ma nadmiarowe `id` pozycji wyceny — zod je odcina.
-    expect(kitchen?.items[0]).not.toHaveProperty('id');
+    expect(projekt).not.toHaveProperty('id');
     // `qty` natomiast NALEŻY do zestawu: „Kuchnia" to 14 m² projektu, nie jedna
     // sztuka. Wcześniej schemat je odcinał i wstawienie zestawu gubiło metraż.
-    expect(kitchen?.items[0]?.qty).toBe(14);
-    expect(kitchen?.items[0]?.libraryItemId).toBeTruthy();
+    expect(projekt?.qty).toBe(14);
+    expect(projekt?.libraryItemId).toBeTruthy();
   });
 
   it('podmienia pozycje grupy', async () => {
