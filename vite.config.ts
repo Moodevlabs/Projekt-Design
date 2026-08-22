@@ -34,6 +34,8 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./vitest.setup.ts'],
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    // Testy integracyjne chodza osobno (`pnpm test:db`) — wymagaja Dockera.
+    exclude: ['**/node_modules/**', '**/dist/**', 'src/**/*.integration.test.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html'],

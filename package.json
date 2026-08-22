@@ -21,7 +21,8 @@
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
     "db:test": "supabase test db",
-    "db:types": "supabase gen types typescript --local > src/data/types.generated.ts"
+    "db:types": "supabase gen types typescript --local > src/data/types.generated.ts",
+    "test:db": "vitest run --config vitest.integration.config.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
