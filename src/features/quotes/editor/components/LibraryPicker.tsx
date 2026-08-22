@@ -64,10 +64,14 @@ export function LibraryPicker({ priorityCategory, onPickItem, onPickGroup }: Lib
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
+      {/*
+        Bez własnego `onClick` — otwieraniem steruje wyłącznie `PopoverTrigger`.
+        Własny handler ustawiający `true` wygrywałby z toggle'em Radiksa
+        (`Slot` woła oba, nasz jako drugi), więc kliknięcie w otwarty trigger
+        nigdy by popovera nie zamknęło.
+      */}
       <PopoverTrigger asChild>
-        <AddLink icon={Library} onClick={() => setOpen(true)}>
-          {pl.editor.fromLibrary}
-        </AddLink>
+        <AddLink icon={Library}>{pl.editor.fromLibrary}</AddLink>
       </PopoverTrigger>
 
       <PopoverContent align="start" className="w-[300px] p-0">

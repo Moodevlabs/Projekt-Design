@@ -74,6 +74,31 @@ describe('LibraryPicker', () => {
     expect(wstawiona.unitPriceCents).toBe(120_000);
   });
 
+  /**
+   * Regresja: `AddLink` zjadał propsy od `PopoverTrigger asChild` (brał tylko
+   * `icon`/`children`/`onClick`), więc Radix nie dostawał ani ref-a, ani
+   * kontroli nad triggerem. Popover otwierał się na stanie, ale bez kotwicy —
+   * w przeglądarce kliknięcie „Z biblioteki" nie dawało nic. W jsdom tego nie
+   * widać po samym tekście, dlatego sprawdzamy atrybuty stanu Radiksa.
+   */
+  it('trigger jest sterowany przez Radiksa, a nie lokalnym stanem', async () => {
+    const user = userEvent.setup();
+    render(<LibraryPicker onPickItem={vi.fn()} />);
+
+    const trigger = screen.getByRole('button', { name: pl.editor.fromLibrary });
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    expect(trigger).toHaveAttribute('data-state', 'closed');
+
+    await user.click(trigger);
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    expect(trigger).toHaveAttribute('data-state', 'open');
+
+    // Drugie kliknięcie musi zamykać — własny `onClick` ustawiający `true`
+    // wygrywałby z toggle'em i popover zostawałby otwarty na zawsze.
+    await user.click(trigger);
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+  });
+
   it('bez obsługi grup nie pokazuje zakładek', async () => {
     const user = userEvent.setup();
     render(<LibraryPicker onPickItem={vi.fn()} />);
