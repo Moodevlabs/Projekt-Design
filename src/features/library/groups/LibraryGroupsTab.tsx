@@ -54,7 +54,12 @@ export function LibraryGroupsTab() {
       ) : null}
 
       {rows.length > 0 ? (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        // `items-start` jest tu konieczne, nie kosmetyczne. Domyślne
+        // `align-items: stretch` daje wszystkim kartom w wierszu wysokość
+        // najwyższej z nich, więc rozwinięcie zawartości JEDNEGO zestawu
+        // rozciągało sąsiednie karty na tę samą wysokość — wyglądało to tak,
+        // jakby przycisk rozwijał wszystkie grupy naraz.
+        <div className="grid items-start gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {rows.map((group) => (
             <LibraryGroupCard
               key={group.id}

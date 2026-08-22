@@ -154,6 +154,37 @@ describe('LibraryGroupsTab — zawartosc zestawu', () => {
     return call?.patch?.items ?? [];
   }
 
+  it('rozwija tylko wskazany zestaw, nie wszystkie', async () => {
+    const user = userEvent.setup();
+    mockGroups([
+      group(),
+      group({
+        id: '33333333-3333-4333-8333-333333333333',
+        name: 'Łazienka',
+        items: [
+          {
+            name: 'Płytki',
+            description: '',
+            kind: 'item',
+            qty: 1,
+            unitPriceCents: 100_000,
+            libraryItemId: null,
+          },
+        ],
+      }),
+    ]);
+    render(<LibraryGroupsTab />);
+
+    await user.click(
+      screen.getByRole('button', { name: pl.library.showGroupItems('Kuchnia pod klucz') }),
+    );
+
+    expect(screen.getByText('Zabudowa')).toBeInTheDocument();
+    expect(screen.queryByText('Płytki')).not.toBeInTheDocument();
+    // Jeden picker, nie dwa — rozwinieta jest dokladnie jedna karta.
+    expect(screen.getAllByRole('button', { name: /Dodaj pozycję do zestawu/ })).toHaveLength(1);
+  });
+
   it('dodaje pozycje z biblioteki do zestawu jako snapshot', async () => {
     const user = userEvent.setup();
     useLibraryItems.mockReturnValue({
