@@ -17,7 +17,10 @@
     "test:cov": "vitest run --coverage",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
+    "db:test": "supabase test db",
     "db:types": "supabase gen types typescript --local > src/data/types.generated.ts"
   },
   "dependencies": {

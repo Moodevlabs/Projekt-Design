@@ -402,8 +402,9 @@ create policy "quote_acceptances: select member" on public.quote_acceptances
 -- 5. Uprawnienia tabelowe (obrona w głąb — RLS to pierwsza linia, GRANT druga)
 -- =============================================================================
 
--- anon nie ma w aplikacji desktopowej nic do roboty na tych tabelach.
-revoke all on all tables in schema public from anon;
+-- Czyścimy domyślne granty Supabase (dają m.in. TRUNCATE) i nadajemy dokładnie
+-- to, czego aplikacja potrzebuje. anon nie ma tu nic do roboty.
+revoke all on all tables in schema public from anon, authenticated;
 
 grant select, insert, update, delete on all tables in schema public to authenticated;
 

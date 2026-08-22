@@ -23,9 +23,17 @@ Format: `- [ ] T-xx Nazwa` — czytaj: wymagane dokumenty → kryteria akceptacj
   > - Funkcje z `reorder.ts` zwracają **tę samą referencję** przy no-opie (mniej przerysowań w React).
   > - Odstępstwo od 01-ARCHITECTURE §4: `vatRate` zawężone do 0–100, żeby tryb brutto nie dzielił przez zero.
 
-- [ ] **T-03 Supabase: migracje 0001–0003, triggery, RLS, seed** (02-DATABASE)
+- [x] **T-03 Supabase: migracje 0001–0003, triggery, RLS, seed** (02-DATABASE)
   `supabase init`, migracje, `seed.sql`, `supabase gen types`. Skrypt `pnpm db:reset`, `pnpm db:types`.
   ✅ `supabase db reset` bez błędów; test SQL (pgTAP lub prosty skrypt) że user A nie widzi wycen usera B.
+  > **Zrobione (kod).** 5 migracji + `seed.sql` + `supabase/tests/rls.test.sql` (pgTAP, 19 assertów) + `config.toml` + placeholder `src/data/types.generated.ts`. `supabase` jako devDependency — nie trzeba globalnej instalacji.
+  > **⚠️ NIEZWERYFIKOWANE:** na maszynie budującej nie ma Dockera ani Podmana, więc `supabase db reset` i `supabase test db` **nie zostały uruchomione**. Składnia całego SQL sprawdzona parserem PostgreSQL 17 (0 błędów), a `body` w seedzie zwalidowane pod `QuoteBodySchema` wraz z przeliczeniem totali. Po zainstalowaniu Dockera odpal: `pnpm db:start && pnpm db:reset && pnpm db:test && pnpm db:types`.
+  > **Na co uważać:**
+  > - `workspace_members` — polityka SELECT NIE woła `is_member()` (cykl 42P17), tylko `user_id = auth.uid()`. Lista współpracowników (T-27) będzie wymagała RPC `security definer`.
+  > - `0004` robi `revoke all on all tables in schema public from anon, authenticated` i nadaje granty jawnie. **Każda kolejna migracja dodająca tabelę musi nadać własne granty i polityki** — inaczej domyślne uprawnienia Supabase znowu wpuszczą `anon`.
+  > - `next_quote_number` jest `security definer` i wymaga `is_member` ORAZ `workspace_can_write`.
+  > - `stripe_events` ma RLS ON i **zero polityk** (brak `workspace_id`) — dostęp tylko `service_role`.
+  > - `workspace_can_write()` musi zostać logicznie identyczne z `domain/billing/entitlement.ts` — test parytetu jest w T-15.
 
 - [x] **T-04 AppShell + routing + design tokens** (05-UI)
   `globals.css` z tokenami, shadcn komponenty z listy, `AppShell` (sidebar+topbar), router z placeholderami stron, `EmptyState`, `StatusBadge`, `Money`.
