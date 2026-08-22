@@ -1,3 +1,6 @@
+import type { ReactNode } from 'react';
+import { DndContext } from '@dnd-kit/core';
+import { SortableContext } from '@dnd-kit/sortable';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
@@ -5,11 +8,24 @@ import { ItemRow } from './ItemRow';
 import { newItem, type Item } from '@/domain/quote';
 import { pl } from '@/i18n/pl';
 
+/** Wiersz żyje w kontekście przeciągania — bez niego `useSortable` nie ma o co pytać. */
+function Dnd({ ids, children }: { ids: string[]; children: ReactNode }) {
+  return (
+    <DndContext>
+      <SortableContext items={ids}>{children}</SortableContext>
+    </DndContext>
+  );
+}
+
 function setup(overrides: Partial<Item> = {}, editing = true) {
   const item = newItem({ name: 'Blat kuchenny', unitPriceCents: 120_000, ...overrides });
-  const handlers = { onToggle: vi.fn(), onPatch: vi.fn(), onRemove: vi.fn() };
+  const handlers = { onToggle: vi.fn(), onPatch: vi.fn(), onRemove: vi.fn(), onNudge: vi.fn() };
 
-  render(<ItemRow item={item} editing={editing} currency="PLN" {...handlers} />);
+  render(
+    <Dnd ids={[item.id]}>
+      <ItemRow item={item} editing={editing} currency="PLN" index={0} count={2} {...handlers} />
+    </Dnd>,
+  );
   return { item, ...handlers };
 }
 
@@ -62,28 +78,40 @@ describe('ItemRow', () => {
   });
 
   it('w podgladzie pokazuje ilosc tylko wtedy, gdy rozna od jedynki', () => {
+    const a = newItem({ name: 'A', qty: 1, unitPriceCents: 1000 });
     const { unmount } = render(
-      <ItemRow
-        item={newItem({ name: 'A', qty: 1, unitPriceCents: 1000 })}
-        editing={false}
-        currency="PLN"
-        onToggle={vi.fn()}
-        onPatch={vi.fn()}
-        onRemove={vi.fn()}
-      />,
+      <Dnd ids={[a.id]}>
+        <ItemRow
+          item={a}
+          editing={false}
+          currency="PLN"
+          index={0}
+          count={1}
+          onToggle={vi.fn()}
+          onPatch={vi.fn()}
+          onRemove={vi.fn()}
+          onNudge={vi.fn()}
+        />
+      </Dnd>,
     );
     expect(screen.queryByText(/×/)).not.toBeInTheDocument();
     unmount();
 
+    const b = newItem({ name: 'B', qty: 2.5, unitPriceCents: 1000 });
     render(
-      <ItemRow
-        item={newItem({ name: 'B', qty: 2.5, unitPriceCents: 1000 })}
-        editing={false}
-        currency="PLN"
-        onToggle={vi.fn()}
-        onPatch={vi.fn()}
-        onRemove={vi.fn()}
-      />,
+      <Dnd ids={[b.id]}>
+        <ItemRow
+          item={b}
+          editing={false}
+          currency="PLN"
+          index={0}
+          count={1}
+          onToggle={vi.fn()}
+          onPatch={vi.fn()}
+          onRemove={vi.fn()}
+          onNudge={vi.fn()}
+        />
+      </Dnd>,
     );
     expect(screen.getByText('2.5 ×')).toBeInTheDocument();
   });
@@ -91,6 +119,47 @@ describe('ItemRow', () => {
   it('w podgladzie pokazuje wartosc pozycji, czyli ilosc razy cena', () => {
     setup({ qty: 3, unitPriceCents: 10_000 }, false);
     expect(screen.getByText(/300,00/)).toBeInTheDocument();
+  });
+
+  it('daje uchwyt przeciagania i strzalki tylko w trybie edycji', () => {
+    setup({}, false);
+    expect(screen.queryByRole('button', { name: /Przenieś pozycję/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Przesuń wyżej/ })).not.toBeInTheDocument();
+  });
+
+  it('uchwyt przeciagania jest przyciskiem z etykieta — sensor klawiatury tego wymaga', () => {
+    setup();
+    const handle = screen.getByRole('button', { name: /Przenieś pozycję: Blat kuchenny/ });
+    expect(handle).toBeInTheDocument();
+  });
+
+  it('strzalka w gore jest wylaczona dla pierwszej pozycji', () => {
+    const item = newItem({ name: 'Pierwsza' });
+    render(
+      <Dnd ids={[item.id]}>
+        <ItemRow
+          item={item}
+          editing
+          currency="PLN"
+          index={0}
+          count={3}
+          onToggle={vi.fn()}
+          onPatch={vi.fn()}
+          onRemove={vi.fn()}
+          onNudge={vi.fn()}
+        />
+      </Dnd>,
+    );
+    expect(screen.getByRole('button', { name: /Przesuń wyżej/ })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /Przesuń niżej/ })).toBeEnabled();
+  });
+
+  it('przesuwa pozycje strzalka', async () => {
+    const user = userEvent.setup();
+    const { item, onNudge } = setup();
+
+    await user.click(screen.getByRole('button', { name: /Przesuń niżej/ }));
+    expect(onNudge).toHaveBeenCalledWith(item.id, 'down');
   });
 
   it('usuwa pozycje', async () => {

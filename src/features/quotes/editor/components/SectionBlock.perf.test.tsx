@@ -1,3 +1,4 @@
+import { DndContext } from '@dnd-kit/core';
 import { act, render } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SectionBlock } from './SectionBlock';
@@ -54,13 +55,21 @@ function makeQuote(): Quote {
   };
 }
 
+/**
+ * Stabilna zaślepka. MUSI być zdefiniowana poza komponentem — nowa funkcja przy
+ * każdym renderze łamałaby memoizację wierszy i test mierzyłby wadę harnessu
+ * zamiast zachowania komponentu. W aplikacji te funkcje pochodzą ze store'u
+ * (akcje Zustanda są stabilne).
+ */
+const noop = () => undefined;
+
 /** Harness: subskrybuje store i przekazuje sekcję w dół, tak jak robi to edytor. */
 function Harness() {
   const section = useEditorStore((state) => state.body?.sections[0]);
   const updateItem = useEditorStore((state) => state.updateItem);
   const toggleItem = useEditorStore((state) => state.toggleItem);
   const removeItem = useEditorStore((state) => state.removeItem);
-  const noop = () => undefined;
+  const nudgeItem = useEditorStore((state) => state.nudgeItem);
 
   if (!section) return null;
 
@@ -71,6 +80,11 @@ function Harness() {
       currency="PLN"
       vatRate={23}
       pricesInclude="net"
+      index={0}
+      count={1}
+      onNudgeItem={nudgeItem}
+      onNudgeGroup={noop}
+      onNudgeSection={noop}
       onRename={noop}
       onRemove={noop}
       onAddGroup={noop}
@@ -93,7 +107,11 @@ beforeEach(() => {
 describe('SectionBlock — wydajność', () => {
   it('edycja jednej pozycji renderuje tylko ten wiersz, nie całą listę', () => {
     const spy = vi.spyOn(money, 'formatMoney');
-    render(<Harness />);
+    render(
+      <DndContext>
+        <Harness />
+      </DndContext>,
+    );
 
     // Render początkowy: każdy wiersz + suma sekcji + suma grupy.
     const initial = spy.mock.calls.length;

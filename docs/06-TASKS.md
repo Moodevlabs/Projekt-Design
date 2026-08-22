@@ -130,9 +130,18 @@ Format: `- [ ] T-xx Nazwa` — czytaj: wymagane dokumenty → kryteria akceptacj
   > - **Podpis w tle wymaga, żeby korzeń powłoki był pozycjonowany** (`relative`). Element pozycjonowany — a taki jest `AppCredit` — rysuje się nad każdą **statyczną** treścią niezależnie od kolejności w drzewie. Bez tego podpis przechodził nad arkuszem wyceny (papier nie ma `position`), choć karty z `position: relative` już go poprawnie zasłaniały. Klasyczna pułapka reguł nakładania CSS.
   > - Jedyny mocny efekt na pulpicie to **osiadające liczby** (`useCountUp`, rAF, ease-out, `prefers-reduced-motion` → od razu wynik). To nawiązanie do sedna produktu: sumy, która przelicza się po przełączeniu pozycji. Nie dokładaj drugiej animacji „dla równowagi".
 
-- [ ] **T-09 Drag & drop + przyciski góra/dół** (05-UI §5)
+- [x] **T-09 Drag & drop + przyciski góra/dół** (05-UI §5)
   @dnd-kit, keyboard sensor, `domain/quote/reorder.ts`.
   ✅ Przenoszenie pozycji między grupami i sekcjami, grup między sekcjami; a11y z klawiatury.
+  > **Zrobione.** `@dnd-kit` (pointer + keyboard sensor), czysta funkcja `dnd/drop-resolution.ts`, akcje kolejności w store, uchwyty przeciągania i przyciski ▲▼ na pozycjach, grupach i sekcjach.
+  > **✅ ZWERYFIKOWANE:** 293 testy jednostkowe (16 dla rozstrzygania celu upuszczenia, 5 dla przycisków ▲▼) + 35 integracyjnych. Na żywo: przestawienie strzałką zmieniło kolejność i **autozapis utrwalił ją w bazie**; przeniesienie **samą klawiaturą** (`Space` → `↓` → `Space`, bez myszy) przestawiło element i ogłosiło to komunikatem dla czytnika ekranu.
+  > **Na co uważać:**
+  > - **`SortableContext` kasuje memoizację, jeśli dostanie nową tablicę `items`.** Zmiana kontekstu przerenderowuje wszystkich konsumentów `useSortable` **niezależnie od `memo`** — naiwne `items.map(i => i.id)` w ciele komponentu sprawiało, że edycja jednej nazwy przerysowywała całą listę. Stąd `useStableIds`: referencja zmienia się tylko przy zmianie składu lub kolejności. Test `SectionBlock.perf.test.tsx` to pilnuje i **złapał tę regresję** przy podpinaniu DnD.
+  > - **Funkcje z `reorder.ts` robią `structuredClone`, a proxy immera się nie sklonuje.** Store zdejmuje najpierw zwykły obiekt przez `current()`.
+  > - **Ruch bez efektu nie brudzi dokumentu** — domena zwraca to samo wejście, store porównuje referencje. Bez tego dojechanie strzałką do krańca listy budziłoby autozapis.
+  > - Puste grupy i sekcje mają **własne cele upuszczenia** (`item-list`, `section-groups`) — bez nich nie dałoby się niczego do nich przenieść, bo nie byłoby czego dotknąć.
+  > - Uchwyt przeciągania jest **przyciskiem z etykietą**, nie ikoną: sensor klawiatury potrzebuje czegoś, na co da się przejść tabem.
+  > - Przyciski ▲▼ to **równorzędna ścieżka**, nie ozdoba — przeciąganie bywa niewykonalne (trackpad, ograniczona motoryka).
 
 - [ ] **T-10 Biblioteka** (00-PRD §4.1)
   Strona biblioteki, `LibraryPicker` w edytorze, „zapisz do biblioteki", „zapisz wszystko", kaskada zmian do otwartej wyceny (dialog).

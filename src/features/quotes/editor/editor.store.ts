@@ -1,12 +1,23 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
+import { current } from 'immer';
 import {
+  moveGroup as moveGroupIn,
+  moveItem as moveItemIn,
+  moveSection as moveSectionIn,
   newGroup,
   newItem,
   newSection,
+  nudgeGroup as nudgeGroupIn,
+  nudgeItem as nudgeItemIn,
+  nudgeSection as nudgeSectionIn,
   type Group,
   type Item,
   type QuoteBody,
+  type MoveGroupArgs,
+  type MoveItemArgs,
+  type MoveSectionArgs,
+  type NudgeDirection,
   type QuoteStatus,
   type Section,
 } from '@/domain/quote';
@@ -76,6 +87,14 @@ export interface EditorState {
   updateItem: (itemId: string, patch: Partial<Item>) => void;
   toggleItem: (itemId: string) => void;
   removeItem: (itemId: string) => void;
+
+  // --- kolejność (T-09) ---
+  moveItem: (args: MoveItemArgs) => void;
+  moveGroup: (args: MoveGroupArgs) => void;
+  moveSection: (args: MoveSectionArgs) => void;
+  nudgeItem: (itemId: string, direction: NudgeDirection) => void;
+  nudgeGroup: (groupId: string, direction: NudgeDirection) => void;
+  nudgeSection: (sectionId: string, direction: NudgeDirection) => void;
 }
 
 const INITIAL = {
@@ -120,6 +139,29 @@ function findItem(body: QuoteBody, itemId: string): Item | undefined {
 
 function findSection(body: QuoteBody, sectionId: string): Section | undefined {
   return body.sections.find((section) => section.id === sectionId);
+}
+
+/**
+ * Most między czystymi funkcjami z `domain/quote/reorder.ts` a szkicem immera.
+ *
+ * Dwie rzeczy, które trzeba tu zrobić dokładnie tak:
+ *  - `current()` zdejmuje ze szkicu zwykły obiekt. Funkcje domenowe robią
+ *    `structuredClone`, a proxy immera się nie sklonuje.
+ *  - Domena zwraca **to samo wejście**, gdy ruch jest bezcelowy (nieznane id,
+ *    krawędź listy). Porównujemy referencje i wtedy NIE brudzimy dokumentu —
+ *    inaczej dojechanie przyciskiem do końca listy uruchamiałoby autozapis.
+ */
+function reorderWith(transform: (body: QuoteBody) => QuoteBody) {
+  return (state: EditorState) => {
+    if (!state.body) return;
+
+    const before = current(state.body);
+    const after = transform(before);
+    if (after === before) return;
+
+    state.body = after;
+    state.saveState = 'dirty';
+  };
 }
 
 export const useEditorStore = create<EditorState>()(
@@ -298,5 +340,15 @@ export const useEditorStore = create<EditorState>()(
           }
         }
       }),
+
+    moveItem: (args) => set(reorderWith((body) => moveItemIn(body, args))),
+    moveGroup: (args) => set(reorderWith((body) => moveGroupIn(body, args))),
+    moveSection: (args) => set(reorderWith((body) => moveSectionIn(body, args))),
+    nudgeItem: (itemId, direction) =>
+      set(reorderWith((body) => nudgeItemIn(body, itemId, direction))),
+    nudgeGroup: (groupId, direction) =>
+      set(reorderWith((body) => nudgeGroupIn(body, groupId, direction))),
+    nudgeSection: (sectionId, direction) =>
+      set(reorderWith((body) => nudgeSectionIn(body, sectionId, direction))),
   })),
 );

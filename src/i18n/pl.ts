@@ -134,6 +134,18 @@ export const pl = {
     makeDiscount: 'Zamień na rabat',
     makeItem: 'Zamień na pozycję',
 
+    dragItem: 'Przenieś pozycję',
+    dragGroup: 'Przenieś grupę',
+    dragSection: 'Przenieś sekcję',
+    moveUp: 'Przesuń wyżej',
+    moveDown: 'Przesuń niżej',
+    dnd: {
+      start: (name: string) => `Podniesiono: ${name}. Strzałkami wybierz miejsce, spacją upuść, Escape anuluje.`,
+      over: (name: string, target: string) => `${name} nad: ${target}.`,
+      dropped: (name: string) => `Upuszczono: ${name}.`,
+      cancelled: (name: string) => `Anulowano przenoszenie: ${name}.`,
+    },
+
     toggleItem: 'Włącz lub wyłącz pozycję',
     toggleGroup: 'Włącz lub wyłącz całą grupę',
     removeItem: 'Usuń pozycję',

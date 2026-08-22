@@ -1,12 +1,23 @@
 import { memo, useState } from 'react';
+import { useDroppable } from '@dnd-kit/core';
+import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { Trash2 } from 'lucide-react';
 import { InlineText } from './InlineText';
 import { ItemRow } from './ItemRow';
 import { GroupBlock } from './GroupBlock';
 import { AddLink } from './AddLink';
 import { DragHandle } from './DragHandle';
+import { MoveButtons } from './MoveButtons';
+import { useStableIds } from '../dnd/useStableIds';
 import { ConfirmDialog } from '@/components/shared';
-import { calcSectionTotals, type Item, type PricesInclude, type Section } from '@/domain/quote';
+import {
+  calcSectionTotals,
+  type Item,
+  type NudgeDirection,
+  type PricesInclude,
+  type Section,
+} from '@/domain/quote';
 import { formatMoney } from '@/domain/money';
 import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
@@ -17,6 +28,8 @@ export interface SectionBlockProps {
   currency: string;
   vatRate: number;
   pricesInclude: PricesInclude;
+  index: number;
+  count: number;
   onRename: (sectionId: string, title: string) => void;
   onRemove: (sectionId: string) => void;
   onAddGroup: (sectionId: string) => void;
@@ -27,6 +40,9 @@ export interface SectionBlockProps {
   onToggleItem: (itemId: string) => void;
   onPatchItem: (itemId: string, patch: Partial<Item>) => void;
   onRemoveItem: (itemId: string) => void;
+  onNudgeItem: (itemId: string, direction: NudgeDirection) => void;
+  onNudgeGroup: (groupId: string, direction: NudgeDirection) => void;
+  onNudgeSection: (sectionId: string, direction: NudgeDirection) => void;
 }
 
 export const SectionBlock = memo(function SectionBlock({
@@ -35,6 +51,8 @@ export const SectionBlock = memo(function SectionBlock({
   currency,
   vatRate,
   pricesInclude,
+  index,
+  count,
   onRename,
   onRemove,
   onAddGroup,
@@ -45,17 +63,67 @@ export const SectionBlock = memo(function SectionBlock({
   onToggleItem,
   onPatchItem,
   onRemoveItem,
+  onNudgeItem,
+  onNudgeGroup,
+  onNudgeSection,
 }: SectionBlockProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const totals = calcSectionTotals(section, { vatRate, pricesInclude });
   const isEmpty = section.items.length === 0 && section.groups.length === 0;
 
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: section.id,
+    data: { kind: 'section', sectionId: section.id },
+    disabled: !editing,
+  });
+
+  const looseItemIds = useStableIds(section.items);
+  const groupIds = useStableIds(section.groups);
+
+  const { setNodeRef: setLooseRef, isOver: isOverLoose } = useDroppable({
+    id: `list:${section.id}:root`,
+    data: { kind: 'item-list', sectionId: section.id, groupId: null },
+  });
+
+  // Cel dla GRUP — pozwala przenieść grupę do sekcji, która żadnej nie ma.
+  const { setNodeRef: setGroupsRef, isOver: isOverGroups } = useDroppable({
+    id: `groups:${section.id}`,
+    data: { kind: 'section-groups', sectionId: section.id },
+  });
+
   return (
-    <section className="mb-10">
+    <section
+      ref={setNodeRef}
+      style={{ transform: CSS.Translate.toString(transform), transition }}
+      className={cn('mb-10', isDragging && 'relative z-10 opacity-40')}
+    >
       {/* Kreska pod tytulem sekcji jest CZARNA — mocniejsza niz szara przy
           grupie i jasna przy wierszu. Trzystopniowa hierarchia z prototypu. */}
-      <div className="flex items-baseline gap-3 border-b border-[var(--doc-ink)] pb-2.5">
-        {editing ? <DragHandle /> : null}
+      <div className="flex items-center gap-3 border-b border-[var(--doc-ink)] pb-2.5">
+        {editing ? (
+          <>
+            <DragHandle
+              ref={setActivatorNodeRef}
+              label={`${pl.editor.dragSection}: ${section.title}`}
+              {...attributes}
+              {...listeners}
+            />
+            <MoveButtons
+              label={section.title}
+              canMoveUp={index > 0}
+              canMoveDown={index < count - 1}
+              onMove={(direction) => onNudgeSection(section.id, direction)}
+            />
+          </>
+        ) : null}
 
         <InlineText
           value={section.title}
@@ -86,47 +154,72 @@ export const SectionBlock = memo(function SectionBlock({
         ) : null}
       </div>
 
-      {section.items.map((item) => (
-        <ItemRow
-          key={item.id}
-          item={item}
-          editing={editing}
-          currency={currency}
-          onToggle={onToggleItem}
-          onPatch={onPatchItem}
-          onRemove={onRemoveItem}
-        />
-      ))}
+      <div
+        ref={setLooseRef}
+        className={cn(
+          'min-h-[8px] rounded-[var(--radius-control)] transition-colors',
+          isOverLoose && 'bg-[var(--doc-sage-light)]',
+        )}
+      >
+        <SortableContext items={looseItemIds} strategy={verticalListSortingStrategy}>
+          {section.items.map((item, itemIndex) => (
+            <ItemRow
+              key={item.id}
+              item={item}
+              editing={editing}
+              currency={currency}
+              index={itemIndex}
+              count={section.items.length}
+              onToggle={onToggleItem}
+              onPatch={onPatchItem}
+              onRemove={onRemoveItem}
+              onNudge={onNudgeItem}
+            />
+          ))}
+        </SortableContext>
+      </div>
 
       {editing ? (
         <div className="mt-2.5 flex items-center gap-4">
-          <AddLink onClick={() => onAddItem(section.id, null, 'item')}>
-            {pl.editor.addItem}
-          </AddLink>
+          <AddLink onClick={() => onAddItem(section.id, null, 'item')}>{pl.editor.addItem}</AddLink>
           <AddLink onClick={() => onAddItem(section.id, null, 'discount')}>
             {pl.editor.addDiscount}
           </AddLink>
         </div>
       ) : null}
 
-      {section.groups.map((group) => (
-        <GroupBlock
-          key={group.id}
-          group={group}
-          sectionId={section.id}
-          editing={editing}
-          currency={currency}
-          vatRate={vatRate}
-          pricesInclude={pricesInclude}
-          onRename={onRenameGroup}
-          onRemove={onRemoveGroup}
-          onToggleGroup={onToggleGroup}
-          onAddItem={onAddItem}
-          onToggleItem={onToggleItem}
-          onPatchItem={onPatchItem}
-          onRemoveItem={onRemoveItem}
-        />
-      ))}
+      <div
+        ref={setGroupsRef}
+        className={cn(
+          'min-h-[8px] rounded-[var(--radius-control)] transition-colors',
+          isOverGroups && 'bg-[var(--doc-sage-light)]',
+        )}
+      >
+        <SortableContext items={groupIds} strategy={verticalListSortingStrategy}>
+          {section.groups.map((group, groupIndex) => (
+            <GroupBlock
+              key={group.id}
+              group={group}
+              sectionId={section.id}
+              editing={editing}
+              currency={currency}
+              vatRate={vatRate}
+              pricesInclude={pricesInclude}
+              index={groupIndex}
+              count={section.groups.length}
+              onRename={onRenameGroup}
+              onRemove={onRemoveGroup}
+              onToggleGroup={onToggleGroup}
+              onAddItem={onAddItem}
+              onToggleItem={onToggleItem}
+              onPatchItem={onPatchItem}
+              onRemoveItem={onRemoveItem}
+              onNudgeItem={onNudgeItem}
+              onNudgeGroup={onNudgeGroup}
+            />
+          ))}
+        </SortableContext>
+      </div>
 
       {editing ? (
         <div className="mt-4">

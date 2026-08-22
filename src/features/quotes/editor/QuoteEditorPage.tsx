@@ -2,7 +2,10 @@ import { useCallback, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 import { AlertTriangle, Plus } from 'lucide-react';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useEditorStore } from './editor.store';
+import { QuoteDndProvider } from './dnd/QuoteDndProvider';
+import { useStableIds } from './dnd/useStableIds';
 import { useAutosave } from './useAutosave';
 import { EditorTopbar } from './components/EditorTopbar';
 import { QuoteHeader } from './components/QuoteHeader';
@@ -126,7 +129,13 @@ function ExistingQuoteEditor({ quoteId }: { quoteId: string }) {
     );
   }
 
-  return <EditorSurface createdAt={quote.data?.createdAt ?? new Date().toISOString()} onReload={() => void quote.refetch()} onRetry={saveNow} />;
+  return (
+    <EditorSurface
+      createdAt={quote.data?.createdAt ?? new Date().toISOString()}
+      onReload={() => void quote.refetch()}
+      onRetry={saveNow}
+    />
+  );
 }
 
 function EditorSurface({
@@ -166,6 +175,9 @@ function EditorSurface({
   const updateItem = useEditorStore((state) => state.updateItem);
   const toggleItem = useEditorStore((state) => state.toggleItem);
   const removeItem = useEditorStore((state) => state.removeItem);
+  const nudgeItem = useEditorStore((state) => state.nudgeItem);
+  const nudgeGroup = useEditorStore((state) => state.nudgeGroup);
+  const nudgeSection = useEditorStore((state) => state.nudgeSection);
 
   /**
    * `addItem` w store zawsze dodaje zwykla pozycje; dla rabatu poprawiamy `kind`
@@ -188,83 +200,94 @@ function EditorSurface({
     [addItemAction],
   );
 
+  const sectionIds = useStableIds(body?.sections ?? []);
+
   if (!body) return <EditorSkeleton />;
 
   const editing = mode === 'edit';
   const issueDate = body.issueDate ?? createdAt.slice(0, 10);
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
-      <EditorTopbar
-        number={number}
-        status={status}
-        mode={mode}
-        saveState={saveState}
-        lastSavedAt={lastSavedAt}
-        onNumberChange={setNumber}
-        onModeChange={setMode}
-        onRetry={onRetry}
-        onReload={onReload}
-      />
+    <QuoteDndProvider enabled={editing}>
+      <div className="flex h-full min-h-0 flex-col">
+        <EditorTopbar
+          number={number}
+          status={status}
+          mode={mode}
+          saveState={saveState}
+          lastSavedAt={lastSavedAt}
+          onNumberChange={setNumber}
+          onModeChange={setMode}
+          onRetry={onRetry}
+          onReload={onReload}
+        />
 
-      {saveState === 'conflict' ? (
-        <Alert variant="destructive" className="mx-7 mt-4 w-auto">
-          <AlertDescription>{pl.editor.conflict}</AlertDescription>
-        </Alert>
-      ) : null}
+        {saveState === 'conflict' ? (
+          <Alert variant="destructive" className="mx-7 mt-4 w-auto">
+            <AlertDescription>{pl.editor.conflict}</AlertDescription>
+          </Alert>
+        ) : null}
 
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        <div className="mx-auto grid w-full max-w-[1320px] items-start gap-7 px-7 pt-6 pb-14 lg:grid-cols-[1fr_336px]">
-          <div className="quote-doc quote-sheet min-w-0 px-10 py-11" data-mode={mode}>
-            <QuoteHeader
-              body={body}
-              editing={editing}
-              createdAt={createdAt}
-              onPatch={patchHeader}
-              onPatchClient={patchClient}
-            />
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          <div className="mx-auto grid w-full max-w-[1320px] items-start gap-7 px-7 pt-6 pb-14 lg:grid-cols-[1fr_336px]">
+            <div className="quote-doc quote-sheet min-w-0 px-10 py-11" data-mode={mode}>
+              <QuoteHeader
+                body={body}
+                editing={editing}
+                createdAt={createdAt}
+                onPatch={patchHeader}
+                onPatchClient={patchClient}
+              />
 
-            <div className="mt-10">
-              {body.sections.map((section) => (
-                <SectionBlock
-                  key={section.id}
-                  section={section}
-                  editing={editing}
-                  currency="PLN"
-                  vatRate={body.vatRate}
-                  pricesInclude={body.pricesInclude}
-                  onRename={renameSection}
-                  onRemove={removeSection}
-                  onAddGroup={addGroup}
-                  onRenameGroup={renameGroup}
-                  onRemoveGroup={removeGroup}
-                  onToggleGroup={toggleGroup}
-                  onAddItem={handleAddItem}
-                  onToggleItem={toggleItem}
-                  onPatchItem={updateItem}
-                  onRemoveItem={removeItem}
-                />
-              ))}
+              <div className="mt-10">
+                <SortableContext items={sectionIds} strategy={verticalListSortingStrategy}>
+                  {body.sections.map((section, sectionIndex) => (
+                    <SectionBlock
+                      key={section.id}
+                      section={section}
+                      editing={editing}
+                      currency="PLN"
+                      vatRate={body.vatRate}
+                      pricesInclude={body.pricesInclude}
+                      index={sectionIndex}
+                      count={body.sections.length}
+                      onRename={renameSection}
+                      onRemove={removeSection}
+                      onAddGroup={addGroup}
+                      onRenameGroup={renameGroup}
+                      onRemoveGroup={removeGroup}
+                      onToggleGroup={toggleGroup}
+                      onAddItem={handleAddItem}
+                      onToggleItem={toggleItem}
+                      onPatchItem={updateItem}
+                      onRemoveItem={removeItem}
+                      onNudgeItem={nudgeItem}
+                      onNudgeGroup={nudgeGroup}
+                      onNudgeSection={nudgeSection}
+                    />
+                  ))}
+                </SortableContext>
 
-              {editing ? (
-                <AddLink icon={Plus} onClick={addSection} className="text-[13px]">
-                  {pl.editor.addSection}
-                </AddLink>
+                {editing ? (
+                  <AddLink icon={Plus} onClick={addSection} className="text-[13px]">
+                    {pl.editor.addSection}
+                  </AddLink>
+                ) : null}
+              </div>
+
+              {body.preparedBy || editing ? (
+                <p className="mt-8 text-[12.5px] text-[var(--doc-ink-soft)] italic">
+                  {pl.editor.preparedBy}: {body.preparedBy}
+                </p>
               ) : null}
             </div>
 
-            {body.preparedBy || editing ? (
-              <p className="mt-8 text-[12.5px] text-[var(--doc-ink-soft)] italic">
-                {pl.editor.preparedBy}: {body.preparedBy}
-              </p>
-            ) : null}
-          </div>
-
-          <div className="lg:sticky lg:top-6">
-            <TotalsCard body={body} currency="PLN" issueDate={issueDate} />
+            <div className="lg:sticky lg:top-6">
+              <TotalsCard body={body} currency="PLN" issueDate={issueDate} />
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </QuoteDndProvider>
   );
 }

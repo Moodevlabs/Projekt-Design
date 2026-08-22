@@ -276,3 +276,97 @@ describe('editor.store — toggle grupy', () => {
     expect(store().saveState).toBe('saved');
   });
 });
+
+describe('editor.store — kolejność', () => {
+  const ids = () => {
+    const body = store().body;
+    if (!body) throw new Error('brak body');
+    const section = body.sections[0];
+    const group = section?.groups[0];
+    if (!section || !group) throw new Error('brak danych');
+    return { section, group, body };
+  };
+
+  it('przenosi pozycję z grupy do luźnych pozycji sekcji', () => {
+    const { section, group } = ids();
+    const itemId = group.items[0]?.id;
+    if (!itemId) throw new Error('brak pozycji');
+
+    store().moveItem({ itemId, toSectionId: section.id, toGroupId: null, toIndex: 0 });
+
+    const after = store().body?.sections[0];
+    expect(after?.items[0]?.id).toBe(itemId);
+    expect(after?.groups[0]?.items).toHaveLength(1);
+  });
+
+  it('przenosi pozycję między sekcjami', () => {
+    const { group } = ids();
+    const targetSectionId = store().body?.sections[1]?.id;
+    const itemId = group.items[0]?.id;
+    if (!targetSectionId || !itemId) throw new Error('brak danych');
+
+    store().moveItem({ itemId, toSectionId: targetSectionId, toGroupId: null, toIndex: 0 });
+
+    expect(store().body?.sections[1]?.items[0]?.id).toBe(itemId);
+  });
+
+  it('przenosi grupę do innej sekcji', () => {
+    const { group } = ids();
+    const targetSectionId = store().body?.sections[1]?.id;
+    if (!targetSectionId) throw new Error('brak sekcji');
+
+    store().moveGroup({ groupId: group.id, toSectionId: targetSectionId, toIndex: 0 });
+
+    expect(store().body?.sections[0]?.groups).toHaveLength(0);
+    expect(store().body?.sections[1]?.groups[0]?.id).toBe(group.id);
+  });
+
+  it('zmienia kolejność sekcji', () => {
+    const first = store().body?.sections[0]?.id;
+    if (!first) throw new Error('brak sekcji');
+
+    store().moveSection({ sectionId: first, toIndex: 1 });
+    expect(store().body?.sections[1]?.id).toBe(first);
+  });
+
+  it('przyciski góra/dół przesuwają o jedno miejsce', () => {
+    const { group } = ids();
+    const [pierwsza, druga] = group.items;
+    if (!pierwsza || !druga) throw new Error('brak pozycji');
+
+    store().nudgeItem(druga.id, 'up');
+    expect(store().body?.sections[0]?.groups[0]?.items[0]?.id).toBe(druga.id);
+  });
+
+  it('każda zmiana kolejności brudzi dokument', () => {
+    const { section } = ids();
+    expect(store().saveState).toBe('idle');
+    store().moveSection({ sectionId: section.id, toIndex: 1 });
+    expect(store().saveState).toBe('dirty');
+  });
+
+  it('ruch bez efektu NIE brudzi dokumentu', () => {
+    const { group } = ids();
+    const pierwsza = group.items[0];
+    if (!pierwsza) throw new Error('brak pozycji');
+
+    // Dojechanie do krawędzi listy nie może uruchamiać autozapisu.
+    store().nudgeItem(pierwsza.id, 'up');
+    expect(store().saveState).toBe('idle');
+
+    store().nudgeItem('nie-ma-takiej', 'down');
+    expect(store().saveState).toBe('idle');
+  });
+
+  it('nie wywraca się na szkicu immera (structuredClone proxy)', () => {
+    const { section, group } = ids();
+    expect(() => {
+      store().moveItem({
+        itemId: group.items[0]?.id ?? '',
+        toSectionId: section.id,
+        toGroupId: null,
+        toIndex: 0,
+      });
+    }).not.toThrow();
+  });
+});

@@ -1,11 +1,14 @@
 import { memo } from 'react';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { Trash2 } from 'lucide-react';
 import { InlineText } from './InlineText';
 import { InlineMoney } from './InlineMoney';
 import { ItemToggle } from './ItemToggle';
 import { DragHandle } from './DragHandle';
+import { MoveButtons } from './MoveButtons';
 import { formatMoney } from '@/domain/money';
-import type { Item } from '@/domain/quote';
+import type { Item, NudgeDirection } from '@/domain/quote';
 import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
 
@@ -13,9 +16,13 @@ export interface ItemRowProps {
   item: Item;
   editing: boolean;
   currency: string;
+  /** Pozycja w swojej liście — steruje wyłączaniem strzałek na krańcach. */
+  index: number;
+  count: number;
   onToggle: (itemId: string) => void;
   onPatch: (itemId: string, patch: Partial<Item>) => void;
   onRemove: (itemId: string) => void;
+  onNudge: (itemId: string, direction: NudgeDirection) => void;
 }
 
 /**
@@ -32,22 +39,58 @@ export const ItemRow = memo(function ItemRow({
   item,
   editing,
   currency,
+  index,
+  count,
   onToggle,
   onPatch,
   onRemove,
+  onNudge,
 }: ItemRowProps) {
   const isDiscount = item.kind === 'discount';
   const valueCents = Math.round(item.qty * item.unitPriceCents);
 
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: item.id,
+    data: { kind: 'item', itemId: item.id },
+    disabled: !editing,
+  });
+
   return (
     <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Translate.toString(transform), transition }}
       className={cn(
         'flex items-center gap-[14px] border-b py-[13px]',
         'border-[var(--doc-hair)]',
+        // Przeciągany wiersz zostaje widoczny, tylko przygaszony — jak w prototypie.
+        isDragging && 'relative z-10 opacity-40',
       )}
       data-testid="item-row"
     >
-      {editing ? <DragHandle /> : null}
+      {editing ? (
+        <>
+          <DragHandle
+            ref={setActivatorNodeRef}
+            label={`${pl.editor.dragItem}: ${item.name || pl.editor.newItemName}`}
+            {...attributes}
+            {...listeners}
+          />
+          <MoveButtons
+            label={item.name || pl.editor.newItemName}
+            canMoveUp={index > 0}
+            canMoveDown={index < count - 1}
+            onMove={(direction) => onNudge(item.id, direction)}
+          />
+        </>
+      ) : null}
 
       <ItemToggle
         checked={item.enabled}

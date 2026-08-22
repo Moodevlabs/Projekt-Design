@@ -1,12 +1,23 @@
 import { memo, useState } from 'react';
+import { useDroppable } from '@dnd-kit/core';
+import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { Trash2 } from 'lucide-react';
 import { InlineText } from './InlineText';
 import { ItemRow } from './ItemRow';
 import { ItemToggle } from './ItemToggle';
 import { AddLink } from './AddLink';
 import { DragHandle } from './DragHandle';
+import { MoveButtons } from './MoveButtons';
+import { useStableIds } from '../dnd/useStableIds';
 import { ConfirmDialog } from '@/components/shared';
-import { calcGroupTotals, type Group, type Item, type PricesInclude } from '@/domain/quote';
+import {
+  calcGroupTotals,
+  type Group,
+  type Item,
+  type NudgeDirection,
+  type PricesInclude,
+} from '@/domain/quote';
 import { formatMoney } from '@/domain/money';
 import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
@@ -18,6 +29,8 @@ export interface GroupBlockProps {
   currency: string;
   vatRate: number;
   pricesInclude: PricesInclude;
+  index: number;
+  count: number;
   onRename: (groupId: string, name: string) => void;
   onRemove: (groupId: string) => void;
   onToggleGroup: (groupId: string) => void;
@@ -25,6 +38,8 @@ export interface GroupBlockProps {
   onToggleItem: (itemId: string) => void;
   onPatchItem: (itemId: string, patch: Partial<Item>) => void;
   onRemoveItem: (itemId: string) => void;
+  onNudgeItem: (itemId: string, direction: NudgeDirection) => void;
+  onNudgeGroup: (groupId: string, direction: NudgeDirection) => void;
 }
 
 export const GroupBlock = memo(function GroupBlock({
@@ -34,6 +49,8 @@ export const GroupBlock = memo(function GroupBlock({
   currency,
   vatRate,
   pricesInclude,
+  index,
+  count,
   onRename,
   onRemove,
   onToggleGroup,
@@ -41,6 +58,8 @@ export const GroupBlock = memo(function GroupBlock({
   onToggleItem,
   onPatchItem,
   onRemoveItem,
+  onNudgeItem,
+  onNudgeGroup,
 }: GroupBlockProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const totals = calcGroupTotals(group, { vatRate, pricesInclude });
@@ -50,10 +69,51 @@ export const GroupBlock = memo(function GroupBlock({
   const allOn = group.items.length > 0 && enabledCount === group.items.length;
   const someOn = enabledCount > 0 && !allOn;
 
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: group.id, data: { kind: 'group', groupId: group.id }, disabled: !editing });
+
+  // Osobny cel upuszczenia na LISTĘ pozycji — bez niego nie dałoby się
+  // przenieść pozycji do pustej grupy, bo nie byłoby czego dotknąć.
+  const itemIds = useStableIds(group.items);
+
+  const { setNodeRef: setListRef, isOver } = useDroppable({
+    id: `list:${sectionId}:${group.id}`,
+    data: { kind: 'item-list', sectionId, groupId: group.id },
+  });
+
   return (
-    <div className="mt-[34px] [&_+_&]:border-t-[1.5px] [&_+_&]:border-[var(--doc-hair-strong)] [&_+_&]:pt-[26px]">
+    <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Translate.toString(transform), transition }}
+      className={cn(
+        'mt-[34px] [&_+_&]:border-t-[1.5px] [&_+_&]:border-[var(--doc-hair-strong)] [&_+_&]:pt-[26px]',
+        isDragging && 'relative z-10 opacity-40',
+      )}
+    >
       <div className="flex items-center gap-3 pb-1">
-        {editing ? <DragHandle /> : null}
+        {editing ? (
+          <>
+            <DragHandle
+              ref={setActivatorNodeRef}
+              label={`${pl.editor.dragGroup}: ${group.name}`}
+              {...attributes}
+              {...listeners}
+            />
+            <MoveButtons
+              label={group.name}
+              canMoveUp={index > 0}
+              canMoveDown={index < count - 1}
+              onMove={(direction) => onNudgeGroup(group.id, direction)}
+            />
+          </>
+        ) : null}
 
         <ItemToggle
           checked={allOn}
@@ -91,17 +151,30 @@ export const GroupBlock = memo(function GroupBlock({
         ) : null}
       </div>
 
-      {group.items.map((item) => (
-        <ItemRow
-          key={item.id}
-          item={item}
-          editing={editing}
-          currency={currency}
-          onToggle={onToggleItem}
-          onPatch={onPatchItem}
-          onRemove={onRemoveItem}
-        />
-      ))}
+      <div
+        ref={setListRef}
+        className={cn(
+          'min-h-[8px] rounded-[var(--radius-control)] transition-colors',
+          isOver && 'bg-[var(--doc-sage-light)]',
+        )}
+      >
+        <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
+          {group.items.map((item, itemIndex) => (
+            <ItemRow
+              key={item.id}
+              item={item}
+              editing={editing}
+              currency={currency}
+              index={itemIndex}
+              count={group.items.length}
+              onToggle={onToggleItem}
+              onPatch={onPatchItem}
+              onRemove={onRemoveItem}
+              onNudge={onNudgeItem}
+            />
+          ))}
+        </SortableContext>
+      </div>
 
       {editing ? (
         <div className="mt-2.5 flex items-center gap-4">
