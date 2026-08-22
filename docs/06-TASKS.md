@@ -133,16 +133,17 @@ Format: `- [ ] T-xx Nazwa` — czytaj: wymagane dokumenty → kryteria akceptacj
 - [x] **T-09 Drag & drop + przyciski góra/dół** (05-UI §5)
   @dnd-kit, keyboard sensor, `domain/quote/reorder.ts`.
   ✅ Przenoszenie pozycji między grupami i sekcjami, grup między sekcjami; a11y z klawiatury.
-  > **Zrobione.** `@dnd-kit` (pointer + keyboard sensor), czysta funkcja `dnd/drop-resolution.ts`, akcje kolejności w store, uchwyty przeciągania i przyciski ▲▼ na pozycjach, grupach i sekcjach.
-  > **✅ ZWERYFIKOWANE:** 293 testy jednostkowe (16 dla rozstrzygania celu upuszczenia, 5 dla przycisków ▲▼) + 35 integracyjnych. Na żywo: przestawienie strzałką zmieniło kolejność i **autozapis utrwalił ją w bazie**; przeniesienie **samą klawiaturą** (`Space` → `↓` → `Space`, bez myszy) przestawiło element i ogłosiło to komunikatem dla czytnika ekranu.
+  > **Zrobione.** `@dnd-kit` (pointer + keyboard sensor), czysta funkcja `dnd/drop-resolution.ts`, akcje kolejności w store, uchwyty przeciągania na pozycjach, grupach i sekcjach. Zmiana kolejności idzie **wyłącznie przeciąganiem**.
+  > **✅ ZWERYFIKOWANE:** 288 testów jednostkowych (16 dla rozstrzygania celu upuszczenia) + 35 integracyjnych. Na żywo: przestawienie zmieniło kolejność i **autozapis utrwalił ją w bazie**; przeniesienie **samą klawiaturą** (`Space` → `↓` → `Space`, bez myszy) przestawiło element i ogłosiło to komunikatem dla czytnika ekranu.
   > **Na co uważać:**
   > - **`SortableContext` kasuje memoizację, jeśli dostanie nową tablicę `items`.** Zmiana kontekstu przerenderowuje wszystkich konsumentów `useSortable` **niezależnie od `memo`** — naiwne `items.map(i => i.id)` w ciele komponentu sprawiało, że edycja jednej nazwy przerysowywała całą listę. Stąd `useStableIds`: referencja zmienia się tylko przy zmianie składu lub kolejności. Test `SectionBlock.perf.test.tsx` to pilnuje i **złapał tę regresję** przy podpinaniu DnD.
   > - **Funkcje z `reorder.ts` robią `structuredClone`, a proxy immera się nie sklonuje.** Store zdejmuje najpierw zwykły obiekt przez `current()`.
-  > - **Ruch bez efektu nie brudzi dokumentu** — domena zwraca to samo wejście, store porównuje referencje. Bez tego dojechanie strzałką do krańca listy budziłoby autozapis.
   > - Puste grupy i sekcje mają **własne cele upuszczenia** (`item-list`, `section-groups`) — bez nich nie dałoby się niczego do nich przenieść, bo nie byłoby czego dotknąć.
   > - Uchwyt przeciągania jest **przyciskiem z etykietą**, nie ikoną: sensor klawiatury potrzebuje czegoś, na co da się przejść tabem.
-  > - **Podgląd pod kursorem musi być ciemny.** Pierwsza wersja była biała (`bg-surface`) i na białej kartce wyceny po prostu znikała — a to jedyna informacja zwrotna w trakcie przeciągania. Pokazuje też **nazwę** przenoszonego elementu, nie sam jego rodzaj.
-  > - Przyciski ▲▼ to **równorzędna ścieżka**, nie ozdoba — przeciąganie bywa niewykonalne (trackpad, ograniczona motoryka).
+  > - **Podglądem przeciągania jest sam wiersz, a „trzymam" komunikuje kursor.** Wiersz zostaje w pełni czytelny (unosi się cieniem, nie blednie), a klasa `is-dragging` na `<body>` wymusza `grabbing` na całej stronie — wskaźnik dawno opuścił uchwyt. Klasa jest zdejmowana także przy odmontowaniu, inaczej kursor przykleiłby się do całej aplikacji (jest na to test).
+  > - **Nie ma przycisków ▲▼ ani plakietki pod kursorem** — obie rzeczy powstały, a potem zostały świadomie usunięte na rzecz samego przeciągania. Nie przywracaj ich bez powodu; gdyby miały wrócić, funkcje `nudge*` czekają gotowe i przetestowane w `domain/quote/reorder.ts`.
+  > - **Klawiaturowa ścieżka a11y zostaje mimo usunięcia strzałek**: uchwyt jest przyciskiem dostępnym tabem, a `KeyboardSensor` obsługuje `Space` → strzałki → `Space`.
+  > - **Ruch „w to samo miejsce" odsiewa `resolveDrop`, nie store.** Domena przy poprawnych id zawsze zwraca nowy dokument, więc store nie ma jak rozpoznać ruchu bez efektu — porównanie referencji chroni tylko przed nieznanym id.
 
 - [ ] **T-10 Biblioteka** (00-PRD §4.1)
   Strona biblioteki, `LibraryPicker` w edytorze, „zapisz do biblioteki", „zapisz wszystko", kaskada zmian do otwartej wyceny (dialog).
