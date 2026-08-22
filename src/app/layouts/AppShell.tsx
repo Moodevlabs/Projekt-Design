@@ -21,7 +21,7 @@ export function AppShell() {
   // więc standardowy topbar aplikacji tylko by go dublował.
   if (handle.hideTopbar) {
     return (
-      <div className="bg-canvas flex h-full min-h-0">
+      <div className="flex h-full min-h-0">
         <Sidebar />
         <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <Outlet />
@@ -31,14 +31,13 @@ export function AppShell() {
   }
 
   return (
-    <div className="bg-canvas flex h-full min-h-0">
+    <div className="flex h-full min-h-0">
       <Sidebar />
-      <div className="flex min-w-0 flex-1 flex-col">
+      {/* Treść przewija się POD paskiem — szkło ma co rozmywać. */}
+      <div className="relative flex min-w-0 flex-1 flex-col overflow-y-auto">
         <Topbar title={handle.title ?? pl.app.name} />
-        <main className="min-h-0 flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-[1280px] p-7">
-            <Outlet />
-          </div>
+        <main className="mx-auto w-full max-w-[1320px] px-7 pt-6 pb-12">
+          <Outlet />
         </main>
       </div>
     </div>

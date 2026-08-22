@@ -17,6 +17,7 @@ export default tseslint.config(
       'reference',
       'supabase/functions/**',
       'supabase/.temp/**',
+      '.claude/**',
     ],
   },
   js.configs.recommended,

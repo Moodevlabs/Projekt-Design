@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft, Eye, Pencil } from 'lucide-react';
 import { InlineText } from './InlineText';
 import { SaveIndicator } from './SaveIndicator';
-import { StatusBadge } from '@/components/shared';
+import { StatusMark } from '@/components/shared';
 import { Button } from '@/components/ui/button';
 import type { EditorMode, SaveState } from '../editor.store';
 import type { QuoteStatus } from '@/domain/quote';
@@ -32,7 +32,7 @@ export function EditorTopbar({
   onReload: () => void;
 }) {
   return (
-    <div className="border-hair bg-surface flex h-16 shrink-0 items-center gap-4 border-b px-7">
+    <div className="glass relative z-10 flex h-[68px] shrink-0 items-center gap-4 px-7">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
         <Link to={routes.quotes}>
           <ArrowLeft className="size-4" aria-hidden />
@@ -46,9 +46,9 @@ export function EditorTopbar({
           onCommit={onNumberChange}
           placeholder={pl.quotes.noNumber}
           ariaLabel={pl.quotes.number}
-          className="tabular w-52 rounded-[var(--radius-control)] px-2 py-1 text-sm font-medium hover:bg-surface-2 focus:bg-surface-2"
+          className="tabular w-52 rounded-[var(--radius-control)] px-2 py-1 text-sm font-medium hover:bg-white/60 focus:bg-white/70"
         />
-        <StatusBadge status={status} />
+        <StatusMark status={status} />
         <SaveIndicator
           state={saveState}
           lastSavedAt={lastSavedAt}
@@ -57,7 +57,7 @@ export function EditorTopbar({
         />
       </div>
 
-      <div className="border-hair bg-surface-2 ml-auto flex items-center rounded-[var(--radius-pill)] border p-0.5">
+      <div className="ml-auto flex items-center rounded-[var(--radius-pill)] border border-white/60 bg-white/45 p-0.5">
         {(['edit', 'preview'] as const).map((value) => {
           const Icon = value === 'edit' ? Pencil : Eye;
           const label = value === 'edit' ? pl.editor.edit : pl.editor.preview;

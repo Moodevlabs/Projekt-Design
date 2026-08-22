@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { EmptyState, Money, StatusBadge } from '@/components/shared';
+import { EmptyState, Money, StatusMark } from '@/components/shared';
 import { QuoteRowMenu } from './QuoteRowMenu';
 import { useQuotesList } from '@/data/queries/useQuotes';
 import type { QuoteSort } from '@/data/repos/quotes.repo';
@@ -239,7 +239,7 @@ export function QuotesListPage() {
                       {quote.clientName ?? pl.quotes.noClient}
                     </TableCell>
                     <TableCell>
-                      <StatusBadge status={quote.status} />
+                      <StatusMark status={quote.status} />
                     </TableCell>
                     <TableCell className="text-right">
                       <Money cents={quote.totalNetCents} currency={quote.currency} />

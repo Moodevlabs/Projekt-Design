@@ -108,6 +108,18 @@ Format: `- [ ] T-xx Nazwa` — czytaj: wymagane dokumenty → kryteria akceptacj
   > - Pola wielolinijkowe mają własny auto-rozmiar — `contentEditable` dawał to za darmo, `<textarea>` nie.
   > - Trasa edytora ustawia `handle.hideTopbar`, bo edytor ma własny pasek.
 
+- [x] **T-08a Przebudowa systemu wizualnego** (05-UI) — *zadanie wstawione na życzenie w trakcie Fazy 1*
+  ✅ Nowoczesny „liquid glass", rozwijany sidebar z animowanym wskaźnikiem, pulpit bez szablonowych kafelków.
+  > **Teza:** **chrom aplikacji jest ze szkła, dokument jest z papieru.** Powłoka (sidebar, paski, karty) cofa się; wycena jest ciepłym, matowym arkuszem leżącym na podłożu i wychodzi do przodu. Szkło oprawia papier — to koduje strukturę produktu (narzędzie kontra artefakt dla klienta).
+  > **Na co uważać:**
+  > - **Szkło to nie sam blur.** Potrzebne są cztery rzeczy naraz: rozmycie, **podbicie nasycenia** (bez tego wychodzi brudna szarość), włos obramowania jaśniejszy u góry niż u dołu (odblask, robiony maską na `::before`, nie `border`) i cień w kolorze atramentu, nie czerni. Do tego **różnica jasności pod spodem** — na płaskim tle szkło nie ma czego załamać i wygląda jak biały div.
+  > - **Kulka nawigacji to dwa zagnieżdżone elementy.** Zewnętrzny robi przesunięcie (`transition`), wewnętrzny rozciągnięcie (`animation`). Na jednym elemencie biłyby się o `transform`.
+  > - **Znacznik statusu nie jest pigułką i nie ma być.** Status wyceny to pozycja w ciągu (szkic → wysłana → rozstrzygnięcie), a nie tag z chmury. Trzyodcinkowy tor pokazuje postęp i daje się skanować pionowo w kolumnie. Znaczenie niosą wypełnienie, grubość napisu i samo słowo — **kolor nie niesie tu żadnej informacji**, więc działa też dla osób nierozróżniających barw.
+  > - **Kolorystyka jest tymczasowa: szarobiel.** Chrom ma nie konkurować z dokumentem. Docelowa paleta powstanie na końcu budowy (T-17). Nie dokładaj tu akcentów kolorystycznych „bo pusto".
+  > - Fonty (`Inter` + `Instrument Sans` na tytuły, etykiety i **liczby**) są hostowane u siebie przez `@fontsource-variable` — w aplikacji desktopowej nie zależymy od sieci ani nie rozluźniamy CSP dla Google Fonts.
+  > - Trasa może ustawić `handle.hideTopbar` — korzysta z tego edytor, który ma własny pasek.
+  > - Jedyny mocny efekt na pulpicie to **osiadające liczby** (`useCountUp`, rAF, ease-out, `prefers-reduced-motion` → od razu wynik). To nawiązanie do sedna produktu: sumy, która przelicza się po przełączeniu pozycji. Nie dokładaj drugiej animacji „dla równowagi".
+
 - [ ] **T-09 Drag & drop + przyciski góra/dół** (05-UI §5)
   @dnd-kit, keyboard sensor, `domain/quote/reorder.ts`.
   ✅ Przenoszenie pozycji między grupami i sekcjami, grup między sekcjami; a11y z klawiatury.

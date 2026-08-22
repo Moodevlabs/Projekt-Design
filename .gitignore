@@ -19,3 +19,5 @@ src-tauri/gen
 
 supabase/.branches
 supabase/.temp
+
+.claude/worktrees

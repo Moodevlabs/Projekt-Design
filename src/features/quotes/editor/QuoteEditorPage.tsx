@@ -213,9 +213,9 @@ function EditorSurface({
         </Alert>
       ) : null}
 
-      <div className="quote-doc min-h-0 flex-1 overflow-y-auto" data-mode={mode}>
-        <div className="mx-auto grid w-full max-w-[1280px] gap-8 p-7 lg:grid-cols-[1fr_340px]">
-          <div className="min-w-0">
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        <div className="mx-auto grid w-full max-w-[1320px] items-start gap-7 px-7 pt-6 pb-14 lg:grid-cols-[1fr_336px]">
+          <div className="quote-doc quote-sheet min-w-0 px-10 py-11" data-mode={mode}>
             <QuoteHeader
               body={body}
               editing={editing}
@@ -260,7 +260,7 @@ function EditorSurface({
             ) : null}
           </div>
 
-          <div className="lg:sticky lg:top-7 lg:self-start">
+          <div className="lg:sticky lg:top-6">
             <TotalsCard body={body} currency="PLN" issueDate={issueDate} />
           </div>
         </div>

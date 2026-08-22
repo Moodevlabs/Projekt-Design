@@ -15,12 +15,12 @@ function Line({
 }) {
   return (
     <div className="flex items-baseline justify-between gap-6 text-[12.5px]">
-      <span className="text-[var(--doc-ink-soft)]">{label}</span>
+      <span className="text-[var(--ink-soft)]">{label}</span>
       <span
         className={cn(
           'amount font-semibold',
-          tone === 'discount' && 'text-[var(--doc-terracotta)]',
-          tone === 'muted' && 'text-[var(--doc-ink-soft)]',
+          tone === 'discount' && 'text-[var(--discount)]',
+          tone === 'muted' && 'text-[var(--ink-soft)]',
         )}
       >
         {value}
@@ -52,10 +52,7 @@ export function TotalsCard({
 
   return (
     <aside
-      className={cn(
-        'rounded-[14px] border border-[var(--doc-hair)] bg-[var(--doc-surface)] p-[18px_24px]',
-        'shadow-[0_4px_24px_rgba(33,32,28,0.06)]',
-      )}
+      className={cn('card-surface px-6 py-5')}
     >
       <div className="space-y-2">
         <Line label={pl.editor.itemsTotal} value={formatMoney(totals.itemsCents, currency)} />
@@ -68,8 +65,8 @@ export function TotalsCard({
         ) : null}
       </div>
 
-      <div className="mt-3.5 border-t border-[var(--doc-hair)] pt-3.5">
-        <p className="text-[11px] font-semibold tracking-[0.1em] text-[var(--doc-ink-soft)] uppercase">
+      <div className="mt-3.5 border-t border-[var(--hair)] pt-3.5">
+        <p className="text-[11px] font-semibold tracking-[0.1em] text-[var(--ink-soft)] uppercase">
           {pl.editor.net}
         </p>
         <p className="amount mt-1 text-[28px] leading-none font-black">
@@ -78,7 +75,7 @@ export function TotalsCard({
       </div>
 
       {showVat ? (
-        <div className="mt-3.5 space-y-2 border-t border-[var(--doc-hair)] pt-3.5">
+        <div className="mt-3.5 space-y-2 border-t border-[var(--hair)] pt-3.5">
           <Line
             label={`${pl.editor.vat} ${body.vatRate}%`}
             value={formatMoney(totals.vatCents, currency)}
@@ -88,7 +85,7 @@ export function TotalsCard({
         </div>
       ) : null}
 
-      <p className="mt-4 text-[12px] text-[var(--doc-ink-soft)]">
+      <p className="mt-4 text-[12px] text-[var(--ink-soft)]">
         {pl.editor.validUntil}: {formatDate(validUntil)}
       </p>
     </aside>

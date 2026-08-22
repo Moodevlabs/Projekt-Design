@@ -16,6 +16,8 @@ export const pl = {
     brand: 'Branding',
     settings: 'Ustawienia',
     subscription: 'Subskrypcja',
+    collapse: 'Zwiń panel',
+    expand: 'Rozwiń panel',
   },
   common: {
     add: 'Dodaj',
@@ -155,6 +157,31 @@ export const pl = {
     quickActions: 'Szybkie akcje',
     thisMonth: 'w tym miesiącu',
     noAcceptanceData: 'brak rozstrzygniętych',
+
+    // Bilans miesiąca — prawa szyna pulpitu czyta liczby jak podsumowanie wyceny.
+    created: 'Wyceny utworzone',
+    sentToClients: 'Wysłane do klientów',
+    responses: 'Odpowiedzi klientów',
+    settledOnYes: (accepted: number, settled: number) => `${accepted} z ${settled} na TAK`,
+    noResponses: 'Klienci jeszcze nie odpowiedzieli',
+    monthEmptyHint: 'Ten miesiąc zaczyna się od pierwszej wyceny.',
+
+    // Pusty pulpit — zaproszenie, nie komunikat o braku.
+    emptyTitle: 'Zbuduj pierwszą wycenę',
+    emptyLead:
+      'Dodajesz pozycje, klient przełącza TAK/NIE, a suma przelicza się sama. Gotową ofertę wysyłasz jako brandowany PDF.',
+    demoYes: 'TAK',
+    demoNo: 'NIE',
+    demoItemConcept: 'Projekt koncepcyjny',
+    demoItemViz: 'Wizualizacje 3D',
+    demoItemSupervision: 'Nadzór autorski',
+    demoTotal: 'Razem netto',
+
+    // Karta subskrypcji na pulpicie.
+    trialDaysLeft: (days: number) =>
+      days === 1 ? 'Został 1 dzień okresu próbnego' : `Zostało ${days} dni okresu próbnego`,
+    renewalOn: (date: string) => `Odnowienie ${date}`,
+    noSubscription: 'Brak aktywnej subskrypcji',
   },
   library: {
     title: 'Biblioteka',
