@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 /**
@@ -58,6 +58,22 @@ export function InlineText({
     setDraftBoth(committed.current);
   };
 
+  /**
+   * `contentEditable` rosl z trescia za darmo; `<textarea>` nie — bez tego
+   * dluzsze opisy zostalyby uciete albo dostalyby pasek przewijania.
+   */
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const resize = useCallback(() => {
+    const node = textareaRef.current;
+    if (!node) return;
+    node.style.height = 'auto';
+    node.style.height = `${node.scrollHeight}px`;
+  }, []);
+
+  useLayoutEffect(() => {
+    if (multiline) resize();
+  }, [draft, multiline, resize]);
+
   const shared = {
     value: draft,
     placeholder,
@@ -79,7 +95,9 @@ export function InlineText({
     return (
       <textarea
         {...shared}
-        rows={2}
+        ref={textareaRef}
+        rows={1}
+        style={{ resize: 'none', overflow: 'hidden' }}
         onKeyDown={(event) => {
           if (event.key === 'Escape') {
             event.preventDefault();

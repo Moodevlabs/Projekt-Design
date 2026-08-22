@@ -87,9 +87,26 @@ Format: `- [ ] T-xx Nazwa` — czytaj: wymagane dokumenty → kryteria akceptacj
   > - Pusta lista rozróżnia „nie masz jeszcze wycen" od „filtr nic nie zwrócił" — są na to osobne teksty i test.
   > **Nie przeklikane ręcznie:** zawartość rozwijanego menu ⋯ (Radix otwiera się na `pointerdown`, nie da się tego wyklikać skryptem). Obecność przycisku per wiersz pokrywa test jednostkowy, a same akcje `duplicateQuote`/`archiveQuote` mają testy integracyjne na żywej bazie.
 
-- [ ] **T-08 Edytor wyceny — rdzeń** (05-UI §3, 01-ARCHITECTURE §3)
+- [x] **T-08 Edytor wyceny — rdzeń** (05-UI §3, 01-ARCHITECTURE §3)
   `editor.store.ts` (Zustand+immer), `QuoteHeader`, `SectionBlock`, `GroupBlock`, `ItemRow`, `TotalsCard`, tryb edycja/podgląd, inline edit, toggle, dodawanie/usuwanie, autosave z wskaźnikiem, numer z `next_quote_number`.
   ✅ Parytet funkcjonalny z `projekt.html` bez biblioteki/DnD/PDF. 300 pozycji bez laga (profil React).
+  > **Zrobione.** `editor.store.ts` (Zustand+immer), `useAutosave`, `QuoteEditorPage`, `EditorTopbar`, `QuoteHeader`, `SectionBlock`, `GroupBlock`, `ItemRow`, `TotalsCard`, `ItemToggle`, `InlineText`, `InlineMoney`, `AddLink`, `DragHandle`, `SaveIndicator`.
+  > **✅ ZWERYFIKOWANE:** 227 testów jednostkowych + 35 integracyjnych; obejrzane na żywo na wycenie z seeda — przełączenie pozycji w podglądzie przeliczyło sumy i **autozapis utrwalił zmianę w bazie** (`enabled:false`, totale przeliczone, `updated_at` podbity).
+  >
+  > **Decyzje wobec prototypu (z analizy `reference/projekt.html`):**
+  > - **Rabat to `kind` pozycji, nie flaga sekcji.** W prototypie rabat mógł istnieć tylko w dedykowanej sekcji i nie dało się go utworzyć z UI (`newItem(rabat)` ignorował argument). U nas jest `+ Dodaj rabat` przy każdej sekcji i grupie.
+  > - **`Group.enabled` NIE istnieje w schemacie** — stan przełącznika grupy wyliczamy z pozycji (`wszystkie` / `żadna` / `część` → stan pośredni). Prototypowy `recalc()` i tak nigdy nie czytał `room.on`.
+  > - **`issueDate` dodane do `QuoteBodySchema`** (opcjonalne, `null` → UI pokazuje `created_at`). Prototyp pozwalał wpisać dowolną datę; wycenę przygotowuje się nieraz z inną datą niż dzień utworzenia.
+  > - Pozostałe świadome uproszczenia (`section.extra`, stopka per wycena) — w `docs/IDEAS.md`.
+  >
+  > **Na co uważać:**
+  > - **Przełącznik TAK/NIE działa także w podglądzie** — to nie przeoczenie, tylko sedno produktu. W podglądzie znikają wszystkie inne kontrolki (test to pilnuje).
+  > - **Wyłączona pozycja tylko zmienia kolor** nazwy i kwoty. Bez `opacity`, bez przekreślenia — klient ma czytać, z czego rezygnuje. Jest test, który blokuje „poprawienie" tego na wyszarzenie.
+  > - **Ramki pól istnieją zawsze, tylko są przezroczyste** poza trybem edycji — dzięki temu przełączenie trybu nie przesuwa layoutu ani o piksel.
+  > - **Konflikt `updated_at` jest trwały** (`hasConflict`): po nim autozapis milczy aż do przeładowania. Bez tego kolejna edycja odblokowałaby zapis i nadpisała cudze zmiany.
+  > - **Wydajność stoi na dwóch rzeczach naraz**: strukturalnym współdzieleniu z immera (nietknięte gałęzie zachowują referencję) i `memo` na `ItemRow`/`GroupBlock`/`SectionBlock`. Test `SectionBlock.perf.test.tsx` sprawdza mechanizm — zweryfikowałem, że **zawodzi po usunięciu `memo`**. Sesji React Profilera nie uruchamiałem.
+  > - Pola wielolinijkowe mają własny auto-rozmiar — `contentEditable` dawał to za darmo, `<textarea>` nie.
+  > - Trasa edytora ustawia `handle.hideTopbar`, bo edytor ma własny pasek.
 
 - [ ] **T-09 Drag & drop + przyciski góra/dół** (05-UI §5)
   @dnd-kit, keyboard sensor, `domain/quote/reorder.ts`.

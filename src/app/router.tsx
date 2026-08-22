@@ -38,8 +38,16 @@ const routeTree = [
             children: [
               { index: true, element: <DashboardPage />, handle: { title: pl.dashboard.title } },
               { path: 'wyceny', element: <QuotesListPage />, handle: { title: pl.quotes.title } },
-              { path: 'wyceny/nowa', element: <QuoteEditorPage />, handle: { title: pl.quotes.new } },
-              { path: 'wyceny/:id', element: <QuoteEditorPage />, handle: { title: pl.quotes.title } },
+              {
+                path: 'wyceny/nowa',
+                element: <QuoteEditorPage />,
+                handle: { title: pl.quotes.new, hideTopbar: true },
+              },
+              {
+                path: 'wyceny/:id',
+                element: <QuoteEditorPage />,
+                handle: { title: pl.quotes.title, hideTopbar: true },
+              },
               { path: 'klienci', element: <ClientsPage />, handle: { title: pl.nav.clients } },
               { path: 'biblioteka', element: <LibraryPage />, handle: { title: pl.library.title } },
               { path: 'szablony', element: <TemplatesPage />, handle: { title: pl.templates.title } },

@@ -59,6 +59,16 @@ export const QuoteBodySchema = z.object({
   intro: z.string().default(''),
   projectDescription: z.string().default(''),
   client: QuoteClientSchema.default({}),
+  /**
+   * Data wystawienia (ISO `YYYY-MM-DD`). `null` = uzyj `quotes.created_at`.
+   * Wycene przygotowuje sie nieraz z inna data niz dzien utworzenia rekordu,
+   * dlatego pole jest edytowalne — tak jak w prototypie.
+   */
+  issueDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Data musi byc w formacie RRRR-MM-DD')
+    .nullable()
+    .default(null),
   validDays: z.number().int().nonnegative().default(7),
   /** Stawka VAT w procentach (0–100). Ograniczona, żeby calc nie dzielił przez zero. */
   vatRate: z.number().min(0).max(100).default(23),

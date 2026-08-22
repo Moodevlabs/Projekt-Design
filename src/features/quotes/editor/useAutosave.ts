@@ -26,7 +26,7 @@ export function useAutosave() {
 
   const flush = useCallback(async () => {
     const state = useEditorStore.getState();
-    const { quoteId, body, lastSeenUpdatedAt, hasConflict } = state;
+    const { quoteId, body, number, lastSeenUpdatedAt, hasConflict } = state;
 
     if (!quoteId || !body || !lastSeenUpdatedAt) return;
     // `hasConflict`, a nie `saveState === 'conflict'`: kolejna edycja przestawia
@@ -38,7 +38,12 @@ export function useAutosave() {
     state.markSaving();
 
     try {
-      const saved = await save.mutateAsync({ id: quoteId, body, lastSeenUpdatedAt });
+      const saved = await save.mutateAsync({
+        id: quoteId,
+        body,
+        lastSeenUpdatedAt,
+        ...(number ? { number } : {}),
+      });
       useEditorStore.getState().markSaved(saved.updatedAt, new Date().toISOString());
     } catch (error) {
       if (error instanceof ConflictError) {
@@ -62,7 +67,8 @@ export function useAutosave() {
   // `idle`), a immer gwarantuje, że przełączenie trybu podglądu nie rusza `body`.
   useEffect(() => {
     const unsubscribe = useEditorStore.subscribe((state, previous) => {
-      if (state.body === previous.body) return;
+      // Numer nie siedzi w `body`, wiec jego zmiane sledzimy osobno.
+      if (state.body === previous.body && state.number === previous.number) return;
       if (state.saveState !== 'dirty' || state.hasConflict) return;
 
       if (timer.current) clearTimeout(timer.current);

@@ -182,6 +182,8 @@ export interface SaveQuoteInput {
   /** `updated_at` ostatnio widziany przez klienta — podstawa blokady optymistycznej. */
   lastSeenUpdatedAt: string;
   status?: QuoteStatus;
+  /** Numer nadaje baza, ale uzytkownik moze go nadpisac (05-UI §3). */
+  number?: string;
 }
 
 /**
@@ -204,6 +206,7 @@ export async function saveQuote(input: SaveQuoteInput): Promise<Quote> {
         total_net_cents: totals.netCents,
         total_gross_cents: totals.grossCents,
         ...(input.status ? { status: input.status } : {}),
+        ...(input.number !== undefined ? { number: input.number } : {}),
       })
       .eq('id', input.id)
       .eq('updated_at', input.lastSeenUpdatedAt)

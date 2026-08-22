@@ -27,7 +27,7 @@ function setup(initialCents = 120_000) {
   }
 
   render(<Harness />);
-  return { onCommit, input: screen.getByLabelText('Cena') };
+  return { onCommit, input: screen.getByLabelText<HTMLInputElement>('Cena') };
 }
 
 describe('InlineMoney', () => {

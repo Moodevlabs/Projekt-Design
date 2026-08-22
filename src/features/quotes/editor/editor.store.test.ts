@@ -237,3 +237,42 @@ describe('editor.store — wydajnosc (tozsamosc obiektow)', () => {
     expect(store().body?.sections[0]?.items[0]?.name).toBe('Zmieniona');
   });
 });
+
+describe('editor.store — toggle grupy', () => {
+  it('wlacza wszystko, gdy czesc jest wylaczona', () => {
+    const group = store().body?.sections[0]?.groups[0];
+    const groupId = group?.id;
+    const firstId = group?.items[0]?.id;
+    if (!groupId || !firstId) throw new Error('brak grupy');
+
+    store().toggleItem(firstId);
+    expect(store().body?.sections[0]?.groups[0]?.items.map((i) => i.enabled)).toEqual([
+      false,
+      true,
+    ]);
+
+    store().toggleGroup(groupId);
+    expect(store().body?.sections[0]?.groups[0]?.items.every((i) => i.enabled)).toBe(true);
+  });
+
+  it('gasi wszystko, gdy wszystko bylo wlaczone', () => {
+    const groupId = store().body?.sections[0]?.groups[0]?.id;
+    if (!groupId) throw new Error('brak grupy');
+
+    store().toggleGroup(groupId);
+    expect(store().body?.sections[0]?.groups[0]?.items.some((i) => i.enabled)).toBe(false);
+  });
+
+  it('pusta grupa nie ma czego wlaczyc i nie brudzi dokumentu', () => {
+    const sectionId = store().body?.sections[1]?.id;
+    if (!sectionId) throw new Error('brak sekcji');
+
+    store().addGroup(sectionId);
+    const emptyId = store().body?.sections[1]?.groups[0]?.id;
+    if (!emptyId) throw new Error('brak grupy');
+
+    store().markSaved('2026-08-01T12:00:00Z', '2026-08-01T12:00:00Z');
+    store().toggleGroup(emptyId);
+    expect(store().saveState).toBe('saved');
+  });
+});

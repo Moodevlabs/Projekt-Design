@@ -47,6 +47,8 @@ export function newQuoteBody(partial: Partial<QuoteBody> = {}): QuoteBody {
     intro: '',
     projectDescription: '',
     client: { name: '', phone: '', email: '' },
+    // `null` = UI pokaze `quotes.created_at`; edytor moze to nadpisac.
+    issueDate: null,
     validDays: 7,
     vatRate: 23,
     pricesInclude: 'net',

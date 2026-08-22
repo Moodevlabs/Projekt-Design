@@ -6,7 +6,7 @@ import { InlineText } from './InlineText';
 function setup(value = 'Blat kuchenny') {
   const onCommit = vi.fn();
   render(<InlineText value={value} onCommit={onCommit} ariaLabel="Nazwa" />);
-  return { onCommit, input: screen.getByLabelText('Nazwa') };
+  return { onCommit, input: screen.getByLabelText<HTMLInputElement>('Nazwa') };
 }
 
 describe('InlineText', () => {

@@ -51,6 +51,7 @@ export interface EditorState {
   markConflict: () => void;
 
   // --- naglowek ---
+  setNumber: (number: string) => void;
   patchHeader: (patch: Partial<QuoteBody>) => void;
   patchClient: (patch: Partial<QuoteBody['client']>) => void;
 
@@ -62,6 +63,13 @@ export interface EditorState {
   addGroup: (sectionId: string) => void;
   renameGroup: (groupId: string, name: string) => void;
   removeGroup: (groupId: string) => void;
+
+  /**
+   * Wlacza albo wylacza wszystkie pozycje grupy naraz.
+   * Jedna akcja, nie petla po `toggleItem` — inaczej w historii zmian
+   * (i w autozapisie) zrobiloby sie z tego kilkanascie osobnych operacji.
+   */
+  toggleGroup: (groupId: string) => void;
 
   /** `groupId: null` = pozycja lezy luzem w sekcji. */
   addItem: (sectionId: string, groupId: string | null) => void;
@@ -165,6 +173,12 @@ export const useEditorStore = create<EditorState>()(
         state.hasConflict = true;
       }),
 
+    setNumber: (number) =>
+      set((state) => {
+        state.number = number;
+        state.saveState = 'dirty';
+      }),
+
     patchHeader: (patch) =>
       set((state) => {
         if (!state.body) return;
@@ -226,6 +240,18 @@ export const useEditorStore = create<EditorState>()(
         for (const section of state.body.sections) {
           section.groups = section.groups.filter((g) => g.id !== groupId);
         }
+        state.saveState = 'dirty';
+      }),
+
+    toggleGroup: (groupId) =>
+      set((state) => {
+        if (!state.body) return;
+        const group = findGroup(state.body, groupId);
+        if (!group || group.items.length === 0) return;
+
+        // Czesc wlaczona -> wlaczamy wszystko. Wszystko wlaczone -> gasimy.
+        const next = !group.items.every((item) => item.enabled);
+        for (const item of group.items) item.enabled = next;
         state.saveState = 'dirty';
       }),
 

@@ -112,3 +112,20 @@ describe('parseQuoteBody', () => {
     expect(result.error).not.toContain(':');
   });
 });
+
+describe('QuoteBodySchema — data wystawienia', () => {
+  it('domyslnie jest pusta, zeby UI moglo pokazac created_at', () => {
+    const body = QuoteBodySchema.parse({});
+    expect(body.issueDate).toBeNull();
+  });
+
+  it('przyjmuje date w formacie ISO', () => {
+    const body = QuoteBodySchema.parse({ issueDate: '2026-08-22' });
+    expect(body.issueDate).toBe('2026-08-22');
+  });
+
+  it('odrzuca format polski, zeby do bazy nie trafil niesortowalny string', () => {
+    const result = QuoteBodySchema.safeParse({ issueDate: '22.08.2026' });
+    expect(result.success).toBe(false);
+  });
+});

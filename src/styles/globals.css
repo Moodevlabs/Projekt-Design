@@ -133,3 +133,53 @@
     @apply bg-surface rounded-[var(--radius-card)] shadow-[var(--shadow-card)];
   }
 }
+
+/* ---------------------------------------------------------------
+   Paleta samego DOKUMENTU wyceny — świadomie inna niż chrom aplikacji.
+   Wycena to brandowana kartka (ciepły papier), a nie panel narzędzi;
+   te wartości są zgodne z prototypem i z domyślnymi z `brand_kits`.
+   T-12 nadpisze je inline ze stylu brand kitu, dlatego są zmiennymi.
+   --------------------------------------------------------------- */
+.quote-doc {
+  --doc-bg: #faf7f1;
+  --doc-surface: #ffffff;
+  --doc-ink: #21201c;
+  --doc-ink-soft: #6b6862;
+  --doc-hair: #e1dcd0;
+  --doc-hair-strong: #cbc4b2;
+  --doc-sage: #4a4842;
+  --doc-sage-light: #e7e5de;
+  --doc-terracotta: #b9634a;
+  --doc-toggle-off: #dcd7c9;
+  --doc-price-off: #b9b4a6;
+  --doc-danger-wash: #f0e4e0;
+
+  background: var(--doc-bg);
+  color: var(--doc-ink);
+}
+
+/* Kwoty zawsze tabularne — kolumna nie skacze przy zmianie cyfr. */
+.quote-doc .amount {
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+ * Pola edytowalne: ramka istnieje ZAWSZE, tylko jest przezroczysta poza
+ * trybem edycji. Dzięki temu przełączenie edycja/podgląd nie przesuwa
+ * layoutu ani o piksel (trik przeniesiony wprost z prototypu).
+ */
+.quote-doc .inline-field {
+  border: 1px solid transparent;
+  border-radius: 3px;
+  outline: none;
+}
+
+.quote-doc[data-mode='edit'] .inline-field:hover,
+.quote-doc[data-mode='edit'] .inline-field:focus {
+  background: var(--doc-sage-light);
+}
+
+.quote-doc[data-mode='edit'] .price-field {
+  border-color: var(--doc-hair);
+  background: #fff;
+}
