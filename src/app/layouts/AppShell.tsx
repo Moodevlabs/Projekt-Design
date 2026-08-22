@@ -1,6 +1,7 @@
 import { Outlet, useMatches } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
+import { WorkspaceGuard } from './WorkspaceGuard';
 import { pl } from '@/i18n/pl';
 
 type RouteHandle = { title?: string; hideTopbar?: boolean };
@@ -24,7 +25,9 @@ export function AppShell() {
       <div className="flex h-full min-h-0">
         <Sidebar />
         <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
-          <Outlet />
+          <WorkspaceGuard>
+            <Outlet />
+          </WorkspaceGuard>
         </main>
       </div>
     );
@@ -37,7 +40,9 @@ export function AppShell() {
       <div className="relative flex min-w-0 flex-1 flex-col overflow-y-auto">
         <Topbar title={handle.title ?? pl.app.name} />
         <main className="mx-auto w-full max-w-[1320px] px-7 pt-6 pb-12">
-          <Outlet />
+          <WorkspaceGuard>
+            <Outlet />
+          </WorkspaceGuard>
         </main>
       </div>
     </div>

@@ -1,6 +1,12 @@
 import { render, screen } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+// Powłokę testujemy w izolacji od warstwy danych — `WorkspaceGuard` pyta
+// o workspace, a to ciągnęłoby za sobą TanStack Query i Supabase.
+vi.mock('@/data/queries/useWorkspace', () => ({
+  useWorkspace: () => ({ isError: false, error: null }),
+}));
 import { AppShell } from './AppShell';
 import { AuthStub } from '@/features/auth/test-utils';
 import { TooltipProvider } from '@/components/ui/tooltip';

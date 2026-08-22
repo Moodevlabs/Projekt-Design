@@ -246,6 +246,10 @@ export const pl = {
     generic: 'Coś poszło nie tak.',
     notFound: 'Nie znaleziono strony.',
     notConfigured: 'Brak konfiguracji Supabase — uzupełnij plik .env.',
+    workspaceTitle: 'Nie udało się wczytać danych firmy',
+    workspaceHint:
+      'Aplikacja połączyła się z bazą, ale nie znalazła Twojego workspace. Najczęściej znaczy to, że baza nie ma zaaplikowanych migracji albo aplikacja wskazuje na inny projekt Supabase niż myślisz.',
+    connectedTo: (url: string) => `Adres bazy: ${url}`,
   },
 } as const;
 
