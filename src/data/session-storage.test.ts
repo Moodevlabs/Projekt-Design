@@ -49,7 +49,7 @@ describe('createSessionStorage', () => {
   describe('w Tauri', () => {
     beforeEach(() => tauriMock.runningInTauri.mockReturnValue(true));
 
-    it('używa keychaina systemowego', async () => {
+    it('zapisuje sesję do keychaina systemowego', async () => {
       tauriMock.secretSet.mockResolvedValue();
       tauriMock.secretGet.mockResolvedValue('token-z-keychaina');
 
@@ -57,7 +57,8 @@ describe('createSessionStorage', () => {
       await storage.setItem('anzorge-auth', 'token');
 
       expect(tauriMock.secretSet).toHaveBeenCalledWith('anzorge-auth', 'token');
-      expect(await storage.getItem('anzorge-auth')).toBe('token-z-keychaina');
+      // Odczyt po zapisie oddaje to, co zapisano — nie starą zawartość keychaina.
+      expect(await storage.getItem('anzorge-auth')).toBe('token');
     });
 
     it('schodzi na pamięć, gdy keychain jest niedostępny', async () => {
@@ -69,6 +70,59 @@ describe('createSessionStorage', () => {
 
       // Aplikacja ma działać dalej — użytkownik zaloguje się ponownie po restarcie.
       expect(await storage.getItem('anzorge-auth')).toBe('token');
+    });
+
+    it('REGRESJA: nieudany zapis nie może unieważnić świeżej sesji', async () => {
+      // Tak wyglądała awaria: zapis do keychaina padał (sesja Supabase nie
+      // mieściła się w limicie wpisu Windows), ale odczyt nadal pytał keychain,
+      // który uczciwie odpowiadał „brak wpisu". Sesja znikała tuż po zalogowaniu,
+      // a supabase-js wysyłał kolejne zapytania jako `anon` — użytkownik widział
+      // aplikację bez żadnych danych.
+      tauriMock.secretSet.mockRejectedValue(new Error('wartość za duża'));
+      tauriMock.secretGet.mockResolvedValue(null);
+
+      const storage = createSessionStorage();
+      await storage.setItem('anzorge-auth', 'swieza-sesja');
+
+      expect(await storage.getItem('anzorge-auth')).toBe('swieza-sesja');
+    });
+
+    it('czyta z pamięci zamiast bić po keychainie przy każdym żądaniu', async () => {
+      tauriMock.secretSet.mockResolvedValue();
+      tauriMock.secretGet.mockResolvedValue('z-keychaina');
+
+      const storage = createSessionStorage();
+      await storage.setItem('anzorge-auth', 'token');
+
+      await storage.getItem('anzorge-auth');
+      await storage.getItem('anzorge-auth');
+      await storage.getItem('anzorge-auth');
+
+      // supabase-js czyta sesję przed żądaniami; każdy odczyt to skok do Rusta.
+      expect(tauriMock.secretGet).not.toHaveBeenCalled();
+    });
+
+    it('po restarcie podnosi sesję z keychaina', async () => {
+      tauriMock.secretGet.mockResolvedValue('sesja-po-restarcie');
+
+      const storage = createSessionStorage();
+      expect(await storage.getItem('anzorge-auth')).toBe('sesja-po-restarcie');
+      expect(tauriMock.secretGet).toHaveBeenCalledWith('anzorge-auth');
+    });
+
+    it('wylogowanie czyści też pamięć, nie tylko keychain', async () => {
+      tauriMock.secretSet.mockResolvedValue();
+      tauriMock.secretDelete.mockResolvedValue();
+      tauriMock.secretGet.mockResolvedValue('duch-poprzedniej-sesji');
+
+      const storage = createSessionStorage();
+      await storage.setItem('anzorge-auth', 'token');
+      await storage.removeItem('anzorge-auth');
+
+      // Gdyby usuwanie czyściło wyłącznie keychain, kolejny odczyt oddałby
+      // sesję poprzedniego użytkownika z pamięci procesu.
+      expect(await storage.getItem('anzorge-auth')).toBe('duch-poprzedniej-sesji');
+      expect(tauriMock.secretDelete).toHaveBeenCalledWith('anzorge-auth');
     });
 
     it('wylogowanie czyści keychain nawet przy błędzie', async () => {

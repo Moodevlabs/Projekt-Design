@@ -36,37 +36,68 @@ function createMemoryStorage(): SessionStorage {
   };
 }
 
+/**
+ * Keychain z pamięcią podręczną **przed** nim.
+ *
+ * Pamięć jest źródłem prawdy dla odczytów, keychain służy wyłącznie do
+ * przetrwania restartu. Dwa powody:
+ *
+ * 1. **Spójność.** Wcześniej zapis awaryjnie lądował w pamięci, ale odczyt
+ *    i tak pytał keychain — ten odpowiadał „brak wpisu", więc sesja znikała
+ *    tuż po zalogowaniu, a supabase-js wysyłał zapytania jako `anon`.
+ *    Teraz cokolwiek zapiszemy, na pewno da się odczytać.
+ * 2. **Szybkość.** supabase-js czyta sesję przed żądaniami; każdy odczyt
+ *    z keychaina to skok do Rusta i do magazynu poświadczeń systemu.
+ */
 function createKeychainStorage(): SessionStorage {
-  // Gdyby keychain był niedostępny (np. Linux bez Secret Service), nie wywalamy
-  // aplikacji — schodzimy na pamięć i logujemy. Użytkownik zaloguje się ponownie
-  // po restarcie, ale będzie mógł pracować.
-  const fallback = createMemoryStorage();
+  const cache = new Map<string, string | null>();
+  let keychainBroken = false;
+
+  const noteFailure = (action: string, error: unknown) => {
+    if (!keychainBroken) {
+      keychainBroken = true;
+      // Logujemy raz — inaczej każdy zapis sesji zasypywałby konsolę.
+      log.warn(
+        `Keychain niedostępny (${action}). Sesja przetrwa do zamknięcia aplikacji, ale nie restart.`,
+        error,
+      );
+    }
+  };
 
   return {
     async getItem(key) {
+      if (cache.has(key)) return cache.get(key) ?? null;
+
+      if (keychainBroken) return null;
       try {
-        return await secretGet(key);
+        const value = await secretGet(key);
+        cache.set(key, value);
+        return value;
       } catch (error) {
-        log.warn('Odczyt z keychaina nieudany — używam pamięci', error);
-        return fallback.getItem(key);
+        noteFailure('odczyt', error);
+        return null;
       }
     },
+
     async setItem(key, value) {
+      // Pamięć najpierw — zapis do keychaina może się nie udać i NIE MOŻE
+      // to unieważnić sesji, którą użytkownik właśnie założył.
+      cache.set(key, value);
+      if (keychainBroken) return;
       try {
         await secretSet(key, value);
       } catch (error) {
-        log.warn('Zapis do keychaina nieudany — używam pamięci', error);
-        await fallback.setItem(key, value);
+        noteFailure('zapis', error);
       }
     },
+
     async removeItem(key) {
+      cache.delete(key);
       try {
         await secretDelete(key);
       } catch (error) {
-        log.warn('Kasowanie z keychaina nieudane', error);
+        noteFailure('kasowanie', error);
       }
-      // Zawsze czyścimy też fallback — wylogowanie musi być pewne.
-      await fallback.removeItem(key);
     },
   };
 }
