@@ -1,0 +1,135 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+/* ---------------------------------------------------------------
+   Tokeny Anzorge (docs/05-UI.md §1). Wartości surowe w :root,
+   mapowanie na Tailwind w @theme inline poniżej.
+   --------------------------------------------------------------- */
+:root {
+  --canvas: #f2f4f8;
+  --surface: #ffffff;
+  --surface-2: #f7f8fb;
+  --ink: #15161a;
+  --ink-soft: #6b6f7a;
+  --hair: #e6e8ee;
+  /* CTA z docs/05-UI ("accent") = czarny przycisk. Nazywamy go `cta`/`primary`,
+     bo `accent` w shadcn/ui oznacza jasną powierzchnię hover — kolizja nazw. */
+  --cta: #15161a;
+  --cta-fg: #ffffff;
+  --positive: #2f855a;
+  --warning: #b7791f;
+  --danger: #c53030;
+  --discount: #b9634a;
+
+  --radius-card: 20px;
+  --radius-control: 12px;
+  --radius-pill: 999px;
+
+  --shadow-card: 0 1px 2px rgba(20, 22, 26, 0.04), 0 8px 24px rgba(20, 22, 26, 0.06);
+
+  /* shadcn/ui — mapowane na paletę Anzorge */
+  --radius: var(--radius-control);
+  --background: var(--canvas);
+  --foreground: var(--ink);
+  --card: var(--surface);
+  --card-foreground: var(--ink);
+  --popover: var(--surface);
+  --popover-foreground: var(--ink);
+  --primary: var(--cta);
+  --primary-foreground: var(--cta-fg);
+  --secondary: var(--surface-2);
+  --secondary-foreground: var(--ink);
+  --muted: var(--surface-2);
+  --muted-foreground: var(--ink-soft);
+  --accent: var(--surface-2);
+  --accent-foreground: var(--ink);
+  --destructive: var(--danger);
+  --destructive-foreground: #ffffff;
+  --border: var(--hair);
+  --input: var(--hair);
+  --ring: #b7bcc9;
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-hair: var(--hair);
+  --color-cta: var(--cta);
+  --color-cta-fg: var(--cta-fg);
+  --color-positive: var(--positive);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-discount: var(--discount);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-card: 20px;
+  --radius-control: 12px;
+  --radius-pill: 999px;
+
+  --shadow-card: 0 1px 2px rgba(20, 22, 26, 0.04), 0 8px 24px rgba(20, 22, 26, 0.06);
+
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/40;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-canvas text-ink font-sans antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  /* Ceny i liczby zawsze tabularne — kolumny się nie rozjeżdżają. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Ukrywamy strzałki number inputów */
+  input[type='number']::-webkit-outer-spin-button,
+  input[type='number']::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
+@layer components {
+  .card-surface {
+    @apply bg-surface rounded-[var(--radius-card)] shadow-[var(--shadow-card)];
+  }
+}
