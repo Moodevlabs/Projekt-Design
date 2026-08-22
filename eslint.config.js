@@ -16,6 +16,7 @@ export default tseslint.config(
       'src/components/ui/**',
       'reference',
       'supabase/functions/**',
+      'supabase/.temp/**',
     ],
   },
   js.configs.recommended,

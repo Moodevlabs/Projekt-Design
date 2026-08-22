@@ -1,0 +1,344 @@
+import { z } from 'zod';
+import {
+  LibraryGroupSchema,
+  LibraryItemSnapshotSchema,
+  type LibraryGroup,
+  type LibraryItemSnapshot,
+} from '@/domain/library/schema';
+import { ItemKindSchema, type ItemKind } from '@/domain/quote';
+import { getSupabase } from '@/data/supabase';
+import type { Tables, TablesUpdate } from '@/data/types.generated';
+import { RepoError, unwrap } from './errors';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('library.repo');
+
+/** Kategoria, do której wpadają pozycje bez wskazanej kategorii (jak default w migracji). */
+export const DEFAULT_CATEGORY = 'Inne';
+
+type ItemRow = Tables<'library_items'>;
+type GroupRow = Tables<'library_groups'>;
+
+/**
+ * Odpowiednik `LibraryItem` z domeny, ale z kompletem pól — zod-owy typ ma
+ * przy wejściu pola opcjonalne, a repozytorium zwraca zawsze wszystko.
+ */
+export interface LibraryItem {
+  id: string;
+  workspaceId: string;
+  category: string;
+  kind: ItemKind;
+  name: string;
+  description: string;
+  unitPriceCents: number;
+  sortOrder: number;
+}
+
+export interface LibraryItemFilters {
+  category?: string;
+  search?: string;
+}
+
+function mapItem(row: ItemRow): LibraryItem {
+  return {
+    id: row.id,
+    workspaceId: row.workspace_id,
+    category: row.category || DEFAULT_CATEGORY,
+    // `kind` jest w bazie tekstem z CHECK-iem; `catch` chroni przed rozjazdem migracji.
+    kind: ItemKindSchema.catch('item').parse(row.kind),
+    name: row.name,
+    description: row.description ?? '',
+    unitPriceCents: Number(row.unit_price_cents ?? 0),
+    sortOrder: Number(row.sort_order ?? 0),
+  };
+}
+
+/**
+ * `items` w grupie to jsonb — może pochodzić ze starszej wersji aplikacji.
+ * Parsujemy miękko: gdy snapshot nie przechodzi walidacji, logujemy i zwracamy
+ * pustą listę zamiast wywalać całą stronę (analogicznie do `bodyError` w quotes.repo).
+ */
+function parseGroupItems(raw: unknown, groupId: string): LibraryItemSnapshot[] {
+  const parsed = z.array(LibraryItemSnapshotSchema).safeParse(raw);
+  if (parsed.success) return parsed.data;
+  log.warn('Uszkodzone pozycje grupy bibliotecznej — zwracam pustą listę', {
+    id: groupId,
+    issues: parsed.error.issues,
+  });
+  return [];
+}
+
+function mapGroup(row: GroupRow): LibraryGroup {
+  const candidate = {
+    id: row.id,
+    workspaceId: row.workspace_id,
+    name: row.name,
+    items: parseGroupItems(row.items, row.id),
+    sortOrder: Number(row.sort_order ?? 0),
+  };
+
+  const parsed = LibraryGroupSchema.safeParse(candidate);
+  if (parsed.success) return parsed.data;
+
+  // Kolumn poza `items` pilnuje schemat tabeli, więc tu trafimy tylko przy
+  // rozjeździe migracji. Lepiej pokazać ułomną grupę niż pustą bibliotekę.
+  log.warn('Grupa biblioteczna niezgodna ze schematem', {
+    id: row.id,
+    issues: parsed.error.issues,
+  });
+  return { ...candidate, name: candidate.name || 'Bez nazwy' };
+}
+
+/**
+ * Pozycje biblioteki. Kolejność: `sort_order`, a przy remisie alfabetycznie —
+ * użytkownik ustawia `sort_order` ręcznie tylko dla części pozycji.
+ */
+export async function listLibraryItems(
+  workspaceId: string,
+  opts: LibraryItemFilters = {},
+): Promise<LibraryItem[]> {
+  let query = getSupabase()
+    .from('library_items')
+    .select('*')
+    .eq('workspace_id', workspaceId)
+    .is('deleted_at', null);
+
+  if (opts.category) query = query.eq('category', opts.category);
+
+  const term = opts.search?.trim();
+  if (term) {
+    // Szukamy po nazwie i opisie — to jedyne teksty widoczne na liście.
+    const pattern = '%' + term + '%';
+    query = query.or('name.ilike.' + pattern + ',description.ilike.' + pattern);
+  }
+
+  const rows = unwrap(
+    await query.order('sort_order', { ascending: true }).order('name', { ascending: true }),
+    'Lista pozycji biblioteki',
+  );
+  return rows.map(mapItem);
+}
+
+/**
+ * Unikalne kategorie do filtra. Liczymy w JS z jednej kolumny — kategorii są
+ * dziesiątki, więc RPC albo osobny widok nie opłaca się utrzymywać.
+ */
+export async function listLibraryCategories(workspaceId: string): Promise<string[]> {
+  const rows = unwrap(
+    await getSupabase()
+      .from('library_items')
+      .select('category')
+      .eq('workspace_id', workspaceId)
+      .is('deleted_at', null),
+    'Kategorie biblioteki',
+  );
+
+  const unique = new Set(rows.map((row) => row.category || DEFAULT_CATEGORY));
+  return [...unique].sort((a, b) => a.localeCompare(b, 'pl'));
+}
+
+export interface CreateLibraryItemInput {
+  workspaceId: string;
+  name: string;
+  category?: string;
+  kind?: ItemKind;
+  description?: string;
+  unitPriceCents?: number;
+  sortOrder?: number;
+}
+
+export async function createLibraryItem(input: CreateLibraryItemInput): Promise<LibraryItem> {
+  const rows = unwrap(
+    await getSupabase()
+      .from('library_items')
+      .insert({
+        workspace_id: input.workspaceId,
+        category: input.category ?? DEFAULT_CATEGORY,
+        kind: input.kind ?? 'item',
+        name: input.name,
+        description: input.description ?? '',
+        unit_price_cents: input.unitPriceCents ?? 0,
+        sort_order: input.sortOrder ?? 0,
+      })
+      .select('*'),
+    'Dodanie pozycji do biblioteki',
+  );
+
+  const row = rows[0];
+  if (!row) throw new RepoError('Nie udało się dodać pozycji do biblioteki.');
+  return mapItem(row);
+}
+
+export type LibraryItemPatch = Partial<Omit<LibraryItem, 'id' | 'workspaceId'>>;
+
+export async function updateLibraryItem(id: string, patch: LibraryItemPatch): Promise<LibraryItem> {
+  // Typowany `update()` nie przyjmuje luźnego obiektu — składamy `TablesUpdate`
+  // pole po polu, żeby `undefined` nie wyzerowało kolumny.
+  const update: TablesUpdate<'library_items'> = {};
+  if (patch.category !== undefined) update.category = patch.category;
+  if (patch.kind !== undefined) update.kind = patch.kind;
+  if (patch.name !== undefined) update.name = patch.name;
+  if (patch.description !== undefined) update.description = patch.description;
+  if (patch.unitPriceCents !== undefined) update.unit_price_cents = patch.unitPriceCents;
+  if (patch.sortOrder !== undefined) update.sort_order = patch.sortOrder;
+
+  const rows = unwrap(
+    await getSupabase().from('library_items').update(update).eq('id', id).select('*'),
+    'Zapis pozycji biblioteki',
+  );
+
+  const row = rows[0];
+  if (!row) throw new RepoError('Nie udało się zapisać pozycji biblioteki.');
+  return mapItem(row);
+}
+
+/**
+ * Soft delete — pozycja bywa powiązana z wycenami przez `libraryItemId`,
+ * więc twarde skasowanie zerwałoby kaskadę zmian do otwartej wyceny (T-10).
+ */
+export async function deleteLibraryItem(id: string): Promise<void> {
+  unwrap(
+    await getSupabase()
+      .from('library_items')
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('id', id)
+      .select('id'),
+    'Usunięcie pozycji biblioteki',
+  );
+}
+
+export async function listLibraryGroups(workspaceId: string): Promise<LibraryGroup[]> {
+  const rows = unwrap(
+    await getSupabase()
+      .from('library_groups')
+      .select('*')
+      .eq('workspace_id', workspaceId)
+      .is('deleted_at', null)
+      .order('sort_order', { ascending: true })
+      .order('name', { ascending: true }),
+    'Lista grup biblioteki',
+  );
+  return rows.map(mapGroup);
+}
+
+export interface CreateLibraryGroupInput {
+  workspaceId: string;
+  name: string;
+  items?: LibraryItemSnapshot[];
+  sortOrder?: number;
+}
+
+export async function createLibraryGroup(input: CreateLibraryGroupInput): Promise<LibraryGroup> {
+  const rows = unwrap(
+    await getSupabase()
+      .from('library_groups')
+      .insert({
+        workspace_id: input.workspaceId,
+        name: input.name,
+        items: input.items ?? [],
+        sort_order: input.sortOrder ?? 0,
+      })
+      .select('*'),
+    'Dodanie grupy do biblioteki',
+  );
+
+  const row = rows[0];
+  if (!row) throw new RepoError('Nie udało się dodać grupy do biblioteki.');
+  return mapGroup(row);
+}
+
+export type LibraryGroupPatch = Partial<Omit<LibraryGroup, 'id' | 'workspaceId'>>;
+
+export async function updateLibraryGroup(
+  id: string,
+  patch: LibraryGroupPatch,
+): Promise<LibraryGroup> {
+  const update: TablesUpdate<'library_groups'> = {};
+  if (patch.name !== undefined) update.name = patch.name;
+  if (patch.items !== undefined) update.items = patch.items;
+  if (patch.sortOrder !== undefined) update.sort_order = patch.sortOrder;
+
+  const rows = unwrap(
+    await getSupabase().from('library_groups').update(update).eq('id', id).select('*'),
+    'Zapis grupy biblioteki',
+  );
+
+  const row = rows[0];
+  if (!row) throw new RepoError('Nie udało się zapisać grupy biblioteki.');
+  return mapGroup(row);
+}
+
+/** Soft delete — spójnie z pozycjami; grupa to też dane użytkownika. */
+export async function deleteLibraryGroup(id: string): Promise<void> {
+  unwrap(
+    await getSupabase()
+      .from('library_groups')
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('id', id)
+      .select('id'),
+    'Usunięcie grupy biblioteki',
+  );
+}
+
+/**
+ * Wejście dla „zapisz do biblioteki" — strukturalnie zgodne z `Item` z wyceny,
+ * więc pozycje edytora można przekazać bez mapowania.
+ */
+export interface SaveToLibraryInput {
+  name: string;
+  description?: string;
+  kind?: ItemKind;
+  unitPriceCents: number;
+  category?: string;
+}
+
+/** Najwyższy `sort_order` w bibliotece — nowe pozycje dopisujemy na koniec. */
+async function maxSortOrder(workspaceId: string): Promise<number> {
+  const rows = unwrap(
+    await getSupabase()
+      .from('library_items')
+      .select('sort_order')
+      .eq('workspace_id', workspaceId)
+      .is('deleted_at', null)
+      .order('sort_order', { ascending: false })
+      .limit(1),
+    'Kolejność pozycji biblioteki',
+  );
+  return Number(rows[0]?.sort_order ?? 0);
+}
+
+/**
+ * Masowy zapis pozycji z wyceny do biblioteki („zapisz wszystko", T-10).
+ * Jeden insert zamiast pętli — inaczej 40 pozycji to 40 round-tripów i 40 szans
+ * na częściowy zapis. Pozycje bez nazwy pomijamy: nie przeszłyby walidacji.
+ */
+export async function saveItemsToLibrary(
+  workspaceId: string,
+  items: SaveToLibraryInput[],
+): Promise<LibraryItem[]> {
+  const named = items.filter((item) => item.name.trim().length > 0);
+  if (named.length === 0) return [];
+
+  const base = await maxSortOrder(workspaceId);
+
+  const rows = unwrap(
+    await getSupabase()
+      .from('library_items')
+      .insert(
+        named.map((item, index) => ({
+          workspace_id: workspaceId,
+          category: item.category ?? DEFAULT_CATEGORY,
+          kind: item.kind ?? 'item',
+          name: item.name.trim(),
+          description: item.description ?? '',
+          unit_price_cents: item.unitPriceCents,
+          // Odstępy co 10, żeby dało się wcisnąć pozycję między istniejące.
+          sort_order: base + (index + 1) * 10,
+        })),
+      )
+      .select('*'),
+    'Zapis pozycji do biblioteki',
+  );
+
+  return rows.map(mapItem);
+}

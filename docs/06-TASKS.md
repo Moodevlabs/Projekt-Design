@@ -61,9 +61,19 @@ Format: `- [ ] T-xx Nazwa` — czytaj: wymagane dokumenty → kryteria akceptacj
   > - Google OAuth otwiera **przeglądarkę systemową** (Google blokuje webview) i wraca deep linkiem; `anzorge://auth/recovery` dodane do `additional_redirect_urls` w `config.toml`. W panelu Supabase trzeba dodać oba adresy ręcznie.
   > - `onSubmit` formularzy owinięty w `void form.handleSubmit(…)(event)` — inaczej ESLint słusznie krzyczy `no-misused-promises`.
 
-- [ ] **T-06 Repozytoria + queries** (01-ARCHITECTURE §2–3)
+- [x] **T-06 Repozytoria + queries** (01-ARCHITECTURE §2–3)
   `quotes/library/templates/workspace/subscription.repo.ts` + hooki. Parse zod przy odczycie. Optimistic update dla toggli statusów.
   ✅ Testy integracyjne na lokalnym Supabase dla quotes.repo (CRUD + konflikt `updated_at`).
+  > **Zrobione.** Repozytoria: `quotes`, `library`, `templates`, `subscription`, `brand`, `workspace`. Hooki w `src/data/queries/` (jeden plik per repo), klucze wyłącznie z `src/data/query-keys.ts`.
+  > **✅ ZWERYFIKOWANE:** `pnpm test:db` → **35 testów integracyjnych na żywym Supabase** (4 pliki), `pnpm test` → 163 jednostkowe, `pnpm lint` i `pnpm typecheck` zielone.
+  > **Na co uważać:**
+  > - **Blokada optymistyczna:** `saveQuote` wymaga `lastSeenUpdatedAt` i porównuje przez `.eq('updated_at', …)`. Brak trafienia = `ConflictError`, a dane w bazie zostają nietknięte (jest test, który to sprawdza). Edytor (T-08) musi trzymać ostatnio widziany `updated_at` i po konflikcie przeładować, a nie ponawiać zapis.
+  > - **Uszkodzone `body` nie wywala aplikacji:** `quotes.repo` i `templates.repo` zwracają `body: null` + `bodyError` z opisem. UI ma pokazać „wycena uszkodzona", nie biały ekran.
+  > - **Pułapka kluczy cache:** `queryKeys.quotes()` = `['quotes']` jest prefiksem także dla detalu `['quotes','detail',id]`. Operacje listowe używają predykatu `q.queryKey[1] !== 'detail'` — bez tego `setQueriesData` próbowałby mapować pojedynczą wycenę jak tablicę.
+  > - **`useSetQuoteStatus` ma pełny optimistic update** z rollbackiem. Rollback jest konieczny, bo przy odbiciu od RLS (read-only po wygasłym trialu) UI pokazywałby „wysłana", a użytkownik byłby przekonany, że oferta poszła do klienta.
+  > - `TemplateSummary.itemCount` liczy **wszystkie** pozycje, a `totalNetCents` tylko włączone — świadome, opisane w JSDoc.
+  > - `SubscriptionStatusSchema` siedzi tymczasowo w `subscription.repo.ts`; przenieść do `domain/billing/` przy T-15.
+  > - **`pnpm test:db` ≠ `pnpm db:test`**: pierwsze to testy integracyjne repozytoriów (Vitest), drugie to testy RLS w pgTAP. Oba wymagają `pnpm db:start`.
 
 - [ ] **T-07 Lista wycen + dashboard (dane realne)** (05-UI §3)
   ✅ Filtry, szukaj, sort, menu ⋯ (duplikuj/archiwizuj); dashboard liczy statystyki z `quotes`.

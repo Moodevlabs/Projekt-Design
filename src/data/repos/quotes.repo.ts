@@ -129,7 +129,7 @@ export async function getQuote(id: string): Promise<Quote> {
   );
   const row = rows[0];
   if (!row) throw new RepoError('Nie znaleziono wyceny.');
-  return mapQuote(row as unknown as Row);
+  return mapQuote(row);
 }
 
 /** Numer nadaje baza (atomowo), zeby dwa rownolegle zapisy nie dostaly tego samego. */
@@ -173,7 +173,7 @@ export async function createQuote(input: CreateQuoteInput): Promise<Quote> {
 
   const row = rows[0];
   if (!row) throw new RepoError('Nie udalo sie utworzyc wyceny.');
-  return mapQuote(row as unknown as Row);
+  return mapQuote(row);
 }
 
 export interface SaveQuoteInput {
@@ -213,7 +213,7 @@ export async function saveQuote(input: SaveQuoteInput): Promise<Quote> {
 
   const row = rows[0];
   if (!row) throw new ConflictError('Wycena zmieniona w innym miejscu — przeladuj.');
-  return mapQuote(row as unknown as Row);
+  return mapQuote(row);
 }
 
 /** Zmiana statusu nie rusza `body`, wiec nie wymaga blokady optymistycznej. */
@@ -229,7 +229,7 @@ export async function setQuoteStatus(id: string, status: QuoteStatus): Promise<Q
 
   const row = rows[0];
   if (!row) throw new RepoError('Nie udalo sie zmienic statusu.');
-  return mapSummary(row as unknown as Row);
+  return mapSummary(row);
 }
 
 export async function duplicateQuote(id: string): Promise<Quote> {

@@ -1,6 +1,11 @@
 /**
  * Klucze cache TanStack Query w jednym miejscu — inaczej unieważnianie
  * rozjeżdża się z pobieraniem.
+ *
+ * Klucze bez parametru nie zawierają `workspaceId`, bo w fazach 1–2 konto ma
+ * dokładnie jeden workspace, a RLS i tak przycina wyniki. Klucze z filtrami
+ * dostają cały obiekt filtrów (razem z `workspaceId`) — dzięki temu prefiks
+ * `['quotes']` / `['library','items']` unieważnia wszystkie warianty naraz.
  */
 export const queryKeys = {
   workspace: ['workspace'] as const,
@@ -9,7 +14,15 @@ export const queryKeys = {
   brandKit: ['brand-kit'] as const,
   quotes: (filters?: unknown) => (filters ? (['quotes', filters] as const) : (['quotes'] as const)),
   quote: (id: string) => ['quotes', 'detail', id] as const,
-  libraryItems: ['library', 'items'] as const,
-  libraryGroups: ['library', 'groups'] as const,
-  templates: ['templates'] as const,
+  libraryItems: (filters?: unknown) =>
+    filters ? (['library', 'items', filters] as const) : (['library', 'items'] as const),
+  libraryCategories: (workspaceId?: string) =>
+    workspaceId
+      ? (['library', 'categories', workspaceId] as const)
+      : (['library', 'categories'] as const),
+  libraryGroups: (workspaceId?: string) =>
+    workspaceId ? (['library', 'groups', workspaceId] as const) : (['library', 'groups'] as const),
+  templates: (workspaceId?: string) =>
+    workspaceId ? (['templates', workspaceId] as const) : (['templates'] as const),
+  template: (id: string) => ['templates', 'detail', id] as const,
 } as const;
