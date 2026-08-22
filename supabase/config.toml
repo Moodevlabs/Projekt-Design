@@ -107,14 +107,18 @@ inspector_port = 8083
 
 # Edge Functions (T-14). Webhook Stripe nie dostaje JWT — podpis
 # weryfikujemy przez STRIPE_WEBHOOK_SECRET wewnatrz funkcji.
-[functions.stripe-webhook]
-verify_jwt = false
-
-[functions.stripe-create-checkout]
-verify_jwt = true
-
-[functions.stripe-create-portal]
-verify_jwt = true
+#
+# ODKOMENTUJ przy T-14, RAZEM z utworzeniem katalogow funkcji.
+# `supabase start` czyta te sekcje i przerywa start, jesli katalog
+# `supabase/functions/<nazwa>/index.ts` nie istnieje.
+# [functions.stripe-webhook]
+# verify_jwt = false
+#
+# [functions.stripe-create-checkout]
+# verify_jwt = true
+#
+# [functions.stripe-create-portal]
+# verify_jwt = true
 
 [analytics]
 enabled = false
