@@ -22,7 +22,7 @@ export function AppShell() {
   // więc standardowy topbar aplikacji tylko by go dublował.
   if (handle.hideTopbar) {
     return (
-      <div className="flex h-full min-h-0">
+      <div className="relative flex h-full min-h-0">
         <Sidebar />
         <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <WorkspaceGuard>
@@ -34,7 +34,7 @@ export function AppShell() {
   }
 
   return (
-    <div className="flex h-full min-h-0">
+    <div className="relative flex h-full min-h-0">
       <Sidebar />
       {/* Treść przewija się POD paskiem — szkło ma co rozmywać. */}
       <div className="relative flex min-w-0 flex-1 flex-col overflow-y-auto">

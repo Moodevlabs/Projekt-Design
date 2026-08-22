@@ -4,8 +4,14 @@ import { pl } from '@/i18n/pl';
  * Podpis wytłoczony w powierzchni aplikacji.
  *
  * Leży na dole okna jako warstwa **pod** treścią: renderowany przed resztą
- * aplikacji i bez własnego `z-index`, więc panele — sidebar, karty, tabele —
- * rysują się nad nim. Nie zabiera miejsca w układzie i nie przesuwa treści.
+ * aplikacji i bez własnego `z-index`, więc całe UI rysuje się nad nim.
+ * Nie zabiera miejsca w układzie i nie przesuwa treści.
+ *
+ * Warunek konieczny: korzeń powłoki musi być **pozycjonowany** (`relative`).
+ * Element pozycjonowany — a taki jest ten podpis — rysuje się nad każdą
+ * statyczną treścią niezależnie od kolejności w drzewie. Bez tego podpis
+ * przechodził nad arkuszem wyceny (papier nie ma `position`), choć karty
+ * z `position: relative` już go poprawnie zasłaniały.
  *
  * Karty są ze szkła, więc tam, gdzie któraś nad nim przechodzi, podpis
  * prześwituje — i o to chodzi: ma być częścią powierzchni, a nie elementem

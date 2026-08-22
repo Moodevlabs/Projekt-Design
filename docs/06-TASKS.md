@@ -127,6 +127,7 @@ Format: `- [ ] T-xx Nazwa` — czytaj: wymagane dokumenty → kryteria akceptacj
   > - **Kolorystyka jest tymczasowa: szarobiel.** Chrom ma nie konkurować z dokumentem. Docelowa paleta powstanie na końcu budowy (T-17). Nie dokładaj tu akcentów kolorystycznych „bo pusto".
   > - Fonty (`Inter` + `Instrument Sans` na tytuły, etykiety i **liczby**) są hostowane u siebie przez `@fontsource-variable` — w aplikacji desktopowej nie zależymy od sieci ani nie rozluźniamy CSP dla Google Fonts.
   > - Trasa może ustawić `handle.hideTopbar` — korzysta z tego edytor, który ma własny pasek.
+  > - **Podpis w tle wymaga, żeby korzeń powłoki był pozycjonowany** (`relative`). Element pozycjonowany — a taki jest `AppCredit` — rysuje się nad każdą **statyczną** treścią niezależnie od kolejności w drzewie. Bez tego podpis przechodził nad arkuszem wyceny (papier nie ma `position`), choć karty z `position: relative` już go poprawnie zasłaniały. Klasyczna pułapka reguł nakładania CSS.
   > - Jedyny mocny efekt na pulpicie to **osiadające liczby** (`useCountUp`, rAF, ease-out, `prefers-reduced-motion` → od razu wynik). To nawiązanie do sedna produktu: sumy, która przelicza się po przełączeniu pozycji. Nie dokładaj drugiej animacji „dla równowagi".
 
 - [ ] **T-09 Drag & drop + przyciski góra/dół** (05-UI §5)
