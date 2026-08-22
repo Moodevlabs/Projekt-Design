@@ -1,4 +1,5 @@
 pub mod files;
+pub mod secrets;
 
 use serde::Serialize;
 
@@ -7,6 +8,8 @@ use serde::Serialize;
 pub enum CommandError {
     #[error("Nie udało się zapisać pliku: {0}")]
     Io(#[from] std::io::Error),
+    #[error("Błąd keychaina: {0}")]
+    Keychain(String),
     #[error("{0}")]
     Other(String),
 }

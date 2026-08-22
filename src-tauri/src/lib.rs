@@ -15,7 +15,10 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .invoke_handler(tauri::generate_handler![
             commands::files::save_file,
-            commands::files::open_path
+            commands::files::open_path,
+            commands::secrets::secret_set,
+            commands::secrets::secret_get,
+            commands::secrets::secret_delete
         ])
         .run(tauri::generate_context!())
         .expect("błąd uruchomienia aplikacji Tauri");

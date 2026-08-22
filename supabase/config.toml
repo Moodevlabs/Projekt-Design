@@ -64,6 +64,7 @@ additional_redirect_urls = [
   "http://localhost:1420/**",
   "http://127.0.0.1:1420",
   "anzorge://auth/callback",
+  "anzorge://auth/recovery",
   "anzorge://billing/success",
   "anzorge://billing/cancel",
   "anzorge://billing/return",

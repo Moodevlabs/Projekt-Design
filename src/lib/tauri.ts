@@ -13,3 +13,21 @@ export async function saveFile(path: string, contents: Uint8Array): Promise<stri
 export async function openPath(path: string): Promise<void> {
   await invoke('open_path', { path });
 }
+
+/* ---------------------------------------------------------------------------
+ * Keychain systemowy — trzymamy tam tokeny sesji Supabase.
+ * W przeglądarce (`pnpm dev`) te wywołania nie mają sensu; wołaj je tylko
+ * po sprawdzeniu `runningInTauri()`.
+ * ------------------------------------------------------------------------- */
+
+export async function secretGet(key: string): Promise<string | null> {
+  return invoke<string | null>('secret_get', { key });
+}
+
+export async function secretSet(key: string, value: string): Promise<void> {
+  await invoke('secret_set', { key, value });
+}
+
+export async function secretDelete(key: string): Promise<void> {
+  await invoke('secret_delete', { key });
+}

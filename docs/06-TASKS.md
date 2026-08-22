@@ -44,9 +44,17 @@ Format: `- [ ] T-xx Nazwa` — czytaj: wymagane dokumenty → kryteria akceptacj
 
 ## Faza 1 — MVP
 
-- [ ] **T-05 Auth** (02-DATABASE §2, 01-ARCHITECTURE §1 sesja)
+- [x] **T-05 Auth** (02-DATABASE §2, 01-ARCHITECTURE §1 sesja)
   `data/supabase.ts` z custom storage (stronghold/keyring przez Tauri command; fallback do memory w `pnpm dev`), Login/Register/Reset, `AuthGate`, Google OAuth przez deep link `anzorge://auth/callback` (PKCE). Po rejestracji trigger tworzy workspace.
   ✅ Rejestracja → dashboard; restart apki zachowuje sesję; wylogowanie czyści keychain.
+  > **Zrobione (kod).** Komendy Rust `secret_get/set/delete` (crate `keyring`, usługa `pl.anzorge.app`), `data/session-storage.ts` (keychain w Tauri, pamięć w `pnpm dev`), `data/supabase.ts` (PKCE, `detectSessionInUrl: false`), `AuthProvider` + `useAuth`, `AuthGate`, ekrany Login/Register/Reset/NewPassword (react-hook-form + zod, komunikaty PL w `errors.ts`), Google OAuth przez przeglądarkę systemową + deep link, menu konta z wylogowaniem w sidebarze. 160 testów zielonych.
+  > **⚠️ NIEZWERYFIKOWANE end-to-end:** brak projektu Supabase i Dockera, więc „rejestracja → dashboard", „restart zachowuje sesję" i „wylogowanie czyści keychain" **nie zostały przeklikane**. Pokryte testami jednostkowymi: adapter keychaina (w tym fallback i to, że nic nie ląduje w `localStorage`), parsowanie deep linka OAuth, zachowanie `AuthGate` w czterech stanach.
+  > **Na co uważać:**
+  > - **Nie ma sesji w `localStorage`** — to celowe. W `pnpm dev` sesja żyje w pamięci i ginie po odświeżeniu strony; realny keychain jest tylko pod `pnpm tauri dev`.
+  > - `AuthGate` w stanie `loading` pokazuje szkielet, a **nie** ekran logowania — inaczej przy każdym starcie migałoby logowanie (odczyt keychaina jest asynchroniczny). Jest na to test.
+  > - Klucze metadanych przy rejestracji (`company`, `full_name`) muszą zgadzać się z triggerem `handle_new_user()` z migracji 0004 — to z nich powstaje workspace i profil.
+  > - Google OAuth otwiera **przeglądarkę systemową** (Google blokuje webview) i wraca deep linkiem; `anzorge://auth/recovery` dodane do `additional_redirect_urls` w `config.toml`. W panelu Supabase trzeba dodać oba adresy ręcznie.
+  > - `onSubmit` formularzy owinięty w `void form.handleSubmit(…)(event)` — inaczej ESLint słusznie krzyczy `no-misused-promises`.
 
 - [ ] **T-06 Repozytoria + queries** (01-ARCHITECTURE §2–3)
   `quotes/library/templates/workspace/subscription.repo.ts` + hooki. Parse zod przy odczycie. Optimistic update dla toggli statusów.

@@ -11,6 +11,14 @@ import {
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { useAuth } from '@/features/auth/auth-context';
 import { routes } from '@/app/routes';
 import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
@@ -65,6 +73,47 @@ function SidebarLink({ item }: { item: NavItem }) {
   );
 }
 
+function AccountMenu({ subscriptionOk }: { subscriptionOk: boolean }) {
+  const { session, signOut } = useAuth();
+  const email = session?.user.email ?? '';
+  const initials = email.slice(0, 2).toUpperCase() || 'AN';
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        aria-label={pl.settings.account}
+        className="focus-visible:ring-ring relative rounded-full focus-visible:ring-2 focus-visible:outline-none"
+      >
+        <Avatar className="size-9">
+          <AvatarFallback className="bg-surface-2 text-ink text-xs font-medium">
+            {initials}
+          </AvatarFallback>
+        </Avatar>
+        <span
+          aria-hidden
+          className={cn(
+            'border-surface absolute -right-0.5 -bottom-0.5 size-3 rounded-full border-2',
+            subscriptionOk ? 'bg-positive' : 'bg-warning',
+          )}
+        />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent side="right" align="end" className="w-56">
+        {email ? (
+          <div className="text-ink-soft truncate px-2 py-1.5 text-xs">{email}</div>
+        ) : null}
+        <DropdownMenuItem asChild>
+          <NavLink to={routes.subscription}>{pl.billing.title}</NavLink>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <NavLink to={routes.settings}>{pl.settings.title}</NavLink>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onSelect={() => void signOut()}>{pl.common.logout}</DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 export function Sidebar({ subscriptionOk = true }: { subscriptionOk?: boolean }) {
   return (
     <nav
@@ -80,25 +129,7 @@ export function Sidebar({ subscriptionOk = true }: { subscriptionOk?: boolean })
       ))}
 
       <div className="mt-auto flex flex-col items-center gap-3 pt-4">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <NavLink to={routes.subscription} className="relative block rounded-full">
-              <Avatar className="size-9">
-                <AvatarFallback className="bg-surface-2 text-ink text-xs font-medium">
-                  AN
-                </AvatarFallback>
-              </Avatar>
-              <span
-                aria-hidden
-                className={cn(
-                  'border-surface absolute -right-0.5 -bottom-0.5 size-3 rounded-full border-2',
-                  subscriptionOk ? 'bg-positive' : 'bg-warning',
-                )}
-              />
-            </NavLink>
-          </TooltipTrigger>
-          <TooltipContent side="right">{pl.billing.title}</TooltipContent>
-        </Tooltip>
+        <AccountMenu subscriptionOk={subscriptionOk} />
       </div>
     </nav>
   );

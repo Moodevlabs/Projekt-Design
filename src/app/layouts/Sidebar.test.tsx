@@ -2,14 +2,17 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { AuthStub } from '@/features/auth/test-utils';
 import { Sidebar } from './Sidebar';
 
 function renderAt(path: string) {
   return render(
     <MemoryRouter initialEntries={[path]}>
-      <TooltipProvider>
-        <Sidebar />
-      </TooltipProvider>
+      <AuthStub>
+        <TooltipProvider>
+          <Sidebar />
+        </TooltipProvider>
+      </AuthStub>
     </MemoryRouter>,
   );
 }

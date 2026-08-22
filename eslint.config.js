@@ -75,11 +75,12 @@ export default tseslint.config(
     },
   },
   {
-    files: ['**/*.{test,spec}.{ts,tsx}', 'vitest.setup.ts'],
+    files: ['**/*.{test,spec}.{ts,tsx}', '**/test-utils.tsx', 'vitest.setup.ts'],
     languageOptions: { globals: { ...globals.node, ...globals.browser } },
     rules: {
       '@typescript-eslint/no-non-null-assertion': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',
+      'react-refresh/only-export-components': 'off',
     },
   },
   {

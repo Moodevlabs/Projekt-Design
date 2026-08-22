@@ -3,9 +3,10 @@ import { describe, expect, it } from 'vitest';
 import { App } from './App';
 
 describe('App', () => {
-  it('renderuje powłokę z nawigacją i pulpitem', async () => {
+  it('bez konfiguracji Supabase tłumaczy, czego brakuje, zamiast pokazywać pusty ekran', async () => {
+    // W testach nie ma .env, więc `isConfigured` jest false — to ta sama ścieżka,
+    // którą zobaczy ktoś, kto sklonuje repo i odpali `pnpm dev`.
     render(<App />);
-    expect(await screen.findByRole('heading', { name: 'Pulpit', level: 1 })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Wyceny' })).toBeInTheDocument();
+    expect(await screen.findByText(/Brak konfiguracji Supabase/)).toBeInTheDocument();
   });
 });

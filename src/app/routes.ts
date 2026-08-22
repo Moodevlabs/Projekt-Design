@@ -13,4 +13,5 @@ export const routes = {
   login: '/logowanie',
   register: '/rejestracja',
   resetPassword: '/reset-hasla',
+  newPassword: '/nowe-haslo',
 } as const;

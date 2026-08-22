@@ -1,7 +1,13 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { RootLayout } from '@/app/RootLayout';
 import { AppShell } from '@/app/layouts/AppShell';
 import { NotFoundPage } from '@/app/NotFoundPage';
 import { routes } from '@/app/routes';
+import { AuthGate } from '@/features/auth/AuthGate';
+import { LoginPage } from '@/features/auth/LoginPage';
+import { RegisterPage } from '@/features/auth/RegisterPage';
+import { ResetPasswordPage } from '@/features/auth/ResetPasswordPage';
+import { NewPasswordPage } from '@/features/auth/NewPasswordPage';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
 import { QuotesListPage } from '@/features/quotes/list/QuotesListPage';
 import { QuoteEditorPage } from '@/features/quotes/editor/QuoteEditorPage';
@@ -14,26 +20,46 @@ import { SubscriptionPage } from '@/features/billing/SubscriptionPage';
 import { pl } from '@/i18n/pl';
 
 /** `handle.title` trafia do Topbara (patrz AppShell). */
-const router = createBrowserRouter([
+const routeTree = [
   {
-    path: routes.dashboard,
-    element: <AppShell />,
+    element: <RootLayout />,
     errorElement: <NotFoundPage />,
     children: [
-      { index: true, element: <DashboardPage />, handle: { title: pl.dashboard.title } },
-      { path: 'wyceny', element: <QuotesListPage />, handle: { title: pl.quotes.title } },
-      { path: 'wyceny/nowa', element: <QuoteEditorPage />, handle: { title: pl.quotes.new } },
-      { path: 'wyceny/:id', element: <QuoteEditorPage />, handle: { title: pl.quotes.title } },
-      { path: 'klienci', element: <ClientsPage />, handle: { title: pl.nav.clients } },
-      { path: 'biblioteka', element: <LibraryPage />, handle: { title: pl.library.title } },
-      { path: 'szablony', element: <TemplatesPage />, handle: { title: pl.templates.title } },
-      { path: 'branding', element: <BrandSettingsPage />, handle: { title: pl.brand.title } },
-      { path: 'ustawienia', element: <SettingsPage />, handle: { title: pl.settings.title } },
-      { path: 'subskrypcja', element: <SubscriptionPage />, handle: { title: pl.billing.title } },
-      { path: '*', element: <NotFoundPage />, handle: { title: pl.errors.notFound } },
+      { path: routes.login, element: <LoginPage /> },
+      { path: routes.register, element: <RegisterPage /> },
+      { path: routes.resetPassword, element: <ResetPasswordPage /> },
+      { path: routes.newPassword, element: <NewPasswordPage /> },
+      {
+        element: <AuthGate />,
+        children: [
+          {
+            path: routes.dashboard,
+            element: <AppShell />,
+            children: [
+              { index: true, element: <DashboardPage />, handle: { title: pl.dashboard.title } },
+              { path: 'wyceny', element: <QuotesListPage />, handle: { title: pl.quotes.title } },
+              { path: 'wyceny/nowa', element: <QuoteEditorPage />, handle: { title: pl.quotes.new } },
+              { path: 'wyceny/:id', element: <QuoteEditorPage />, handle: { title: pl.quotes.title } },
+              { path: 'klienci', element: <ClientsPage />, handle: { title: pl.nav.clients } },
+              { path: 'biblioteka', element: <LibraryPage />, handle: { title: pl.library.title } },
+              { path: 'szablony', element: <TemplatesPage />, handle: { title: pl.templates.title } },
+              { path: 'branding', element: <BrandSettingsPage />, handle: { title: pl.brand.title } },
+              { path: 'ustawienia', element: <SettingsPage />, handle: { title: pl.settings.title } },
+              {
+                path: 'subskrypcja',
+                element: <SubscriptionPage />,
+                handle: { title: pl.billing.title },
+              },
+              { path: '*', element: <NotFoundPage />, handle: { title: pl.errors.notFound } },
+            ],
+          },
+        ],
+      },
     ],
   },
-]);
+];
+
+const router = createBrowserRouter(routeTree);
 
 export function AppRouter() {
   return <RouterProvider router={router} />;
