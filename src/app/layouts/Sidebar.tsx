@@ -24,10 +24,24 @@ import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
 
 /**
- * Wskaźnik aktywnej pozycji. Jedna „kulka" przejeżdża między wierszami
- * zamiast siedmiu niezależnych teł — dzięki temu widać ruch, a nie przeskok.
+ * Łezka obejmuje ikonę, więc sięga od krawędzi szyny aż za ikonę.
+ * Wysokość = wiersz + dwa barki wtapiające się w krawędź.
  */
-function ActivePill({ index, expanded }: { index: number; expanded: boolean }) {
+const NOTCH_SHOULDER = 14;
+const NOTCH_HEIGHT = NAV_ROW_HEIGHT + NOTCH_SHOULDER * 2;
+const NOTCH_WIDTH = 64;
+
+/**
+ * Wskaźnik aktywnej pozycji.
+ *
+ * Zwinięty pasek: **wcięcie** w prawej krawędzi szyny — treść wgryza się
+ * w nawigację. Rozwinięty: pigułka pod całym wierszem. Wąska szyna ikon
+ * lubi znacznik na krawędzi, wiersz pełnej szerokości lubi tło.
+ *
+ * W obu przypadkach jest to JEDEN element przejeżdżający między pozycjami,
+ * a nie siedem niezależnych teł — dzięki temu widać ruch, a nie przeskok.
+ */
+function ActiveIndicator({ index, expanded }: { index: number; expanded: boolean }) {
   const [travelling, setTravelling] = useState(false);
   const previous = useRef(index);
 
@@ -44,19 +58,40 @@ function ActivePill({ index, expanded }: { index: number; expanded: boolean }) {
 
   if (index < 0) return null;
 
+  const rowTop = index * NAV_ROW_STEP;
+
+  if (expanded) {
+    return (
+      <span
+        aria-hidden
+        data-testid="nav-active-marker"
+        data-variant="pill"
+        data-index={index}
+        className="nav-pill-track pointer-events-none absolute top-0 left-0 w-full"
+        style={{ transform: `translateY(${rowTop}px)`, height: NAV_ROW_HEIGHT }}
+      >
+        <span className="nav-pill-body block" data-travelling={travelling} />
+      </span>
+    );
+  }
+
+  // Wcięcie sięga prawej krawędzi szyny (stąd ujemny `right`, żeby wyjść
+  // poza padding) i obejmuje ikonę, która dzięki temu leży na jasnym tle.
   return (
     <span
       aria-hidden
-      data-testid="nav-active-pill"
+      data-testid="nav-active-marker"
+      data-variant="notch"
       data-index={index}
-      className="nav-pill-track pointer-events-none absolute left-0 top-0"
+      className="nav-notch-track pointer-events-none absolute top-0"
       style={{
-        transform: `translateY(${index * NAV_ROW_STEP}px)`,
-        height: NAV_ROW_HEIGHT,
-        width: expanded ? '100%' : NAV_ROW_HEIGHT,
+        transform: `translateY(${rowTop - NOTCH_SHOULDER}px)`,
+        height: NOTCH_HEIGHT,
+        width: NOTCH_WIDTH,
+        right: 'calc(-1 * var(--nav-inline-padding))',
       }}
     >
-      <span className="nav-pill-body block" data-travelling={travelling} />
+      <span className="nav-notch-body block" data-travelling={travelling} />
     </span>
   );
 }
@@ -88,13 +123,15 @@ function SidebarLink({
       style={{ height: NAV_ROW_HEIGHT }}
       className={cn(
         'relative flex items-center rounded-[var(--radius-pill)] transition-colors',
-        'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',
+        'focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none',
         expanded ? 'w-full gap-3 px-3.5' : 'w-[46px] justify-center',
         item.disabled
-          ? 'text-ink-soft/40 cursor-not-allowed'
+          ? 'cursor-not-allowed text-white/25'
           : active
-            ? 'text-cta-fg'
-            : 'text-ink-soft hover:text-ink',
+            ? // Aktywna pozycja zawsze leży na jasnym tle — pigułce (pasek
+              // rozwinięty) albo we wcięciu (pasek zwinięty) — więc idzie w atrament.
+              'text-ink'
+            : 'text-white/65 hover:text-white',
       )}
     >
       <Icon className="size-[18px] shrink-0" aria-hidden />
@@ -130,26 +167,27 @@ function AccountMenu({ subscriptionOk, expanded }: { subscriptionOk: boolean; ex
       <DropdownMenuTrigger
         aria-label={pl.settings.account}
         className={cn(
-          'focus-visible:ring-ring flex items-center rounded-[var(--radius-pill)] focus-visible:ring-2 focus-visible:outline-none',
-          expanded ? 'w-full gap-3 px-2 py-1.5 hover:bg-white/50' : 'justify-center',
+          'flex items-center rounded-[var(--radius-pill)] focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none',
+          expanded ? 'w-full gap-3 px-2 py-1.5 hover:bg-white/10' : 'justify-center',
         )}
       >
         <span className="relative shrink-0">
           <Avatar className="size-9">
-            <AvatarFallback className="bg-white/70 text-ink text-xs font-medium">
+            <AvatarFallback className="text-ink bg-white text-xs font-medium">
               {initials}
             </AvatarFallback>
           </Avatar>
           <span
             aria-hidden
             className={cn(
-              'absolute -right-0.5 -bottom-0.5 size-3 rounded-full border-2 border-white',
-              subscriptionOk ? 'bg-ink' : 'bg-ink/35',
+              // Obwódka w kolorze szyny, żeby kropka „siedziała" w panelu.
+              'absolute -right-0.5 -bottom-0.5 size-3 rounded-full border-2 border-[#131519]',
+              subscriptionOk ? 'bg-white' : 'bg-white/40',
             )}
           />
         </span>
         {expanded ? (
-          <span className="text-ink-soft min-w-0 flex-1 truncate text-left text-xs">
+          <span className="min-w-0 flex-1 truncate text-left text-xs text-white/55">
             {email || pl.settings.account}
           </span>
         ) : null}
@@ -179,26 +217,31 @@ export function Sidebar({ subscriptionOk = true }: { subscriptionOk?: boolean })
     <nav
       aria-label={pl.app.name}
       data-expanded={expanded}
-      style={{ width: expanded ? 244 : 76 }}
+      style={
+        {
+          width: expanded ? 244 : 76,
+          '--nav-inline-padding': expanded ? '16px' : '15px',
+        } as React.CSSProperties
+      }
       className={cn(
-        'glass relative z-10 flex shrink-0 flex-col py-5',
+        'glass-dark relative z-10 flex shrink-0 flex-col py-5',
         expanded ? 'px-4' : 'items-center px-[15px]',
         'transition-[width] duration-[var(--dur-slide)] ease-[var(--ease-liquid)]',
       )}
     >
       <div className={cn('mb-6 flex items-center', expanded ? 'w-full gap-3 px-1' : 'flex-col')}>
-        <span className="bg-cta text-cta-fg font-display flex size-9 shrink-0 items-center justify-center rounded-[13px] text-sm font-semibold">
+        <span className="font-display text-ink flex size-9 shrink-0 items-center justify-center rounded-full bg-white text-sm font-semibold">
           A
         </span>
         {expanded ? (
-          <span className="font-display text-ink flex-1 truncate text-[15px] font-semibold tracking-tight">
+          <span className="font-display flex-1 truncate text-[15px] font-semibold tracking-tight text-white">
             {pl.app.name}
           </span>
         ) : null}
       </div>
 
       <div className="relative w-full" style={{ height: NAV_ITEMS.length * NAV_ROW_STEP }}>
-        <ActivePill index={activeIndex} expanded={expanded} />
+        <ActiveIndicator index={activeIndex} expanded={expanded} />
         <div className="relative flex flex-col" style={{ gap: NAV_ROW_STEP - NAV_ROW_HEIGHT }}>
           {NAV_ITEMS.map((item, index) => (
             <SidebarLink
@@ -221,9 +264,9 @@ export function Sidebar({ subscriptionOk = true }: { subscriptionOk?: boolean })
               aria-label={expanded ? pl.nav.collapse : pl.nav.expand}
               aria-expanded={expanded}
               className={cn(
-                'text-ink-soft hover:text-ink flex h-9 items-center rounded-[var(--radius-control)] transition-colors',
-                'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',
-                expanded ? 'w-full gap-3 px-2 hover:bg-white/50' : 'w-9 justify-center',
+                'flex h-9 items-center rounded-[var(--radius-control)] text-white/55 transition-colors hover:text-white',
+                'focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none',
+                expanded ? 'w-full gap-3 px-2 hover:bg-white/10' : 'w-9 justify-center',
               )}
             >
               {expanded ? (

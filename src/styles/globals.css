@@ -52,6 +52,25 @@
   --glass-shadow:
     0 1px 2px rgba(22, 24, 28, 0.04), 0 14px 34px -12px rgba(22, 24, 28, 0.16);
 
+  /* Ciemna tafla — nawigacja. Ta sama fizyka, odwrócone wartości:
+     rozjaśnienie u góry (odblask), głębia u dołu. */
+  --glass-dark-bg: rgba(19, 21, 25, 0.93);
+  --glass-dark-highlight: rgba(255, 255, 255, 0.22);
+  --glass-dark-edge: rgba(255, 255, 255, 0.04);
+  --glass-dark-shadow: 0 0 0 1px rgba(19, 21, 25, 0.6), 0 18px 44px -14px rgba(19, 21, 25, 0.5);
+
+  /* Kulka aktywnej pozycji leży na CIEMNEJ szynie, więc jest biała. */
+  --nav-pill: #ffffff;
+
+  /*
+   * Pole swiatla jako zmienna, bo uzywa go i `body::before`, i wciecie
+   * w nawigacji. Oba renderuja je z `background-attachment: fixed`, wiec
+   * sa zakotwiczone w tym samym punkcie widoku i pasuja co do piksela.
+   */
+  --field:
+    radial-gradient(72rem 52rem at 4% -10%, var(--canvas-light), transparent 60%),
+    radial-gradient(60rem 48rem at 106% 110%, var(--canvas-deep), transparent 58%);
+
   --radius-card: 20px;
   --radius-control: 12px;
   --radius-pill: 999px;
@@ -168,9 +187,8 @@
     inset: 0;
     z-index: -1;
     pointer-events: none;
-    background:
-      radial-gradient(72rem 52rem at 4% -10%, var(--canvas-light), transparent 60%),
-      radial-gradient(60rem 48rem at 106% 110%, var(--canvas-deep), transparent 58%);
+    background-color: var(--canvas);
+    background-image: var(--field);
   }
 
   h1,
@@ -232,6 +250,46 @@
 
   .glass-strong {
     background: var(--glass-bg-strong);
+  }
+
+  /* Ciemny wariant tafli. Nawigacja jest osią aplikacji: czarna szyna,
+     jasne szkło treści, ciepły papier dokumentu — trzy wyraźne plany. */
+  .glass-dark {
+    position: relative;
+    background: var(--glass-dark-bg);
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    box-shadow: var(--glass-dark-shadow);
+    color: #fff;
+  }
+
+  .glass-dark::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      168deg,
+      var(--glass-dark-highlight) 0%,
+      rgba(255, 255, 255, 0.06) 30%,
+      var(--glass-dark-edge) 100%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  @supports not (backdrop-filter: blur(1px)) {
+    .glass-dark {
+      background: #131519;
+    }
   }
 
   /* Karta chromu = tafla szkła. Nie przez `@apply .glass` — w Tailwind 4
@@ -365,7 +423,7 @@
 }
 
 .nav-pill-body {
-  background: var(--cta);
+  background: var(--nav-pill);
   border-radius: var(--radius-pill);
   height: 100%;
   width: 100%;
@@ -398,4 +456,57 @@
   transition:
     opacity 220ms var(--ease-out-soft),
     transform 320ms var(--ease-liquid);
+}
+
+
+/* ---------------------------------------------------------------
+   Nawigacja zwinieta — WCIECIE aktywnej pozycji.
+
+   To nie jest naklejka na szyne, tylko wgryzienie sie tresci w jej
+   krawedz: ksztalt lezki wypelniony DOKLADNIE tym samym polem swiatla
+   co tlo strony, zakotwiczonym w widoku (`background-attachment: fixed`).
+   Dzieki temu czyta sie jak dziura, a nie jak plamka w przyblizonym
+   kolorze — i nie rozjezdza sie z tlem przy przewijaniu.
+
+   Rozwiniety pasek zostaje przy pigulce: pelnej szerokosci wiersz lubi
+   tlo, waska szyna ikon lubi znacznik na krawedzi.
+   --------------------------------------------------------------- */
+.nav-notch-body {
+  height: 100%;
+  width: 100%;
+  transform-origin: center;
+  background-color: var(--canvas);
+  background-image: var(--field);
+  background-attachment: fixed;
+  /*
+   * Lezka OBEJMUJACA ikone: okragla kieszen po lewej (miesci ikone
+   * aktywnego ekranu) rozlewajaca sie w prawo az do krawedzi szyny,
+   * gdzie wtapia sie w nia dwoma WKLESLYMI barkami. Dzieki temu wybrany
+   * ekran zlewa sie z trescia zamiast lezec na nawigacji.
+   *
+   * Wspolrzedne w px — element ma staly rozmiar 64x74
+   * (46 px wiersza + 2 x 14 px barku).
+   */
+  clip-path: path(
+    'M 64 0 A 14 14 0 0 1 50 14 L 23 14 A 23 23 0 0 0 23 60 L 50 60 A 14 14 0 0 1 64 74 Z'
+  );
+}
+
+.nav-notch-body[data-travelling='true'] {
+  animation: nav-notch-stretch var(--dur-slide) var(--ease-liquid);
+}
+
+@keyframes nav-notch-stretch {
+  0% {
+    transform: scaleY(1);
+  }
+  38% {
+    transform: scaleY(1.14);
+  }
+  70% {
+    transform: scaleY(0.98);
+  }
+  100% {
+    transform: scaleY(1);
+  }
 }

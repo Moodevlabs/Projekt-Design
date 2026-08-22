@@ -25,11 +25,21 @@ beforeEach(() => {
 });
 
 describe('Sidebar — aktywna pozycja', () => {
-  it('ustawia kulkę na wysokości aktywnej pozycji', () => {
+  it('ustawia znacznik na wysokości aktywnej pozycji', () => {
     renderAt('/wyceny');
-    const pill = screen.getByTestId('nav-active-pill');
+    const marker = screen.getByTestId('nav-active-marker');
     const expected = NAV_ITEMS.findIndex((item) => item.to === '/wyceny');
-    expect(pill).toHaveAttribute('data-index', String(expected));
+    expect(marker).toHaveAttribute('data-index', String(expected));
+  });
+
+  it('zwinięty pasek oznacza wybór wcięciem, rozwinięty pigułką', async () => {
+    const user = userEvent.setup();
+    renderAt('/wyceny');
+
+    expect(screen.getByTestId('nav-active-marker')).toHaveAttribute('data-variant', 'notch');
+
+    await user.click(screen.getByRole('button', { name: pl.nav.expand }));
+    expect(screen.getByTestId('nav-active-marker')).toHaveAttribute('data-variant', 'pill');
   });
 
   it('oznacza aktywny link atrybutem aria-current', () => {
@@ -56,9 +66,9 @@ describe('Sidebar — aktywna pozycja', () => {
     );
   });
 
-  it('chowa kulkę na trasie spoza nawigacji', () => {
+  it('chowa znacznik na trasie spoza nawigacji', () => {
     renderAt('/subskrypcja');
-    expect(screen.queryByTestId('nav-active-pill')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nav-active-marker')).not.toBeInTheDocument();
   });
 
   it('oznacza pozycje z fazy 2 jako niedostępne', () => {

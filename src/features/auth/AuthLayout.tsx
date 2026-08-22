@@ -32,7 +32,7 @@ export function AuthLayout({
 
       <div className="relative w-full max-w-[380px]">
         <div className="mb-7 flex flex-col items-center gap-3.5">
-          <span className="bg-cta text-cta-fg font-display flex size-12 items-center justify-center rounded-[17px] text-lg font-semibold shadow-[0_8px_24px_-8px_rgba(20,22,28,0.6)]">
+          <span className="bg-cta text-cta-fg font-display flex size-12 items-center justify-center rounded-full text-lg font-semibold shadow-[0_8px_24px_-8px_rgba(20,22,28,0.6)]">
             A
           </span>
           <div className="text-center">

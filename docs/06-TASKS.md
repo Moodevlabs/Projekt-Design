@@ -109,11 +109,14 @@ Format: `- [ ] T-xx Nazwa` — czytaj: wymagane dokumenty → kryteria akceptacj
   > - Trasa edytora ustawia `handle.hideTopbar`, bo edytor ma własny pasek.
 
 - [x] **T-08a Przebudowa systemu wizualnego** (05-UI) — *zadanie wstawione na życzenie w trakcie Fazy 1*
-  ✅ Nowoczesny „liquid glass", rozwijany sidebar z animowanym wskaźnikiem, pulpit bez szablonowych kafelków.
+  ✅ Nowoczesny „liquid glass", czarny rozwijany sidebar z animowanym wskaźnikiem, pulpit bez szablonowych kafelków.
   > **Teza:** **chrom aplikacji jest ze szkła, dokument jest z papieru.** Powłoka (sidebar, paski, karty) cofa się; wycena jest ciepłym, matowym arkuszem leżącym na podłożu i wychodzi do przodu. Szkło oprawia papier — to koduje strukturę produktu (narzędzie kontra artefakt dla klienta).
   > **Na co uważać:**
   > - **Szkło to nie sam blur.** Potrzebne są cztery rzeczy naraz: rozmycie, **podbicie nasycenia** (bez tego wychodzi brudna szarość), włos obramowania jaśniejszy u góry niż u dołu (odblask, robiony maską na `::before`, nie `border`) i cień w kolorze atramentu, nie czerni. Do tego **różnica jasności pod spodem** — na płaskim tle szkło nie ma czego załamać i wygląda jak biały div.
-  > - **Kulka nawigacji to dwa zagnieżdżone elementy.** Zewnętrzny robi przesunięcie (`transition`), wewnętrzny rozciągnięcie (`animation`). Na jednym elemencie biłyby się o `transform`.
+  > - **Nawigacja jest ciemna, treść jasna** — czarna szyna, jasne szkło, ciepły papier dokumentu: trzy wyraźne plany.
+  > - **Wskaźnik aktywnego ekranu ma dwie postacie.** Pasek zwinięty: **wcięcie** w prawej krawędzi szyny, obejmujące ikonę — wybrany ekran zlewa się z treścią, więc ikona leży na jasnym tle i jest atramentowa. Pasek rozwinięty: pigułka pod całym wierszem. Wąska szyna ikon lubi znacznik na krawędzi, wiersz pełnej szerokości lubi tło.
+  > - **Wcięcie to nie plamka w przybliżonym kolorze.** Jest wypełnione **tym samym** polem światła co tło strony, renderowanym z `background-attachment: fixed` — dzięki temu jest zakotwiczone w widoku i pasuje co do piksela, zamiast rozjeżdżać się z tłem.
+  > - **Wskaźnik to dwa zagnieżdżone elementy.** Zewnętrzny robi przesunięcie (`transition`), wewnętrzny rozciągnięcie (`animation`). Na jednym elemencie biłyby się o `transform`.
   > - **Znacznik statusu nie jest pigułką i nie ma być.** Status wyceny to pozycja w ciągu (szkic → wysłana → rozstrzygnięcie), a nie tag z chmury. Trzyodcinkowy tor pokazuje postęp i daje się skanować pionowo w kolumnie. Znaczenie niosą wypełnienie, grubość napisu i samo słowo — **kolor nie niesie tu żadnej informacji**, więc działa też dla osób nierozróżniających barw.
   > - **Kolorystyka jest tymczasowa: szarobiel.** Chrom ma nie konkurować z dokumentem. Docelowa paleta powstanie na końcu budowy (T-17). Nie dokładaj tu akcentów kolorystycznych „bo pusto".
   > - Fonty (`Inter` + `Instrument Sans` na tytuły, etykiety i **liczby**) są hostowane u siebie przez `@fontsource-variable` — w aplikacji desktopowej nie zależymy od sieci ani nie rozluźniamy CSP dla Google Fonts.
