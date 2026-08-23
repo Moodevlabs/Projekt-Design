@@ -18,6 +18,7 @@ export function newItem(partial: Partial<Item> = {}): Item {
     // Domyślnie `flat`, czyli zachowanie sprzed cennika parametrycznego.
     pricing: { mode: 'flat' },
     roomId: null,
+    tags: [],
     ...partial,
   };
 }

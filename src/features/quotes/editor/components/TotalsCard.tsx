@@ -3,6 +3,7 @@ import { ChevronDown } from 'lucide-react';
 import { calcWorkload, calcQuoteTotals, calcSectionBreakdown, type QuoteBody } from '@/domain/quote';
 import { formatMoney } from '@/domain/money';
 import { formatMinutes } from '@/domain/time';
+import { WorkloadPopover } from './WorkloadPopover';
 import { addDays, formatDate } from '@/lib/dates';
 import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
@@ -44,10 +45,13 @@ export function TotalsCard({
   body,
   currency,
   issueDate,
+  hourlyRateCents = null,
 }: {
   body: QuoteBody;
   currency: string;
   issueDate: string;
+  /** Stawka z ustawień — do szacunku czasu w wycenie kwotowej (F2.3). */
+  hourlyRateCents?: number | null;
 }) {
   const totals = calcQuoteTotals(body);
   // Podzial na etapy zwiniety domyslnie — to narzedzie do sprawdzania,
@@ -62,6 +66,10 @@ export function TotalsCard({
     <aside
       className={cn('card-surface px-6 py-5')}
     >
+      <div className="mb-2 flex justify-end">
+        <WorkloadPopover body={body} fallbackRateCents={hourlyRateCents} />
+      </div>
+
       <div className="space-y-2">
         <Line label={pl.editor.itemsTotal} value={formatMoney(totals.itemsCents, currency)} />
         {totals.discountsCents > 0 ? (

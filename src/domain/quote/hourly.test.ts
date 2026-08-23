@@ -158,6 +158,7 @@ describe('calcWorkload', () => {
   it('sumuje minuty per sekcja i łącznie', () => {
     const workload = calcWorkload(body);
 
+    expect(workload.available).toBe(true);
     expect(workload.minutesBySection.map((s) => [s.title, s.minutes])).toEqual([
       ['Projekt', 180],
       ['Nadzór', 120],
@@ -169,14 +170,17 @@ describe('calcWorkload', () => {
     expect(calcWorkload(body).minutesTotal).toBe(300);
   });
 
-  it('w trybie kwotowym zwraca zera, zamiast zgadywać', () => {
-    // Przeliczenie groszy na minuty wymagałoby stawki, której wycena kwotowa
-    // nie musi mieć.
+  it('w trybie kwotowym BEZ STAWKI mowi „nie wiem", a nie „zero"', () => {
+    // Zero minut pracy to konkretna informacja i nie wolno jej mylic z brakiem
+    // danych do wyliczenia — interfejs ma powiedziec, czego brakuje.
     const kwotowa = newQuoteBody({
       sections: [newSection({ title: 'X', items: [newItem({ name: 'A', unitPriceCents: 500 })] })],
     });
 
-    expect(calcWorkload(kwotowa)).toEqual({ minutesTotal: 0, minutesBySection: [] });
+    const workload = calcWorkload(kwotowa);
+    expect(workload.available).toBe(false);
+    expect(workload.minutesTotal).toBe(0);
+    expect(workload.minutesBySection).toEqual([]);
   });
 });
 

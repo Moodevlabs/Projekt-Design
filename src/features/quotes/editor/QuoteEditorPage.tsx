@@ -299,6 +299,9 @@ function EditorSurface({
   const library = useSaveToLibrary();
   const canWrite = useEntitlement().canWrite;
   const variants = useVariantOptions();
+  // Stawka z ustawien — wycena kwotowa jej nie ma, a szacunek czasu (F2.3)
+  // musi ja skads wziac.
+  const workspaceRate = useWorkspace().data?.settings.hourlyRateCents ?? null;
   const markAsSent = useMarkAsSentPrompt();
   const basisChange = usePricingBasisChange();
   /*
@@ -519,7 +522,12 @@ function EditorSurface({
                 onPatch={updateRoom}
                 onRemove={removeRoom}
               />
-              <TotalsCard body={body} currency="PLN" issueDate={issueDate} />
+              <TotalsCard
+                body={body}
+                currency="PLN"
+                issueDate={issueDate}
+                hourlyRateCents={workspaceRate}
+              />
             </div>
           </div>
         </div>

@@ -475,9 +475,20 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - **Brak stawki mówi o sobie wprost** („bez stawki wszystkie kwoty wychodzą zerowe”). Bez tego komunikatu wycena wygląda na zepsutą.
   > **Przy okazji naprawione:** nowa wycena brała VAT, tryb cen i `showDisabledItems` z wartości zaszytych w `newQuoteBody`, więc **ustawienie VAT 8% w ustawieniach i tak dawało w dokumencie 23%**. Teraz idzie przez `quoteBodyFromSettings` — i to jest **kopia, nie odwołanie**: późniejsza zmiana stawki czy VAT-u nie rusza ofert, które już poszły. Jest na to test.
 
-- [ ] **T-42 Szacowanie pracochłonności** (F2.3)
+- [x] **T-42 Szacowanie pracochłonności** (F2.3)
   Popover z minutami per sekcja, tag `communication`, `Item.tags`.
   ✅ Suma minut zgodna z `OFERTA - DANE` U/R48 dla seedu.
+  > **Zrobione.** `Item.tags`, `TAG_COMMUNICATION`, `calcWorkload` w wariancie odwrotnym (`kwota / stawka × 60`), `WorkloadPopover` pod zegarem w `TotalsCard`, przełącznik etykiety w wierszu. 778 testów.
+  > **Na co uważać:**
+  > - **`available` odróżnia „zero minut" od „nie wiem".** W trybie kwotowym szacunek wymaga stawki, której dokument nie ma — bierzemy ją z ustawień workspace'u. Bez niej popover mówi, czego brakuje, zamiast pokazywać zera, które wyglądałyby jak wynik.
+  > - **Wycena godzinowa IGNORUJE stawkę z ustawień** — minuty są w niej wprost, a podstawienie cudzej stawki przeliczyłoby je drugi raz. Jest na to test.
+  > - **Komunikacja jest WLICZONA w sumę, nie doliczona obok**, i popover mówi to wprost. Inaczej suma nie zgadzałaby się z rozbiciem na sekcje i wyglądała na policzoną dwa razy.
+  > - **Szacunek pod zegarem, a nie w wierszu podsumowania.** W trybie kwotowym to liczba wyliczona wstecz z ceny, a nie czas, który ktoś wpisał; postawiona obok sum wyglądałaby na równie pewną co one. Popover mówi wprost, że to szacunek — zanim ktoś zaplanuje po nim tydzień pracy.
+  > - **`Item.tags` to luźna lista stringów, nie enum.** To notatki o charakterze pracy (`communication`, `meeting`), a nie wymiar, po którym cokolwiek się liczy. Zamknięty zbiór wymuszałby migrację przy każdej nowej etykiecie, a nieznana etykieta nie ma prawa zepsuć dokumentu (jest na to test).
+  > - `bodyVersion` **nie podbity** — `tags` ma wartość domyślną, więc stare dokumenty wczytują się bez kroku migracji.
+  > - W wierszu jest **przełącznik**, a nie lista tagów: `communication` to jedyna etykieta, która dziś cokolwiek liczy, a rozwijana lista sugerowałaby wybór tam, gdzie są dwie odpowiedzi.
+  > **Czego NIE dało się sprawdzić:** kryterium mówi o parytecie z `OFERTA - DANE` U/R48, ale **arkusza nie ma w repozytorium**, a `FEATURES` podaje tylko wzór, bez wartości oczekiwanych. Zweryfikowany jest **wzór** (`kwota / stawka × 60`) i sposób sumowania komunikacji; zgodność liczbowa z konkretnym arkuszem pozostaje niesprawdzona.
+  > **Nie zrobione (faza 2, zgodnie z `FEATURES`):** kafel „Średnia pracochłonność zaakceptowanych wycen" na pulpicie — oznaczony tam jako `(f2)`.
 
 - [ ] **T-43 Harmonogram — domena** (F5.1)
   `domain/schedule/`, `calcSchedule`, `domain/dates/workdays.ts` (polskie święta: stałe + Wielkanoc algorytmem Meeusa + Boże Ciało), szablon 11 etapów.

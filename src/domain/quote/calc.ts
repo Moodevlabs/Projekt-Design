@@ -174,41 +174,87 @@ export function calcQuoteTotals(body: QuoteBody): QuoteTotals {
   );
 }
 
-/** Pracochłonność dokumentu w minutach (F2.1). */
+/** Etykieta pozycji oznaczająca komunikację projektową (F2.3). */
+export const TAG_COMMUNICATION = 'communication';
+
+/** Pracochłonność dokumentu w minutach (F2.1, F2.3). */
 export interface Workload {
   minutesTotal: number;
   minutesBySection: { sectionId: string; title: string; minutes: number }[];
+  /**
+   * Ile z tych minut przypada na pozycje oznaczone jako komunikacja projektowa.
+   * **Wliczone w `minutesTotal`** — to wyodrębnienie, nie osobna pula.
+   */
+  communicationMinutes: number;
+  /**
+   * Czy liczby w ogóle udało się policzyć.
+   *
+   * W trybie kwotowym potrzebna jest stawka; bez niej `false` i same zera.
+   * Rozróżnienie „zero minut" od „nie wiem" jest tu istotne: interfejs ma
+   * powiedzieć, czego brakuje, zamiast pokazywać zero jak wynik.
+   */
+  available: boolean;
 }
 
+const BRAK_PRACOCHLONNOSCI: Workload = {
+  minutesTotal: 0,
+  minutesBySection: [],
+  communicationMinutes: 0,
+  available: false,
+};
+
 /**
- * Suma minut pracy (F2.1).
+ * Pracochłonność wyceny w minutach.
  *
- * Liczy się **tylko w trybie godzinowym** — w kwotowym liczby są groszami
- * i przeliczanie ich na minuty wymagałoby stawki, której wycena kwotowa nie
- * musi mieć. Zwracamy zera zamiast zgadywać.
+ * Działa w obie strony, bo arkusz też tak robi:
  *
- * Wyliczamy z surowych jednostek, a nie z groszy przez `toMinutes`: droga
- * w tę i z powrotem przez stawkę gubi resztę przy zaokrągleniu, a minuty są
- * tym, co użytkownik faktycznie wpisał.
+ *  - **tryb godzinowy** — minuty to wprost to, co wpisano. Liczymy z surowych
+ *    jednostek, a nie z groszy przez `toMinutes`: droga w tę i z powrotem
+ *    przez stawkę gubi resztę przy zaokrągleniu.
+ *  - **tryb kwotowy** (F2.3, wariant odwrotny) — szacujemy `kwota / stawka × 60`.
+ *    Stawki nie ma wtedy w dokumencie, bo wycena kwotowa jej nie potrzebuje,
+ *    więc podaje ją wołający — zwykle z ustawień workspace'u.
+ *
+ * **Bez stawki w trybie kwotowym zwracamy `available: false`, a nie zera.**
+ * Zero minut pracy to konkretna informacja i nie wolno jej mylić z brakiem
+ * danych do wyliczenia.
  *
  * Świadome odstępstwo od `FEATURES §F2.1`, gdzie te liczby miały siedzieć
  * w `calcQuoteTotals`: osobna funkcja nie zmusza wszystkich odbiorców
- * podsumowania do obsługi pól, które w trybie kwotowym zawsze są puste.
+ * podsumowania do obsługi pól, które w trybie kwotowym zwykle są puste.
  */
-export function calcWorkload(body: QuoteBody): Workload {
-  if (body.pricingBasis !== 'time') return { minutesTotal: 0, minutesBySection: [] };
+export function calcWorkload(body: QuoteBody, fallbackRateCents: number | null = null): Workload {
+  const godzinowa = body.pricingBasis === 'time';
+  const rate = godzinowa ? body.hourlyRateCents : fallbackRateCents;
+
+  // W trybie godzinowym minuty znamy wprost — stawka nie jest do tego potrzebna.
+  if (!godzinowa && !rate) return BRAK_PRACOCHLONNOSCI;
+
+  const minutesOf = (item: Item): number => {
+    const units = calcItemUnits(item, body.rooms);
+    return godzinowa ? units : Math.round((units / (rate ?? 1)) * MINUTES_PER_HOUR);
+  };
+
+  /** Pozycje, które faktycznie oznaczają pracę: włączone i niebędące rabatem. */
+  const liczone = (section: Section) =>
+    sectionItems(section).filter((item) => item.enabled && item.kind !== 'discount');
 
   const minutesBySection = body.sections.map((section) => ({
     sectionId: section.id,
     title: section.title,
-    minutes: sectionItems(section)
-      .filter((item) => item.enabled && item.kind !== 'discount')
-      .reduce((sum, item) => sum + calcItemUnits(item, body.rooms), 0),
+    minutes: liczone(section).reduce((sum, item) => sum + minutesOf(item), 0),
   }));
+
+  const communicationMinutes = body.sections
+    .flatMap(liczone)
+    .filter((item) => item.tags.includes(TAG_COMMUNICATION))
+    .reduce((sum, item) => sum + minutesOf(item), 0);
 
   return {
     minutesTotal: minutesBySection.reduce((sum, row) => sum + row.minutes, 0),
     minutesBySection,
+    communicationMinutes,
+    available: true,
   };
 }
 

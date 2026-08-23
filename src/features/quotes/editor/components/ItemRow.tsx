@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Trash2 } from 'lucide-react';
+import { MessagesSquare, Trash2 } from 'lucide-react';
 import { InlineText } from './InlineText';
 import { InlineMoney } from './InlineMoney';
 import { ItemToggle } from './ItemToggle';
@@ -15,6 +15,7 @@ import { formatMoney } from '@/domain/money';
 import {
   calcItemCents,
   itemTextContext,
+  TAG_COMMUNICATION,
   type PricingContext,
   renderText,
   type DocumentTextInfo,
@@ -110,6 +111,7 @@ export const ItemRow = memo(function ItemRow({
   const itemVariants = (item.libraryItemId && variants.get(item.libraryItemId)) || EMPTY_VARIANTS;
   const parametric = pricingSummary(item, rooms, currency);
   const godzinowa = pricing.pricingBasis === 'time';
+  const komunikacja = item.tags.includes(TAG_COMMUNICATION);
 
   const {
     attributes,
@@ -291,6 +293,35 @@ export const ItemRow = memo(function ItemRow({
           </span>
         ) : null}
       </div>
+
+      {editing ? (
+        /*
+         * Etykieta „komunikacja projektowa" (F2.3) — przełącznik, nie lista
+         * tagów. To jedyna etykieta, która dziś cokolwiek liczy, a rozwijana
+         * lista sugerowałaby wybór tam, gdzie są dwie odpowiedzi: tak albo nie.
+         */
+        <button
+          type="button"
+          aria-pressed={komunikacja}
+          aria-label={`${pl.editor.itemTagCommunication}: ${item.name || pl.editor.newItemName}`}
+          title={pl.editor.itemTagCommunication}
+          onClick={() =>
+            onPatch(item.id, {
+              tags: komunikacja
+                ? item.tags.filter((tag) => tag !== TAG_COMMUNICATION)
+                : [...item.tags, TAG_COMMUNICATION],
+            })
+          }
+          className={cn(
+            'flex size-[22px] shrink-0 items-center justify-center rounded-full transition-colors',
+            komunikacja
+              ? 'bg-[var(--doc-sage-light)] text-[var(--doc-sage)]'
+              : 'text-[var(--doc-ink-soft)] hover:bg-[var(--doc-surface)]',
+          )}
+        >
+          <MessagesSquare className="size-[13px]" aria-hidden />
+        </button>
+      ) : null}
 
       {editing ? (
         <SaveToLibraryButton

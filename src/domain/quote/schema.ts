@@ -86,6 +86,15 @@ export const ItemSchema = z.object({
   roomId: z.string().uuid().nullable().default(null),
   /** Liczba kadrów — tylko dla `per_frame`. */
   frames: z.number().int().positive().optional(),
+  /**
+   * Etykiety pozycji (F2.3, używane też przy harmonogramie w F5).
+   *
+   * Luźna lista stringów, a nie enum: to są **notatki o charakterze pracy**
+   * (`communication`, `meeting`), a nie wymiar, po którym cokolwiek się liczy.
+   * Zamknięty zbiór wymuszałby migrację za każdym razem, gdy komuś przyda się
+   * nowa etykieta — a nieznana etykieta nie ma prawa zepsuć dokumentu.
+   */
+  tags: z.array(z.string()).default([]),
 });
 export type Item = z.infer<typeof ItemSchema>;
 

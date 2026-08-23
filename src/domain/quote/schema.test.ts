@@ -26,6 +26,8 @@ describe('ItemSchema', () => {
       // parametrycznym — `qty × cena`.
       pricing: { mode: 'flat' },
       roomId: null,
+      // Etykiety (F2.3) są opcjonalne — pozycja bez nich to zwykła praca.
+      tags: [],
     });
   });
 

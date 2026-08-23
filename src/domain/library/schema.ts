@@ -75,6 +75,7 @@ export function libraryItemToQuoteItem(
     // jak opisano ją raz w cenniku.
     pricing: libraryItem.pricing,
     roomId: null,
+    tags: [],
     ...overrides,
   };
 }
@@ -92,6 +93,9 @@ export function librarySnapshotToQuoteItem(snapshot: LibraryItemSnapshot): Item 
     libraryItemId: snapshot.libraryItemId,
     pricing: { mode: 'flat' },
     roomId: null,
+    // Snapshot zestawu nie niesie etykiet — sa cecha konkretnej wyceny
+    // (F2.3), a nie opisu uslugi w bibliotece.
+    tags: [],
   };
 }
 
