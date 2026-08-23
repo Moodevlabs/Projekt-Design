@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { newId } from '../id';
-import { ItemKindSchema, type Item } from '../quote/schema';
+import { ItemKindSchema, PricingRuleSchema, type Item } from '../quote/schema';
 
 /**
  * Biblioteka pozycji i zestawów — parytet z tabelami `library_items`
@@ -16,6 +16,11 @@ export const LibraryItemSchema = z.object({
   description: z.string().default(''),
   unitPriceCents: z.number().int().default(0),
   sortOrder: z.number().int().default(0),
+  /**
+   * Reguła wyceny wpisu. Brak = `flat`, czyli zachowanie sprzed cennika
+   * parametrycznego — wstawiona pozycja liczy się jako `qty × cena`.
+   */
+  pricing: PricingRuleSchema.default({ mode: 'flat' }),
 });
 export type LibraryItem = z.infer<typeof LibraryItemSchema>;
 
@@ -66,9 +71,9 @@ export function libraryItemToQuoteItem(
     unitPriceCents: libraryItem.unitPriceCents,
     enabled: true,
     libraryItemId: libraryItem.id,
-    // Wpisy biblioteczne dostaną własne reguły cenowe dopiero w T-34
-    // (`library_items.pricing`); do tego czasu wstawiamy pozycję stałocenową.
-    pricing: { mode: 'flat' },
+    // Reguła jedzie z biblioteki — pozycja wstawiona do wyceny liczy się tak,
+    // jak opisano ją raz w cenniku.
+    pricing: libraryItem.pricing,
     roomId: null,
     ...overrides,
   };

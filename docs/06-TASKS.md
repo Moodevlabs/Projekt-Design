@@ -232,11 +232,22 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - **Unikalność sluga dotyczy tylko żywych wpisów** (indeks częściowy `where deleted_at is null`), więc raz usunięta „kuchnia” daje się dodać z powrotem.
   > - Usuwanie to **soft delete** — `roomTypeId` siedzi w regułach cenowych i w pomieszczeniach zapisanych wycen. Ostrzeżenie „X pozycji używa tego typu” dochodzi razem z UI w T-16.
 
-- [ ] **T-34 Biblioteka: reguły cenowe i macierz** (F1.3)
-  `library_items.pricing jsonb`, przełącznik trybu na karcie pozycji, macierz `pozycje × typy pomieszczeń`, import CSV.
-  ✅ Zmiana ceny w macierzy wchodzi do nowej wyceny; kaskada do otwartej wyceny obejmuje `pricing`.
-  ⚠️ Kaskada z T-10 przenosi dziś **wyłącznie `name`, `description`, `unitPriceCents`** (`cascadeFields` w `items/item-draft.ts` + `LibraryCascadePatch` w store). Dopisanie `pricing` to zmiana w obu miejscach plus test — nie dzieje się samo.
-  ⚠️ Nowa zależność `@tanstack/react-table` wymaga uzasadnienia w PR (CLAUDE.md „Czego NIE robić”). Rozważ najpierw zwykłą tabelę z inputami — macierz to kilkanaście kolumn, nie tysiąc wierszy.
+- [x] **T-34 Biblioteka: reguły cenowe** (F1.3 — bez widoku zbiorczego)
+  `library_items.pricing jsonb`, przełącznik trybu na karcie pozycji, stawki per typ pomieszczenia.
+  ✅ Reguła zapisana w bibliotece wchodzi do nowej wyceny; kaskada do otwartej wyceny obejmuje `pricing`.
+  > **Zrobione.** Migracja `0007_library_pricing.sql`, `LibraryItemSchema.pricing`, miękkie parsowanie reguły w repo, `PricingEditor` + `PricingModeToggle` na karcie pozycji, kaskada rozszerzona o `pricing`. 424 testy jednostkowe, 47 integracyjnych.
+  > **Na co uważać:**
+  > - **Kaskada porównuje reguły przez `JSON.stringify`, nie po referencji.** Reguła to zagnieżdżony obiekt (mapa stawek), więc po każdym odczycie z bazy jest inną referencją — porównanie tożsamości pytałoby o kaskadę przy każdym zapisie, nawet gdy nic się nie zmieniło.
+  > - **Przełączenie trybu buduje regułę od zera**, zamiast doklejać pola. Inaczej po `per_room → flat → per_room` w JSON-ie zostawałyby śmieci po nieaktywnym trybie. Stawki przenoszą się między trybami parametrycznymi świadomie — to zwykle ta sama tabela cen.
+  > - **Puste pole stawki znaczy „domyślna”, nie zero.** Macierz pokazuje w takim wierszu wartość domyślną, żeby to, co widać, zgadzało się z tym, co się policzy.
+  > - **Nieczytelna reguła w `jsonb` degraduje pozycję do `flat`**, a nie wywala biblioteki — jedna zepsuta pozycja nie może zabrać użytkownikowi całego cennika. Cena jednostkowa zostaje.
+  > - `@tanstack/react-table` **nie** zostało dodane. Stawki to kilkanaście wierszy na kartę, `MoneyInput` już był — biblioteka nic by nie wniosła poza zależnością.
+
+- [ ] **T-50 Macierz cennika i import CSV** (F1.3 — reszta)
+  Widok `pozycje (wiersze) × typy pomieszczeń (kolumny)` z edycją w komórkach i filtrem po kategorii — dla ludzi, którzy lubią Excela. Import CSV macierzy (kolumny = slugi typów), parser w `domain/library/csv.ts`.
+  ✅ Zmiana stawki w widoku zbiorczym daje ten sam efekt co edycja na karcie; import z pliku o kolumnach ze slugami wgrywa stawki bez ruszania pozostałych pól.
+  ⚠️ Wydzielone z T-34 świadomie: reguły cenowe **działają** bez tego widoku (edytuje się je na karcie pozycji), a zbiorcza tabela to wygoda przy przenoszeniu cennika z arkusza. Zrób ją, zanim klient zacznie przepisywać cennik ręcznie.
+  ⚠️ `slug` jest kluczem importu — patrz notatka w T-33 o tym, dlaczego nie zmienia się razem z nazwą.
 
 - [ ] **T-35 Edytor: panel pomieszczeń i bloki per pomieszczenie** (F1.4)
   `RoomsPanel`, sekcja z blokami pomieszczeń, „dodaj pozycję do wszystkich pomieszczeń", warianty (3D/360), stepper kadrów, akcje store (`addRoom`/`updateRoom`/`removeRoom`/`setItemVariant`/`setItemFrames`), dopisek „baza + 7 pom." z tooltipem.

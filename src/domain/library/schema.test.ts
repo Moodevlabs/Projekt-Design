@@ -26,6 +26,8 @@ describe('LibraryItemSchema', () => {
       description: '',
       unitPriceCents: 0,
       sortOrder: 0,
+      // Wpis bez reguły liczy się jak przed cennikiem parametrycznym.
+      pricing: { mode: 'flat' },
     });
   });
 
@@ -105,6 +107,32 @@ describe('libraryItemToQuoteItem', () => {
     expect(libraryItemToQuoteItem(libraryItem, { qty: 3, enabled: false })).toMatchObject({
       qty: 3,
       enabled: false,
+    });
+  });
+
+  it('przenosi regułę cenową z biblioteki do wyceny', () => {
+    // Sedno cennika parametrycznego: usługę opisuje się raz, w bibliotece.
+    const parametryczna = LibraryItemSchema.parse({
+      id: LI,
+      workspaceId: WS,
+      name: 'Projekt budowlany',
+      unitPriceCents: 0,
+      pricing: {
+        mode: 'per_room',
+        baseCents: 20_000,
+        perRoomCents: {},
+        defaultPerRoomCents: 1_500,
+        roomScope: 'technical',
+      },
+    });
+
+    const item = libraryItemToQuoteItem(parametryczna);
+    expect(item.pricing).toEqual({
+      mode: 'per_room',
+      baseCents: 20_000,
+      perRoomCents: {},
+      defaultPerRoomCents: 1_500,
+      roomScope: 'technical',
     });
   });
 });

@@ -5,7 +5,7 @@ import {
   type LibraryGroup,
   type LibraryItemSnapshot,
 } from '@/domain/library/schema';
-import { ItemKindSchema, type ItemKind } from '@/domain/quote';
+import { ItemKindSchema, PricingRuleSchema, type ItemKind, type PricingRule } from '@/domain/quote';
 import { getSupabase } from '@/data/supabase';
 import type { Tables, TablesUpdate } from '@/data/types.generated';
 import { RepoError, unwrap } from './errors';
@@ -32,11 +32,29 @@ export interface LibraryItem {
   description: string;
   unitPriceCents: number;
   sortOrder: number;
+  pricing: PricingRule;
 }
 
 export interface LibraryItemFilters {
   category?: string;
   search?: string;
+}
+
+/**
+ * Reguła cenowa z `jsonb`. Parsujemy miękko: wpis zapisany nowszą wersją
+ * aplikacji (albo ręcznie zepsuty) wraca jako `flat`, żeby jedna pozycja nie
+ * wywaliła całej biblioteki. Cena jednostkowa zostaje, więc pozycja dalej ma
+ * sensowną wartość — tyle że bez składnika za pomieszczenia.
+ */
+function parsePricing(raw: unknown, id: string): PricingRule {
+  const parsed = PricingRuleSchema.safeParse(raw ?? { mode: 'flat' });
+  if (parsed.success) return parsed.data;
+
+  log.warn('Nieczytelna reguła cenowa pozycji bibliotecznej — używam stałej ceny', {
+    id,
+    issues: parsed.error.issues,
+  });
+  return { mode: 'flat' };
 }
 
 function mapItem(row: ItemRow): LibraryItem {
@@ -50,6 +68,7 @@ function mapItem(row: ItemRow): LibraryItem {
     description: row.description ?? '',
     unitPriceCents: Number(row.unit_price_cents ?? 0),
     sortOrder: Number(row.sort_order ?? 0),
+    pricing: parsePricing(row.pricing, row.id),
   };
 }
 
@@ -145,6 +164,7 @@ export interface CreateLibraryItemInput {
   description?: string;
   unitPriceCents?: number;
   sortOrder?: number;
+  pricing?: PricingRule;
 }
 
 export async function createLibraryItem(input: CreateLibraryItemInput): Promise<LibraryItem> {
@@ -159,6 +179,7 @@ export async function createLibraryItem(input: CreateLibraryItemInput): Promise<
         description: input.description ?? '',
         unit_price_cents: input.unitPriceCents ?? 0,
         sort_order: input.sortOrder ?? 0,
+        pricing: input.pricing ?? { mode: 'flat' },
       })
       .select('*'),
     'Dodanie pozycji do biblioteki',
@@ -181,6 +202,7 @@ export async function updateLibraryItem(id: string, patch: LibraryItemPatch): Pr
   if (patch.description !== undefined) update.description = patch.description;
   if (patch.unitPriceCents !== undefined) update.unit_price_cents = patch.unitPriceCents;
   if (patch.sortOrder !== undefined) update.sort_order = patch.sortOrder;
+  if (patch.pricing !== undefined) update.pricing = patch.pricing;
 
   const rows = unwrap(
     await getSupabase().from('library_items').update(update).eq('id', id).select('*'),

@@ -22,6 +22,7 @@ function libraryItem(overrides: Partial<LibraryItem> = {}): LibraryItem {
     description: 'Kamienny',
     unitPriceCents: 120_000,
     sortOrder: 0,
+    pricing: { mode: 'flat' },
     ...overrides,
   };
 }
@@ -135,5 +136,55 @@ describe('useCascadePrompt — scenariusz z kryterium T-10', () => {
     expect(item?.name).toBe('Blat granitowy');
     // Cena się nie zmieniła w bibliotece, więc nie ma prawa zmienić się w wycenie.
     expect(item?.unitPriceCents).toBe(120_000);
+  });
+
+  it('zmiana reguły cenowej kaskaduje do powiązanych pozycji', () => {
+    // Reguła to opis usługi, nie decyzja w konkretnej ofercie — poprawka stawki
+    // za pomieszczenie musi dogonić wyceny, w których ta usługa już jest.
+    useEditorStore.getState().load(quoteWithLinkedItem());
+    const { result } = renderHook(() => useCascadePrompt());
+
+    const nowaRegula = {
+      mode: 'per_room',
+      baseCents: 20_000,
+      perRoomCents: {},
+      defaultPerRoomCents: 1_500,
+      roomScope: 'all',
+    } as const;
+
+    act(() => result.current.offer(libraryItem(), libraryItem({ pricing: nowaRegula })));
+    expect(result.current.prompt?.count).toBe(2);
+
+    act(() => result.current.accept());
+
+    const body = useEditorStore.getState().body;
+    expect(body?.sections[0]?.items[0]?.pricing).toEqual(nowaRegula);
+    expect(body?.sections[0]?.groups[0]?.items[0]?.pricing).toEqual(nowaRegula);
+    // Pozycja spoza biblioteki zostaje przy swojej regule.
+    expect(body?.sections[0]?.items[1]?.pricing).toEqual({ mode: 'flat' });
+  });
+
+  it('identyczna regula nie uchodzi za zmiane', () => {
+    // Reguła to zagnieżdżony obiekt — po odczycie z bazy jest inną referencją,
+    // więc porównanie „po tożsamości” pytałoby o kaskadę przy każdym zapisie.
+    useEditorStore.getState().load(quoteWithLinkedItem());
+    const { result } = renderHook(() => useCascadePrompt());
+
+    const regula = {
+      mode: 'per_room',
+      baseCents: 20_000,
+      perRoomCents: { kuchnia: 5_000 },
+      defaultPerRoomCents: 1_500,
+      roomScope: 'all',
+    } as const;
+
+    act(() =>
+      result.current.offer(
+        libraryItem({ pricing: regula }),
+        libraryItem({ pricing: { ...regula, perRoomCents: { kuchnia: 5_000 } } }),
+      ),
+    );
+
+    expect(result.current.prompt).toBeNull();
   });
 });

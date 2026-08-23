@@ -1,5 +1,5 @@
 import type { LibraryItem } from '@/data/repos/library.repo';
-import type { ItemKind } from '@/domain/quote';
+import type { ItemKind, PricingRule } from '@/domain/quote';
 
 /** Edytowalne pola pozycji bibliotecznej — to, co karta trzyma lokalnie. */
 export interface ItemDraft {
@@ -8,6 +8,7 @@ export interface ItemDraft {
   category: string;
   kind: ItemKind;
   unitPriceCents: number;
+  pricing: PricingRule;
 }
 
 export function toItemDraft(item: LibraryItem): ItemDraft {
@@ -17,6 +18,7 @@ export function toItemDraft(item: LibraryItem): ItemDraft {
     category: item.category,
     kind: item.kind,
     unitPriceCents: item.unitPriceCents,
+    pricing: item.pricing,
   };
 }
 
@@ -33,6 +35,7 @@ export function draftSignature(draft: ItemDraft): string {
     draft.category,
     draft.kind,
     draft.unitPriceCents,
+    draft.pricing,
   ]);
 }
 
@@ -50,14 +53,20 @@ export interface CascadeFields {
   name?: string;
   description?: string;
   unitPriceCents?: number;
+  pricing?: PricingRule;
 }
 
-/** Tylko te z trzech kaskadujących pól, które faktycznie się zmieniły. */
+/** Tylko te z kaskadujących pól, które faktycznie się zmieniły. */
 export function cascadeFields(previous: LibraryItem, next: LibraryItem): CascadeFields {
   const patch: CascadeFields = {};
   if (next.name !== previous.name) patch.name = next.name;
   if (next.description !== previous.description) patch.description = next.description;
   if (next.unitPriceCents !== previous.unitPriceCents) patch.unitPriceCents = next.unitPriceCents;
+  // Reguła to zagnieżdżony obiekt (mapa cen per pomieszczenie), więc porównanie
+  // referencji nic by nie dało — po każdym odczycie z bazy byłaby „inna”.
+  if (JSON.stringify(next.pricing) !== JSON.stringify(previous.pricing)) {
+    patch.pricing = next.pricing;
+  }
   return patch;
 }
 

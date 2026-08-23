@@ -37,6 +37,7 @@ function baseItem(partial: Partial<LibraryItem> = {}): LibraryItem {
     description: 'Dąb lity, 40 mm',
     unitPriceCents: 250_000,
     sortOrder: 10,
+    pricing: { mode: 'flat' },
     ...partial,
   };
 }
@@ -51,6 +52,16 @@ vi.mock('@/data/queries/useLibrary', () => ({
 
 vi.mock('@/features/quotes/editor/useLibraryCascade', () => ({
   useLibraryCascade: () => ({ linkedCount, apply: applyCascade }),
+}));
+
+// Edytor reguł cenowych czyta słownik typów pomieszczeń (T-33).
+vi.mock('@/data/queries/useRoomTypes', () => ({
+  useRoomTypes: () => ({
+    data: [
+      { id: 'rt-kuchnia', workspaceId: 'ws', name: 'Kuchnia', slug: 'kuchnia', sortOrder: 10 },
+      { id: 'rt-salon', workspaceId: 'ws', name: 'Salon', slug: 'salon', sortOrder: 20 },
+    ],
+  }),
 }));
 
 const { LibraryItemsTab } = await import('./LibraryItemsTab');
@@ -198,6 +209,55 @@ describe('LibraryItemsTab — edycja pozycji', () => {
 
     await user.click(screen.getByRole('button', { name: pl.common.delete }));
     expect(deleteMutate).toHaveBeenCalledWith('item-1');
+  });
+});
+
+describe('LibraryItemsTab — reguly cenowe', () => {
+  it('przelaczenie na „za pomieszczenie” zapisuje regule z macierza stawek', async () => {
+    const user = userEvent.setup();
+    render(<LibraryItemsTab />);
+
+    await user.click(
+      screen.getByRole('button', {
+        name: new RegExp(`${pl.library.pricingLabel}: ${pl.library.pricingFlat}`),
+      }),
+    );
+    await user.click(screen.getByRole('button', { name: pl.library.pricingPerRoom }));
+
+    // Stawka za konkretny typ pomieszczenia — to odwzorowanie kolumn F–S arkusza.
+    const stawka = screen.getByLabelText(pl.library.pricingRoomPrice('Kuchnia'));
+    await user.clear(stawka);
+    await user.type(stawka, '150');
+
+    await user.click(screen.getByRole('button', { name: pl.library.saveItem('Blat kuchenny') }));
+
+    const patch = updateMutate.mock.calls[0]?.[0] as { patch: { pricing?: unknown } };
+    expect(patch.patch.pricing).toMatchObject({
+      mode: 'per_room',
+      perRoomCents: { 'rt-kuchnia': 15_000 },
+    });
+  });
+
+  it('powrot na „stala” nie zostawia smieci po trybie parametrycznym', async () => {
+    const user = userEvent.setup();
+    mockItems([
+      baseItem({
+        pricing: {
+          mode: 'per_room',
+          baseCents: 20_000,
+          perRoomCents: { 'rt-kuchnia': 5_000 },
+          defaultPerRoomCents: 1_500,
+          roomScope: 'all',
+        },
+      }),
+    ]);
+    render(<LibraryItemsTab />);
+
+    await user.click(screen.getByRole('button', { name: pl.library.pricingFlat }));
+    await user.click(screen.getByRole('button', { name: pl.library.saveItem('Blat kuchenny') }));
+
+    const patch = updateMutate.mock.calls[0]?.[0] as { patch: { pricing?: unknown } };
+    expect(patch.patch.pricing).toEqual({ mode: 'flat' });
   });
 });
 

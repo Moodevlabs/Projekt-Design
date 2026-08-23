@@ -256,6 +256,30 @@ export const pl = {
     itemsNoResultsTitle: 'Brak pozycji dla tych filtrów',
     itemsNoResultsDescription: 'Zmień kategorię albo wyczyść wyszukiwanie.',
 
+    // Reguły cenowe (cennik parametryczny).
+    pricingLabel: 'Sposób wyceny',
+    pricingFlat: 'Stała',
+    pricingPerRoom: 'Za pomieszczenie',
+    pricingPerFrame: 'Za kadr',
+    pricingFlatHint: 'Cena × ilość — jak dotąd.',
+    pricingPerRoomHint: 'Baza plus stawka za każde zaznaczone pomieszczenie wyceny.',
+    pricingPerFrameHint: 'Stawka pomieszczenia plus baza za każdy kadr.',
+    pricingBase: 'Baza',
+    pricingBaseFor: (name: string) => `Baza dla pozycji: ${name}`,
+    pricingPerFrameBase: 'Za kadr',
+    pricingScope: 'Liczone pomieszczenia',
+    pricingScopeAll: 'Wszystkie',
+    pricingScopeVisual: 'Wizualne',
+    pricingScopeTechnical: 'Techniczne',
+    pricingScopeHint: 'Które pomieszczenia wliczają się do tej usługi.',
+    pricingRooms: 'Stawki za pomieszczenie',
+    pricingRoomPrice: (room: string) => `Stawka: ${room}`,
+    pricingDefaultRoom: 'Pozostałe',
+    pricingDefaultRoomHint: 'Dla pomieszczeń spoza słownika i typów bez własnej stawki.',
+    pricingNoRoomTypes: 'Najpierw dodaj typy pomieszczeń w ustawieniach.',
+    pricingExample: (cents: string, rooms: number) =>
+      rooms === 1 ? `Przy 1 pomieszczeniu: ${cents}` : `Przy ${rooms} pomieszczeniach: ${cents}`,
+
     // Grupy.
     addGroup: 'Dodaj grupę',
     newGroupName: 'Nowa grupa',

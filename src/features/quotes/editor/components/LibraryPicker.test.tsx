@@ -20,6 +20,7 @@ function item(partial: Partial<LibraryItem> & { id: string; name: string }): Lib
     description: '',
     unitPriceCents: 10_000,
     sortOrder: 0,
+    pricing: { mode: 'flat' },
     ...partial,
   };
 }

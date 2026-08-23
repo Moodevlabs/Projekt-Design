@@ -1,13 +1,23 @@
 import { useEffect, useRef, useState } from 'react';
-import { Trash2 } from 'lucide-react';
+import { ChevronDown, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { MoneyInput } from '../components/MoneyInput';
 import { KindToggle } from '../components/KindToggle';
+import { PricingEditor } from './PricingEditor';
 import { draftSignature, itemSignature, toItemDraft, type ItemDraft } from './item-draft';
 import type { LibraryItem } from '@/data/repos/library.repo';
+import type { PricingRule } from '@/domain/quote';
 import { pl } from '@/i18n/pl';
+import { cn } from '@/lib/utils';
+
+/** Etykieta trybu na zwiniętym przełączniku — widać sposób wyceny bez rozwijania. */
+const MODE_LABELS: Record<PricingRule['mode'], string> = {
+  flat: pl.library.pricingFlat,
+  per_room: pl.library.pricingPerRoom,
+  per_frame: pl.library.pricingPerFrame,
+};
 
 type LibraryItemCardProps = {
   item: LibraryItem;
@@ -49,6 +59,11 @@ export function LibraryItemCard({
   const patch = (fields: Partial<ItemDraft>) =>
     setDraft((previous) => ({ ...previous, ...fields }));
   const label = item.name || pl.library.newItemName;
+
+  // Reguła cenowa jest zwinięta domyślnie: większość pozycji zostaje przy
+  // stałej cenie, a rozwinięta macierz stawek zdominowałaby kartę.
+  const [pricingOpen, setPricingOpen] = useState(item.pricing.mode !== 'flat');
+  const pricingId = `library-item-pricing-${item.id}`;
 
   return (
     <article className="card-surface flex flex-col gap-3 p-5">
@@ -102,6 +117,30 @@ export function LibraryItemCard({
           className="w-36"
         />
       </div>
+
+      <button
+        type="button"
+        aria-expanded={pricingOpen}
+        aria-controls={pricingId}
+        onClick={() => setPricingOpen((previous) => !previous)}
+        className="text-ink-soft hover:text-ink focus-visible:ring-ring flex items-center gap-1 self-start rounded-[var(--radius-control)] text-xs focus-visible:ring-2 focus-visible:outline-none"
+      >
+        <ChevronDown
+          className={cn('size-4 transition-transform', pricingOpen && 'rotate-180')}
+          aria-hidden
+        />
+        {`${pl.library.pricingLabel}: ${MODE_LABELS[draft.pricing.mode]}`}
+      </button>
+
+      {pricingOpen ? (
+        <div id={pricingId}>
+          <PricingEditor
+            value={draft.pricing}
+            onChange={(pricing) => patch({ pricing })}
+            itemName={label}
+          />
+        </div>
+      ) : null}
 
       {dirty ? (
         <div className="border-hair flex items-center justify-end gap-2 border-t pt-3">

@@ -238,6 +238,53 @@ describe('library.repo — grupy', () => {
     expect(projekt?.libraryItemId).toBeTruthy();
   });
 
+  it('regula cenowa przezywa zapis i odczyt', async () => {
+    const pozycja = await makeItem('Projekt budowlany');
+
+    const zapisana = await updateLibraryItem(pozycja.id, {
+      pricing: {
+        mode: 'per_room',
+        baseCents: 20_000,
+        perRoomCents: { 'typ-kuchnia': 5_000 },
+        defaultPerRoomCents: 1_500,
+        roomScope: 'technical',
+      },
+    });
+
+    expect(zapisana.pricing).toEqual({
+      mode: 'per_room',
+      baseCents: 20_000,
+      perRoomCents: { 'typ-kuchnia': 5_000 },
+      defaultPerRoomCents: 1_500,
+      roomScope: 'technical',
+    });
+
+    // I to samo po ponownym odczycie z bazy, nie tylko w odpowiedzi na UPDATE.
+    const zListy = (await listLibraryItems(workspaceId)).find((row) => row.id === pozycja.id);
+    expect(zListy?.pricing).toEqual(zapisana.pricing);
+  });
+
+  it('pozycje sprzed migracji maja regule `flat`', async () => {
+    const pozycja = await makeItem('Sprzed cennika parametrycznego');
+
+    // Kolumna ma default w migracji, ale sprawdzamy realny wiersz, a nie zod.
+    expect(pozycja.pricing).toEqual({ mode: 'flat' });
+  });
+
+  it('nieczytelna regula nie wywala biblioteki — wraca `flat`', async () => {
+    const pozycja = await makeItem('Zepsuta regula');
+
+    await getSupabase()
+      .from('library_items')
+      .update({ pricing: { mode: 'kosmiczny' } })
+      .eq('id', pozycja.id);
+
+    const zListy = (await listLibraryItems(workspaceId)).find((row) => row.id === pozycja.id);
+    // Jedna zepsuta pozycja nie moze zabrac uzytkownikowi calej biblioteki.
+    expect(zListy?.pricing).toEqual({ mode: 'flat' });
+    expect(zListy?.unitPriceCents).toBe(pozycja.unitPriceCents);
+  });
+
   it('podmienia pozycje grupy', async () => {
     const group = await makeGroup('Grupa do edycji');
 

@@ -23,8 +23,14 @@ import type { Quote } from '@/data/repos/quotes.repo';
  * Pola, które kaskadują z biblioteki do wyceny. Świadomie WĄSKI zestaw:
  * `enabled`, `qty` i kolejność należą do konkretnej wyceny, nie do biblioteki,
  * więc edycja wpisu bibliotecznego nie ma prawa ich nadpisać.
+ *
+ * `pricing` należy do biblioteki (to opis usługi, nie decyzja w ofercie),
+ * dlatego kaskaduje — inaczej poprawka stawki za pomieszczenie omijałaby
+ * wyceny, w których ta usługa już jest.
  */
-export type LibraryCascadePatch = Partial<Pick<Item, 'name' | 'description' | 'unitPriceCents'>>;
+export type LibraryCascadePatch = Partial<
+  Pick<Item, 'name' | 'description' | 'unitPriceCents' | 'pricing'>
+>;
 
 /**
  * Ile pozycji dokumentu pochodzi z danej pozycji biblioteki.

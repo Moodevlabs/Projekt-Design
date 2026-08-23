@@ -190,6 +190,7 @@ export type Database = {
           id: string
           kind: string
           name: string
+          pricing: Json
           sort_order: number
           unit_price_cents: number
           updated_at: string
@@ -203,6 +204,7 @@ export type Database = {
           id?: string
           kind?: string
           name: string
+          pricing?: Json
           sort_order?: number
           unit_price_cents?: number
           updated_at?: string
@@ -216,6 +218,7 @@ export type Database = {
           id?: string
           kind?: string
           name?: string
+          pricing?: Json
           sort_order?: number
           unit_price_cents?: number
           updated_at?: string
