@@ -19,19 +19,27 @@ export class ConflictError extends RepoError {
   }
 }
 
-/** Zapis odrzucony przez RLS — najczęściej wygasła subskrypcja (read-only). */
+/** Zapis odrzucony przez RLS — najczęściej wygasł dostęp (tryb tylko do odczytu). */
 export class ReadOnlyError extends RepoError {
-  constructor(message = 'Tryb tylko do odczytu — subskrypcja nie pozwala na zapis.') {
+  constructor(message = 'Dostęp wygasł — zapis jest zablokowany. Wyceny możesz dalej przeglądać i eksportować.') {
     super(message);
     this.name = 'ReadOnlyError';
   }
 }
 
-/** Kody PostgREST/Postgres, które oznaczają odbicie się od RLS. */
-const RLS_CODES = new Set(['42501', 'PGRST301', 'PGRST116']);
+/**
+ * `42501` to jedyny kod, po którym wolno orzec „to RLS”.
+ *
+ * Kusi, żeby dopisać tu `PGRST116` („brak wiersza”) — ale ten kod dostajemy
+ * też, gdy rekord po prostu nie istnieje albo zmienił się w międzyczasie.
+ * Nazwanie tego wygasłym dostępem wysyłałoby ludzi do płatności za cudzy błąd.
+ * Zablokowany UPDATE i tak nie dociera tutaj: gasimy go w UI, zanim poleci
+ * (patrz `useAutosave`).
+ */
+const RLS_DENIED = '42501';
 
 export function toRepoError(error: PostgrestError, context: string): RepoError {
-  if (RLS_CODES.has(error.code) && error.code === '42501') {
+  if (error.code === RLS_DENIED) {
     return new ReadOnlyError();
   }
   if (error.code === '23505') {

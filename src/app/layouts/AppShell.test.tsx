@@ -6,6 +6,13 @@ import { describe, expect, it, vi } from 'vitest';
 // o workspace, a to ciągnęłoby za sobą TanStack Query i Supabase.
 vi.mock('@/data/queries/useWorkspace', () => ({
   useWorkspace: () => ({ isError: false, error: null }),
+  useWorkspaceId: () => 'ws-1',
+}));
+
+// Licznik okresu próbnego w panelu bocznym pyta o subskrypcję. Powłoka nie ma
+// o tym nic do powiedzenia — `TrialBar` ma własne testy.
+vi.mock('@/features/billing/useEntitlement', () => ({
+  useEntitlement: () => ({ canWrite: true, reason: 'active', loading: true }),
 }));
 import { AppShell } from './AppShell';
 import { AuthStub } from '@/features/auth/test-utils';

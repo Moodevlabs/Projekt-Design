@@ -552,9 +552,47 @@ export const pl = {
     active: 'Aktywna',
     pastDue: 'Zaległa płatność',
     canceled: 'Anulowana',
-    buy: 'Wykup dostęp',
-    manage: 'Zarządzaj subskrypcją',
-    readOnlyBanner: 'Tryb tylko do odczytu — subskrypcja wygasła. Możesz przeglądać i eksportować wyceny.',
+    buy: 'Aktywuj dostęp',
+    manage: 'Zarządzaj płatnością',
+    readOnlyBanner:
+      'Tryb tylko do odczytu — dostęp wygasł. Wyceny możesz dalej przeglądać i eksportować.',
+
+    /**
+     * Aplikacja jest płatna w całości — nie ma wersji darmowej ani pakietów.
+     * Wybór dotyczy wyłącznie tego, jak często płacisz.
+     */
+    intro: 'Anzorge jest aplikacją płatną. Wybierz, jak chcesz płacić.',
+    monthly: 'Miesięcznie',
+    yearly: 'Rocznie',
+    monthlyPrice: '19,99 zł / mies.',
+    yearlyPrice: '199 zł / rok',
+    yearlySaving: 'dwa miesiące taniej',
+    perPeriod: (period: string) => (period === 'yearly' ? 'rocznie' : 'miesięcznie'),
+
+    statusLabel: 'Status',
+    trialDaysLeft: (days: number) => {
+      if (days === 1) return 'Został 1 dzień okresu próbnego';
+      const rest = days % 10;
+      const tens = days % 100;
+      if (rest >= 2 && rest <= 4 && (tens < 12 || tens > 14)) return `Zostały ${days} dni okresu próbnego`;
+      return `Zostało ${days} dni okresu próbnego`;
+    },
+    trialExplainer: 'Okres próbny to czas na sprawdzenie aplikacji — nie wymaga karty.',
+    renewsAt: (date: string) => `Odnowienie: ${date}`,
+    endsAt: (date: string) => `Dostęp do: ${date}`,
+    canceledNotice: 'Płatność anulowana — dostęp działa do końca opłaconego okresu.',
+    pastDueNotice: 'Płatność się nie powiodła. Popraw dane karty, żeby nie stracić dostępu.',
+    expiredNotice: 'Dostęp wygasł. Twoje wyceny są bezpieczne — wróć do nich po opłaceniu.',
+    graceNotice: 'Ponawiamy płatność. Możesz pracować normalnie.',
+    noSubscription: 'Brak informacji o płatności.',
+
+    dataSafe: 'Twoje dane zostają na miejscu — po wygaśnięciu dalej je otworzysz i wyeksportujesz.',
+    failed: 'Nie udało się połączyć ze Stripe.',
+    noUrl: 'Stripe nie zwrócił adresu płatności.',
+    returned: 'Sprawdzam status płatności…',
+    activated: 'Dostęp aktywny. Dziękujemy!',
+    checkoutCanceled: 'Płatność przerwana — nic nie pobraliśmy.',
+    readOnlyEditHint: 'Edycja wymaga aktywnego dostępu. Podgląd i eksport działają dalej.',
   },
   auth: {
     login: 'Zaloguj się',

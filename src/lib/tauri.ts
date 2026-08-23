@@ -40,6 +40,19 @@ export async function openPath(path: string): Promise<void> {
   await invoke('open_path', { path });
 }
 
+/**
+ * Otwiera adres w **przeglądarce systemowej**.
+ *
+ * Używane do płatności: Stripe blokuje osadzanie Checkoutu w ramkach, a poza
+ * tym przy płaceniu chce się mieć własny menedżer haseł. Lista dozwolonych
+ * adresów siedzi w `src-tauri/capabilities/default.json` — próba otwarcia
+ * czegokolwiek spoza niej zostanie odrzucona przez Tauri, i tak ma być.
+ */
+export async function openExternal(url: string): Promise<void> {
+  const { openUrl } = await import('@tauri-apps/plugin-opener');
+  await openUrl(url);
+}
+
 /* ---------------------------------------------------------------------------
  * Keychain systemowy — trzymamy tam tokeny sesji Supabase.
  * W przeglądarce (`pnpm dev`) te wywołania nie mają sensu; wołaj je tylko

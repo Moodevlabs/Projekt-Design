@@ -3,6 +3,7 @@ import { useEditorStore } from './editor.store';
 import { useSaveQuote } from '@/data/queries/useQuotes';
 import { ConflictError } from '@/data/repos/errors';
 import { onWindowCloseRequested, runningInTauri } from '@/lib/tauri';
+import { useEntitlement } from '@/features/billing/useEntitlement';
 import { createLogger } from '@/lib/logger';
 
 const log = createLogger('autosave');
@@ -26,6 +27,18 @@ export const AUTOSAVE_DELAY_MS = 800;
  */
 export function useAutosave() {
   const save = useSaveQuote();
+  /**
+   * Bez prawa zapisu nie wysylamy niczego.
+   *
+   * Nie chodzi o dublowanie RLS — ta blokada jest po stronie bazy i tam
+   * zostaje. Chodzi o to, ze RLS odrzuca UPDATE **cicho**, zerem zmienionych
+   * wierszy, a nasz zapis porownuje `updated_at` i wzialby to za konflikt.
+   * Uzytkownik zobaczylby „wycena zmieniona w innym miejscu” zamiast prawdy:
+   * ze wygasl mu dostep.
+   */
+  const canWrite = useEntitlement().canWrite;
+  const canWriteRef = useRef(canWrite);
+  canWriteRef.current = canWrite;
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   /** Zapis w locie — trzymamy obietnicę, bo wyjście musi mieć na co poczekać. */
   const inFlight = useRef<Promise<void> | null>(null);
@@ -35,6 +48,7 @@ export function useAutosave() {
     const { quoteId, body, number, lastSeenUpdatedAt, hasConflict } = state;
 
     if (!quoteId || !body || !lastSeenUpdatedAt) return;
+    if (!canWriteRef.current) return;
     // `hasConflict`, a nie `saveState === 'conflict'`: kolejna edycja przestawia
     // `saveState` z powrotem na `dirty`, a mimo to zapisywac dalej nie wolno.
     if (hasConflict) return;

@@ -369,9 +369,18 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - **To NIE jest plan „Pro" i nie ma wersji darmowej.** Aplikacja jest płatna w całości, a `monthly`/`yearly` to wyłącznie **częstotliwość płatności**. Nazwa produktu w Stripe jest widoczna klientowi na stronie płatności, więc „Anzorge Pro" sugerowałoby istnienie darmowego tieru — poprawione w sandboxie i w kodzie (migracja `0009_plan_naming.sql` przenosi też stare wartości kolumny `plan`). Okres próbny to czas na sprawdzenie, a nie darmowy tier.
   > **Czego brakuje do produkcji:** `STRIPE_WEBHOOK_SECRET` z prawdziwego endpointu (lokalnie użyłem własnego), `supabase secrets set` na projekcie w chmurze i podpięcie URL webhooka w panelu Stripe.
 
-- [ ] **T-15 Gating + ekran subskrypcji** (03-BILLING §4)
+- [x] **T-15 Gating + ekran subskrypcji** (03-BILLING §4)
   `domain/billing/entitlement.ts` (parytet z SQL — test), `useSubscription`, `PaywallGate`, banner read-only, pasek triala, deep link `anzorge://billing/*`, polling po powrocie.
   ✅ Symulacja: ustaw `trial_ends_at` w przeszłość → edytor read-only, RLS odrzuca update; kup → `active` → edycja wraca.
+  > **Zrobione.** `useEntitlement` (stan uprawnienia dla UI), `useBillingActions` (Checkout/Portal w przeglądarce systemowej), `SubscriptionPage`, `ReadOnlyBanner` nad edytorem, `TrialBar` w panelu bocznym, deep link `anzorge://billing/success|cancel` w `RootLayout` z pollingiem. 22 nowe testy; 596 zielonych.
+  > **Ważne — to nie jest „plan Pro".** Aplikacja jest płatna w całości, nie ma wersji darmowej ani pakietów. Ekran daje wybór **częstotliwości płatności** (miesięcznie/rocznie), nie tieru. Jest test, który pilnuje, żeby słowo „Pro" ani „darmowy" nie wróciło do tego ekranu — jeśli kiedyś naprawdę pojawią się pakiety, trzeba go świadomie usunąć.
+  > **Na co uważać:**
+  > - **Blokujemy tylko wtedy, gdy *wiemy*, że dostęp wygasł.** `useSubscription` jest wyłączone, dopóki nie znamy workspace'u, a wyłączone zapytanie **nie jest** `isLoading` — sprawdzanie `isLoading` dawało na starcie „brak subskrypcji" i na moment zamykało edytor każdemu, łącznie z płacącymi. Dlatego warunkiem jest `isSuccess`, a nie brak ładowania. Błąd sieci też znaczy „nie wiem" i nie odbiera prawa zapisu — prawdziwą granicą jest RLS.
+  > - **Autozapis milczy, gdy dostęp wygasł** (`useAutosave`). Nie jest to dublowanie RLS: zablokowany UPDATE wraca z bazy **cicho, zerem zmienionych wierszy**, a nasz zapis porównuje `updated_at` — użytkownik zobaczyłby „wycena zmieniona w innym miejscu" zamiast prawdy o wygaśnięciu. Jest na to test regresji (sprawdzony sabotażem).
+  > - `toRepoError` uznaje za RLS **wyłącznie `42501`**. Kusi, żeby dopisać `PGRST116` („brak wiersza"), ale ten kod dostajemy też, gdy rekord nie istnieje albo się zmienił — wysyłalibyśmy ludzi do płatności za cudzy błąd.
+  > - Tryb edycji to `mode === 'edit' && canWrite`, liczone przy renderze — dostęp może wygasnąć przy otwartym edytorze i dokument zamyka się na pisanie od razu, bez przeładowania.
+  > - Testy powłoki (`AppShell`, `Sidebar`) mockują `useEntitlement`, żeby `TrialBar` nie wciągał tam TanStack Query i Supabase.
+  > **Nie zweryfikowane na żywo:** pełna ścieżka „wygasły trial → read-only" wymaga ręcznego cofnięcia `trial_ends_at` w bazie; pokryte testami, ale nieprzeklikane.
 
 - [ ] **T-16 Ustawienia workspace + konto** **+ UI z F1.2**
   Waluta, VAT, wzorzec numeracji, `showDisabledItems`, zmiana hasła, eksport danych (JSON), usuń konto (Edge fn `delete-account`).

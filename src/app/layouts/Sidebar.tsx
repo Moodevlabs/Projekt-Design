@@ -19,6 +19,7 @@ import {
   type NavItem,
 } from './nav-items';
 import { useSidebarExpanded } from './useSidebarExpanded';
+import { TrialBar } from '@/features/billing/TrialBar';
 import { routes } from '@/app/routes';
 import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
@@ -244,6 +245,8 @@ export function Sidebar({ subscriptionOk = true }: { subscriptionOk?: boolean })
             <TooltipContent side="right">{pl.nav.expand}</TooltipContent>
           )}
         </Tooltip>
+
+        <TrialBar expanded={expanded} />
 
         <AccountMenu subscriptionOk={subscriptionOk} expanded={expanded} />
       </div>

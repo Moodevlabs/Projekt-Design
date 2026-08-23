@@ -25,6 +25,7 @@ export function EditorTopbar({
   lastSavedAt,
   onNumberChange,
   onModeChange,
+  canWrite = true,
   onRetry,
   onReload,
   onSaveAllToLibrary,
@@ -42,6 +43,8 @@ export function EditorTopbar({
   lastSavedAt: string | null;
   onNumberChange: (next: string) => void;
   onModeChange: (next: EditorMode) => void;
+  /** Bez prawa zapisu przelacznik „Edycja” jest martwy — patrz nizej. */
+  canWrite?: boolean;
   onRetry: () => void;
   onReload: () => void;
   onSaveAllToLibrary: () => void;
@@ -84,14 +87,20 @@ export function EditorTopbar({
         {(['edit', 'preview'] as const).map((value) => {
           const Icon = value === 'edit' ? Pencil : Eye;
           const label = value === 'edit' ? pl.editor.edit : pl.editor.preview;
+          // Po wygasnieciu dostepu wlaczenie edycji tylko by skusilo do
+          // pisania w dokument, ktorego i tak nie da sie zapisac.
+          const locked = value === 'edit' && !canWrite;
           return (
             <button
               key={value}
               type="button"
               aria-pressed={mode === value}
+              disabled={locked}
+              title={locked ? pl.billing.readOnlyEditHint : undefined}
               onClick={() => onModeChange(value)}
               className={cn(
                 'flex items-center gap-1.5 rounded-[var(--radius-pill)] px-3 py-1.5 text-sm transition-colors',
+                locked && 'cursor-not-allowed opacity-45',
                 mode === value
                   ? 'bg-primary text-primary-foreground'
                   : 'text-ink-soft hover:text-ink',

@@ -25,6 +25,8 @@ import type { Item } from '@/domain/quote';
 import { useSaveToLibrary } from './useSaveToLibrary';
 import { useTemplateActions } from './useTemplateActions';
 import { useExportPdf } from '@/pdf/useExportPdf';
+import { ReadOnlyBanner } from '@/features/billing/ReadOnlyBanner';
+import { useEntitlement } from '@/features/billing/useEntitlement';
 import { routes } from '@/app/routes';
 import { pl } from '@/i18n/pl';
 
@@ -271,10 +273,16 @@ function EditorSurface({
    * podaje dalej. Logika ma tam wlasne testy na prawdziwym store.
    */
   const library = useSaveToLibrary();
+  const canWrite = useEntitlement().canWrite;
 
   if (!body) return <EditorSkeleton />;
 
-  const editing = mode === 'edit';
+  /**
+   * Tryb edycji wymaga prawa zapisu. Sam `mode` nie wystarczy: dostep moze
+   * wygasnac przy otwartym edytorze, a wtedy dokument ma sie zamknac na
+   * pisanie od razu, a nie dopiero po przeladowaniu strony.
+   */
+  const editing = mode === 'edit' && canWrite;
   const issueDate = body.issueDate ?? createdAt.slice(0, 10);
 
   return (
@@ -283,11 +291,12 @@ function EditorSurface({
         <EditorTopbar
           number={number}
           status={status}
-          mode={mode}
+          mode={editing ? mode : 'preview'}
           saveState={saveState}
           lastSavedAt={lastSavedAt}
           onNumberChange={setNumber}
           onModeChange={setMode}
+          canWrite={canWrite}
           onRetry={onRetry}
           onReload={onReload}
           onSaveAllToLibrary={library.saveAll}
@@ -300,6 +309,8 @@ function EditorSurface({
           canOverwriteTemplate={templates.canOverwrite}
           onOpenLibrary={() => setLibraryOpen(true)}
         />
+
+        <ReadOnlyBanner />
 
         <LibrarySheet open={libraryOpen} onOpenChange={setLibraryOpen} />
 

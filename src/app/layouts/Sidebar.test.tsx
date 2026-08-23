@@ -1,7 +1,14 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+// Panel boczny trzymamy w izolacji od warstwy danych. Licznik okresu próbnego
+// pyta o subskrypcję, co ciągnęłoby tu TanStack Query i Supabase — a testuje
+// się go osobno, w `billing-ui.test.tsx`.
+vi.mock('@/features/billing/useEntitlement', () => ({
+  useEntitlement: () => ({ canWrite: true, reason: 'active', loading: true }),
+}));
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { AuthStub } from '@/features/auth/test-utils';
 import { Sidebar } from './Sidebar';
