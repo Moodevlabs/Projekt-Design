@@ -8,8 +8,13 @@ import { pl } from '@/i18n/pl';
 const useQuotesList = vi.hoisted(() => vi.fn());
 const useSubscription = vi.hoisted(() => vi.fn());
 
+const useBrandKit = vi.hoisted(() => vi.fn(() => ({ isSuccess: true, data: null })));
+const useAllLibraryItems = vi.hoisted(() => vi.fn(() => ({ isSuccess: true, data: [] })));
+
 vi.mock('@/data/queries/useQuotes', () => ({ useQuotesList }));
 vi.mock('@/data/queries/useSubscription', () => ({ useSubscription }));
+vi.mock('@/data/queries/useBrandKit', () => ({ useBrandKit }));
+vi.mock('@/data/queries/useLibrary', () => ({ useAllLibraryItems }));
 
 const { DashboardPage } = await import('./DashboardPage');
 

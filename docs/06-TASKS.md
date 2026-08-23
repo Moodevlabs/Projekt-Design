@@ -418,6 +418,19 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
 - [ ] **T-17 Polish & release 1.0**
   Pusty stan onboardingu (3 kroki: logo → biblioteka → pierwsza wycena), obsługa błędów (ErrorBoundary, toasty), ikony aplikacji, `tauri build` Win+mac, podpisywanie (notarization macOS, cert Win — zanotuj w README co trzeba mieć), CHANGELOG.
   ✅ Instalator działa na czystej maszynie.
+  > **Częściowo zrobione — zadanie zostaje otwarte.** Kod jest gotowy, reszta wymaga certyfikatów i drugiej maszyny.
+  > **Zrobione:**
+  > - `AppErrorBoundary` **nad providerami** — wyjątek w renderze daje ekran z komunikatem, treścią błędu do skopiowania i zdaniem „dane są bezpieczne", zamiast białej strony. Nie hipoteza: dokładnie tak wyglądał błąd podwójnego montowania edytora w `StrictMode`.
+  > - `OnboardingChecklist` na pulpicie: logo → biblioteka → pierwsza wycena. **Znika, gdy wszystko zrobione**, i nie da się jej odhaczyć ręcznie — checklist, który zostaje po wykonaniu, zamienia się w ozdobę. **Nie miga**: dopóki nie wiadomo, co jest zrobione, nie pokazuje się nic.
+  > - `CHANGELOG.md` (Keep a Changelog) z zawartością T-30…T-49.
+  > - `README.md` → sekcja **„Wydanie 1.0"**: numer wersji w dwóch plikach, certyfikaty Win (EV / Azure Trusted Signing), macOS (Developer ID + notaryzacja, build musi leć na macOS), `tauri icon`, checklista przed ogłoszeniem.
+  > - Ikony aplikacji **nie są domyślne** — `src-tauri/icons/` ma własne „A". Sprawdzone.
+  > - `npx tauri build` na Windows **przechodzi**: `Anzorge_0.1.0_x64_en-US.msi` i `Anzorge_0.1.0_x64-setup.exe`. `cargo test` zielony (0 testów — warstwa Rust jest minimalna z założenia).
+  > **Zostało (poza kodem):**
+  > - **Instalator na czystej maszynie** — kryterium odbioru. Zbudowany, ale **nikt go nie uruchomił na maszynie bez Node, Rusta i `.env`**.
+  > - **Build macOS** — z Windowsa się nie da.
+  > - **Podpis i notaryzacja** — wymagają certyfikatów (Apple Developer, EV/Azure). Co dokładnie mieć, stoi w README.
+  > - **Wersja `0.1.0`** w `package.json` i `tauri.conf.json` — przed wydaniem podnieś w obu.
 
 ## Faza 1.5 — reszta pakietu z Excela (zaraz po 1.0)
 

@@ -876,6 +876,27 @@ export const pl = {
     noAccount: 'Nie masz konta?',
     hasAccount: 'Masz już konto?',
   },
+  onboarding: {
+    title: 'Zacznij od trzech rzeczy',
+    lead: 'Każdy krok zajmuje chwilę i oszczędza pracy przy pierwszej ofercie.',
+    progress: (done: number, total: number) => `${done} z ${total}`,
+    done: 'gotowe',
+    steps: {
+      brand: {
+        title: 'Wgraj logo',
+        hint: 'Trafia do każdego PDF-a — wgrane raz oszczędza poprawianie ofert później.',
+      },
+      library: {
+        title: 'Dodaj pozycje do biblioteki',
+        hint: 'Wycena składa się wtedy z klikania, a nie z przepisywania.',
+      },
+      quote: {
+        title: 'Zrób pierwszą wycenę',
+        hint: 'Pozycje TAK/NIE, sumy na żywo, PDF na końcu.',
+      },
+    },
+  },
+
   errors: {
     generic: 'Coś poszło nie tak.',
     notFound: 'Nie znaleziono strony.',
@@ -884,6 +905,13 @@ export const pl = {
     workspaceHint:
       'Aplikacja połączyła się z bazą, ale nie znalazła Twojego workspace. Najczęściej znaczy to, że baza nie ma zaaplikowanych migracji albo aplikacja wskazuje na inny projekt Supabase niż myślisz.',
     connectedTo: (url: string) => `Adres bazy: ${url}`,
+
+    // Ekran awaryjny (T-17).
+    crashTitle: 'Aplikacja napotkała błąd',
+    crashLead:
+      'Twoje dane są bezpieczne — wyceny zapisują się w chmurze na bieżąco. Przekaż poniższy komunikat, jeśli błąd się powtórzy.',
+    crashReload: 'Przeładuj aplikację',
+    crashBack: 'Spróbuj dalej',
   },
 } as const;
 

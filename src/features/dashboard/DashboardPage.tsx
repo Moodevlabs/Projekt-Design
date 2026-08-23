@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { RecentQuotes } from './RecentQuotes';
 import { MonthLedger } from './MonthLedger';
 import { DashboardEmptyState } from './DashboardEmptyState';
+import { OnboardingChecklist } from './OnboardingChecklist';
 import { SubscriptionCard } from './SubscriptionCard';
 import { calcDashboardStats } from './stats';
 import { calcSettledCounts } from './settled';
@@ -27,6 +28,12 @@ export function DashboardPage() {
   return (
     <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div className="min-w-0">
+        {/*
+          Checklist stoi NAD trescia, nie zamiast niej: po pierwszej wycenie
+          pulpit ma juz co pokazac, a dwa kroki moga byc wciaz do zrobienia.
+        */}
+        {!loading && !error ? <OnboardingChecklist hasQuotes={rows.length > 0} /> : null}
+
         {empty ? (
           <DashboardEmptyState />
         ) : (
