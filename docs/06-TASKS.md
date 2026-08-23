@@ -353,9 +353,20 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - Kolor tekstu w nagłówku i wariant logo **wynikają z kontrastu**, nie z progu jasności — `contrastText` porównuje oba warianty, bo przy kolorach ze środka skali próg wskazuje gorszy.
   > - Logo trafia do pliku jako **data URL**, nie link: podpisany URL wygasa, a dokument ma być samodzielny.
 
-- [ ] **T-14 Stripe — Edge Functions + webhook** (03-BILLING)
+- [x] **T-14 Stripe — Edge Functions + webhook** (03-BILLING)
   3 funkcje + `_shared`, idempotencja, mapowanie statusów, testy Deno z mockiem.
   ✅ `stripe trigger` aktualizuje `subscriptions` lokalnie.
+  > **Zrobione i ZWERYFIKOWANE na żywym sandboxie Stripe** (`sk_test_`, konto PL). Produkt „Anzorge Pro" i ceny `pro_monthly` (19,99 PLN) / `pro_yearly` (199 PLN) założone przez API, `tax_behavior: inclusive`. Checkout przetestowany end-to-end: logowanie kontem z seeda → funkcja → **prawdziwy URL `checkout.stripe.com`**. Webhook przetestowany podpisem HMAC liczonym samodzielnie (bez Stripe CLI): zły podpis → 400, poprawny event → zapis statusu, powtórka → bez zmian, nieznany status → `incomplete`. Po testach baza przywrócona do stanu z seeda.
+  > **Dwa realne błędy złapane dopiero przez uruchomienie — oba przeszłyby review:**
+  > - **Zapis `stripe_customer_id` szedł klientem użytkownika**, a `subscriptions` ma politykę „członkowie czytają, nikt z klienta nie pisze" (0004). Update nie rzucał błędem — po prostu nie ruszał żadnego wiersza. Efekt: klient Stripe powstawał, my o nim nie wiedzieliśmy i przy kolejnym zakupie zakładaliśmy drugiego. **Zapis musi iść przez `service_role`.**
+  > - **Webhook traktował KAŻDY błąd insertu do `stripe_events` jako „już przetworzony"** i zwracał 200. Brakowało kolumny `type` (NOT NULL), więc w praktyce **żaden webhook nigdy by nie zadziałał**, a Stripe — dostając 200 — nigdy by nie ponowił. Teraz rozróżniamy `23505` (prawdziwa powtórka) od reszty, która daje 500 i wymusza ponowienie.
+  > **Na co uważać:**
+  > - **Ceny szukamy po `lookup_key`, nie po ID w sekretach** — jeden sekret mniej do ustawienia przy wdrożeniu, a przypięcie ID przez `STRIPE_PRICE_MONTHLY`/`_YEARLY` dalej działa jako override.
+  > - `constructEventAsync`, nie `constructEvent`: w Deno kryptografia jest asynchroniczna i wariant synchroniczny rzuca.
+  > - Stripe SDK wymaga `Stripe.createFetchHttpClient()` — bez tego próbuje użyć node'owego `http` i nie startuje.
+  > - **Mapowanie statusów jest zduplikowane** (`src/domain/billing/entitlement.ts` i `supabase/functions/_shared/subscription-status.ts`), bo Deno nie importuje z `src/`. Pilnuje ich `edge-parity.test.ts`, który czyta plik funkcji i porównuje mapowanie — bez uruchamiania Deno.
+  > - Hot reload `supabase functions serve` **wywraca runtime przy edycji pliku** (błąd montowania w Dockerze). Po każdej zmianie restartuj serwer, zamiast diagnozować 502.
+  > **Czego brakuje do produkcji:** `STRIPE_WEBHOOK_SECRET` z prawdziwego endpointu (lokalnie użyłem własnego), `supabase secrets set` na projekcie w chmurze i podpięcie URL webhooka w panelu Stripe.
 
 - [ ] **T-15 Gating + ekran subskrypcji** (03-BILLING §4)
   `domain/billing/entitlement.ts` (parytet z SQL — test), `useSubscription`, `PaywallGate`, banner read-only, pasek triala, deep link `anzorge://billing/*`, polling po powrocie.
