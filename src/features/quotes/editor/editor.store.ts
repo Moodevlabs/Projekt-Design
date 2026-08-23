@@ -14,6 +14,7 @@ import {
   type MoveGroupArgs,
   type MoveItemArgs,
   type MoveSectionArgs,
+  type Discount,
   type QuoteStatus,
   type Room,
   type Section,
@@ -103,6 +104,12 @@ export interface EditorState {
   updateRoom: (roomId: string, patch: Partial<Room>) => void;
   /** Usuwa pomieszczenie i odpina od niego pozycje — patrz komentarz w implementacji. */
   removeRoom: (roomId: string) => void;
+
+  // --- rabaty (T-36): osobny byt, nie pozycja wyceny ---
+  addDiscount: (partial?: Partial<Discount>) => void;
+  updateDiscount: (discountId: string, patch: Partial<Discount>) => void;
+  removeDiscount: (discountId: string) => void;
+  toggleDiscount: (discountId: string) => void;
 
   /**
    * Wlacza albo wylacza wszystkie pozycje grupy naraz.
@@ -365,6 +372,55 @@ export const useEditorStore = create<EditorState>()(
           }
         }
 
+        state.saveState = 'dirty';
+      }),
+
+    addDiscount: (partial) =>
+      set((state) => {
+        if (!state.body) return;
+        state.body.discounts.push({
+          id: newId(),
+          name: 'Rabat',
+          description: '',
+          enabled: true,
+          type: 'fixed',
+          valueCents: 0,
+          scope: 'quote',
+          sectionId: null,
+          itemIds: [],
+          condition: 'always',
+          roundToCents: 0,
+          ...partial,
+        });
+        state.saveState = 'dirty';
+      }),
+
+    updateDiscount: (discountId, patch) =>
+      set((state) => {
+        if (!state.body) return;
+        const discount = state.body.discounts.find((candidate) => candidate.id === discountId);
+        if (!discount) return;
+        Object.assign(discount, patch);
+        state.saveState = 'dirty';
+      }),
+
+    removeDiscount: (discountId) =>
+      set((state) => {
+        if (!state.body) return;
+        state.body.discounts = state.body.discounts.filter(
+          (discount) => discount.id !== discountId,
+        );
+        state.saveState = 'dirty';
+      }),
+
+    toggleDiscount: (discountId) =>
+      set((state) => {
+        if (!state.body) return;
+        const discount = state.body.discounts.find((candidate) => candidate.id === discountId);
+        if (!discount) return;
+        // Ten sam gest co przy pozycji: klient odznacza rabat, a nie kasuje go
+        // z oferty — ma widzieć, z czego rezygnuje.
+        discount.enabled = !discount.enabled;
         state.saveState = 'dirty';
       }),
 

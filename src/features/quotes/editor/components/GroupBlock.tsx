@@ -35,7 +35,7 @@ export interface GroupBlockProps {
   onRename: (groupId: string, name: string) => void;
   onRemove: (groupId: string) => void;
   onToggleGroup: (groupId: string) => void;
-  onAddItem: (sectionId: string, groupId: string | null, kind: Item['kind']) => void;
+  onAddItem: (sectionId: string, groupId: string | null) => void;
   onToggleItem: (itemId: string) => void;
   onPatchItem: (itemId: string, patch: Partial<Item>) => void;
   onRemoveItem: (itemId: string) => void;
@@ -193,12 +193,7 @@ export const GroupBlock = memo(function GroupBlock({
 
       {editing ? (
         <div className="mt-2.5 flex items-center gap-4">
-          <AddLink onClick={() => onAddItem(sectionId, group.id, 'item')}>
-            {pl.editor.addItem}
-          </AddLink>
-          <AddLink onClick={() => onAddItem(sectionId, group.id, 'discount')}>
-            {pl.editor.addDiscount}
-          </AddLink>
+          <AddLink onClick={() => onAddItem(sectionId, group.id)}>{pl.editor.addItem}</AddLink>
           <LibraryPicker
             priorityCategory={group.name}
             onPickItem={(item) => onInsertItems(sectionId, group.id, [item])}

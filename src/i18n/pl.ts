@@ -137,6 +137,34 @@ export const pl = {
     pricingFromFrames: (frames: number) =>
       frames === 1 ? 'pomieszczenie + 1 kadr' : `pomieszczenie + ${frames} kadry/ów`,
 
+    // Rabaty jako osobna lista (T-36).
+    discountsTitle: 'Rabaty',
+    addDiscountEntry: 'Dodaj rabat',
+    newDiscountName: 'Rabat',
+    discountNameLabel: (name: string) => `Nazwa rabatu: ${name}`,
+    discountToggle: (name: string) => `Uwzględnij rabat: ${name}`,
+    removeDiscount: (name: string) => `Usuń rabat: ${name}`,
+    discountTypeLabel: (name: string) => `Rodzaj rabatu: ${name}`,
+    discountTypeFixed: 'zł',
+    discountTypePercent: '%',
+    discountValueLabel: (name: string) => `Wartość rabatu: ${name}`,
+    discountScopeLabel: (name: string) => `Zakres rabatu: ${name}`,
+    discountScopeQuote: 'Cała wycena',
+    discountScopeSection: 'Sekcja',
+    discountScopeItems: 'Wybrane pozycje',
+    discountConditionLabel: (name: string) => `Tylko przy komplecie: ${name}`,
+    discountConditionShort: 'Tylko przy komplecie',
+    discountConditionHint:
+      'Rabat należy się dopiero, gdy klient bierze wszystkie pozycje z zakresu.',
+    /** Dlaczego rabat wynosi 0 zł — bez tego wygląda jak błąd. */
+    discountUnmet: (enabled: number, total: number) =>
+      `Warunek niespełniony (${enabled}/${total} pozycji)`,
+    discountRoundLabel: (name: string) => `Zaokrąglenie: ${name}`,
+    discountRoundNone: 'bez zaokrąglania',
+    discountRoundTo: (zl: number) => `do ${zl} zł`,
+    discountsEmpty: 'Brak rabatów.',
+    discountSectionMissing: 'Wskaż sekcję',
+
     summary: 'Podsumowanie',
     itemsTotal: 'Suma pozycji',
     discounts: 'Rabaty',
@@ -175,7 +203,6 @@ export const pl = {
     itemDescriptionLabel: 'Opis pozycji',
     itemPriceLabel: 'Cena pozycji',
     itemQtyLabel: 'Ilość',
-    addDiscount: 'Dodaj rabat',
     makeDiscount: 'Zamień na rabat',
     makeItem: 'Zamień na pozycję',
 

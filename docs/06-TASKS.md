@@ -266,9 +266,16 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   ⚠️ **Tu wraca decyzja odłożona przy T-31: `Group.roomId` czy nowy byt.** Rekomendacja bez zmian — grupa wskazująca na `Room` daje przeciąganie, zapis zestawu do biblioteki i kaskadę za darmo; osobny byt znaczy czwarty poziom w DnD.
   ⚠️ Wydzielone z T-35 świadomie: cennik parametryczny **działa** bez bloków (pomieszczenia + usługa `per_room` = poprawna cena). Bloki to sposób pracy z arkusza, gdzie każda usługa jest powielona per pomieszczenie — wygodne przy dużych wycenach, ale nie warunek działania.
 
-- [ ] **T-36 Edytor: UI rabatów** (F3.2)
-  `DiscountRow` (typ zł/%, zakres, warunek, zaokrąglenie), wyszarzony rabat niespełniony z licznikiem „3/5 pozycji", rabaty jako osobna zakładka biblioteki.
+- [x] **T-36 Edytor: UI rabatów** (F3.2 — bez zakładki w bibliotece)
+  `DiscountRow` (typ zł/%, zakres, warunek, zaokrąglenie), wyszarzony rabat niespełniony z licznikiem „3/5 pozycji".
   ✅ Sekcja `RABATY` z arkusza odwzorowana 1:1.
+  > **Zrobione.** Migracja v3→v4 (rabaty-pozycje → `body.discounts`), akcje store, `DiscountsSection` + `DiscountRow` na końcu dokumentu, „Dodaj rabat" zniknęło z sekcji i grup, rabat wstawiony z biblioteki trafia na listę rabatów. 451 testów jednostkowych, 47 integracyjnych.
+  > **Na co uważać:**
+  > - **Migracja NIE naprawia uszkodzeń — i to jest zasada, nie szczegół.** Pierwsza wersja kroku v3→v4 robiła `Array.isArray(sections) ? sections : []`, przez co dokument z zepsutym `sections` po cichu stawał się **pustą wyceną** zamiast trafić do `bodyError`. Złapał to test integracyjny „nie wywala się na uszkodzonym body". Dokument o niespodziewanym kształcie przepuszczamy nietknięty — od odrzucania jest walidacja. Jest na to osobny test.
+  > - **Kwota po migracji musi się zgadzać co do grosza.** Pozycja-rabat liczyła się jako `qty × cena`, więc do rabatu kwotowego idzie iloczyn, nie sama cena jednostkowa. `enabled` też przenosimy — to były widoczne dla klienta wiersze.
+  > - **`Item.kind` zostaje w modelu**, bo używa go biblioteka (rabat jako wpis biblioteczny) i snapshoty zestawów. W wycenie pozycje `kind: 'discount'` już nie powstają: „Dodaj rabat" tworzy `Discount`, a wpis biblioteczny oznaczony jako rabat jest przechwytywany przy wstawianiu i również staje się rabatem.
+  > - **Zakres rabatu czyści wskazania przy zmianie** — inaczej rabat przełączony z „wybrane pozycje" na „cała wycena" pamiętałby stare `itemIds`.
+  > - Osobna **zakładka rabatów w bibliotece** (F3.2, ostatni punkt) świadomie nie weszła: rabaty biblioteczne działają dziś przez `library_items.kind`, a przenoszenie ich na własną strukturę to zmiana schematu biblioteki — wchodzi razem z **T-50**, gdzie i tak ruszamy tamten model.
 
 - [ ] **T-37 Podsumowania per sekcja** (F7.3)
   `calcQuoteTotals` zwraca `bySection` z uwzględnieniem rabatów zakresowych; rozwijany blok „Per etap” w `TotalsCard`.

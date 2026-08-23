@@ -7,7 +7,14 @@ import {
   type BodyRecord,
   type MigrationStep,
 } from './migrate';
-import { calcQuoteTotals, newItem, newQuoteBody, newSection, parseQuoteBody } from './index';
+import {
+  calcQuoteTotals,
+  newGroup,
+  newItem,
+  newQuoteBody,
+  newSection,
+  parseQuoteBody,
+} from './index';
 
 describe('readBodyVersion', () => {
   it('brak pola to wersja 1 — dokumenty sprzed wersjonowania', () => {
@@ -157,6 +164,110 @@ describe('parseQuoteBody z migracja', () => {
 
     expect(result.body.rooms).toEqual([]);
     expect(calcQuoteTotals(result.body)).toEqual(przedMigracja);
+  });
+
+  it('rabaty-pozycje przenosza sie do listy rabatow bez zmiany kwoty', () => {
+    // v4: rabat przestal byc wierszem wyceny. Migracja nie moze zmienic tego,
+    // ile klient placi.
+    const stara = newQuoteBody({
+      vatRate: 0,
+      sections: [
+        newSection({
+          title: 'Prace',
+          items: [
+            newItem({ name: 'Projekt', qty: 2, unitPriceCents: 150_000 }),
+            newItem({ name: 'Rabat stalego klienta', kind: 'discount', unitPriceCents: 50_000 }),
+          ],
+          groups: [
+            newGroup({
+              name: 'Kuchnia',
+              items: [newItem({ name: 'Rabat w grupie', kind: 'discount', unitPriceCents: 10_000 })],
+            }),
+          ],
+        }),
+      ],
+    });
+    const przed = calcQuoteTotals(stara);
+
+    const surowy = JSON.parse(JSON.stringify(stara)) as BodyRecord;
+    surowy.bodyVersion = 3;
+    delete surowy.discounts;
+
+    const result = parseQuoteBody(surowy);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    // Rabaty zniknely z pozycji...
+    const pozycje = result.body.sections[0]?.items ?? [];
+    expect(pozycje.map((item) => item.name)).toEqual(['Projekt']);
+    expect(result.body.sections[0]?.groups[0]?.items).toHaveLength(0);
+
+    // ...i sa na liscie rabatow, z zachowana kwota i nazwa.
+    expect(result.body.discounts).toHaveLength(2);
+    expect(result.body.discounts[0]).toMatchObject({
+      name: 'Rabat stalego klienta',
+      type: 'fixed',
+      valueCents: 50_000,
+      scope: 'quote',
+    });
+
+    expect(calcQuoteTotals(result.body).netCents).toBe(przed.netCents);
+  });
+
+  it('rabat-pozycja z iloscia przenosi swoja PELNA wartosc', () => {
+    // Pozycja-rabat liczyla sie jako `qty × cena`, wiec 3 × 20 zl to 60 zl.
+    const stara = newQuoteBody({
+      vatRate: 0,
+      sections: [
+        newSection({
+          items: [
+            newItem({ name: 'Projekt', unitPriceCents: 100_000 }),
+            newItem({ name: 'Rabat', kind: 'discount', qty: 3, unitPriceCents: 2_000 }),
+          ],
+        }),
+      ],
+    });
+
+    const surowy = JSON.parse(JSON.stringify(stara)) as BodyRecord;
+    surowy.bodyVersion = 3;
+
+    const result = parseQuoteBody(surowy);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.body.discounts[0]?.valueCents).toBe(6_000);
+  });
+
+  it('wylaczony rabat-pozycja zostaje wylaczony', () => {
+    const stara = newQuoteBody({
+      sections: [
+        newSection({
+          items: [newItem({ name: 'Rabat', kind: 'discount', unitPriceCents: 1_000, enabled: false })],
+        }),
+      ],
+    });
+
+    const surowy = JSON.parse(JSON.stringify(stara)) as BodyRecord;
+    surowy.bodyVersion = 3;
+
+    const result = parseQuoteBody(surowy);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.body.discounts[0]?.enabled).toBe(false);
+  });
+
+  it('migracja NIE naprawia uszkodzonego dokumentu', () => {
+    // `sections` jako tekst to uszkodzenie. Ciche zastapienie go pusta lista
+    // wygladaloby dla uzytkownika jak utrata calej wyceny — ma zobaczyc
+    // „wycena uszkodzona”, a nie pusty dokument.
+    const result = parseQuoteBody({
+      bodyVersion: 3,
+      title: 'Bez sekcji',
+      sections: 'to nie jest tablica',
+    });
+
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error).toContain('sections');
   });
 
   it('dokument z nowszej wersji ladnie ląduje w `bodyError`', () => {

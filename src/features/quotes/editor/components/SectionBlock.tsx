@@ -37,7 +37,7 @@ export interface SectionBlockProps {
   onRenameGroup: (groupId: string, name: string) => void;
   onRemoveGroup: (groupId: string) => void;
   onToggleGroup: (groupId: string) => void;
-  onAddItem: (sectionId: string, groupId: string | null, kind: Item['kind']) => void;
+  onAddItem: (sectionId: string, groupId: string | null) => void;
   onToggleItem: (itemId: string) => void;
   onPatchItem: (itemId: string, patch: Partial<Item>) => void;
   onRemoveItem: (itemId: string) => void;
@@ -178,10 +178,7 @@ export const SectionBlock = memo(function SectionBlock({
 
       {editing ? (
         <div className="mt-2.5 flex items-center gap-4">
-          <AddLink onClick={() => onAddItem(section.id, null, 'item')}>{pl.editor.addItem}</AddLink>
-          <AddLink onClick={() => onAddItem(section.id, null, 'discount')}>
-            {pl.editor.addDiscount}
-          </AddLink>
+          <AddLink onClick={() => onAddItem(section.id, null)}>{pl.editor.addItem}</AddLink>
           <LibraryPicker
             priorityCategory={section.title}
             onPickItem={(item) => onInsertItems(section.id, null, [item])}

@@ -15,7 +15,7 @@
  */
 
 /** Wersja, w której zapisujemy dokumenty. Podnieś ją razem z dopisaniem kroku. */
-export const CURRENT_BODY_VERSION = 3;
+export const CURRENT_BODY_VERSION = 4;
 
 export type BodyRecord = Record<string, unknown>;
 
@@ -39,6 +39,75 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
    * bo nie ma jeszcze czym ich narysować.
    */
   2: (body) => ({ ...body, discounts: Array.isArray(body.discounts) ? body.discounts : [] }),
+
+  /**
+   * v4 = rabaty wychodzą z listy pozycji (T-36). Wiersze `kind: 'discount'`
+   * zamieniają się we wpisy `discounts` — kwotowe, na całą wycenę, bo dokładnie
+   * tak działały jako pozycje.
+   *
+   * Kolejność i `enabled` przenosimy: to były widoczne dla klienta wiersze,
+   * a nie techniczny zapis. Zerowanie ich przy migracji zmieniłoby kwotę
+   * istniejącej oferty.
+   */
+  3: (body) => {
+    /*
+     * Migracja NIE naprawia uszkodzeń. Dokument o niespodziewanym kształcie
+     * (np. `sections` jako tekst) przepuszczamy nietknięty — złapie go
+     * walidacja i użytkownik zobaczy „wycena uszkodzona” zamiast pustej listy
+     * pozycji. Ciche zastąpienie śmiecia pustą tablicą wyglądałoby jak utrata
+     * całej wyceny.
+     */
+    if (!Array.isArray(body.sections)) return body;
+
+    const asList = (value: unknown): unknown[] => (Array.isArray(value) ? value : []);
+    const jestRabatem = (item: unknown): item is BodyRecord =>
+      isRecord(item) && item.kind === 'discount';
+
+    const naDiscount = (item: BodyRecord): BodyRecord => ({
+      id: item.id,
+      name: typeof item.name === 'string' && item.name.length > 0 ? item.name : 'Rabat',
+      description: typeof item.description === 'string' ? item.description : '',
+      enabled: item.enabled !== false,
+      type: 'fixed',
+      // Pozycja-rabat liczyła się jako `qty × cena`, więc tę samą kwotę
+      // przenosimy do rabatu kwotowego.
+      valueCents: Math.round(
+        (typeof item.qty === 'number' ? item.qty : 1) *
+          (typeof item.unitPriceCents === 'number' ? item.unitPriceCents : 0),
+      ),
+      scope: 'quote',
+      sectionId: null,
+      itemIds: [],
+      condition: 'always',
+      roundToCents: 0,
+    });
+
+    const przeniesione: BodyRecord[] = [];
+
+    const bezRabatow = (items: unknown): unknown[] =>
+      asList(items).filter((item) => {
+        if (!jestRabatem(item)) return true;
+        przeniesione.push(naDiscount(item));
+        return false;
+      });
+
+    const noweSekcje: unknown[] = asList(body.sections).map((section) => {
+      if (!isRecord(section)) return section;
+      return {
+        ...section,
+        items: bezRabatow(section.items),
+        groups: asList(section.groups).map((group) =>
+          isRecord(group) ? { ...group, items: bezRabatow(group.items) } : group,
+        ),
+      };
+    });
+
+    return {
+      ...body,
+      sections: noweSekcje,
+      discounts: [...asList(body.discounts), ...przeniesione],
+    };
+  },
 };
 
 export type MigrateResult = { ok: true; body: unknown } | { ok: false; error: string };

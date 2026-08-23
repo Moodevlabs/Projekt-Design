@@ -12,13 +12,13 @@ import { QuoteHeader } from './components/QuoteHeader';
 import { SectionBlock } from './components/SectionBlock';
 import { TotalsCard } from './components/TotalsCard';
 import { RoomsPanel } from './components/RoomsPanel';
+import { DiscountsSection } from './components/DiscountsSection';
 import { AddLink } from './components/AddLink';
 import { LibrarySheet } from './components/LibrarySheet';
 import { useCreateQuote, useQuote } from '@/data/queries/useQuotes';
 import { EmptyState } from '@/components/shared';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { newItem } from '@/domain/quote';
 import type { Item } from '@/domain/quote';
 import { useSaveToLibrary } from './useSaveToLibrary';
 import { routes } from '@/app/routes';
@@ -183,27 +183,33 @@ function EditorSurface({
   const addRoom = useEditorStore((state) => state.addRoom);
   const updateRoom = useEditorStore((state) => state.updateRoom);
   const removeRoom = useEditorStore((state) => state.removeRoom);
+  const addDiscount = useEditorStore((state) => state.addDiscount);
+  const updateDiscount = useEditorStore((state) => state.updateDiscount);
+  const removeDiscount = useEditorStore((state) => state.removeDiscount);
+  const toggleDiscount = useEditorStore((state) => state.toggleDiscount);
   const [libraryOpen, setLibraryOpen] = useState(false);
 
   /**
-   * `addItem` w store zawsze dodaje zwykla pozycje; dla rabatu poprawiamy `kind`
-   * zaraz po dodaniu. Prototyp mial tu blad — `newItem(rabat)` ignorowal argument
-   * i rabat dodany w sekcji rabatowej wychodzil jako zwykla pozycja.
+   * Wstawianie z biblioteki. Wpis oznaczony jako rabat trafia do **listy
+   * rabatów**, a nie między pozycje — od T-36 rabat jest osobnym bytem, więc
+   * pozycja z `kind: 'discount'` nie miałaby się gdzie narysować.
    */
-  const handleAddItem = useCallback(
-    (sectionId: string, groupId: string | null, kind: Item['kind']) => {
-      addItemAction(sectionId, groupId);
-      if (kind === 'item') return;
+  const handleInsertItems = useCallback(
+    (sectionId: string, groupId: string | null, items: Item[]) => {
+      const pozycje = items.filter((item) => item.kind !== 'discount');
+      const rabaty = items.filter((item) => item.kind === 'discount');
 
-      const state = useEditorStore.getState();
-      const section = state.body?.sections.find((candidate) => candidate.id === sectionId);
-      const list = groupId
-        ? section?.groups.find((group) => group.id === groupId)?.items
-        : section?.items;
-      const added = list?.[list.length - 1];
-      if (added) state.updateItem(added.id, { kind: 'discount', name: newItem().name });
+      if (pozycje.length > 0) insertItems(sectionId, groupId, pozycje);
+      for (const rabat of rabaty) {
+        addDiscount({
+          name: rabat.name,
+          description: rabat.description,
+          type: 'fixed',
+          valueCents: rabat.unitPriceCents,
+        });
+      }
     },
-    [addItemAction],
+    [insertItems, addDiscount],
   );
 
   const sectionIds = useStableIds(body?.sections ?? []);
@@ -272,11 +278,11 @@ function EditorSurface({
                       onRenameGroup={renameGroup}
                       onRemoveGroup={removeGroup}
                       onToggleGroup={toggleGroup}
-                      onAddItem={handleAddItem}
+                      onAddItem={addItemAction}
                       onToggleItem={toggleItem}
                       onPatchItem={updateItem}
                       onRemoveItem={removeItem}
-                    onInsertItems={insertItems}
+                    onInsertItems={handleInsertItems}
                     onInsertGroup={insertGroup}
                     onSaveItemToLibrary={library.saveItem}
                     onSaveGroupToLibrary={library.saveGroup}
@@ -289,6 +295,20 @@ function EditorSurface({
                     {pl.editor.addSection}
                   </AddLink>
                 ) : null}
+
+                {/* Rabaty na końcu dokumentu, jak w arkuszu — i jak w każdej
+                    ofercie, gdzie obniżki czyta się po cenach. */}
+                <div className="mt-10">
+                  <DiscountsSection
+                    body={body}
+                    currency="PLN"
+                    editing={editing}
+                    onAdd={addDiscount}
+                    onToggle={toggleDiscount}
+                    onPatch={updateDiscount}
+                    onRemove={removeDiscount}
+                  />
+                </div>
               </div>
 
               {body.preparedBy || editing ? (
