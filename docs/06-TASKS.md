@@ -507,10 +507,21 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - Szablon etapów daje **świeże `id` przy każdym wywołaniu**: etap należy do konkretnej wyceny, wspólne `id` znaczyłoby, że edycja jednego harmonogramu rusza drugi.
   > **Czego NIE dało się sprawdzić:** kryterium mówi o parytecie z `TERMIN - DOKUMENT` (O37/Q37, O39, O47/O49), ale **arkusza nie ma w repozytorium** — tak samo jak przy T-42. Zweryfikowane są wzory i zachowanie na własnych przypadkach (święta 2026/2027, przełom roku, sześciodniowy tydzień inwestora); zgodność liczbowa z tamtym plikiem pozostaje niesprawdzona.
 
-- [ ] **T-44 Harmonogram — zakładka w edytorze** (F5.2)
+- [x] **T-44 Harmonogram — zakładka w edytorze** (F5.2)
   Zakładki **Wycena | Termin | Dokumenty**, tabela etapów, karta wyniku, Gantt na czystym CSS, auto-sync etapów po tagach pozycji.
   ✅ Zmiana pomieszczeń w zakładce Wycena zmienia wynik w zakładce Termin.
   ⚠️ Zakładki zmieniają szkielet `QuoteEditorPage`, który dziś jest jednym widokiem z własnym paskiem (`handle.hideTopbar`). Zaplanuj, co się dzieje z autozapisem i `LibrarySheet` przy przełączaniu zakładek — store jest jeden na całą wycenę.
+  > **Zrobione.** Zakładki w edytorze, `ScheduleTab` + `StageRow` + `ScheduleResultCard`, harmonogram w store i w autozapisie, `newStage`, podpowiedź po etykietach pozycji, `NumberField`. 858 testów jednostkowych, 66 integracyjnych.
+  > **Rozstrzygnięcie ostrzeżenia z zadania (autozapis i store przy zakładkach):**
+  > - **Harmonogram siedzi w TYM SAMYM store co `body`** i jedzie **jednym zapisem**. Obie zakładki piszą do tego samego wiersza, więc dwa niezależne cykle zapisu deptałyby sobie po `updated_at` i każdy kończyłby się konfliktem u drugiego.
+  > - **Przełączenie zakładki nie odmontowuje dokumentu** — zakładka „Wycena" jest ukrywana klasą, a nie zdejmowana z drzewa. Odmontowanie zrywałoby stan przewijania, otwarte panele i (co gorsza) uruchamiało `reset` z `ExistingQuoteEditor`.
+  > - `LibrarySheet` i pasek narzędzi zostają wspólne dla obu zakładek: to jeden dokument, więc numer, status i wskaźnik zapisu mają być w jednym miejscu.
+  > **Na co uważać:**
+  > - **Harmonogram zakłada się dopiero przy pierwszym wejściu na zakładkę i tylko w trybie edycji.** Samo obejrzenie wyceny nie ma prawa zmienić dokumentu ani zabrudzić autozapisu; `null` w kolumnie to uczciwsza informacja niż jedenaście domyślnych etapów w każdej ofercie. `ensureSchedule` jest idempotentne.
+  > - **Podpowiedź po etykietach tylko WŁĄCZA etapy i tylko raz na etap.** Automat cofający ręczne wyłączenie jest nie do zniesienia, a ciche wyłączenie etapu po zniknięciu pozycji skracałoby termin bez wiedzy użytkownika. Komunikat pozwala cofnąć.
+  > - **`NumberField` powstał z realnego błędu, który złapał test.** Naiwne pole (`value={liczba}` + `onChange` odrzucający niepoprawne wejście) jest nie do użycia: skasowanie zawartości daje pusty string, ten nie przechodzi walidacji, React przywraca starą liczbę, a kolejna cyfra dokleja się do niej („5" → „56"). Pole trzyma teraz szkic jako tekst. **Ten sam wzorzec siedzi jeszcze w polu ilości pomieszczenia i liczbie kadrów** — do przepięcia przy okazji.
+  > - **Pasek etapów NIE jest wykresem Gantta z osią czasu.** Kolejność etapów nie oznacza ich rozłożenia w kalendarzu (nie modelujemy zależności), więc oś obiecywałaby precyzję, której tu nie ma. Pasek pokazuje proporcje — czyli to, co naprawdę wiemy.
+  > **Odstępstwo:** zakładki to **Wycena | Termin**, bez „Dokumenty". Zakładka prowadząca do „wkrótce" jest gorsza niż jej brak — dojdzie razem z F6 (T-46…T-48).
 
 - [ ] **T-45 PDF „Szacowany termin”** (F5.3)
   `SchedulePdfDocument`, tabela pomieszczenia × etapy, blok „Ramy czasowe”, osobna ważność.

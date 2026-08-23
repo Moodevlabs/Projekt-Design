@@ -24,6 +24,13 @@ import {
   type Room,
   type Section,
 } from '@/domain/quote';
+import {
+  newScheduleBody,
+  newStage,
+  type ScheduleBody,
+  type ScheduleStage,
+  type StageTemplate,
+} from '@/domain/schedule';
 import { newId } from '@/domain/id';
 import type { Quote } from '@/data/repos/quotes.repo';
 
@@ -79,6 +86,15 @@ export interface EditorState {
    * blokady optymistycznej — patrz `quotes.repo.saveQuote`.
    */
   lastSeenUpdatedAt: string | null;
+  /**
+   * Harmonogram wyceny (F5). `null` = ta wycena go nie ma — normalny stan,
+   * bo większość ofert obejdzie się bez terminu.
+   *
+   * Siedzi w tym samym store co `body`, mimo że w bazie jest osobną kolumną:
+   * zakładki „Wycena" i „Termin" to jeden dokument i jeden autozapis. Osobny
+   * store znaczyłby dwa niezależne cykle zapisu na tym samym wierszu.
+   */
+  schedule: ScheduleBody | null;
 
   mode: EditorMode;
   saveState: SaveState;
@@ -104,6 +120,14 @@ export interface EditorState {
    * autozapis nie ma tu czego zapisywac.
    */
   setStatus: (status: QuoteStatus) => void;
+
+  // --- harmonogram (F5.2) ---
+  /** Zakłada harmonogram z szablonu, jeśli wycena jeszcze go nie ma. */
+  ensureSchedule: (template?: StageTemplate[] | null) => void;
+  patchSchedule: (patch: Partial<ScheduleBody>) => void;
+  updateStage: (stageId: string, patch: Partial<ScheduleStage>) => void;
+  addStage: (partial?: Partial<ScheduleStage>) => void;
+  removeStage: (stageId: string) => void;
 
   // --- zapis ---
   markSaving: () => void;
@@ -208,6 +232,7 @@ const INITIAL = {
   number: null,
   status: 'draft' as QuoteStatus,
   body: null,
+  schedule: null as ScheduleBody | null,
   lastSeenUpdatedAt: null,
   mode: 'edit' as EditorMode,
   saveState: 'idle' as SaveState,
@@ -280,6 +305,7 @@ export const useEditorStore = create<EditorState>()(
         state.number = quote.number;
         state.status = quote.status;
         state.body = quote.body;
+        state.schedule = quote.schedule;
         state.lastSeenUpdatedAt = quote.updatedAt;
         state.saveState = 'idle';
         state.saveError = null;
@@ -297,6 +323,44 @@ export const useEditorStore = create<EditorState>()(
     setStatus: (status) =>
       set((state) => {
         state.status = status;
+      }),
+
+    ensureSchedule: (template = null) =>
+      set((state) => {
+        // Idempotentne: wejście na zakładkę „Termin" nie może skasować tego,
+        // co ktoś już ustawił.
+        if (state.schedule) return;
+        state.schedule = newScheduleBody({}, template ?? null);
+        state.saveState = 'dirty';
+      }),
+
+    patchSchedule: (patch) =>
+      set((state) => {
+        if (!state.schedule) return;
+        Object.assign(state.schedule, patch);
+        state.saveState = 'dirty';
+      }),
+
+    updateStage: (stageId, patch) =>
+      set((state) => {
+        const stage = state.schedule?.stages.find((candidate) => candidate.id === stageId);
+        if (!stage) return;
+        Object.assign(stage, patch);
+        state.saveState = 'dirty';
+      }),
+
+    addStage: (partial) =>
+      set((state) => {
+        if (!state.schedule) return;
+        state.schedule.stages.push(newStage(partial));
+        state.saveState = 'dirty';
+      }),
+
+    removeStage: (stageId) =>
+      set((state) => {
+        if (!state.schedule) return;
+        state.schedule.stages = state.schedule.stages.filter((stage) => stage.id !== stageId);
+        state.saveState = 'dirty';
       }),
 
     markSaving: () =>

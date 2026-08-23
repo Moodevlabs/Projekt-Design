@@ -47,7 +47,7 @@ export function useAutosave() {
 
   const runSave = useCallback(async () => {
     const state = useEditorStore.getState();
-    const { quoteId, body, number, lastSeenUpdatedAt, hasConflict } = state;
+    const { quoteId, body, schedule, number, lastSeenUpdatedAt, hasConflict } = state;
 
     if (!quoteId || !body || !lastSeenUpdatedAt) return;
     if (!canWriteRef.current) return;
@@ -63,6 +63,17 @@ export function useAutosave() {
         body,
         lastSeenUpdatedAt,
         ...(number ? { number } : {}),
+        /*
+         * Harmonogram jedzie RAZEM z dokumentem, a nie osobnym zapisem.
+         * Zakladki „Wycena" i „Termin" pisza do tego samego wiersza, wiec dwa
+         * niezalezne cykle zapisu deptalyby sobie po `updated_at` i kazdy
+         * konczylby sie konfliktem u drugiego.
+         *
+         * Wysylamy zawsze to, co jest w store — takze `null`, gdy wycena nie
+         * ma harmonogramu. To wartosc wczytana z bazy, wiec zapisanie jej
+         * z powrotem niczego nie kasuje.
+         */
+        schedule,
       });
       // Zapis może wrócić już po wyjściu z edytora, kiedy store trzyma inną
       // wycenę (albo nic). Wtedy nie wolno mu ruszać cudzego stanu.

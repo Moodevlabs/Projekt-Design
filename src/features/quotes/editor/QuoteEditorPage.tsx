@@ -13,6 +13,7 @@ import { QuoteHeader } from './components/QuoteHeader';
 import { SectionBlock } from './components/SectionBlock';
 import { TotalsCard } from './components/TotalsCard';
 import { RoomsPanel } from './components/RoomsPanel';
+import { ScheduleTab } from './schedule/ScheduleTab';
 import { PricingBasisCard } from './components/PricingBasisCard';
 import { DiscountsSection } from './components/DiscountsSection';
 import { AddLink } from './components/AddLink';
@@ -47,6 +48,7 @@ import { ReadOnlyBanner } from '@/features/billing/ReadOnlyBanner';
 import { useEntitlement } from '@/features/billing/useEntitlement';
 import { routes } from '@/app/routes';
 import { pl } from '@/i18n/pl';
+import { cn } from '@/lib/utils';
 
 export function QuoteEditorPage() {
   const { id } = useParams<{ id: string }>();
@@ -105,6 +107,34 @@ function NewQuoteRedirect() {
   }
 
   return <EditorSkeleton />;
+}
+
+/** Zakladka edytora — jeden dokument, rozne widoki na niego. */
+function EditorTab({
+  active,
+  label,
+  onSelect,
+}: {
+  active: boolean;
+  label: string;
+  onSelect: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="tab"
+      aria-selected={active}
+      onClick={onSelect}
+      className={cn(
+        'relative -mb-px px-3 py-2.5 text-sm transition-colors',
+        active
+          ? 'text-ink border-b-2 border-[var(--doc-ink)] font-semibold'
+          : 'text-ink-soft hover:text-ink border-b-2 border-transparent',
+      )}
+    >
+      {label}
+    </button>
+  );
 }
 
 function EditorSkeleton() {
@@ -255,6 +285,7 @@ function EditorSurface({
   const [libraryOpen, setLibraryOpen] = useState(false);
   const templates = useTemplateActions();
   const { exportPdf, exporting: exportingPdf } = useExportPdf();
+  const [tab, setTab] = useState<'quote' | 'schedule'>('quote');
   const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
   const [overwriteTemplateOpen, setOverwriteTemplateOpen] = useState(false);
 
@@ -461,8 +492,33 @@ function EditorSurface({
           </Alert>
         ) : null}
 
+        {/*
+          Zakladki (F5.2). Store jest JEDEN na cala wycene, wiec przelaczenie
+          nie odmontowuje dokumentu ani nie przerywa autozapisu — zmienia sie
+          tylko to, co widac. Harmonogram jedzie z dokumentem w tym samym
+          zapisie (patrz `useAutosave`).
+        */}
+        <div className="border-hair flex items-center gap-1 border-b px-7">
+          <EditorTab
+            active={tab === 'quote'}
+            onSelect={() => setTab('quote')}
+            label={pl.editor.tabQuote}
+          />
+          <EditorTab
+            active={tab === 'schedule'}
+            onSelect={() => setTab('schedule')}
+            label={pl.editor.tabSchedule}
+          />
+        </div>
+
         <div className="min-h-0 flex-1 overflow-y-auto">
-          <div className="mx-auto grid w-full max-w-[1320px] items-start gap-7 px-7 pt-6 pb-14 lg:grid-cols-[1fr_336px]">
+          {tab === 'schedule' ? <ScheduleTab editing={editing} /> : null}
+          <div
+            className={cn(
+              'mx-auto grid w-full max-w-[1320px] items-start gap-7 px-7 pt-6 pb-14 lg:grid-cols-[1fr_336px]',
+              tab === 'quote' ? '' : 'hidden',
+            )}
+          >
             <div className="quote-doc quote-sheet min-w-0 px-10 py-11" data-mode={mode}>
               <QuoteHeader
                 body={body}

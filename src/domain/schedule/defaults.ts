@@ -1,5 +1,10 @@
 import { newId } from '../id';
-import { ScheduleBodySchema, type ScheduleBody, type ScheduleStage } from './schema';
+import {
+  ScheduleBodySchema,
+  ScheduleStageSchema,
+  type ScheduleBody,
+  type ScheduleStage,
+} from './schema';
 
 /**
  * Domyślny szablon etapów (F5.1) — odwzorowanie arkusza `TERMIN - DOKUMENT`.
@@ -146,6 +151,44 @@ const SZABLON: StageTemplate[] = [
  */
 export function defaultScheduleStages(template: StageTemplate[] | null = null): ScheduleStage[] {
   return (template ?? SZABLON).map((stage) => ({ ...stage, id: newId() }));
+}
+
+/**
+ * Nowy etap harmonogramu.
+ *
+ * Czyta wymienione pola i przepuszcza wynik przez schemat — ta sama zasada co
+ * w `newRoom`/`newDiscount`: akcje bywają podpinane wprost pod `onClick`,
+ * a obiekt zdarzenia rozsypany do dokumentu psuje zapis.
+ */
+export function newStage(partial: Partial<ScheduleStage> = {}): ScheduleStage {
+  const domyslny: ScheduleStage = {
+    id: newId(),
+    name: 'Nowy etap',
+    owner: 'provider',
+    baseDays: 1,
+    perRoomDays: {},
+    defaultPerRoomDays: 0,
+    roomScope: 'none',
+    enabled: true,
+    linkedItemTags: [],
+  };
+
+  const kandydat: ScheduleStage = {
+    ...domyslny,
+    ...(partial.id === undefined ? {} : { id: partial.id }),
+    ...(partial.name === undefined ? {} : { name: partial.name }),
+    ...(partial.owner === undefined ? {} : { owner: partial.owner }),
+    ...(partial.baseDays === undefined ? {} : { baseDays: partial.baseDays }),
+    ...(partial.perRoomDays === undefined ? {} : { perRoomDays: partial.perRoomDays }),
+    ...(partial.defaultPerRoomDays === undefined
+      ? {}
+      : { defaultPerRoomDays: partial.defaultPerRoomDays }),
+    ...(partial.roomScope === undefined ? {} : { roomScope: partial.roomScope }),
+    ...(partial.enabled === undefined ? {} : { enabled: partial.enabled }),
+    ...(partial.linkedItemTags === undefined ? {} : { linkedItemTags: partial.linkedItemTags }),
+  };
+
+  return ScheduleStageSchema.safeParse(kandydat).data ?? domyslny;
 }
 
 /** Nowy harmonogram wyceny z etapami z szablonu. */
