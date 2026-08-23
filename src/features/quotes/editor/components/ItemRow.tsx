@@ -8,9 +8,40 @@ import { ItemToggle } from './ItemToggle';
 import { DragHandle } from './DragHandle';
 import { SaveToLibraryButton } from './SaveToLibraryButton';
 import { formatMoney } from '@/domain/money';
-import type { Item } from '@/domain/quote';
+import { calcItemCents, type Item, type Room } from '@/domain/quote';
 import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
+
+/**
+ * Krótkie „skąd ta kwota” dla pozycji liczonej z reguły. `null` dla `flat` —
+ * przy zwykłej pozycji cena jednostkowa jest widoczna wprost i dopisek byłby
+ * szumem.
+ *
+ * Liczba pomieszczeń jest ta sama, którą widzi kalkulacja: filtrowana po
+ * zasięgu reguły, więc „7 pom.” zgadza się z kwotą także wtedy, gdy część
+ * pomieszczeń ma odznaczoną flagę.
+ */
+function pricingSummary(item: Item, rooms: Room[], currency: string): string | null {
+  const pricing = item.pricing;
+
+  if (pricing.mode === 'per_room') {
+    const liczone = rooms.filter((room) =>
+      pricing.roomScope === 'visual'
+        ? room.includedInVisual
+        : pricing.roomScope === 'technical'
+          ? room.includedInTechnical
+          : true,
+    );
+    const sztuk = liczone.reduce((sum, room) => sum + room.qty, 0);
+    return pl.editor.pricingFromRooms(formatMoney(pricing.baseCents, currency), sztuk);
+  }
+
+  if (pricing.mode === 'per_frame') {
+    return pl.editor.pricingFromFrames(item.frames ?? 1);
+  }
+
+  return null;
+}
 
 export interface ItemRowProps {
   item: Item;
@@ -20,6 +51,8 @@ export interface ItemRowProps {
   onPatch: (itemId: string, patch: Partial<Item>) => void;
   onRemove: (itemId: string) => void;
   onSaveToLibrary: (item: Item) => void;
+  /** Pomieszczenia wyceny — pozycja parametryczna bez nich policzy samą bazę. */
+  rooms: Room[];
 }
 
 /**
@@ -40,9 +73,14 @@ export const ItemRow = memo(function ItemRow({
   onPatch,
   onRemove,
   onSaveToLibrary,
+  rooms,
 }: ItemRowProps) {
   const isDiscount = item.kind === 'discount';
-  const valueCents = Math.round(item.qty * item.unitPriceCents);
+  // Wartość liczy domena, a nie wiersz: pozycja `per_room` to baza plus
+  // składniki za pomieszczenia, więc `qty × cena` dałoby tu inną kwotę niż
+  // w podsumowaniu wyceny.
+  const valueCents = calcItemCents(item, rooms);
+  const parametric = pricingSummary(item, rooms, currency);
 
   const {
     attributes,
@@ -131,9 +169,10 @@ export const ItemRow = memo(function ItemRow({
         <span className="amount text-[13px] text-[var(--doc-ink-soft)]">{item.qty} ×</span>
       ) : null}
 
+      <div className="flex min-w-[86px] flex-col items-end">
       <div
         className={cn(
-          'flex min-w-[86px] items-center justify-end gap-0.5 text-[14.5px]',
+          'flex items-center justify-end gap-0.5 text-[14.5px]',
           isDiscount
             ? item.enabled
               ? 'text-[var(--doc-terracotta)]'
@@ -144,7 +183,7 @@ export const ItemRow = memo(function ItemRow({
         )}
       >
         {isDiscount ? <span aria-hidden>−</span> : null}
-        {editing ? (
+        {editing && parametric === null ? (
           <InlineMoney
             cents={item.unitPriceCents}
             currency={currency}
@@ -153,8 +192,21 @@ export const ItemRow = memo(function ItemRow({
             className="price-field inline-field amount w-[76px] text-[14.5px]"
           />
         ) : (
+          // Cena pozycji parametrycznej WYNIKA z reguły, więc nie ma tu czego
+          // edytować — pole do wpisania kwoty sugerowałoby, że da się ją
+          // nadpisać, a wpisana wartość nie miałaby żadnego wpływu na wynik.
           <span className="amount">{formatMoney(valueCents, currency)}</span>
         )}
+      </div>
+
+        {parametric ? (
+          // Skąd ta kwota. Bez tego pozycja liczona za pomieszczenie pokazuje
+          // liczbę, której użytkownik nie umie sprawdzić — a automatowi, którego
+          // nie da się prześledzić, nikt nie ufa.
+          <span className="text-[11px] whitespace-nowrap text-[var(--doc-ink-soft)]">
+            {parametric}
+          </span>
+        ) : null}
       </div>
 
       {editing ? (

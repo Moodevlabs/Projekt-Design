@@ -28,7 +28,7 @@ function setup(overrides: Partial<Item> = {}, editing = true) {
 
   render(
     <Dnd ids={[item.id]}>
-      <ItemRow item={item} editing={editing} currency="PLN" {...handlers} />
+      <ItemRow item={item} editing={editing} currency="PLN" rooms={[]} {...handlers} />
     </Dnd>,
   );
   return { item, ...handlers };
@@ -90,6 +90,7 @@ describe('ItemRow', () => {
           item={a}
           editing={false}
           currency="PLN"
+          rooms={[]}
           onToggle={vi.fn()}
           onPatch={vi.fn()}
           onRemove={vi.fn()}
@@ -107,6 +108,7 @@ describe('ItemRow', () => {
           item={b}
           editing={false}
           currency="PLN"
+          rooms={[]}
           onToggle={vi.fn()}
           onPatch={vi.fn()}
           onRemove={vi.fn()}
@@ -162,5 +164,118 @@ describe('ItemRow', () => {
 
     await user.click(screen.getByRole('button', { name: /Usuń pozycję/ }));
     expect(onRemove).toHaveBeenCalledWith(item.id);
+  });
+});
+
+describe('ItemRow — pozycja liczona za pomieszczenie', () => {
+  const rooms = [
+    {
+      id: '11111111-1111-4111-8111-111111111111',
+      roomTypeId: null,
+      label: 'Kuchnia',
+      qty: 2,
+      includedInVisual: true,
+      includedInTechnical: true,
+    },
+    {
+      id: '22222222-2222-4222-8222-222222222222',
+      roomTypeId: null,
+      label: 'Salon',
+      qty: 1,
+      includedInVisual: false,
+      includedInTechnical: true,
+    },
+  ];
+
+  const parametryczna = newItem({
+    name: 'Projekt budowlany',
+    unitPriceCents: 0,
+    pricing: {
+      mode: 'per_room',
+      baseCents: 20_000,
+      perRoomCents: {},
+      defaultPerRoomCents: 1_500,
+      roomScope: 'technical',
+    },
+  });
+
+  it('pokazuje kwote z reguly, a nie `qty × cena jednostkowa`', () => {
+    render(
+      <Dnd ids={[parametryczna.id]}>
+        <ItemRow
+          item={parametryczna}
+          editing={false}
+          currency="PLN"
+          rooms={rooms}
+          onToggle={vi.fn()}
+          onPatch={vi.fn()}
+          onRemove={vi.fn()}
+          onSaveToLibrary={vi.fn()}
+        />
+      </Dnd>,
+    );
+
+    // 200 zl bazy + 3 pomieszczenia techniczne (kuchnia x2 + salon) × 15 zl.
+    expect(screen.getByText(/245,00/)).toBeInTheDocument();
+  });
+
+  it('pisze, skad ta kwota — z liczba pomieszczen zgodna z zasiegiem reguly', () => {
+    render(
+      <Dnd ids={[parametryczna.id]}>
+        <ItemRow
+          item={parametryczna}
+          editing
+          currency="PLN"
+          rooms={rooms}
+          onToggle={vi.fn()}
+          onPatch={vi.fn()}
+          onRemove={vi.fn()}
+          onSaveToLibrary={vi.fn()}
+        />
+      </Dnd>,
+    );
+
+    expect(screen.getByText(/baza .* \+ 3 pom\./)).toBeInTheDocument();
+  });
+
+  it('w trybie edycji NIE daje pola ceny jednostkowej', () => {
+    // Cena wynika z reguly — pole sugerowaloby, ze da sie ja nadpisac.
+    render(
+      <Dnd ids={[parametryczna.id]}>
+        <ItemRow
+          item={parametryczna}
+          editing
+          currency="PLN"
+          rooms={rooms}
+          onToggle={vi.fn()}
+          onPatch={vi.fn()}
+          onRemove={vi.fn()}
+          onSaveToLibrary={vi.fn()}
+        />
+      </Dnd>,
+    );
+
+    expect(screen.queryByLabelText(pl.editor.itemPriceLabel)).not.toBeInTheDocument();
+  });
+
+  it('zwykla pozycja dalej ma pole ceny i zaden dopisek', () => {
+    const zwykla = newItem({ name: 'Nadzor', unitPriceCents: 25_000 });
+    render(
+      <Dnd ids={[zwykla.id]}>
+        <ItemRow
+          item={zwykla}
+          editing
+          currency="PLN"
+          rooms={rooms}
+          onToggle={vi.fn()}
+          onPatch={vi.fn()}
+          onRemove={vi.fn()}
+          onSaveToLibrary={vi.fn()}
+        />
+      </Dnd>,
+    );
+
+    expect(screen.getByLabelText(pl.editor.itemPriceLabel)).toBeInTheDocument();
+    expect(screen.queryByText(/pom\./)).not.toBeInTheDocument();
   });
 });

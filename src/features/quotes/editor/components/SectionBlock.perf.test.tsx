@@ -6,6 +6,15 @@ import { useEditorStore } from '../editor.store';
 import { newGroup, newItem, newQuoteBody, newSection } from '@/domain/quote';
 import type { Quote } from '@/data/repos/quotes.repo';
 import * as money from '@/domain/money';
+import type { Room } from '@/domain/quote';
+
+/**
+ * Stala referencja, nie `[]` inline. Nowa tablica przy kazdym renderze
+ * zabilaby `memo` na wierszach — a w aplikacji `body.rooms` jest stabilne,
+ * bo immer zachowuje referencje nietknietych galezi. Ten test pilnuje
+ * mechanizmu, wiec musi odwzorowac te wlasnosc.
+ */
+const NO_ROOMS: Room[] = [];
 
 /**
  * Dowód na kryterium T-08 „300 pozycji bez laga".
@@ -79,6 +88,7 @@ function Harness() {
       currency="PLN"
       vatRate={23}
       pricesInclude="net"
+      rooms={NO_ROOMS}
       onRename={noop}
       onRemove={noop}
       onAddGroup={noop}

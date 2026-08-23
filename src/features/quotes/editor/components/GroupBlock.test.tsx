@@ -48,6 +48,7 @@ function setup(group: Group, editing = true) {
         currency="PLN"
         vatRate={23}
         pricesInclude="net"
+        rooms={[]}
         {...handlers}
       />
     </Dnd>,

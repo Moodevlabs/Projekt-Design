@@ -249,10 +249,22 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   ⚠️ Wydzielone z T-34 świadomie: reguły cenowe **działają** bez tego widoku (edytuje się je na karcie pozycji), a zbiorcza tabela to wygoda przy przenoszeniu cennika z arkusza. Zrób ją, zanim klient zacznie przepisywać cennik ręcznie.
   ⚠️ `slug` jest kluczem importu — patrz notatka w T-33 o tym, dlaczego nie zmienia się razem z nazwą.
 
-- [ ] **T-35 Edytor: panel pomieszczeń i bloki per pomieszczenie** (F1.4)
-  `RoomsPanel`, sekcja z blokami pomieszczeń, „dodaj pozycję do wszystkich pomieszczeń", warianty (3D/360), stepper kadrów, akcje store (`addRoom`/`updateRoom`/`removeRoom`/`setItemVariant`/`setItemFrames`), dopisek „baza + 7 pom." z tooltipem.
+- [x] **T-35 Edytor: panel pomieszczeń** (F1.4 — bez bloków per pomieszczenie)
+  `RoomsPanel`, akcje store (`addRoom`/`updateRoom`/`removeRoom`), dopisek „baza + 7 pom.".
   ✅ Scenariusz z arkusza: 7 pomieszczeń → 200 + Σ; wyłączenie T dla salonu zdejmuje 15 zł; `kuchnia x2` podwaja składnik.
-  ⚠️ Zależy od rozstrzygnięcia z T-31. Usunięcie pomieszczenia kasuje pozycje z jego `roomId` — przez `ConfirmDialog`, jak przy usuwaniu grupy.
+  > **Zrobione.** `RoomsPanel` + `RoomRow` nad `TotalsCard`, akcje store, `rooms` przepięte do `SectionBlock`/`GroupBlock`/`ItemRow`, rozbicie ceny przy pozycji parametrycznej. Scenariusz z arkusza ma własny test na prawdziwym store (`rooms-scenario.test.ts`). 441 testów jednostkowych, 47 integracyjnych.
+  > **Na co uważać:**
+  > - **Złapany błąd z T-31: `ItemRow` liczył wartość ręcznie** (`qty × unitPriceCents`), więc pozycja parametryczna pokazywała w wierszu inną kwotę niż podsumowanie. Teraz liczy `calcItemCents`. Szukając tej pułapki patrzyłem na `calcSectionTotals`/`calcGroupTotals` i przeoczyłem, że wiersz ma własne obliczenie — **jeśli dojdzie kolejne miejsce pokazujące kwotę pozycji (PDF!), sprawdź je pod tym kątem**.
+  > - **`rooms` musi mieć stabilną referencję.** Przekazanie `[]` inline zabija `memo` na wierszach — test wydajnościowy to wychwycił (8 renderów zamiast 5). W aplikacji `body.rooms` jest stabilne dzięki immerowi.
+  > - **Pozycja parametryczna nie ma pola ceny jednostkowej w trybie edycji.** Cena wynika z reguły; pole sugerowałoby, że da się ją nadpisać, a wpisana wartość nie miałaby wpływu na wynik.
+  > - **Usunięcie pomieszczenia ODPINA pozycje, nie kasuje ich** (wbrew pierwotnej notatce). Użytkownik usuwa pomieszczenie, nie usługi — ale martwy `roomId` zostawiłby pozycję `per_frame` liczoną po cenie nieistniejącego pomieszczenia, więc czyścimy wskaźnik. Dialog potwierdzenia mówi wprost, co się stanie.
+  > - Liczba w dopisku jest filtrowana **po zasięgu reguły**, więc „3 pom." zgadza się z kwotą także wtedy, gdy część pomieszczeń ma odznaczoną flagę.
+
+- [ ] **T-51 Edytor: bloki per pomieszczenie i warianty** (F1.4 — reszta)
+  Sekcja renderująca blok na każde pomieszczenie (pozycje z `roomId`), „dodaj pozycję do wszystkich pomieszczeń", pytanie „skopiować zestaw z pomieszczenia X?" przy dodawaniu nowego, warianty pozycji (Wizualizacja 3D / 360) i stepper kadrów dla `per_frame`.
+  ✅ Powielenie usługi na 7 pomieszczeń jednym kliknięciem; zmiana wariantu podmienia regułę i opis.
+  ⚠️ **Tu wraca decyzja odłożona przy T-31: `Group.roomId` czy nowy byt.** Rekomendacja bez zmian — grupa wskazująca na `Room` daje przeciąganie, zapis zestawu do biblioteki i kaskadę za darmo; osobny byt znaczy czwarty poziom w DnD.
+  ⚠️ Wydzielone z T-35 świadomie: cennik parametryczny **działa** bez bloków (pomieszczenia + usługa `per_room` = poprawna cena). Bloki to sposób pracy z arkusza, gdzie każda usługa jest powielona per pomieszczenie — wygodne przy dużych wycenach, ale nie warunek działania.
 
 - [ ] **T-36 Edytor: UI rabatów** (F3.2)
   `DiscountRow` (typ zł/%, zakres, warunek, zaokrąglenie), wyszarzony rabat niespełniony z licznikiem „3/5 pozycji", rabaty jako osobna zakładka biblioteki.

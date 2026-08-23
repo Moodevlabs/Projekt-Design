@@ -110,6 +110,33 @@ export const pl = {
     pickerItemsTab: 'Pozycje',
     pickerGroupsTab: 'Grupy',
     pickerGroupItems: (count: number) => `${count} poz.`,
+    // Pomieszczenia wyceny (cennik parametryczny).
+    rooms: 'Pomieszczenia',
+    roomsHint: 'Usługi liczone za pomieszczenie biorą stąd swoje składniki.',
+    roomsEmpty: 'Brak pomieszczeń. Dodaj je, jeśli wyceniasz za pomieszczenie.',
+    addRoom: 'Dodaj pomieszczenie',
+    newRoomName: 'Nowe pomieszczenie',
+    roomNameLabel: (room: string) => `Nazwa pomieszczenia: ${room}`,
+    roomQtyLabel: (room: string) => `Ilość: ${room}`,
+    roomTypeLabel: (room: string) => `Typ pomieszczenia: ${room}`,
+    roomTypeCustom: 'Własne',
+    removeRoom: (room: string) => `Usuń pomieszczenie: ${room}`,
+    removeRoomTitle: 'Usunąć pomieszczenie?',
+    removeRoomDescription: (room: string) =>
+      `„${room}” zniknie z wyceny, a usługi liczone za pomieszczenie przeliczą się bez niego. Pozycje przypisane do tego pomieszczenia zostają — tracą tylko przypisanie.`,
+    /** Kolumna M z arkusza — „w projekcie”. */
+    roomVisual: (room: string) => `Część wizualna: ${room}`,
+    /** Kolumna A z arkusza — „w części technicznej”. */
+    roomTechnical: (room: string) => `Część techniczna: ${room}`,
+    roomVisualShort: 'W',
+    roomTechnicalShort: 'T',
+    roomFlagsHint: 'W — część wizualna, T — techniczna. Decydują, co wchodzi do której usługi.',
+    /** Skąd wzięła się cena pozycji parametrycznej — np. „baza 200,00 zł + 7 pom.”. */
+    pricingFromRooms: (base: string, rooms: number) =>
+      rooms === 1 ? `baza ${base} + 1 pom.` : `baza ${base} + ${rooms} pom.`,
+    pricingFromFrames: (frames: number) =>
+      frames === 1 ? 'pomieszczenie + 1 kadr' : `pomieszczenie + ${frames} kadry/ów`,
+
     summary: 'Podsumowanie',
     itemsTotal: 'Suma pozycji',
     discounts: 'Rabaty',

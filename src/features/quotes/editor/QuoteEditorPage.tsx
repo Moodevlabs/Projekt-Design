@@ -11,6 +11,7 @@ import { EditorTopbar } from './components/EditorTopbar';
 import { QuoteHeader } from './components/QuoteHeader';
 import { SectionBlock } from './components/SectionBlock';
 import { TotalsCard } from './components/TotalsCard';
+import { RoomsPanel } from './components/RoomsPanel';
 import { AddLink } from './components/AddLink';
 import { LibrarySheet } from './components/LibrarySheet';
 import { useCreateQuote, useQuote } from '@/data/queries/useQuotes';
@@ -179,6 +180,9 @@ function EditorSurface({
   const removeItem = useEditorStore((state) => state.removeItem);
   const insertItems = useEditorStore((state) => state.insertItems);
   const insertGroup = useEditorStore((state) => state.insertGroup);
+  const addRoom = useEditorStore((state) => state.addRoom);
+  const updateRoom = useEditorStore((state) => state.updateRoom);
+  const removeRoom = useEditorStore((state) => state.removeRoom);
   const [libraryOpen, setLibraryOpen] = useState(false);
 
   /**
@@ -261,6 +265,7 @@ function EditorSurface({
                       currency="PLN"
                       vatRate={body.vatRate}
                       pricesInclude={body.pricesInclude}
+                    rooms={body.rooms}
                       onRename={renameSection}
                       onRemove={removeSection}
                       onAddGroup={addGroup}
@@ -293,7 +298,16 @@ function EditorSurface({
               ) : null}
             </div>
 
-            <div className="lg:sticky lg:top-6">
+            <div className="flex flex-col gap-4 lg:sticky lg:top-6">
+              {/* Nad podsumowaniem, bo to pomieszczenia decydują o kwotach
+                  usług liczonych za pomieszczenie. */}
+              <RoomsPanel
+                rooms={body.rooms}
+                editing={editing}
+                onAdd={addRoom}
+                onPatch={updateRoom}
+                onRemove={removeRoom}
+              />
               <TotalsCard body={body} currency="PLN" issueDate={issueDate} />
             </div>
           </div>

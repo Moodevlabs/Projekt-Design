@@ -16,6 +16,7 @@ import {
   type Group,
   type Item,
   type PricesInclude,
+  type Room,
   type Section,
 } from '@/domain/quote';
 import { formatMoney } from '@/domain/money';
@@ -28,6 +29,8 @@ export interface SectionBlockProps {
   currency: string;
   vatRate: number;
   pricesInclude: PricesInclude;
+  /** Pomieszczenia wyceny — potrzebne do policzenia pozycji parametrycznych. */
+  rooms: Room[];
   onRename: (sectionId: string, title: string) => void;
   onRemove: (sectionId: string) => void;
   onAddGroup: (sectionId: string) => void;
@@ -50,6 +53,7 @@ export const SectionBlock = memo(function SectionBlock({
   currency,
   vatRate,
   pricesInclude,
+  rooms,
   onRename,
   onRemove,
   onAddGroup,
@@ -66,7 +70,7 @@ export const SectionBlock = memo(function SectionBlock({
   onSaveGroupToLibrary,
 }: SectionBlockProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const totals = calcSectionTotals(section, { vatRate, pricesInclude });
+  const totals = calcSectionTotals(section, { vatRate, pricesInclude, rooms });
   const isEmpty = section.items.length === 0 && section.groups.length === 0;
 
   const {
@@ -166,6 +170,7 @@ export const SectionBlock = memo(function SectionBlock({
               onPatch={onPatchItem}
               onRemove={onRemoveItem}
               onSaveToLibrary={onSaveItemToLibrary}
+              rooms={rooms}
             />
           ))}
         </SortableContext>
@@ -202,6 +207,7 @@ export const SectionBlock = memo(function SectionBlock({
               currency={currency}
               vatRate={vatRate}
               pricesInclude={pricesInclude}
+              rooms={rooms}
               onRename={onRenameGroup}
               onRemove={onRemoveGroup}
               onToggleGroup={onToggleGroup}

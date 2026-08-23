@@ -17,6 +17,7 @@ import {
   type Group,
   type Item,
   type PricesInclude,
+  type Room,
 } from '@/domain/quote';
 import { formatMoney } from '@/domain/money';
 import { pl } from '@/i18n/pl';
@@ -29,6 +30,8 @@ export interface GroupBlockProps {
   currency: string;
   vatRate: number;
   pricesInclude: PricesInclude;
+  /** Pomieszczenia wyceny — potrzebne do policzenia pozycji parametrycznych. */
+  rooms: Room[];
   onRename: (groupId: string, name: string) => void;
   onRemove: (groupId: string) => void;
   onToggleGroup: (groupId: string) => void;
@@ -48,6 +51,7 @@ export const GroupBlock = memo(function GroupBlock({
   currency,
   vatRate,
   pricesInclude,
+  rooms,
   onRename,
   onRemove,
   onToggleGroup,
@@ -60,7 +64,9 @@ export const GroupBlock = memo(function GroupBlock({
   onSaveGroupToLibrary,
 }: GroupBlockProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const totals = calcGroupTotals(group, { vatRate, pricesInclude });
+  // `rooms` są konieczne: bez nich pozycja `per_room` policzyłaby samą bazę
+  // i nagłówek pokazałby inną kwotę niż podsumowanie wyceny.
+  const totals = calcGroupTotals(group, { vatRate, pricesInclude, rooms });
 
   // Do biblioteki idą tylko nazwane pozycje (snapshot wymaga nazwy), więc po
   // nich poznajemy też, czy jest w ogóle co zapisywać.
@@ -179,6 +185,7 @@ export const GroupBlock = memo(function GroupBlock({
               onPatch={onPatchItem}
               onRemove={onRemoveItem}
               onSaveToLibrary={onSaveItemToLibrary}
+              rooms={rooms}
             />
           ))}
         </SortableContext>

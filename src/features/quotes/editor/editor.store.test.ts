@@ -431,3 +431,84 @@ describe('editor.store — kaskada z biblioteki', () => {
     expect(store().saveState).toBe('dirty');
   });
 });
+
+describe('editor.store — pomieszczenia (T-35)', () => {
+  it('dodane pomieszczenie ma sensowne wartosci startowe i brudzi dokument', () => {
+    store().addRoom();
+
+    const room = store().body?.rooms[0];
+    expect(room?.label).toBe('Nowe pomieszczenie');
+    expect(room?.qty).toBe(1);
+    // Nowe pomieszczenie liczy sie do obu czesci — wylaczanie jest decyzja.
+    expect(room?.includedInVisual).toBe(true);
+    expect(room?.includedInTechnical).toBe(true);
+    expect(room?.roomTypeId).toBeNull();
+    expect(store().saveState).toBe('dirty');
+  });
+
+  it('kazde pomieszczenie dostaje wlasne id', () => {
+    store().addRoom();
+    store().addRoom();
+
+    const rooms = store().body?.rooms ?? [];
+    expect(rooms).toHaveLength(2);
+    expect(rooms[0]?.id).not.toBe(rooms[1]?.id);
+  });
+
+  it('aktualizuje wskazane pomieszczenie, nie rusza pozostalych', () => {
+    store().addRoom({ label: 'Kuchnia' });
+    store().addRoom({ label: 'Salon' });
+    const kuchnia = store().body?.rooms[0];
+    if (!kuchnia) throw new Error('brak pomieszczenia');
+
+    store().updateRoom(kuchnia.id, { qty: 2, includedInVisual: false });
+
+    expect(store().body?.rooms[0]?.qty).toBe(2);
+    expect(store().body?.rooms[0]?.includedInVisual).toBe(false);
+    expect(store().body?.rooms[1]?.label).toBe('Salon');
+    expect(store().body?.rooms[1]?.qty).toBe(1);
+  });
+
+  it('usuwa pomieszczenie i ODPINA od niego pozycje, zamiast je kasowac', () => {
+    store().addRoom({ label: 'Kuchnia' });
+    const room = store().body?.rooms[0];
+    const itemId = store().body?.sections[0]?.items[0]?.id;
+    if (!room || !itemId) throw new Error('brak danych');
+
+    store().updateItem(itemId, { roomId: room.id });
+    store().removeRoom(room.id);
+
+    expect(store().body?.rooms).toHaveLength(0);
+    // Uzytkownik usunal POMIESZCZENIE, nie usluge — pozycja zostaje w wycenie.
+    const item = store().body?.sections[0]?.items[0];
+    expect(item?.id).toBe(itemId);
+    // ...ale bez martwego wskaznika, ktory kazalby liczyc ja po cenie
+    // nieistniejacego pomieszczenia.
+    expect(item?.roomId).toBeNull();
+  });
+
+  it('odpina takze pozycje siedzace w grupach', () => {
+    store().addRoom({ label: 'Kuchnia' });
+    const room = store().body?.rooms[0];
+    const groupItemId = store().body?.sections[0]?.groups[0]?.items[0]?.id;
+    if (!room || !groupItemId) throw new Error('brak danych');
+
+    store().updateItem(groupItemId, { roomId: room.id });
+    store().removeRoom(room.id);
+
+    expect(store().body?.sections[0]?.groups[0]?.items[0]?.roomId).toBeNull();
+  });
+
+  it('usuniecie nieistniejacego pomieszczenia nie rusza pozycji', () => {
+    store().addRoom({ label: 'Kuchnia' });
+    const room = store().body?.rooms[0];
+    const itemId = store().body?.sections[0]?.items[0]?.id;
+    if (!room || !itemId) throw new Error('brak danych');
+
+    store().updateItem(itemId, { roomId: room.id });
+    store().removeRoom('nie-ma-takiego');
+
+    expect(store().body?.rooms).toHaveLength(1);
+    expect(store().body?.sections[0]?.items[0]?.roomId).toBe(room.id);
+  });
+});

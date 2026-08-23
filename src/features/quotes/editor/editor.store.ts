@@ -15,8 +15,10 @@ import {
   type MoveItemArgs,
   type MoveSectionArgs,
   type QuoteStatus,
+  type Room,
   type Section,
 } from '@/domain/quote';
+import { newId } from '@/domain/id';
 import type { Quote } from '@/data/repos/quotes.repo';
 
 /**
@@ -95,6 +97,12 @@ export interface EditorState {
   addGroup: (sectionId: string) => void;
   renameGroup: (groupId: string, name: string) => void;
   removeGroup: (groupId: string) => void;
+
+  // --- pomieszczenia (T-35): wymiar, po którym liczy się cennik parametryczny ---
+  addRoom: (partial?: Partial<Room>) => void;
+  updateRoom: (roomId: string, patch: Partial<Room>) => void;
+  /** Usuwa pomieszczenie i odpina od niego pozycje — patrz komentarz w implementacji. */
+  removeRoom: (roomId: string) => void;
 
   /**
    * Wlacza albo wylacza wszystkie pozycje grupy naraz.
@@ -314,6 +322,49 @@ export const useEditorStore = create<EditorState>()(
         for (const section of state.body.sections) {
           section.groups = section.groups.filter((g) => g.id !== groupId);
         }
+        state.saveState = 'dirty';
+      }),
+
+    addRoom: (partial) =>
+      set((state) => {
+        if (!state.body) return;
+        state.body.rooms.push({
+          id: newId(),
+          roomTypeId: null,
+          label: 'Nowe pomieszczenie',
+          qty: 1,
+          includedInVisual: true,
+          includedInTechnical: true,
+          ...partial,
+        });
+        state.saveState = 'dirty';
+      }),
+
+    updateRoom: (roomId, patch) =>
+      set((state) => {
+        if (!state.body) return;
+        const room = state.body.rooms.find((candidate) => candidate.id === roomId);
+        if (!room) return;
+        Object.assign(room, patch);
+        state.saveState = 'dirty';
+      }),
+
+    removeRoom: (roomId) =>
+      set((state) => {
+        if (!state.body) return;
+        state.body.rooms = state.body.rooms.filter((room) => room.id !== roomId);
+
+        // Pozycje przypięte do skasowanego pomieszczenia zostają w wycenie, ale
+        // tracą przypięcie. Kasowanie ich razem z pomieszczeniem byłoby
+        // zaskakujące — użytkownik usuwa POMIESZCZENIE, nie usługi; a pozostawienie
+        // martwego `roomId` sprawiłoby, że pozycja `per_frame` liczyłaby się po
+        // cenie nieistniejącego pomieszczenia.
+        for (const list of itemLists(state.body)) {
+          for (const item of list) {
+            if (item.roomId === roomId) item.roomId = null;
+          }
+        }
+
         state.saveState = 'dirty';
       }),
 
