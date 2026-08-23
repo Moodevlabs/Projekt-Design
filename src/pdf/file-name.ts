@@ -35,3 +35,14 @@ export function quoteFileName(number: string | null, clientName: string): string
   const base = clientPart ? `${numberPart}-${clientPart}` : numberPart;
   return `${base}.pdf`;
 }
+
+/**
+ * Nazwa pliku dokumentu „Szacowany termin" (F5.3).
+ *
+ * Osobny przyrostek, bo pakiet dla jednego inwestora to kilka plików o tym
+ * samym numerze — bez rozróżnienia drugi zapis nadpisałby pierwszy.
+ */
+export function scheduleFileName(number: string | null): string {
+  const numberPart = number ? slug(number) : 'wycena';
+  return `${numberPart}-termin.pdf`;
+}

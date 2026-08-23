@@ -44,6 +44,7 @@ import { useMarkAsSentPrompt } from './useMarkAsSentPrompt';
 import { usePricingBasisChange } from './usePricingBasisChange';
 import { useTemplateActions } from './useTemplateActions';
 import { useExportPdf } from '@/pdf/useExportPdf';
+import { useExportSchedulePdf } from '@/pdf/useExportSchedulePdf';
 import { ReadOnlyBanner } from '@/features/billing/ReadOnlyBanner';
 import { useEntitlement } from '@/features/billing/useEntitlement';
 import { routes } from '@/app/routes';
@@ -285,6 +286,7 @@ function EditorSurface({
   const [libraryOpen, setLibraryOpen] = useState(false);
   const templates = useTemplateActions();
   const { exportPdf, exporting: exportingPdf } = useExportPdf();
+  const { exportSchedule, exporting: exportingSchedule } = useExportSchedulePdf();
   const [tab, setTab] = useState<'quote' | 'schedule'>('quote');
   const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
   const [overwriteTemplateOpen, setOverwriteTemplateOpen] = useState(false);
@@ -423,6 +425,15 @@ function EditorSurface({
             })
           }
           exportingPdf={exportingPdf}
+          onExportSchedule={() =>
+            void exportSchedule({
+              schedule: useEditorStore.getState().schedule,
+              rooms: body.rooms,
+              number,
+              issueDate,
+            })
+          }
+          exportingSchedule={exportingSchedule}
           onSaveAsTemplate={() => setSaveTemplateOpen(true)}
           onOverwriteTemplate={() => setOverwriteTemplateOpen(true)}
           canOverwriteTemplate={templates.canOverwrite}

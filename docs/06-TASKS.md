@@ -523,9 +523,19 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - **Pasek etapów NIE jest wykresem Gantta z osią czasu.** Kolejność etapów nie oznacza ich rozłożenia w kalendarzu (nie modelujemy zależności), więc oś obiecywałaby precyzję, której tu nie ma. Pasek pokazuje proporcje — czyli to, co naprawdę wiemy.
   > **Odstępstwo:** zakładki to **Wycena | Termin**, bez „Dokumenty". Zakładka prowadząca do „wkrótce" jest gorsza niż jej brak — dojdzie razem z F6 (T-46…T-48).
 
-- [ ] **T-45 PDF „Szacowany termin”** (F5.3)
+- [x] **T-45 PDF „Szacowany termin”** (F5.3)
   `SchedulePdfDocument`, tabela pomieszczenia × etapy, blok „Ramy czasowe”, osobna ważność.
   ✅ A4 mieści 18 pomieszczeń bez łamania wiersza w środku.
+  > **Zrobione.** `pdf/schedule-content.ts` (reguły treści), `pdf/SchedulePdfDocument.tsx`, `useExportSchedulePdf`, `scheduleFileName`, pozycja „Eksportuj termin" w menu edytora. 871 testów jednostkowych.
+  > **Na co uważać:**
+  > - **Macierz obejmuje wyłącznie etapy ZALEŻNE od pomieszczeń.** Kolumna dla etapu liczonego na cały projekt miałaby w każdym wierszu to samo — nie niosłaby informacji, a zabierała szerokość, której na A4 nie ma w nadmiarze. Takie etapy idą listą pod tabelą. To odstępstwo od dosłownego odwzorowania `TERMIN - DOKUMENT` B15–N32 i jest świadome.
+  > - **Wiersze mają `wrap={false}`** — kryterium „18 pomieszczeń bez łamania wiersza". Bez tego połowa znaczników ląduje na dole jednej kartki, a połowa na górze drugiej. Nagłówek tabeli jest `fixed`, więc druga strona nie jest kolumnami znaczków bez wyjaśnienia.
+  > - **Pomieszczenie odznaczone w OBU częściach nie trafia do dokumentu** — jego wiersz byłby pasem myślników, czyli informacją o tym, czego nie ma. Klient czyta dokument o tym, co robimy.
+  > - **Etapy bez czasu (wyłączone albo zerowe) wypadają** — wiersz o niczym tylko wydłuża dokument.
+  > - **Ważność jest osobna od oferty i krótsza (7 dni).** Termin starzeje się szybciej niż cena: zależy od tego, kiedy projekt ruszy, a nie od cennika.
+  > - **Nazwa pliku ma przyrostek `-termin`.** Pakiet dla jednego inwestora to kilka plików o tym samym numerze — bez rozróżnienia drugi zapis nadpisałby pierwszy.
+  > - Ramy czasowe stoją **na górze**, nie na końcu: to jedyna liczba, po którą inwestor sięga, otwierając ten dokument.
+  > **Nie zweryfikowane wizualnie:** render sprawdzony nagłówkiem `%PDF-` i rozmiarem, treść — czystymi funkcjami (`renderToString` zwraca binarny plik, patrz pułapka z T-13). Samego wyglądu na papierze nikt jeszcze nie oglądał.
 
 - [ ] **T-46 Dokument „Etapy współpracy”** (F6.1)
   Migracja `workspace_doc_templates`, seed 19 etapów, zakładka Dokumenty, `StagesPdfDocument`.

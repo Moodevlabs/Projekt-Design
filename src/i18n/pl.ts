@@ -638,6 +638,19 @@ export const pl = {
     previewRendering: 'Przeliczam…',
     previewOpen: 'Otwórz podgląd w nowym oknie',
   },
+  /** Teksty widoczne wyłącznie w wygenerowanych dokumentach. */
+  pdf: {
+    validUntil: 'Ważny do',
+    scheduleStart: 'Start',
+    scheduleNoStart: 'Termin policzymy po ustaleniu daty rozpoczęcia.',
+    scheduleRoomsTable: 'Zakres per pomieszczenie',
+    scheduleWholeProject: 'Etapy dla całego projektu',
+    scheduleStageDays: 'Dni robocze',
+    exportSchedule: 'Eksportuj termin (PDF)',
+    scheduleMissing: 'Ta wycena nie ma jeszcze harmonogramu — ustaw go w zakładce „Termin".',
+    scheduleSaved: 'Zapisano dokument „Szacowany termin"',
+  },
+
   settings: {
     title: 'Ustawienia',
     sectionQuotes: 'Domyślne dla wycen',

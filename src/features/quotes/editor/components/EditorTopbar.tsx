@@ -31,6 +31,8 @@ export function EditorTopbar({
   onSaveAllToLibrary,
   onExportPdf,
   exportingPdf,
+  onExportSchedule,
+  exportingSchedule,
   onSaveAsTemplate,
   onOverwriteTemplate,
   canOverwriteTemplate,
@@ -50,6 +52,9 @@ export function EditorTopbar({
   onSaveAllToLibrary: () => void;
   onExportPdf: () => void;
   exportingPdf: boolean;
+  /** Osobny dokument „Szacowany termin" (F5.3). */
+  onExportSchedule: () => void;
+  exportingSchedule: boolean;
   onSaveAsTemplate: () => void;
   onOverwriteTemplate: () => void;
   /** Bez szablonów nie ma czego nadpisywać — pozycja menu znika. */
@@ -122,6 +127,9 @@ export function EditorTopbar({
           <DropdownMenuContent align="end" className="w-64">
             <DropdownMenuItem onSelect={onExportPdf} disabled={exportingPdf}>
               {pl.editor.exportPdf}
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={onExportSchedule} disabled={exportingSchedule}>
+              {pl.pdf.exportSchedule}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onSelect={onOpenLibrary}>{pl.library.title}</DropdownMenuItem>
