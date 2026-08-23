@@ -31,8 +31,20 @@ describe('ItemSchema', () => {
     });
   });
 
-  it('odrzuca pustą nazwę i cenę ułamkową', () => {
-    expect(ItemSchema.safeParse({ id: UUID_A, name: '', unitPriceCents: 100 }).success).toBe(false);
+  it('PRZYJMUJE pustą nazwę — to dokument w trakcie pisania, nie uszkodzenie', () => {
+    /*
+     * Zgłoszenie użytkownika: „Wycena uszkodzona" po skasowaniu nazwy pozycji.
+     * Interfejs celowo obsługuje pustą nazwę (placeholder „Nowa pozycja"),
+     * więc kasując ją, żeby wpisać od nowa, człowiek na ułamek sekundy ma
+     * dokument z pustym polem — i autozapis utrwala go w tym stanie.
+     *
+     * Wymóg `min(1)` znaczył, że takiego dokumentu NIE DAŁO SIĘ już otworzyć.
+     * Odrzucamy zniekształcony KSZTAŁT, a nie niedokończoną TREŚĆ.
+     */
+    expect(ItemSchema.safeParse({ id: UUID_A, name: '', unitPriceCents: 100 }).success).toBe(true);
+  });
+
+  it('nadal odrzuca cenę ułamkową — grosze są liczbą całkowitą', () => {
     expect(ItemSchema.safeParse({ id: UUID_A, name: 'X', unitPriceCents: 10.5 }).success).toBe(
       false,
     );
@@ -102,12 +114,26 @@ describe('parseQuoteBody', () => {
   });
 
   it('zwraca opis błędu ze ścieżką dla uszkodzonego dokumentu', () => {
+    // Zły TYP wartości to uszkodzenie kształtu — w odróżnieniu od pustej
+    // nazwy, która jest tylko niedokończoną treścią.
     const result = parseQuoteBody({
-      sections: [{ id: UUID_A, items: [{ id: UUID_B, unitPriceCents: 100 }] }],
+      sections: [{ id: UUID_A, items: [{ id: UUID_B, unitPriceCents: 'dużo' }] }],
     });
     expect(result.ok).toBe(false);
     if (result.ok) throw new Error('oczekiwano błędu');
-    expect(result.error).toContain('sections.0.items.0.name');
+    expect(result.error).toContain('sections.0.items.0.unitPriceCents');
+  });
+
+  it('dokument z pustymi nazwami pozycji OTWIERA SIĘ', () => {
+    // Regresja: dokładnie ten dokument dawał „Wycena uszkodzona".
+    const result = parseQuoteBody({
+      bodyVersion: 4,
+      sections: [
+        { id: UUID_A, title: 'Planowanie', items: [{ id: UUID_B, name: '', unitPriceCents: 0 }] },
+      ],
+    });
+
+    expect(result.ok).toBe(true);
   });
 
   it('zwraca błąd bez ścieżki dla wejścia, które nie jest obiektem', () => {

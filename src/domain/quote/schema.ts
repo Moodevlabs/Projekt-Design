@@ -36,7 +36,8 @@ export type RoomScope = z.infer<typeof RoomScopeSchema>;
 export const RoomSchema = z.object({
   id: z.string().uuid(),
   roomTypeId: z.string().uuid().nullable().default(null),
-  label: z.string().min(1),
+  /** Patrz `PUSTA_NAZWA` niżej — pusta etykieta to dokument w trakcie pisania. */
+  label: z.string().default(''),
   qty: z.number().int().positive().default(1),
   includedInVisual: z.boolean().default(true),
   includedInTechnical: z.boolean().default(true),
@@ -73,7 +74,20 @@ export type PricingRule = z.infer<typeof PricingRuleSchema>;
 export const ItemSchema = z.object({
   id: z.string().uuid(),
   kind: ItemKindSchema.default('item'),
-  name: z.string().min(1),
+  /**
+   * PUSTA NAZWA JEST DOZWOLONA — i to jest decyzja, nie niedopatrzenie.
+   *
+   * Interfejs celowo ją obsługuje: pole ma placeholder „Nowa pozycja",
+   * a etykiety czytników czytają `item.name || 'Nowa pozycja'`. Człowiek,
+   * który kasuje nazwę, żeby wpisać ją od nowa, na ułamek sekundy ma
+   * dokument z pustym polem — i autozapis go w tym stanie utrwala.
+   *
+   * Wymóg `min(1)` znaczył, że taki dokument **nie dawał się już otworzyć**:
+   * walidacja odrzucała `body`, a edytor pokazywał „Wycena uszkodzona".
+   * Odrzucamy zniekształcony KSZTAŁT dokumentu, a nie niedokończoną TREŚĆ —
+   * od pilnowania treści jest interfejs, nie parser.
+   */
+  name: z.string().default(''),
   description: z.string().default(''),
   qty: z.number().positive().default(1),
   /** Cena jednostkowa w groszach. Dla `discount` wartość jest dodatnia — calc ją odejmuje. */
@@ -145,7 +159,8 @@ export type DiscountCondition = z.infer<typeof DiscountConditionSchema>;
  */
 export const DiscountSchema = z.object({
   id: z.string().uuid(),
-  name: z.string().min(1),
+  /** Jak przy `Item.name` — pusta nazwa to stan przejściowy, nie uszkodzenie. */
+  name: z.string().default(''),
   description: z.string().default(''),
   enabled: z.boolean().default(true),
   type: z.enum(['fixed', 'percent']),
