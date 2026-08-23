@@ -333,7 +333,7 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - Szablon z uszkodzonym `body` **zostaje na liście**, ale bez przycisku tworzenia wyceny: ukrycie go zostawiłoby wiersz, którego nie da się ani użyć, ani skasować.
   > - Migracja `body` działa dla szablonów od T-30 — `parseQuoteBody` jest wspólnym wejściem, więc dokumenty sprzed wersjonowania wczytują się tak samo jak wyceny (jest test integracyjny).
 
-- [ ] **T-12 Brand kit — ustawienia + Storage** (04-PDF §3–4, 02-DATABASE storage) **+ F7.2**
+- [x] **T-12 Brand kit — ustawienia + Storage** (04-PDF §3–4, 02-DATABASE storage) **+ F7.2**
   Formularz, upload logo do bucketa `brand`, signed URL, walidacja kolorów, kontrast.
   Z `F7.2`: `opening_hours jsonb` (max 4 wiersze), `signer_title`, `signer_name` — stopka „CZYNNE” i blok „wystawił”.
   ✅ Zapis i odczyt; logo widoczne po restarcie; stopka zgodna z arkuszami.
@@ -348,16 +348,21 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - Jasny wariant logo pokazujemy na ciemnym tle — na białym podglądzie byłby niewidoczny i wyglądałby jak nieudany upload.
   > - **Pułapka narzędziowa:** `supabase db reset` potrafi wywalić się na kroku Storage **po** zastosowaniu migracji. Jeśli w tym stanie odpalisz `db:types`, plik typów nadpisze się okrojoną wersją. Generuj do pliku tymczasowego i sprawdź, zanim podmienisz `types.generated.ts`.
 
-- [ ] **T-13 PDF** (04-PDF) **+ F1.5, F3.3**
+- [x] **T-13 PDF** (04-PDF) **+ F1.5, F3.3**
   `QuotePdfDocument`, fonty, theme z brand kitu, worker, eksport przez Tauri `save_file` + `open_path`, live preview w ustawieniach brandingu, snapshot test renderu (pdf → png przez `pdf-to-img` w teście lub porównanie struktury).
   Z `F1.5`: bloki pomieszczeń z `x2`, wiersz „Pomieszczenia: …” (`showRoomsSummary`), opcjonalny rozkład ceny (`showPriceBreakdown`, domyślnie **off**).
   Z `F3.3`: sekcja rabatów z „−5% (etap funkcjonalny)”, niespełnione warunkowe pokazywane domyślnie (narzędzie sprzedażowe).
   ✅ PDF 10 stron < 3 s; polskie znaki; wyłączone pozycje wg ustawienia; numeracja stron; snapshot z sekcją pomieszczeń i rabatami.
-  > **Zrobione częściowo — patrz „czego brakuje".** `domain/brand/color.ts` (kontrast WCAG), `pdf/theme.ts`, `pdf/QuotePdfDocument.tsx` z blokami pomieszczeń i sekcją rabatów, `pdf/document-content.ts`, `pdf/file-name.ts`, `useExportPdf` z zapisem przez Tauri i pobieraniem w przeglądarce, pozycja „Eksportuj PDF" w menu edytora. 553 testy jednostkowe.
-  > **CZEGO BRAKUJE (blokada zewnętrzna):**
-  > - **Plików fontów `.ttf` nie ma w repo, więc PDF NIE MA POLSKICH ZNAKÓW.** `@react-pdf` spada wtedy na wbudowaną Helveticę. To decyzja licencyjna (każdy krój ma własne warunki redystrybucji), nie przeoczenie — dlatego nie pobrałem ich sam. `src/pdf/fonts/register.ts` czeka gotowy: wrzuć pliki 400 i 700 pod nazwami z `FONT_FILES`, a rejestracja podłączy je sama i `pdfFontsRegistered()` zacznie zwracać `true`. **Dopóki tego nie ma, kryterium „polskie znaki" jest niespełnione.**
-  > - Podgląd PDF na żywo w ustawieniach brandingu (04-PDF §4) i generowanie w Web Workerze — do dorobienia; dziś render idzie na głównym wątku przy kliknięciu eksportu.
-  > - Pytanie „Oznaczyć jako wysłaną?" po pierwszym eksporcie (04-PDF §5).
+  > **Zrobione.** `domain/brand/color.ts` (kontrast WCAG), `pdf/theme.ts`, `pdf/QuotePdfDocument.tsx` z blokami pomieszczeń i sekcją rabatów, `pdf/document-content.ts`, `pdf/file-name.ts`, `useExportPdf`, **fonty (użytkownik wrzucił komplet 2026-08-23)**, **podgląd na żywo w brandingu**, **render w Web Workerze z powrotem na główny wątek**, **pytanie „Oznaczyć jako wysłaną?"**. 665 testów jednostkowych.
+  > **Na co uważać (fonty):**
+  > - **Rejestracja jest PER KRÓJ, nie na komplet.** Pierwsza wersja ustawiała jeden wspólny znacznik: wystarczyło, że brakuje jednego z pięciu plików, i wszystkie kroje — łącznie z wgranymi — spadały na Helveticę. Z zewnątrz wyglądało to tak, jakby wrzucenie fontów nic nie dało. Teraz decyduje `isPdfFontRegistered(family)`.
+  > - **Kroje z rozmiarami optycznymi bierzemy w wersji 18 pt** (Inter 4.x wydaje 18/24/28). To cięcie pod tekst ciągły; 24 i 28 pt są rysowane pod duże nagłówki i w akapicie są za wąskie. Nazwy plików muszą się zgadzać z `FONT_FILES`.
+  > - **Osadzanie fontu testujemy inaczej niż jego obecność.** Produkcyjna rejestracja bierze adresy z `import.meta.glob(…, '?url')`, czyli `/src/pdf/fonts/…` — poprawne w przeglądarce, ale w Node `@react-pdf` otwiera to jako ścieżkę pliku i dostaje `ENOENT`. Dlatego `fonts/register.test.ts` pilnuje obecności plików i wag 400/700, a `polish-chars.test.tsx` rejestruje ze ścieżek dyskowych i sprawdza, że krój **naprawdę trafia do pliku** (z kontrolą negatywną na Helveticę).
+  > **Na co uważać (worker i podgląd):**
+  > - **Worker jest przyspieszeniem, nie warunkiem działania.** `@react-pdf` nie deklaruje wsparcia dla Web Workerów, więc `render.tsx` przy każdym błędzie (brak `window`, timeout, wywrotka przy ładowaniu modułu) wraca na główny wątek i zapamiętuje to na resztę sesji. Eksport oferty nie ma prawa polec dlatego, że optymalizacja nie wypaliła. **Sam render w workerze nie był sprawdzony w prawdziwej przeglądarce** — testy pokrywają ścieżkę decyzyjną i powrót, nie zachowanie `@react-pdf` poza głównym wątkiem.
+  > - **Podgląd renderuje SZKIC, nie zapisany brand kit** — inaczej byłby bezużyteczny dokładnie wtedy, gdy jest potrzebny. Debounce 500 ms, licznik pokoleń przeciw wyścigom i zwalnianie poprzedniego `blob:`; bez tego ostatniego każda zmiana koloru zostawia kilkusetkilobajtowy plik w pamięci karty.
+  > - **Wariant logo w podglądzie liczy ten sam helper co generator** (`isLightBackground`), a nie przepisana reguła. Dwie kopie tej decyzji rozjechałyby się przy pierwszej zmianie.
+  > - **Pytamy o „wysłaną" tylko dla szkicu i raz na sesję edytora**, po UDANYM zapisie pliku. Zamknięty dialog zapisu to nie eksport. Cofanie wyceny zaakceptowanej do „wysłanej" niszczyłoby informację.
   > **Na co uważać:**
   > - **PDF to TRZECIE miejsce liczące kwotę pozycji** (po podsumowaniu i wierszu w edytorze) — czyta `calcItemCents`, nie liczy po swojemu. Dokładnie ta pułapka wyszła w T-35.
   > - **`renderToString` z `@react-pdf` zwraca binarny PDF, nie XML.** Testy szukające tekstu w tym wyniku są bezwartościowe: `not.toContain('cokolwiek')` zawsze przechodzi. Dlatego reguły treści siedzą w `document-content.ts` jako czyste funkcje, a render sprawdzamy nagłówkiem `%PDF-` i rozmiarem bufora.

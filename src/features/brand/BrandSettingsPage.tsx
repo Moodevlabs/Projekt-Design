@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { LogoField } from './LogoField';
+import { BrandPreview } from './BrandPreview';
 import {
   useBrandKit,
   useRemoveLogo,
@@ -344,6 +345,13 @@ export function BrandSettingsPage() {
           />
         </div>
       </Section>
+
+      {/*
+        Podgląd na końcu formularza, a nie w bocznej kolumnie: przy szerokości
+        okna aplikacji strona A4 obok pól byłaby nieczytelnym znaczkiem, a to
+        właśnie na nią trzeba tu popatrzeć.
+      */}
+      <BrandPreview draft={draft} />
 
       {/* Pasek zapisu pojawia się dopiero przy zmianach — jak na kartach biblioteki. */}
       {dirty ? (

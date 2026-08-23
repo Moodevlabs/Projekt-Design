@@ -23,7 +23,9 @@
     "forceConsistentCasingInFileNames": true,
 
     "types": ["vitest/globals", "@testing-library/jest-dom"],
-    "baseUrl": ".",
+    // Bez `baseUrl` — jest przestarzały i znika w TypeScript 7. Od TS 5
+    // `paths` rozwiązuje się względem katalogu tego pliku, więc alias działa
+    // tak samo, a nie ciągniemy za sobą ostrzeżenia.
     "paths": {
       "@/*": ["./src/*"]
     }

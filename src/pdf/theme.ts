@@ -37,9 +37,9 @@ const HAIR = '#E3DFD7';
 const DISCOUNT = '#B9634A';
 
 /**
- * Nazwa rodziny dla `@react-pdf`. Gdy fonty nie są zarejestrowane (brak plików
- * `.ttf` w repo), zwracamy wbudowaną `Helvetica` — dokument się wyrenderuje,
- * ale **bez polskich znaków**. Patrz `fonts/register.ts`.
+ * Nazwa rodziny dla `@react-pdf`. Gdy plików `.ttf` dla TEGO kroju nie ma
+ * w repo, zwracamy wbudowaną `Helvetica` — dokument się wyrenderuje, ale
+ * **bez polskich znaków**. Patrz `fonts/register.ts`.
  */
 export function pdfFontFamily(font: FontFamily, registered: boolean): string {
   return registered ? font : 'Helvetica';

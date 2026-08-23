@@ -17,7 +17,15 @@ const log = createLogger('pdf.fonts');
  * podłączy, bo Vite rozwiązuje te ścieżki w czasie budowania.
  */
 
-/** Nazwy plików, których szuka rejestracja. Warianty: 400 (normal) i 700 (bold). */
+/**
+ * Nazwy plików, których szuka rejestracja. Warianty: 400 (normal) i 700 (bold).
+ *
+ * Kroje wydawane w kilku **rozmiarach optycznych** (Inter 4.x: 18pt / 24pt /
+ * 28pt) bierzemy w wersji **18pt** — to cięcie zaprojektowane do tekstu
+ * ciągłego, a oferta to w większości tekst ciągły. 24pt i 28pt są rysowane pod
+ * duże nagłówki i w akapicie wyglądają na zbyt wąskie. Pliki przemianuj na
+ * nazwy z tej tabeli; wag pośrednich (Light, Medium, SemiBold) nie używamy.
+ */
 export const FONT_FILES: Record<FontFamily, { normal: string; bold: string }> = {
   Lato: { normal: 'Lato-Regular.ttf', bold: 'Lato-Bold.ttf' },
   Inter: { normal: 'Inter-Regular.ttf', bold: 'Inter-Bold.ttf' },
@@ -32,12 +40,24 @@ export const FONT_FILES: Record<FontFamily, { normal: string; bold: string }> = 
  */
 const files = import.meta.glob<string>('./*.ttf', { eager: true, query: '?url', import: 'default' });
 
-let registered = false;
+/** Kroje, dla których pliki faktycznie leżą w repo. */
+const registered = new Set<FontFamily>();
 let done = false;
 
-/** Czy udało się zarejestrować komplet fontów (a więc czy PDF ma polskie znaki). */
-export function pdfFontsRegistered(): boolean {
-  return registered;
+/**
+ * Czy DANY krój ma pliki, a więc czy PDF w nim złożony ma polskie znaki.
+ *
+ * Sprawdzamy **per krój, nie na komplet**. Wcześniej wystarczyło, że brakuje
+ * jednego z pięciu, i wszystkie — łącznie z tymi wgranymi — spadały na
+ * Helveticę. Z zewnątrz wyglądało to tak, jakby wrzucenie plików nic nie dało.
+ */
+export function isPdfFontRegistered(family: FontFamily): boolean {
+  return registered.has(family);
+}
+
+/** Czy komplet krojów jest dostępny (diagnostyka, nie decyzja o renderze). */
+export function allPdfFontsRegistered(): boolean {
+  return registered.size === Object.keys(FONT_FILES).length;
 }
 
 /**
@@ -45,8 +65,8 @@ export function pdfFontsRegistered(): boolean {
  * `@react-pdf` trzyma własny rejestr, a podwójna rejestracja tego samego kroju
  * nadpisuje wpis i marnuje czas przy każdym renderze.
  */
-export function registerPdfFonts(): boolean {
-  if (done) return registered;
+export function registerPdfFonts(): void {
+  if (done) return;
   done = true;
 
   const brakujace: string[] = [];
@@ -70,17 +90,15 @@ export function registerPdfFonts(): boolean {
         { src: bold, fontWeight: 700 },
       ],
     });
+    registered.add(family);
   }
 
-  registered = brakujace.length === 0;
-
-  if (!registered) {
+  if (brakujace.length > 0) {
     log.warn(
-      'Brak plików fontów — PDF wyrenderuje się Helveticą, BEZ polskich znaków. ' +
-        'Wrzuć pliki do src/pdf/fonts/ (patrz FONT_FILES).',
+      'Brak plików dla części krojów — oferta złożona jednym z nich wyrenderuje ' +
+        'się Helveticą, czyli BEZ polskich znaków. Wrzuć pliki do src/pdf/fonts/ ' +
+        '(nazwy w FONT_FILES).',
       { brakujace },
     );
   }
-
-  return registered;
 }

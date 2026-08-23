@@ -189,6 +189,12 @@ export const pl = {
     pdfSaved: 'Zapisano PDF',
     pdfOpen: 'Otwórz',
     pdfFailed: 'Nie udało się wygenerować PDF.',
+    markAsSentTitle: 'Oznaczyć wycenę jako wysłaną?',
+    markAsSentDescription:
+      'PDF jest zapisany. Jeśli właśnie wysyłasz go klientowi, wycena zmieni status ze szkicu na „wysłana" i trafi do zestawień.',
+    markAsSentConfirm: 'Tak, wysłana',
+    markAsSentDismiss: 'Zostaw szkic',
+    markedAsSent: 'Wycena oznaczona jako wysłana.',
 
     summary: 'Podsumowanie',
     itemsTotal: 'Suma pozycji',
@@ -544,6 +550,12 @@ export const pl = {
 
     saved: 'Zapisano branding',
     invalidColor: 'Kolor musi być w formacie #RRGGBB',
+
+    previewTitle: 'Podgląd oferty',
+    previewHint:
+      'Przykładowa wycena złożona z tych ustawień — także tych jeszcze niezapisanych. Dane są zmyślone.',
+    previewRendering: 'Przeliczam…',
+    previewOpen: 'Otwórz podgląd w nowym oknie',
   },
   settings: {
     title: 'Ustawienia',

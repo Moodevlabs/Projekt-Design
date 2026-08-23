@@ -91,6 +91,15 @@ export interface EditorState {
   load: (quote: Quote) => void;
   reset: () => void;
   setMode: (mode: EditorMode) => void;
+  /**
+   * Status dokumentu po zmianie z zewnatrz (np. „oznacz jako wyslana" po
+   * eksporcie). Store trzyma go osobno od cache zapytan, wiec bez tej akcji
+   * pasek edytora pokazywalby stary status az do przeladowania strony.
+   *
+   * NIE brudzi dokumentu: status siedzi w kolumnie, nie w `body`, wiec
+   * autozapis nie ma tu czego zapisywac.
+   */
+  setStatus: (status: QuoteStatus) => void;
 
   // --- zapis ---
   markSaving: () => void;
@@ -265,6 +274,11 @@ export const useEditorStore = create<EditorState>()(
     setMode: (mode) =>
       set((state) => {
         state.mode = mode;
+      }),
+
+    setStatus: (status) =>
+      set((state) => {
+        state.status = status;
       }),
 
     markSaving: () =>

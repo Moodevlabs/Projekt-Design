@@ -1,14 +1,15 @@
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 import { useBrandKit } from '@/data/queries/useBrandKit';
-import { getLogoUrl } from '@/data/repos/brand.repo';
 import { openPath, runningInTauri, saveFile } from '@/lib/tauri';
 import { defaultBrandKit } from '@/domain/brand/schema';
 import type { QuoteBody } from '@/domain/quote';
 import { createLogger } from '@/lib/logger';
+import { fetchLogoAsDataUrl } from './logo';
 import { quoteFileName } from './file-name';
+import { renderQuotePdf } from './render';
 import { buildPdfTheme } from './theme';
-import { registerPdfFonts } from './fonts/register';
+import { isPdfFontRegistered, registerPdfFonts } from './fonts/register';
 import { pl } from '@/i18n/pl';
 
 const log = createLogger('pdf.export');
@@ -18,6 +19,14 @@ export interface ExportArgs {
   number: string | null;
   issueDate: string;
   currency: string;
+  /**
+   * Wolane po UDANYM zapisie pliku — nie po kliknieciu „Eksportuj".
+   *
+   * Rozroznienie jest istotne: uzytkownik, ktory zamknal dialog zapisu albo
+   * trafil na blad, niczego nie wyeksportowal i nie ma prawa dostac pytania
+   * „oznaczyc jako wyslana?".
+   */
+  onExported?: () => void;
 }
 
 /**
@@ -33,41 +42,38 @@ export function useExportPdf() {
   const [exporting, setExporting] = useState(false);
 
   const exportPdf = useCallback(
-    async ({ body, number, issueDate, currency }: ExportArgs) => {
+    async ({ body, number, issueDate, currency, onExported }: ExportArgs) => {
       setExporting(true);
       try {
         const kit = brandKit.data ?? defaultBrandKit();
-        const fontsOk = registerPdfFonts();
-        const theme = buildPdfTheme(kit, fontsOk);
+        registerPdfFonts();
+        const theme = buildPdfTheme(kit, isPdfFontRegistered(kit.fontFamily));
 
         // Logo idzie do PDF jako data URL: `@react-pdf` w webview nie pobierze
         // podpisanego URL-a sam, a i tak chcemy je mieć w pliku, nie linkiem.
         const logoPath = theme.headerLogo === 'dark' ? kit.logoDarkPath : kit.logoLightPath;
-        const logoDataUrl = logoPath ? await fetchAsDataUrl(logoPath) : null;
+        const logoDataUrl = await fetchLogoAsDataUrl(logoPath);
 
-        const [{ pdf }, { QuotePdfDocument }] = await Promise.all([
-          import('@react-pdf/renderer'),
-          import('./QuotePdfDocument'),
-        ]);
-
-        const blob = await pdf(
-          <QuotePdfDocument
-            body={body}
-            theme={theme}
-            brandKit={kit}
-            number={number}
-            issueDate={issueDate}
-            currency={currency}
-            logoDataUrl={logoDataUrl}
-          />,
-        ).toBlob();
+        // Render idzie do Web Workera, a przy jego niepowodzeniu na glowny
+        // watek — patrz `render.ts`. Eksport nie ma prawa polec dlatego, ze
+        // optymalizacja nie wypalila.
+        const bytes = await renderQuotePdf({
+          body,
+          theme,
+          brandKit: kit,
+          number,
+          issueDate,
+          currency,
+          logoDataUrl,
+        });
 
         const fileName = quoteFileName(number, body.client.name);
 
         if (!runningInTauri()) {
           // W przeglądarce (`pnpm dev`) nie ma dialogu systemowego — pobieramy
           // plik po staremu, żeby dało się sprawdzić wynik bez budowania appki.
-          downloadInBrowser(blob, fileName);
+          downloadInBrowser(bytes, fileName);
+          onExported?.();
           return;
         }
 
@@ -80,12 +86,12 @@ export function useExportPdf() {
         // `null` znaczy, że użytkownik zamknął dialog — to nie jest błąd.
         if (!target) return;
 
-        const bytes = new Uint8Array(await blob.arrayBuffer());
         const savedPath = await saveFile(target, bytes);
 
         toast.success(pl.editor.pdfSaved, {
           action: { label: pl.editor.pdfOpen, onClick: () => void openPath(savedPath) },
         });
+        onExported?.();
       } catch (error) {
         log.error('Eksport PDF nieudany', error);
         toast.error(error instanceof Error ? error.message : pl.editor.pdfFailed);
@@ -99,35 +105,8 @@ export function useExportPdf() {
   return { exportPdf, exporting };
 }
 
-/** Pobiera plik z prywatnego bucketa i zamienia na data URL. */
-async function fetchAsDataUrl(path: string): Promise<string | null> {
-  try {
-    const url = await getLogoUrl(path);
-    if (!url) return null;
-
-    const response = await fetch(url);
-    const blob = await response.blob();
-
-    return await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        // `readAsDataURL` daje string, ale typ `FileReader` dopuszcza też
-        // ArrayBuffer — sprawdzamy jawnie, zamiast rzutować na ślepo.
-        if (typeof reader.result === 'string') resolve(reader.result);
-        else reject(new Error('Nieoczekiwany format logo.'));
-      };
-      reader.onerror = () => reject(new Error('Nie udało się odczytać logo.'));
-      reader.readAsDataURL(blob);
-    });
-  } catch (error) {
-    // Brak logo nie może zablokować eksportu — dokument wydrukuje się z samą
-    // nazwą firmy w nagłówku.
-    log.warn('Nie udało się wczytać logo do PDF', error);
-    return null;
-  }
-}
-
-function downloadInBrowser(blob: Blob, fileName: string) {
+function downloadInBrowser(bytes: Uint8Array, fileName: string) {
+  const blob = new Blob([bytes], { type: 'application/pdf' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;

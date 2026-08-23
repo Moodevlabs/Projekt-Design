@@ -48,4 +48,13 @@ describe('pdfFontFamily', () => {
     // kroju, ktorego `@react-pdf` nie zna, i wywalic render.
     expect(buildPdfTheme(defaultBrandKit()).fontFamily).toBe('Helvetica');
   });
+
+  it('uzywa kroju z brand kitu, gdy jego pliki sa dostepne', () => {
+    // Decyzja jest PER KROJ. Wczesniej wystarczylo, ze brakuje jednego z pieciu,
+    // i wszystkie — lacznie z wgranymi — spadaly na Helvetice; wrzucenie plikow
+    // wygladalo wtedy na dzialanie bez efektu.
+    const kit = { ...defaultBrandKit(), fontFamily: 'Inter' as const };
+    expect(buildPdfTheme(kit, true).fontFamily).toBe('Inter');
+    expect(buildPdfTheme(kit, false).fontFamily).toBe('Helvetica');
+  });
 });

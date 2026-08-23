@@ -18,12 +18,13 @@ import { AddLink } from './components/AddLink';
 import { LibrarySheet } from './components/LibrarySheet';
 import { OverwriteTemplateDialog, SaveAsTemplateDialog } from './components/TemplateDialogs';
 import { useCreateQuote, useQuote } from '@/data/queries/useQuotes';
-import { EmptyState } from '@/components/shared';
+import { ConfirmDialog, EmptyState } from '@/components/shared';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import type { Item } from '@/domain/quote';
 import { useSaveToLibrary } from './useSaveToLibrary';
 import { useVariantOptions } from './useVariantOptions';
+import { useMarkAsSentPrompt } from './useMarkAsSentPrompt';
 import { useTemplateActions } from './useTemplateActions';
 import { useExportPdf } from '@/pdf/useExportPdf';
 import { ReadOnlyBanner } from '@/features/billing/ReadOnlyBanner';
@@ -277,6 +278,7 @@ function EditorSurface({
   const library = useSaveToLibrary();
   const canWrite = useEntitlement().canWrite;
   const variants = useVariantOptions();
+  const markAsSent = useMarkAsSentPrompt();
 
   if (!body) return <EditorSkeleton />;
 
@@ -304,7 +306,13 @@ function EditorSurface({
           onReload={onReload}
           onSaveAllToLibrary={library.saveAll}
           onExportPdf={() =>
-            void exportPdf({ body, number, issueDate, currency: 'PLN' })
+            void exportPdf({
+              body,
+              number,
+              issueDate,
+              currency: 'PLN',
+              onExported: markAsSent.afterExport,
+            })
           }
           exportingPdf={exportingPdf}
           onSaveAsTemplate={() => setSaveTemplateOpen(true)}
@@ -314,6 +322,17 @@ function EditorSurface({
         />
 
         <ReadOnlyBanner />
+
+        {/* Pytanie po eksporcie — tylko dla szkicu i tylko raz na sesję. */}
+        <ConfirmDialog
+          open={markAsSent.open}
+          onOpenChange={markAsSent.setOpen}
+          title={pl.editor.markAsSentTitle}
+          description={pl.editor.markAsSentDescription}
+          confirmLabel={pl.editor.markAsSentConfirm}
+          cancelLabel={pl.editor.markAsSentDismiss}
+          onConfirm={markAsSent.confirm}
+        />
 
         <LibrarySheet open={libraryOpen} onOpenChange={setLibraryOpen} />
 
