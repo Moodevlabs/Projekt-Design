@@ -423,9 +423,15 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
 
 > **Dlaczego to nie wchodzi do 1.0.** `F1` i `F3` są w Fazie 1, bo bez nich klient z tego arkusza **nie przeniesie swojego cennika** — to warunek wejścia. `F2`, `F4`, `F5` i `F6` są tym, co sprawi, że przestanie otwierać Excela, ale każde z nich to osobny moduł (harmonogram to własna domena, dat i świąt; pakiet dokumentów to trzy nowe generatory PDF). Wepchnięcie ich do 1.0 przesuwa premierę o miesiące przy zerowym zysku dla pierwszego wydania. Rekomenduję 1.1 wkrótce po 1.0 — jeśli uznasz inaczej, przenieś je do Fazy 1; zależności na to pozwalają.
 
-- [ ] **T-38 Silnik placeholderów w opisach** (F4.1)
+- [x] **T-38 Silnik placeholderów w opisach** (F4.1)
   `domain/quote/template-text.ts`, `renderText`, `{rooms}`, `{frames|kadr|kadry|kadrów}` z polską liczbą mnogą (reguła 12–14), nieznany placeholder zostaje dosłownie.
   ✅ „kuchnia, salon x2.”; `1 kadr / 3 kadry / 5 kadrów / 22 kadry / 12 kadrów`.
+  > **Zrobione.** `renderText`, `polishPlural`, `PLACEHOLDER_HINTS`; czysta domena, bez zależności. 29 testów.
+  > **Na co uważać:**
+  > - **Nieznany placeholder ZOSTAJE dosłownie** — tak samo nieznany wariant (`{rooms:kuchnia}`) i placeholder bez danych w kontekście (`{frames}` przy pozycji bez kadrów). Ciche zniknięcie znaczyłoby zdanie z dziurą, wysłane do klienta bez szansy, że ktoś to zauważy. Literówka ma być widoczna.
+  > - **Wyjątek 12–14 w liczbie mnogiej jest istotny**, nie kosmetyczny: „22 kadry", ale „12 kadrów". To jedyne miejsce, gdzie sama końcówka prowadzi na manowce, a oferta to dokument handlowy.
+  > - **`{rooms:visual}` i `{rooms:technical}` używają tego samego zakresu co cennik parametryczny** — zdanie wymienia dokładnie te pomieszczenia, za które klient płaci w danej pozycji. Rozjazd między tekstem a kwotą byłby gorszy niż brak tekstu.
+  > - Wzorzec placeholdera dopuszcza tylko litery w nazwie, żeby nie zjadać zwykłych klamr w tekście (`{a+b}`, `{}`). Jest na to test.
 
 - [ ] **T-39 Auto-opisy w UI i PDF** (F4.2)
   Render w podglądzie i PDF, surowy tekst w edycji, przycisk `{}` z listą placeholderów, seed opisów z placeholderami.

@@ -4,3 +4,4 @@ export * from './calc';
 export * from './discounts';
 export * from './factory';
 export * from './reorder';
+export * from './template-text';
