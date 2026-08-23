@@ -114,7 +114,7 @@ create table subscriptions (
   stripe_subscription_id text unique,
   status text not null default 'trialing'
     check (status in ('trialing','active','past_due','canceled','incomplete','unpaid','paused')),
-  plan text,                                  -- 'pro_monthly' | 'pro_yearly'
+  plan text,                                  -- okres rozliczeniowy: 'monthly' | 'yearly'
   trial_ends_at timestamptz,
   current_period_end timestamptz,
   cancel_at_period_end boolean default false,

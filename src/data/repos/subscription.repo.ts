@@ -26,7 +26,7 @@ export type SubscriptionStatus = z.infer<typeof SubscriptionStatusSchema>;
 export interface Subscription {
   workspaceId: string;
   status: SubscriptionStatus;
-  /** `pro_monthly` | `pro_yearly`; `null` dopóki trwa trial. */
+  /** Okres rozliczeniowy: `monthly` | `yearly`; `null` dopóki trwa okres próbny. */
   plan: string | null;
   trialEndsAt: string | null;
   currentPeriodEnd: string | null;

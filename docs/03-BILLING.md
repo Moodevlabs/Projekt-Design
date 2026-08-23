@@ -1,14 +1,15 @@
 # 03 — Subskrypcja i Stripe
 
 ## 1. Produkty w Stripe
-- Product „Anzorge Pro": price `pro_monthly` 19,99 PLN/mies., `pro_yearly` 199 PLN/rok. Tax: ceny brutto (`tax_behavior: inclusive`), włączony Stripe Tax (VAT PL / OSS).
+- Product „Anzorge": price `monthly` 19,99 PLN/mies., `yearly` 199 PLN/rok.
+  **Nazwa produktu jest widoczna dla klienta na stronie płatności** — nie ma tu żadnego „Pro”, bo nie ma wersji darmowej. Płaci się za korzystanie z aplikacji; miesięcznie albo rocznie. Tax: ceny brutto (`tax_behavior: inclusive`), włączony Stripe Tax (VAT PL / OSS).
 - Trial nie jest w Stripe — trial jest **nasz** (`subscriptions.trial_ends_at` nadawany przy signup). Dzięki temu nie wymagamy karty i Stripe customer powstaje dopiero przy pierwszym checkout.
 - Customer Portal: włączone zmiana planu, anulowanie na koniec okresu, faktury.
 
 ## 2. Przepływ zakupu
 
 ```
-[App] "Wykup Pro" ──invoke──► Edge fn stripe-create-checkout (JWT usera)
+[App] "Aktywuj dostęp" ──invoke──► Edge fn stripe-create-checkout (JWT usera)
    └─ tworzy/odnajduje customer (metadata.workspace_id), session.url
 [App] opener.openUrl(session.url)  ──► przeglądarka systemowa, Stripe Checkout
    success_url = anzorge://billing/success   cancel_url = anzorge://billing/cancel
@@ -21,7 +22,7 @@ Dlaczego polling po powrocie: webhook może dojść po deep linku. Alternatywa: 
 ## 3. Edge Functions (Deno)
 
 `stripe-create-checkout`
-- Wejście: `{ plan: 'pro_monthly'|'pro_yearly' }`. Auth: JWT z `Authorization`.
+- Wejście: `{ plan: 'monthly'|'yearly' }` (okres rozliczeniowy). Auth: JWT z `Authorization`.
 - Pobierz workspace usera (musi być owner). Jeśli `stripe_customer_id` brak → `customers.create({ email, metadata: { workspace_id } })`, zapisz.
 - `checkout.sessions.create({ mode:'subscription', customer, line_items:[{price}], success_url, cancel_url, allow_promotion_codes:true, automatic_tax:{enabled:true}, metadata:{workspace_id} })`.
 - Zwróć `{ url }`.
@@ -52,7 +53,7 @@ type Entitlement = { canWrite: boolean; reason: 'trial'|'active'|'grace'|'expire
 Logika w `domain/billing/entitlement.ts` (czysta funkcja od wiersza `subscriptions` + `now`) — **identyczna** z `workspace_can_write()` w SQL. Test jednostkowy pilnuje parytetu na przypadkach brzegowych.
 
 UI:
-- `<PaywallGate>` owija akcje zapisu: gdy `!canWrite` → przyciski disabled + banner na górze edytora „Tryb tylko do odczytu — wykup Pro, żeby edytować".
+- `<PaywallGate>` owija akcje zapisu: gdy `!canWrite` → przyciski disabled + banner na górze edytora „Tryb tylko do odczytu — opłać dostęp, żeby edytować".
 - Trial: pasek „Zostało X dni triala" w sidebarze od 7. dnia.
 - Offline / brak odpowiedzi: używaj ostatniego znanego entitlement z cache, max 7 dni od `fetchedAt`; potem read-only z komunikatem „Połącz się z internetem, żeby odświeżyć licencję".
 - RLS jest twardą granicą — nawet obejście UI nie pozwoli zapisać.

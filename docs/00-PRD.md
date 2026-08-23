@@ -15,7 +15,8 @@ Jedno konto = jedna firma (workspace). Wielu użytkowników w jednym workspace �
 
 ## 3. Model biznesowy
 
-- Subskrypcja **19,99 zł / mies.** (plan „Pro"), roboczo też plan roczny **199 zł / rok**.
+- Subskrypcja **19,99 zł / mies.**, roboczo też rozliczenie roczne **199 zł / rok**.
+  **Nie ma wersji darmowej ani planów** — to opłata za korzystanie z aplikacji, a wybór dotyczy wyłącznie częstotliwości płatności. Okres próbny (14 dni, bez karty) to czas na sprawdzenie, a nie darmowy tier.
 - **Trial 14 dni** bez karty. Po trialu: aplikacja w trybie read-only (można oglądać i eksportować istniejące wyceny, nie można tworzyć nowych / edytować). To ważne — nie blokujemy człowiekowi dostępu do jego danych.
 - Płatność przez Stripe Checkout w przeglądarce systemowej, powrót do aplikacji deep linkiem.
 

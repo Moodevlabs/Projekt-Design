@@ -41,9 +41,13 @@ export function statusFromStripe(stripeStatus: string): SubscriptionStatus {
   }
 }
 
-/** Plan po cenie — `lookup_key` jest naszym identyfikatorem planu. */
+/**
+ * Okres rozliczeniowy po cenie — `lookup_key` jest jego identyfikatorem.
+ * Nie ma planów w sensie pakietów: aplikacja jest płatna w całości, a wybór
+ * dotyczy tylko częstotliwości płatności.
+ */
 export function planFromLookupKey(lookupKey: string | null | undefined): string | null {
-  if (lookupKey === 'pro_monthly' || lookupKey === 'pro_yearly') return lookupKey;
+  if (lookupKey === 'monthly' || lookupKey === 'yearly') return lookupKey;
   return null;
 }
 

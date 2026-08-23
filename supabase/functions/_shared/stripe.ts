@@ -20,11 +20,17 @@ export function stripeClient(): Stripe {
   });
 }
 
-/** Ceny szukamy po `lookup_key`, żeby nie trzymać ID w sekretach. */
-export type PlanKey = 'pro_monthly' | 'pro_yearly';
+/**
+ * Okres rozliczeniowy. **Nie ma planów ani wersji darmowej** — aplikacja jest
+ * płatna, a wybór dotyczy wyłącznie tego, czy klient płaci co miesiąc, czy raz
+ * w roku. Stąd `monthly`/`yearly`, a nie `pro_*`.
+ *
+ * Ceny szukamy po `lookup_key`, żeby nie trzymać ID w sekretach.
+ */
+export type PlanKey = 'monthly' | 'yearly';
 
 export function isPlanKey(value: unknown): value is PlanKey {
-  return value === 'pro_monthly' || value === 'pro_yearly';
+  return value === 'monthly' || value === 'yearly';
 }
 
 /**
@@ -36,7 +42,7 @@ export function isPlanKey(value: unknown): value is PlanKey {
  */
 export async function findPriceId(stripe: Stripe, plan: PlanKey): Promise<string> {
   const fromEnv = Deno.env.get(
-    plan === 'pro_monthly' ? 'STRIPE_PRICE_MONTHLY' : 'STRIPE_PRICE_YEARLY',
+    plan === 'monthly' ? 'STRIPE_PRICE_MONTHLY' : 'STRIPE_PRICE_YEARLY',
   );
   if (fromEnv) return fromEnv;
 
