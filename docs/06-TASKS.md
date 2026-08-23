@@ -552,9 +552,18 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - **Dokument zakłada się dopiero przy pierwszym wejściu w zakładkę i tylko w trybie edycji** — obejrzenie oferty nie ma prawa dopisać jej dokumentu ani zabrudzić autozapisu.
   > **Nie zweryfikowane:** „parytet z arkuszem `ETAPY WSPÓŁPRACY`” sprawdzony **strukturalnie** (19 etapów, 5 części, podział zgodny ze specyfikacją). **Brzmienie opisów jest nasze, nie przepisane z arkusza** — samego pliku nie ma w repozytorium. Warto skonfrontować z oryginałem, zanim trafi do klientów. Wyglądu PDF na papierze nikt nie oglądał (render sprawdzony nagłówkiem `%PDF-` i rozmiarem).
 
-- [ ] **T-47 Dokument „Cennik usług dodatkowych”** (F6.2)
+- [x] **T-47 Dokument „Cennik usług dodatkowych”** (F6.2)
   Przedziały cen, jednostka `zł/h`, termin realizacji, `formatMoneyRange`, `PriceListPdfDocument`, przycisk „Dodaj do wyceny jako pozycję”.
   ✅ Parytet z arkuszem `CENNIK USŁUG DODATKOWYCH`.
+  > **Zrobione.** `domain/documents/price-list.ts` + szablon 11 pozycji w 3 grupach, `formatMoneyRange` w `domain/money.ts`, podzakładki **Dokumenty → Etapy | Cennik** (`DocumentsTab`), `PriceListPdfDocument` + `useExportPriceListPdf` + pozycja w menu, most „Dodaj do wyceny jako pozycję”. 944 testy jednostkowe. **Bez migracji** — cennik mieszka w `quotes.documents` z T-46.
+  > **Na co uważać:**
+  > - **Cena jest PRZEDZIAŁEM, nie liczbą.** `priceMaxCents = null` znaczy „jedna cena” i to jest znaczące: „300 zł” to zobowiązanie, „300–1200 zł” to widłki. Dlatego w PDF **nie ma sumy** — suma widłek nic nie znaczy, a wyglądałaby jak kwota do zapłaty.
+  > - **Most do wyceny bierze DOLNĄ granicę.** Z widłek trzeba wybrać jedną liczbę; górna zawyżałaby ofertę bez pytania. Komunikat mówi, do której sekcji pozycja trafiła i że kwota jest z dolnej granicy — to decyzja, nie oczywistość.
+  > - **W wycenie godzinowej kwota jest przeliczana po stawce** (`convertUnits`), a bez stawki most **odmawia** — dokładnie ta pułapka z §8.5 `FEATURES`: 300 zł wstawione jako 300 minut to błąd, którego nikt by nie zauważył.
+  > - **Separator tysięcy zostawiamy locale’owi.** pl-PL (CLDR `min2`) pisze „1200 zł”, ale „10 000 zł”. Wygląda na przeoczenie, jest regułą języka — i tak samo zachowuje się `formatMoney`, więc cennik nie rozjeżdża się z ofertą w tej samej kopercie.
+  > - **Drugi poziom zakładek**, nie czwarta pozycja na górnym pasku: „Etapy” i „Cennik” to ten sam rodzaj rzeczy (dokument dla tego samego inwestora), a „Wycena” i „Termin” to co innego. F6.3 doda kolejne.
+  > - **Zakładanie cennika nie rusza etapów** i odwrotnie — oba dokumenty siedzą w jednym polu `documents`, więc `ensure*` musi przepisywać to drugie jawnie (jest na to test).
+  > **Nie zweryfikowane:** „parytet z arkuszem” sprawdzony **strukturalnie** (3 grupy, przedziały, jednostka `zł/h`, termin). **Kwoty i terminy w szablonie są nasze, nie przepisane z arkusza** — pliku nie ma w repozytorium. Wyglądu PDF na papierze nikt nie oglądał.
 
 - [ ] **T-48 Eksport pakietu dokumentów** (F6.3)
   Dialog wyboru dokumentów, scalanie do jednego PDF albo osobne pliki, nazwy `{number}-wycena.pdf`, ważność per dokument.

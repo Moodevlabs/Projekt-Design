@@ -89,6 +89,7 @@ describe('WorkspaceSettingsSchema', () => {
       // `null` = uzywamy wbudowanego szablonu etapow (F5.1).
       scheduleTemplate: null,
       stagesTemplate: null,
+      priceListTemplate: null,
     });
   });
 

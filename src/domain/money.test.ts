@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatMoney, parseMoney, roundCents } from './money';
+import { formatMoney, formatMoneyRange, parseMoney, roundCents } from './money';
 
 /** ICU wstawia spacje twarde/wąskie — porównujemy po normalizacji. */
 const norm = (value: string): string => value.replace(/[\s\u00A0\u202F]/g, ' ');
@@ -85,5 +85,50 @@ describe('parseMoney — wejście niepoprawne', () => {
 
   it.each(garbage)('parseMoney(%j) === null', (input) => {
     expect(parseMoney(input)).toBeNull();
+  });
+});
+
+describe('formatMoneyRange — cennik usług dodatkowych (F6.2)', () => {
+  it('waluta pada raz, na końcu przedziału', () => {
+    expect(norm(formatMoneyRange(30_000, 120_000))).toBe('300–1200 zł');
+  });
+
+  it('separator tysięcy zostawiamy locale’owi — tak jak `formatMoney`', () => {
+    // pl-PL (CLDR `min2`) grupuje dopiero od pięciu cyfr: „1200 zł”, ale
+    // „10 000 zł”. Wymuszenie grupowania tutaj rozjechałoby cennik z ofertą,
+    // która jedzie w tej samej kopercie.
+    expect(norm(formatMoneyRange(1_000_000, 2_000_000))).toBe('10 000–20 000 zł');
+    expect(norm(formatMoney(120_050))).toBe(norm(formatMoneyRange(120_050)));
+  });
+
+  it('pełne złotówki idą bez groszy — cennik operuje okrągłymi widłekami', () => {
+    expect(norm(formatMoneyRange(30_000, 120_000))).not.toContain(',00');
+  });
+
+  it('gdy którakolwiek kwota ma grosze, pokazujemy je przy OBU', () => {
+    // Inaczej „300–1 200,50 zł” wyglądałoby na literówkę.
+    const wynik = norm(formatMoneyRange(30_000, 120_050));
+    expect(wynik).toBe('300,00–1200,50 zł');
+  });
+
+  it('brak górnej granicy znaczy JEDNĄ cenę, nie przedział', () => {
+    expect(norm(formatMoneyRange(25_000))).toBe('250 zł');
+    expect(norm(formatMoneyRange(25_000))).not.toContain('–');
+  });
+
+  it('górna równa dolnej też znaczy jedną cenę', () => {
+    expect(norm(formatMoneyRange(25_000, 25_000))).toBe('250 zł');
+  });
+
+  it('jednostka dokleja się do kwoty', () => {
+    expect(norm(formatMoneyRange(25_000, null, 'h'))).toBe('250 zł/h');
+  });
+
+  it('odwrócony przedział prostujemy — w dokumencie czyta się jak błąd', () => {
+    expect(norm(formatMoneyRange(120_000, 30_000))).toBe(norm(formatMoneyRange(30_000, 120_000)));
+  });
+
+  it('szanuje walutę dokumentu', () => {
+    expect(norm(formatMoneyRange(30_000, 120_000, '', 'EUR'))).toContain('€');
   });
 });

@@ -57,3 +57,9 @@ export function stagesFileName(number: string | null): string {
   const numberPart = number ? slug(number) : 'wycena';
   return `${numberPart}-etapy.pdf`;
 }
+
+/** Nazwa pliku dokumentu „Cennik usług dodatkowych" (F6.2). */
+export function priceListFileName(number: string | null): string {
+  const numberPart = number ? slug(number) : 'wycena';
+  return `${numberPart}-cennik.pdf`;
+}

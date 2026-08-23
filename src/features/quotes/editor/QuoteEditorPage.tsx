@@ -14,7 +14,7 @@ import { SectionBlock } from './components/SectionBlock';
 import { TotalsCard } from './components/TotalsCard';
 import { RoomsPanel } from './components/RoomsPanel';
 import { ScheduleTab } from './schedule/ScheduleTab';
-import { StagesDocTab } from './documents/StagesDocTab';
+import { DocumentsTab } from './documents/DocumentsTab';
 import { PricingBasisCard } from './components/PricingBasisCard';
 import { DiscountsSection } from './components/DiscountsSection';
 import { AddLink } from './components/AddLink';
@@ -47,6 +47,7 @@ import { useTemplateActions } from './useTemplateActions';
 import { useExportPdf } from '@/pdf/useExportPdf';
 import { useExportSchedulePdf } from '@/pdf/useExportSchedulePdf';
 import { useExportStagesPdf } from '@/pdf/useExportStagesPdf';
+import { useExportPriceListPdf } from '@/pdf/useExportPriceListPdf';
 import { ReadOnlyBanner } from '@/features/billing/ReadOnlyBanner';
 import { useEntitlement } from '@/features/billing/useEntitlement';
 import { routes } from '@/app/routes';
@@ -290,6 +291,7 @@ function EditorSurface({
   const { exportPdf, exporting: exportingPdf } = useExportPdf();
   const { exportSchedule, exporting: exportingSchedule } = useExportSchedulePdf();
   const { exportStages, exporting: exportingStages } = useExportStagesPdf();
+  const { exportPriceList, exporting: exportingPriceList } = useExportPriceListPdf();
   const [tab, setTab] = useState<'quote' | 'schedule' | 'documents'>('quote');
   const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
   const [overwriteTemplateOpen, setOverwriteTemplateOpen] = useState(false);
@@ -447,6 +449,14 @@ function EditorSurface({
             })
           }
           exportingStages={exportingStages}
+          onExportPriceList={() =>
+            void exportPriceList({
+              doc: useEditorStore.getState().documents?.priceList ?? null,
+              number,
+              issueDate,
+            })
+          }
+          exportingPriceList={exportingPriceList}
           onSaveAsTemplate={() => setSaveTemplateOpen(true)}
           onOverwriteTemplate={() => setOverwriteTemplateOpen(true)}
           canOverwriteTemplate={templates.canOverwrite}
@@ -542,7 +552,7 @@ function EditorSurface({
 
         <div className="min-h-0 flex-1 overflow-y-auto">
           {tab === 'schedule' ? <ScheduleTab editing={editing} /> : null}
-          {tab === 'documents' ? <StagesDocTab editing={editing} /> : null}
+          {tab === 'documents' ? <DocumentsTab editing={editing} /> : null}
           <div
             className={cn(
               'mx-auto grid w-full max-w-[1320px] items-start gap-7 px-7 pt-6 pb-14 lg:grid-cols-[1fr_336px]',

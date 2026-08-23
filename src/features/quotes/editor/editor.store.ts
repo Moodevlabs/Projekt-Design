@@ -32,8 +32,13 @@ import {
   type StageTemplate,
 } from '@/domain/schedule';
 import {
+  newPriceListDoc,
+  newPriceListItem,
   newStagesDoc,
   newStageEntry,
+  type PriceListDoc,
+  type PriceListItem,
+  type PriceListTemplateItem,
   type QuoteDocuments,
   type StageEntry,
   type StagesDoc,
@@ -146,6 +151,14 @@ export interface EditorState {
   updateStageEntry: (entryId: string, patch: Partial<StageEntry>) => void;
   addStageEntry: (partial?: Partial<StageEntry>) => void;
   removeStageEntry: (entryId: string) => void;
+
+  // --- cennik uslug dodatkowych (F6.2) ---
+  /** Zaklada dokument „Cennik uslug dodatkowych", jesli wycena go nie ma. */
+  ensurePriceListDoc: (template?: PriceListTemplateItem[] | null) => void;
+  patchPriceListDoc: (patch: Partial<PriceListDoc>) => void;
+  updatePriceListItem: (itemId: string, patch: Partial<PriceListItem>) => void;
+  addPriceListItem: (partial?: Partial<PriceListItem>) => void;
+  removePriceListItem: (itemId: string) => void;
 
   // --- zapis ---
   markSaving: () => void;
@@ -388,7 +401,10 @@ export const useEditorStore = create<EditorState>()(
         // Idempotentne, jak `ensureSchedule` — wejście na zakładkę nie może
         // skasować tego, co ktoś już opisał.
         if (state.documents?.stages) return;
-        state.documents = { ...state.documents, stages: newStagesDoc({}, template ?? null) };
+        state.documents = {
+          stages: newStagesDoc({}, template ?? null),
+          priceList: state.documents?.priceList ?? null,
+        };
         state.saveState = 'dirty';
       }),
 
@@ -419,6 +435,48 @@ export const useEditorStore = create<EditorState>()(
         if (!state.documents?.stages) return;
         state.documents.stages.entries = state.documents.stages.entries.filter(
           (entry) => entry.id !== entryId,
+        );
+        state.saveState = 'dirty';
+      }),
+
+    ensurePriceListDoc: (template = null) =>
+      set((state) => {
+        // Idempotentne, jak `ensureStagesDoc`.
+        if (state.documents?.priceList) return;
+        state.documents = {
+          stages: state.documents?.stages ?? null,
+          priceList: newPriceListDoc({}, template ?? null),
+        };
+        state.saveState = 'dirty';
+      }),
+
+    patchPriceListDoc: (patch) =>
+      set((state) => {
+        if (!state.documents?.priceList) return;
+        Object.assign(state.documents.priceList, patch);
+        state.saveState = 'dirty';
+      }),
+
+    updatePriceListItem: (itemId, patch) =>
+      set((state) => {
+        const item = state.documents?.priceList?.items.find((entry) => entry.id === itemId);
+        if (!item) return;
+        Object.assign(item, patch);
+        state.saveState = 'dirty';
+      }),
+
+    addPriceListItem: (partial) =>
+      set((state) => {
+        if (!state.documents?.priceList) return;
+        state.documents.priceList.items.push(newPriceListItem(partial));
+        state.saveState = 'dirty';
+      }),
+
+    removePriceListItem: (itemId) =>
+      set((state) => {
+        if (!state.documents?.priceList) return;
+        state.documents.priceList.items = state.documents.priceList.items.filter(
+          (item) => item.id !== itemId,
         );
         state.saveState = 'dirty';
       }),

@@ -31,6 +31,57 @@ export function formatMoney(cents: number, currency = 'PLN'): string {
 }
 
 /**
+ * Formatuje przedział cen do cennika usług dodatkowych (F6.2).
+ *
+ * Trzy decyzje, które widać w wyniku:
+ *
+ *  - **Waluta pada raz, na końcu**: `300–1 200 zł`, nie `300,00 zł – 1 200,00 zł`.
+ *    Przedział ma się czytać jako jedna informacja, a nie dwie kwoty obok siebie.
+ *  - **Grosze znikają, gdy obie kwoty są pełnymi złotymi.** Cennik operuje
+ *    okrągłymi widełkami; `300,00–1 200,00 zł` to szum. Gdy któraś kwota ma
+ *    grosze, pokazujemy je przy obu — inaczej wyglądałoby to na literówkę.
+ *  - **Odwrócony przedział prostujemy.** `1200–300 zł` w dokumencie dla klienta
+ *    czyta się jak błąd, a nie jak informacja; nie ma powodu go powielać.
+ *
+ * Separator tysięcy zostawiamy locale'owi: pl-PL (CLDR `min2`) pisze `1200 zł`,
+ * ale `10 000 zł`. Wygląda to na przeoczenie, a jest regułą języka — i tak
+ * samo zachowuje się `formatMoney`, więc cennik nie rozjeżdża się z ofertą.
+ *
+ * `max` równe `min` albo `null` znaczy „jedna cena", nie przedział.
+ */
+export function formatMoneyRange(
+  minCents: number,
+  maxCents: number | null = null,
+  unit = '',
+  currency = 'PLN',
+): string {
+  const dol = roundCents(minCents);
+  const gora = maxCents === null ? dol : roundCents(maxCents);
+  const od = Math.min(dol, gora);
+  const do_ = Math.max(dol, gora);
+
+  const grosze = od % 100 !== 0 || do_ % 100 !== 0;
+  const cyfry = grosze ? 2 : 0;
+
+  const zWaluta = new Intl.NumberFormat('pl-PL', {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: cyfry,
+    maximumFractionDigits: cyfry,
+  });
+
+  const kwota =
+    od === do_
+      ? zWaluta.format(do_ / 100)
+      : `${new Intl.NumberFormat('pl-PL', {
+          minimumFractionDigits: cyfry,
+          maximumFractionDigits: cyfry,
+        }).format(od / 100)}–${zWaluta.format(do_ / 100)}`;
+
+  return unit ? `${kwota}/${unit}` : kwota;
+}
+
+/**
  * Parsuje tekst wpisany przez użytkownika na grosze (int).
  *
  * Obsługuje polskie formaty: `1 200`, `1200,50`, `1200.5`, `1 200,50 zł`, `-350`,

@@ -3,6 +3,7 @@ import { DEFAULT_NUMBER_PATTERN } from '../numbering';
 import { PricesIncludeSchema, PricingBasisSchema } from '../quote/schema';
 import { ScheduleStageSchema } from '../schedule/schema';
 import { StageEntrySchema } from '../documents/schema';
+import { PriceListItemSchema } from '../documents/price-list';
 
 /**
  * Brand kit i ustawienia workspace — parytet z tabelą `brand_kits`
@@ -102,6 +103,11 @@ export const WorkspaceSettingsSchema = z.object({
    */
   stagesTemplate: z
     .array(StageEntrySchema.omit({ id: true }))
+    .nullable()
+    .default(null),
+  /** Wlasny cennik uslug dodatkowych (F6.2). `null` = cennik wbudowany. */
+  priceListTemplate: z
+    .array(PriceListItemSchema.omit({ id: true }))
     .nullable()
     .default(null),
 });

@@ -35,6 +35,8 @@ export function EditorTopbar({
   exportingSchedule,
   onExportStages,
   exportingStages,
+  onExportPriceList,
+  exportingPriceList,
   onSaveAsTemplate,
   onOverwriteTemplate,
   canOverwriteTemplate,
@@ -60,6 +62,9 @@ export function EditorTopbar({
   /** Osobny dokument „Etapy współpracy” (F6.1). */
   onExportStages: () => void;
   exportingStages: boolean;
+  /** Osobny dokument „Cennik usług dodatkowych” (F6.2). */
+  onExportPriceList: () => void;
+  exportingPriceList: boolean;
   onSaveAsTemplate: () => void;
   onOverwriteTemplate: () => void;
   /** Bez szablonów nie ma czego nadpisywać — pozycja menu znika. */
@@ -138,6 +143,9 @@ export function EditorTopbar({
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={onExportStages} disabled={exportingStages}>
               {pl.pdf.exportStages}
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={onExportPriceList} disabled={exportingPriceList}>
+              {pl.pdf.exportPriceList}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onSelect={onOpenLibrary}>{pl.library.title}</DropdownMenuItem>

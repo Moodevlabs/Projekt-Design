@@ -165,6 +165,34 @@ export const pl = {
     stageEntryDescriptionLabel: (name: string) => `Opis etapu: ${name}`,
     stageEntryDescriptionPlaceholder: 'Co obejmuje ten etap…',
     removeStageEntry: (name: string) => `Usuń etap: ${name}`,
+
+    // Dokument „Cennik uslug dodatkowych” (F6.2).
+    docTabStages: 'Etapy współpracy',
+    docTabPriceList: 'Cennik dodatkowy',
+    priceListTitle: 'Cennik usług dodatkowych',
+    priceListIntro:
+      'Usługi spoza zakresu tej oferty. Ceny podane widłekami — dokładna kwota zależy od zakresu i wychodzi po rozmowie.',
+    priceListEmpty: 'Cennik powstanie po wejściu w tryb edycji.',
+    priceListValidDays: 'Ważny (dni)',
+    priceListFootnote: 'Przypis',
+    priceListFootnotePlaceholder: 'Uwagi do cennika, zastrzeżenia…',
+    addPriceListItem: 'Dodaj pozycję cennika',
+    newPriceListItemName: 'Nowa usługa',
+    priceListNameLabel: (name: string) => `Nazwa usługi: ${name}`,
+    priceListDescriptionLabel: (name: string) => `Opis usługi: ${name}`,
+    priceListDescriptionPlaceholder: 'Co obejmuje ta usługa…',
+    priceListMinLabel: (name: string) => `Cena od: ${name}`,
+    priceListMaxLabel: (name: string) => `Cena do: ${name}`,
+    priceListUnitLabel: (name: string) => `Jednostka: ${name}`,
+    priceListUnitPlaceholder: 'h',
+    priceListLeadTimeLabel: (name: string) => `Termin realizacji: ${name}`,
+    priceListLeadTimePlaceholder: 'termin realizacji',
+    removePriceListItem: (name: string) => `Usuń pozycję cennika: ${name}`,
+    addPriceListItemToQuote: 'Dodaj do wyceny jako pozycję',
+    addPriceListItemToQuoteLabel: (name: string) => `Dodaj do wyceny jako pozycję: ${name}`,
+    priceListAddedToQuote: (name: string) => `Dodano do wyceny: ${name}`,
+    priceListAddedToQuoteHint: (section: string) =>
+      `Trafiło do sekcji „${section}” z dolną granicą przedziału — sprawdź kwotę.`,
     scheduleTitle: 'Szacowany termin',
     scheduleIntro:
       'Etapy z dniami po stronie wykonawcy i inwestora. Etapy zależne od pomieszczeń liczą się z tych samych pomieszczeń co wycena.',
@@ -677,6 +705,12 @@ export const pl = {
     exportStages: 'Eksportuj etapy współpracy (PDF)',
     stagesMissing: 'Ta wycena nie ma jeszcze dokumentu etapów — złóż go w zakładce „Dokumenty”.',
     stagesSaved: 'Zapisano dokument „Etapy współpracy”',
+    priceListRangeNote:
+      'Ceny podane widłekami — dokładna kwota zależy od zakresu i powstaje po rozmowie.',
+    exportPriceList: 'Eksportuj cennik dodatkowy (PDF)',
+    priceListMissing:
+      'Ta wycena nie ma jeszcze cennika dodatkowego — złóż go w zakładce „Dokumenty”.',
+    priceListSaved: 'Zapisano dokument „Cennik usług dodatkowych”',
   },
 
   settings: {

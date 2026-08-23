@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { PriceListDocSchema } from './price-list';
 
 /**
  * Dokumenty towarzyszące wycenie (F6).
@@ -40,6 +41,7 @@ export type StagesDoc = z.infer<typeof StagesDocSchema>;
 
 export const QuoteDocumentsSchema = z.object({
   stages: StagesDocSchema.nullable().default(null),
+  priceList: PriceListDocSchema.nullable().default(null),
 });
 export type QuoteDocuments = z.infer<typeof QuoteDocumentsSchema>;
 
