@@ -382,11 +382,20 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - Testy powłoki (`AppShell`, `Sidebar`) mockują `useEntitlement`, żeby `TrialBar` nie wciągał tam TanStack Query i Supabase.
   > **Nie zweryfikowane na żywo:** pełna ścieżka „wygasły trial → read-only" wymaga ręcznego cofnięcia `trial_ends_at` w bazie; pokryte testami, ale nieprzeklikane.
 
-- [ ] **T-16 Ustawienia workspace + konto** **+ UI z F1.2**
+- [x] **T-16 Ustawienia workspace + konto** **+ UI z F1.2**
   Waluta, VAT, wzorzec numeracji, `showDisabledItems`, zmiana hasła, eksport danych (JSON), usuń konto (Edge fn `delete-account`).
   Z `F1.2`: `RoomTypesSection` — lista typów pomieszczeń z inline-edit, dodawaniem, usuwaniem i kolejnością.
   ✅ Zmiana wzorca numeracji wpływa na kolejną wycenę; typy pomieszczeń edytowalne.
   ⚠️ `workspaces.settings` to JSONB bez migracji — `hourlyRateCents`, `defaultPricingBasis`, `scheduleTemplate` i `defaultValidDays.*` dokładają się tu bez ruszania schematu, ale **każde czytane przez zod** (CLAUDE.md §2). Pola pod F2/F5/F6 dodawaj razem z ich zadaniami, nie na zapas.
+  > **Zrobione.** `WorkspaceSettingsSection` (waluta, VAT, netto/brutto, wzorzec numeracji z podglądem na żywo, `showDisabledItems`), `RoomTypesSection` (F1.2 — inline-edit, dodawanie, usuwanie), `AccountSection` (zmiana hasła, eksport JSON, kasowanie konta), `export.repo.ts`, `useExportData`, Edge Function `delete-account`. 26 nowych testów; 622 zielone.
+  > **Na co uważać:**
+  > - **Eksport idzie po surowe wiersze, nie po zmapowane typy.** `listQuotes` zwraca same nagłówki (bez `body`) — zrzut zbudowany na nim byłby spisem tytułów zamiast kopią pracy. Jest na to test. Z tego samego powodu eksport obejmuje `clients`, których warstwa repozytoriów jeszcze nie ma.
+  > - **Eksport i zmiana hasła działają bez aktywnego dostępu.** Reszta ustawień to zapis, więc jest zablokowana. Odcięcie eksportu za brak płatności byłoby trzymaniem cudzej pracy jako zakładnika.
+  > - **`delete-account` ma ustaloną kolejność i nie wolno jej zmienić:** (1) anulowanie subskrypcji w Stripe, (2) pliki ze Storage, (3) użytkownik. Skasowanie konta bez (1) zostawiłoby aktywne obciążenie karty za usługę, do której nie ma dostępu. Kaskada `on delete cascade` sprząta tabele, ale **nie rusza bucketa** — stąd (2). Gdy (1) albo (2) padnie, przerywamy: lepiej zostawić konto do ponownej próby niż skasować dane i stracić możliwość odwołania płatności.
+  > - Kasowanie konta ma **dwie bariery** (przepisanie słowa + dialog) i nie wylogowuje po nieudanej próbie — inaczej człowiek wylądowałby na logowaniu w przekonaniu, że konta już nie ma.
+  > - Zmiana nazwy typu pomieszczenia **nie rusza `slug`a** (klucz cennika parametrycznego). Test tego pilnuje — gdyby slug szedł za nazwą, poprawka literówki wyzerowałaby ceny w zapisanych wycenach.
+  > - W testach `userEvent.type` nie nadaje się do wzorca numeracji: `{` otwiera tam opis klawisza, a tokeny to właśnie klamry. Używamy `fireEvent.change`.
+  > **Nie zweryfikowane na żywo:** `delete-account` nie było uruchamiane (skasowałoby konto testowe); wymaga `supabase functions deploy delete-account`.
 
 - [ ] **T-17 Polish & release 1.0**
   Pusty stan onboardingu (3 kroki: logo → biblioteka → pierwsza wycena), obsługa błędów (ErrorBoundary, toasty), ikony aplikacji, `tauri build` Win+mac, podpisywanie (notarization macOS, cert Win — zanotuj w README co trzeba mieć), CHANGELOG.

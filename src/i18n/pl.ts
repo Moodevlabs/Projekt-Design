@@ -537,13 +537,58 @@ export const pl = {
   },
   settings: {
     title: 'Ustawienia',
+    sectionQuotes: 'Domyślne dla wycen',
     currency: 'Waluta',
     vatRate: 'Stawka VAT',
+    pricesInclude: 'Ceny w wycenie podaję',
+    pricesNet: 'netto (VAT doliczany)',
+    pricesGross: 'brutto (VAT w cenie)',
+    pricesIncludeHint:
+      'Dotyczy nowych wycen. Wyceny już zapisane zachowują ustawienie sprzed zmiany.',
     numberPattern: 'Wzorzec numeracji',
+    numberPatternPreview: 'Następna wycena dostanie numer',
+    numberPatternHint: 'Tokeny: {YYYY}, {YY}, {MM}, {DD}, {seq}, {seq:6}.',
+    numberPatternReset: 'Przywróć domyślny wzorzec',
     showDisabledItems: 'Pokazuj wyłączone pozycje w PDF',
+    showDisabledItemsHint:
+      'Wyłączone pozycje trafiają do PDF jako opcje bez kwoty — przydatne przy wariantach do wyboru.',
+    unsaved: 'Niezapisane zmiany',
+    saved: 'Ustawienia zapisane.',
+    readOnly: 'Dostęp wygasł — ustawień nie da się zmienić. Eksport danych działa dalej.',
+
+    roomTypes: 'Typy pomieszczeń',
+    roomTypesHint:
+      'Po nich cennik parametryczny dobiera stawkę. Zmiana nazwy nie rusza klucza, więc nie psuje cen w zapisanych wycenach.',
+    roomTypesEmpty: 'Nie masz jeszcze żadnych typów pomieszczeń.',
+    roomTypeNamePlaceholder: 'np. Kuchnia',
+    roomTypeName: (name: string) => `Nazwa typu pomieszczenia: ${name}`,
+    roomTypeRemove: (name: string) => `Usuń typ pomieszczenia ${name}`,
+    roomTypeRemoveTitle: 'Usunąć typ pomieszczenia?',
+    roomTypeRemoveDescription: (name: string) =>
+      `„${name}" zniknie z listy, ale wyceny i reguły cenowe, które już go używają, zostaną nietknięte.`,
+    roomTypeDuplicate: 'Taki typ pomieszczenia już istnieje.',
+
     account: 'Konto',
+    changePassword: 'Zmień hasło',
+    newPassword: 'Nowe hasło',
+    repeatPassword: 'Powtórz hasło',
+    passwordChanged: 'Hasło zmienione.',
     exportData: 'Eksportuj dane',
+    exportDataHint:
+      'Jeden plik JSON ze wszystkim: wyceny wraz z treścią, biblioteka, zestawy, szablony, klienci i ustawienia.',
+    exportRunning: 'Przygotowuję plik…',
+    exportDone: 'Dane zapisane do pliku.',
+    exportOpen: 'Otwórz',
+    exportFailed: 'Nie udało się wyeksportować danych.',
     deleteAccount: 'Usuń konto',
+    deleteAccountHint:
+      'Kasuje konto i wszystkie dane bezpowrotnie. Zanim to zrobisz, wyeksportuj wyceny — nie da się ich odzyskać.',
+    deleteAccountConfirmLabel: (word: string) => `Wpisz ${word}, aby potwierdzić`,
+    deleteAccountTitle: 'Usunąć konto na zawsze?',
+    deleteAccountDescription:
+      'Znikną wszystkie wyceny, biblioteka, szablony i ustawienia. Tej operacji nie da się cofnąć.',
+    accountDeleted: 'Konto usunięte.',
+    deleteAccountFailed: 'Nie udało się usunąć konta.',
   },
   billing: {
     title: 'Subskrypcja',
