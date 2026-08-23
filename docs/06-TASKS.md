@@ -565,10 +565,20 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - **Zakładanie cennika nie rusza etapów** i odwrotnie — oba dokumenty siedzą w jednym polu `documents`, więc `ensure*` musi przepisywać to drugie jawnie (jest na to test).
   > **Nie zweryfikowane:** „parytet z arkuszem” sprawdzony **strukturalnie** (3 grupy, przedziały, jednostka `zł/h`, termin). **Kwoty i terminy w szablonie są nasze, nie przepisane z arkusza** — pliku nie ma w repozytorium. Wyglądu PDF na papierze nikt nie oglądał.
 
-- [ ] **T-48 Eksport pakietu dokumentów** (F6.3)
+- [x] **T-48 Eksport pakietu dokumentów** (F6.3)
   Dialog wyboru dokumentów, scalanie do jednego PDF albo osobne pliki, nazwy `{number}-wycena.pdf`, ważność per dokument.
   ✅ Pakiet 4 dokumentów < 5 s, ciągła numeracja stron w trybie „jeden plik”.
   ⚠️ `pdf-lib` — nowa zależność, uzasadnij w PR.
+  > **Zrobione.** `pdf/merge.ts` (scalanie + ciągła numeracja), `pdf/package-plan.ts` (czyste reguły: co, w jakiej kolejności, pod jaką nazwą), `usePackageExport`, `ExportPackageDialog`, pozycja „Eksportuj pakiet dokumentów…” w menu. 970 testów jednostkowych.
+  > **Uzasadnienie `pdf-lib`:** `@react-pdf` renderuje **jeden** dokument na wywołanie i nie umie doszyć stron do cudzego pliku. Bez tej zależności trzeba by złożyć pakiet jako jeden `<Document>` z czterema `<Page>` — czyli zlać cztery dokumenty o **różnej ważności i różnym przeznaczeniu** w jeden byt tylko po to, żeby uniknąć paczki. `pdf-lib` jest czystym JS-em (bez binarki, bez procesu w tle), więc działa w webview tak samo jak w teście.
+  > **Na co uważać:**
+  > - **Ciągła numeracja jest sednem trybu „jeden plik”.** Cztery dokumenty z własnymi numeracjami od jedynki to nie pakiet, tylko cztery pliki w jednej kopercie. Numer rysuje wbudowana **Helvetica**, więc podpis strony musi zostać w WinAnsi — `${page} / ${total}` jest bezpieczne, polskie diakrytyki nie.
+  > - **`mergePdfs([])` RZUCA, nie zwraca pustki.** `pdf-lib` po zapisie i odczycie robi z dokumentu bez stron jedną **pustą stronę** — biała kartka wysłana inwestorowi jest gorsza niż odmowa.
+  > - **`PDFDocument.load(new Uint8Array(part))`, nie `load(part)`.** `pdf-lib` sprawdza typ przez `instanceof`, a bajty z innego realmu (Node `Buffer` z `renderToBuffer`, wynik z Web Workera) tego testu nie przechodzą i lecą jako „typ NaN”. Kosztowało to jeden fałszywy trop przy pisaniu testu.
+  > - **Dokument, którego wycena nie ma, NIE pojawia się w dialogu** — nawet jako odznaczony. Checkbox, którego nie da się zaznaczyć, to pytanie bez odpowiedzi. Domyślnie zaznaczone jest wszystko, co jest: pakiet to całość, a odznaczenie — świadoma decyzja.
+  > - **Tryb „osobne pliki” pyta o FOLDER, nie o każdą nazwę.** Cztery dialogi zapisu pod rząd to nie wybór, tylko przeszkoda; nazwy i tak wynikają z numeru wyceny. Ścieżki sklejamy przez `joinPath` (Tauri), a nie ręcznym ukośnikiem.
+  > - **Dokumenty renderują się równolegle** (`Promise.all`) — szeregowanie ich tylko dlatego, że kod czyta się liniowo, kosztowałoby sekundy.
+  > **Nie zweryfikowane:** kryterium **„< 5 s” nie jest sprawdzone w warunkach docelowych.** Zmierzony render czterech dokumentów plus scalanie: **~0,1–0,25 s w Node**, ale **bez osadzonych fontów** (test używa wbudowanej Helvetiki) i bez Web Workera. W aplikacji dochodzi embedowanie Intera, więc realny czas będzie wyższy — rząd wielkości nadal daleko od 5 s, ale **liczby z appki nikt jeszcze nie zmierzył**. Test wydajnościowy asertuje luźny próg 30 s (zegar ścienny w CI to loteria); łapie katastrofę, nie regresję o 200 ms. Wyglądu scalonego pliku na papierze nikt nie oglądał.
 
 - [ ] **T-49 Rejestr ofert — pola z arkusza `OFERTY`** (F7.1)
   `quotes.city`, `internal_notes`, `doc_kind`; kolumna „Miasto”, filtr, szybkie notatki; eksport CSV w układzie arkusza.

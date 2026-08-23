@@ -37,6 +37,7 @@ export function EditorTopbar({
   exportingStages,
   onExportPriceList,
   exportingPriceList,
+  onExportPackage,
   onSaveAsTemplate,
   onOverwriteTemplate,
   canOverwriteTemplate,
@@ -65,6 +66,8 @@ export function EditorTopbar({
   /** Osobny dokument „Cennik usług dodatkowych” (F6.2). */
   onExportPriceList: () => void;
   exportingPriceList: boolean;
+  /** Pakiet dokumentów (F6.3) — otwiera dialog wyboru. */
+  onExportPackage: () => void;
   onSaveAsTemplate: () => void;
   onOverwriteTemplate: () => void;
   /** Bez szablonów nie ma czego nadpisywać — pozycja menu znika. */
@@ -147,6 +150,7 @@ export function EditorTopbar({
             <DropdownMenuItem onSelect={onExportPriceList} disabled={exportingPriceList}>
               {pl.pdf.exportPriceList}
             </DropdownMenuItem>
+            <DropdownMenuItem onSelect={onExportPackage}>{pl.pdf.exportPackage}</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onSelect={onOpenLibrary}>{pl.library.title}</DropdownMenuItem>
             <DropdownMenuItem onSelect={onSaveAllToLibrary}>

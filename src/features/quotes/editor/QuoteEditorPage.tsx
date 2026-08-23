@@ -48,6 +48,8 @@ import { useExportPdf } from '@/pdf/useExportPdf';
 import { useExportSchedulePdf } from '@/pdf/useExportSchedulePdf';
 import { useExportStagesPdf } from '@/pdf/useExportStagesPdf';
 import { useExportPriceListPdf } from '@/pdf/useExportPriceListPdf';
+import { usePackageExport } from '@/pdf/usePackageExport';
+import { ExportPackageDialog } from './components/ExportPackageDialog';
 import { ReadOnlyBanner } from '@/features/billing/ReadOnlyBanner';
 import { useEntitlement } from '@/features/billing/useEntitlement';
 import { routes } from '@/app/routes';
@@ -292,6 +294,12 @@ function EditorSurface({
   const { exportSchedule, exporting: exportingSchedule } = useExportSchedulePdf();
   const { exportStages, exporting: exportingStages } = useExportStagesPdf();
   const { exportPriceList, exporting: exportingPriceList } = useExportPriceListPdf();
+  const { exportPackage, exporting: exportingPackage } = usePackageExport();
+  // Subskrybowane, a nie czytane przez `getState()`: dialog pakietu ma
+  // pokazac dokument zalozony przed chwila w sasiedniej zakladce.
+  const schedule = useEditorStore((state) => state.schedule);
+  const documents = useEditorStore((state) => state.documents);
+  const [packageOpen, setPackageOpen] = useState(false);
   const [tab, setTab] = useState<'quote' | 'schedule' | 'documents'>('quote');
   const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
   const [overwriteTemplateOpen, setOverwriteTemplateOpen] = useState(false);
@@ -457,6 +465,7 @@ function EditorSurface({
             })
           }
           exportingPriceList={exportingPriceList}
+          onExportPackage={() => setPackageOpen(true)}
           onSaveAsTemplate={() => setSaveTemplateOpen(true)}
           onOverwriteTemplate={() => setOverwriteTemplateOpen(true)}
           canOverwriteTemplate={templates.canOverwrite}
@@ -503,6 +512,32 @@ function EditorSurface({
         </Dialog>
 
         <LibrarySheet open={libraryOpen} onOpenChange={setLibraryOpen} />
+
+        <ExportPackageDialog
+          open={packageOpen}
+          onOpenChange={setPackageOpen}
+          contents={{
+            hasSchedule: schedule !== null,
+            hasStages: documents?.stages != null,
+            hasPriceList: documents?.priceList != null,
+          }}
+          exporting={exportingPackage}
+          onExport={(selected, single) => {
+            setPackageOpen(false);
+            void exportPackage({
+              selected,
+              single,
+              body,
+              rooms: body.rooms,
+              schedule,
+              stages: documents?.stages ?? null,
+              priceList: documents?.priceList ?? null,
+              number,
+              issueDate,
+              currency: 'PLN',
+            });
+          }}
+        />
 
         <SaveAsTemplateDialog
           open={saveTemplateOpen}

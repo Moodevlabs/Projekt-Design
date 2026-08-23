@@ -41,6 +41,18 @@ export async function openPath(path: string): Promise<void> {
 }
 
 /**
+ * Sklejenie sciezki po stronie systemu.
+ *
+ * Recznie wstawiony `/` albo `\` dziala na jednym systemie i psuje sie na
+ * drugim — przy zapisie pakietu do wybranego folderu (F6.3) plik trafilby
+ * wtedy nie tam, gdzie uzytkownik wskazal.
+ */
+export async function joinPath(...parts: string[]): Promise<string> {
+  const { join } = await import('@tauri-apps/api/path');
+  return join(...parts);
+}
+
+/**
  * Otwiera adres w **przeglądarce systemowej**.
  *
  * Używane do płatności: Stripe blokuje osadzanie Checkoutu w ramkach, a poza

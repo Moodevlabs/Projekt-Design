@@ -711,6 +711,25 @@ export const pl = {
     priceListMissing:
       'Ta wycena nie ma jeszcze cennika dodatkowego — złóż go w zakładce „Dokumenty”.',
     priceListSaved: 'Zapisano dokument „Cennik usług dodatkowych”',
+
+    // Pakiet dokumentów (F6.3).
+    exportPackage: 'Eksportuj pakiet dokumentów…',
+    packageTitle: 'Eksport pakietu',
+    packageIntro: 'Wybierz dokumenty dla inwestora. Wszystkie niosą numer tej wyceny.',
+    packageSingle: 'Jeden plik PDF',
+    packageSingleHint: 'Dokumenty jeden po drugim, ze wspólną numeracją stron.',
+    packageSeparateHint: 'Osobne pliki do wybranego folderu.',
+    packageDoc: {
+      quote: 'Wycena',
+      schedule: 'Szacowany termin',
+      stages: 'Etapy współpracy',
+      priceList: 'Cennik usług dodatkowych',
+    },
+    packageNothingSelected: 'Nie wybrano żadnego dokumentu.',
+    packageExport: 'Eksportuj',
+    packagePageLabel: (page: number, total: number) => `${page} / ${total}`,
+    packageSaved: 'Zapisano pakiet dokumentów',
+    packageSavedMany: (count: number) => `Zapisano ${count} dokumentów w wybranym folderze`,
   },
 
   settings: {
