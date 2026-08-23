@@ -8,6 +8,8 @@ import {
   newGroup,
   newItem,
   newSection,
+  newRoom,
+  newDiscount,
   convertItemUnits,
   type Group,
   type Item,
@@ -397,15 +399,9 @@ export const useEditorStore = create<EditorState>()(
     addRoom: (partial) =>
       set((state) => {
         if (!state.body) return;
-        state.body.rooms.push({
-          id: newId(),
-          roomTypeId: null,
-          label: 'Nowe pomieszczenie',
-          qty: 1,
-          includedInVisual: true,
-          includedInTechnical: true,
-          ...partial,
-        });
+        // Fabryka czyta wymienione pola zamiast rozsypywac wejscie — patrz
+        // komentarz przy `newRoom`. Chroni dokument przed obiektem zdarzenia.
+        state.body.rooms.push(newRoom(partial));
         state.saveState = 'dirty';
       }),
 
@@ -483,20 +479,7 @@ export const useEditorStore = create<EditorState>()(
     addDiscount: (partial) =>
       set((state) => {
         if (!state.body) return;
-        state.body.discounts.push({
-          id: newId(),
-          name: 'Rabat',
-          description: '',
-          enabled: true,
-          type: 'fixed',
-          valueCents: 0,
-          scope: 'quote',
-          sectionId: null,
-          itemIds: [],
-          condition: 'always',
-          roundToCents: 0,
-          ...partial,
-        });
+        state.body.discounts.push(newDiscount(partial));
         state.saveState = 'dirty';
       }),
 

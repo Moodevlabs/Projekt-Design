@@ -68,7 +68,8 @@ export function DiscountsSection({
 
       {editing ? (
         <div className="mt-2.5">
-          <AddLink icon={Percent} onClick={onAdd}>
+          {/* `() => onAdd()` — patrz komentarz w `RoomsPanel`. */}
+          <AddLink icon={Percent} onClick={() => onAdd()}>
             {pl.editor.addDiscountEntry}
           </AddLink>
         </div>

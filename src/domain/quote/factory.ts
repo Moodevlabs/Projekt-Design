@@ -1,6 +1,7 @@
 import { newId } from '../id';
 import { CURRENT_BODY_VERSION } from './migrate';
-import type { Group, Item, QuoteBody, Section } from './schema';
+import { DiscountSchema, RoomSchema } from './schema';
+import type { Discount, Group, Item, QuoteBody, Room, Section } from './schema';
 
 /** Fabryki obiektów domenowych — każdy nowy element dostaje własne `id`. */
 
@@ -32,6 +33,82 @@ export function newGroup(partial: Partial<Group> = {}): Group {
     roomId: null,
     ...partial,
   };
+}
+
+/**
+ * Nowe pomieszczenie wyceny.
+ *
+ * **Czyta WYMIENIONE pola, zamiast rozsypywać `...partial`** — i to jest tu
+ * sedno, nie styl. Takie akcje bywają podpinane wprost pod `onClick`, a React
+ * przekazuje wtedy obiekt zdarzenia. Rozsypany do dokumentu wnosił węzły DOM
+ * i włókna Reacta, przez co `JSON.stringify` przy zapisie wywalał się na
+ * strukturze cyklicznej: użytkownik widział „Błąd zapisu", a jego praca
+ * zostawała tylko w pamięci przeglądarki.
+ *
+ * Samo czytanie po nazwie **nie wystarcza**: nazwy potrafią się zderzyć
+ * (`Discount.type` kontra `Event.type`, gdzie wjeżdżało `'click'`), więc wynik
+ * przepuszczamy jeszcze przez schemat. Nie do przyjęcia wejście daje po prostu
+ * czysty, domyślny obiekt — a dokument zostaje serializowalny.
+ */
+export function newRoom(partial: Partial<Room> = {}): Room {
+  const domyslne: Room = {
+    id: newId(),
+    roomTypeId: null,
+    label: 'Nowe pomieszczenie',
+    qty: 1,
+    includedInVisual: true,
+    includedInTechnical: true,
+  };
+
+  const kandydat: Room = {
+    ...domyslne,
+    ...(partial.id === undefined ? {} : { id: partial.id }),
+    ...(partial.roomTypeId === undefined ? {} : { roomTypeId: partial.roomTypeId }),
+    ...(partial.label === undefined ? {} : { label: partial.label }),
+    ...(partial.qty === undefined ? {} : { qty: partial.qty }),
+    // Sprawdzamy `undefined`, a nie prawdziwość — świadome `false` musi przetrwać.
+    ...(partial.includedInVisual === undefined ? {} : { includedInVisual: partial.includedInVisual }),
+    ...(partial.includedInTechnical === undefined
+      ? {}
+      : { includedInTechnical: partial.includedInTechnical }),
+  };
+
+  return RoomSchema.safeParse(kandydat).data ?? domyslne;
+}
+
+/** Nowy rabat. Ta sama zasada co w `newRoom` — patrz komentarz wyżej. */
+export function newDiscount(partial: Partial<Discount> = {}): Discount {
+  const domyslne: Discount = {
+    id: newId(),
+    name: 'Rabat',
+    description: '',
+    enabled: true,
+    type: 'fixed',
+    valueCents: 0,
+    scope: 'quote',
+    sectionId: null,
+    itemIds: [],
+    condition: 'always',
+    roundToCents: 0,
+  };
+
+  const kandydat: Discount = {
+    ...domyslne,
+    ...(partial.id === undefined ? {} : { id: partial.id }),
+    ...(partial.name === undefined ? {} : { name: partial.name }),
+    ...(partial.description === undefined ? {} : { description: partial.description }),
+    ...(partial.enabled === undefined ? {} : { enabled: partial.enabled }),
+    ...(partial.type === undefined ? {} : { type: partial.type }),
+    ...(partial.valueCents === undefined ? {} : { valueCents: partial.valueCents }),
+    ...(partial.percent === undefined ? {} : { percent: partial.percent }),
+    ...(partial.scope === undefined ? {} : { scope: partial.scope }),
+    ...(partial.sectionId === undefined ? {} : { sectionId: partial.sectionId }),
+    ...(partial.itemIds === undefined ? {} : { itemIds: partial.itemIds }),
+    ...(partial.condition === undefined ? {} : { condition: partial.condition }),
+    ...(partial.roundToCents === undefined ? {} : { roundToCents: partial.roundToCents }),
+  };
+
+  return DiscountSchema.safeParse(kandydat).data ?? domyslne;
 }
 
 /** Nowa sekcja wyceny. */

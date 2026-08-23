@@ -60,8 +60,11 @@ export function RoomsPanel({
         <>
           <button
             type="button"
-            onClick={onAdd}
-            className="text-[var(--doc-sage)] hover:text-[var(--doc-ink)] focus-visible:ring-ring inline-flex items-center gap-1 self-start rounded-[3px] text-[12.5px] font-semibold transition-colors focus-visible:ring-2 focus-visible:outline-none"
+            // `() => onAdd()`, a NIE `onAdd`: React przekazuje handlerowi
+            // obiekt zdarzenia, ktory trafialby do dokumentu jako dane
+            // pomieszczenia i psul zapis (struktura cykliczna w JSON).
+            onClick={() => onAdd()}
+            className="focus-visible:ring-ring inline-flex items-center gap-1 self-start rounded-[3px] text-[12.5px] font-semibold text-[var(--doc-sage)] transition-colors hover:text-[var(--doc-ink)] focus-visible:ring-2 focus-visible:outline-none"
           >
             <Plus className="size-3.5" aria-hidden />
             {pl.editor.addRoom}
