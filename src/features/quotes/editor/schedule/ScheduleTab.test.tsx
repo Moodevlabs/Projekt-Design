@@ -60,6 +60,7 @@ describe('ScheduleTab — zakładanie harmonogramu', () => {
     useEditorStore.setState({
       body: newQuoteBody({}),
       schedule: null,
+      documents: null,
       quoteId: 'q1',
       lastSeenUpdatedAt: '2026-08-01T10:00:00Z',
       saveState: 'idle',

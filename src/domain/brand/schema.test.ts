@@ -88,6 +88,7 @@ describe('WorkspaceSettingsSchema', () => {
       defaultPricingBasis: 'amount',
       // `null` = uzywamy wbudowanego szablonu etapow (F5.1).
       scheduleTemplate: null,
+      stagesTemplate: null,
     });
   });
 

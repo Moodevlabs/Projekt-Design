@@ -46,3 +46,14 @@ export function scheduleFileName(number: string | null): string {
   const numberPart = number ? slug(number) : 'wycena';
   return `${numberPart}-termin.pdf`;
 }
+
+/**
+ * Nazwa pliku dokumentu „Etapy współpracy" (F6.1).
+ *
+ * Ta sama zasada co przy terminie: przyrostek odróżnia plik w pakiecie,
+ * w którym wszystkie dokumenty niosą ten sam numer wyceny.
+ */
+export function stagesFileName(number: string | null): string {
+  const numberPart = number ? slug(number) : 'wycena';
+  return `${numberPart}-etapy.pdf`;
+}

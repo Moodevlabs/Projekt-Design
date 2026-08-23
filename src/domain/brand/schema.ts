@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { DEFAULT_NUMBER_PATTERN } from '../numbering';
 import { PricesIncludeSchema, PricingBasisSchema } from '../quote/schema';
 import { ScheduleStageSchema } from '../schedule/schema';
+import { StageEntrySchema } from '../documents/schema';
 
 /**
  * Brand kit i ustawienia workspace — parytet z tabelą `brand_kits`
@@ -86,7 +87,23 @@ export const WorkspaceSettingsSchema = z.object({
    * go w konkretnej wycenie. Wspólne `id` znaczyłoby, że edycja jednego
    * dokumentu rusza drugi.
    */
-  scheduleTemplate: z.array(ScheduleStageSchema.omit({ id: true })).nullable().default(null),
+  scheduleTemplate: z
+    .array(ScheduleStageSchema.omit({ id: true }))
+    .nullable()
+    .default(null),
+  /**
+   * Wlasny szablon etapow wspolpracy (F6.1). `null` = szablon wbudowany.
+   *
+   * Trzymamy go w `settings`, a nie w osobnej tabeli `workspace_doc_templates`
+   * z `FEATURES`: mamy juz jeden mechanizm szablonu workspace'u
+   * (`scheduleTemplate`) i drugi, rownolegly, znaczylby dwa miejsca do
+   * pilnowania. Tabela z NAZWANYMI szablonami ma sens dopiero wtedy, gdy ktos
+   * naprawde potrzebuje kilku zestawow do wyboru.
+   */
+  stagesTemplate: z
+    .array(StageEntrySchema.omit({ id: true }))
+    .nullable()
+    .default(null),
 });
 export type WorkspaceSettings = z.infer<typeof WorkspaceSettingsSchema>;
 

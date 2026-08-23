@@ -14,6 +14,7 @@ import { SectionBlock } from './components/SectionBlock';
 import { TotalsCard } from './components/TotalsCard';
 import { RoomsPanel } from './components/RoomsPanel';
 import { ScheduleTab } from './schedule/ScheduleTab';
+import { StagesDocTab } from './documents/StagesDocTab';
 import { PricingBasisCard } from './components/PricingBasisCard';
 import { DiscountsSection } from './components/DiscountsSection';
 import { AddLink } from './components/AddLink';
@@ -45,6 +46,7 @@ import { usePricingBasisChange } from './usePricingBasisChange';
 import { useTemplateActions } from './useTemplateActions';
 import { useExportPdf } from '@/pdf/useExportPdf';
 import { useExportSchedulePdf } from '@/pdf/useExportSchedulePdf';
+import { useExportStagesPdf } from '@/pdf/useExportStagesPdf';
 import { ReadOnlyBanner } from '@/features/billing/ReadOnlyBanner';
 import { useEntitlement } from '@/features/billing/useEntitlement';
 import { routes } from '@/app/routes';
@@ -287,7 +289,8 @@ function EditorSurface({
   const templates = useTemplateActions();
   const { exportPdf, exporting: exportingPdf } = useExportPdf();
   const { exportSchedule, exporting: exportingSchedule } = useExportSchedulePdf();
-  const [tab, setTab] = useState<'quote' | 'schedule'>('quote');
+  const { exportStages, exporting: exportingStages } = useExportStagesPdf();
+  const [tab, setTab] = useState<'quote' | 'schedule' | 'documents'>('quote');
   const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
   const [overwriteTemplateOpen, setOverwriteTemplateOpen] = useState(false);
 
@@ -434,6 +437,16 @@ function EditorSurface({
             })
           }
           exportingSchedule={exportingSchedule}
+          onExportStages={() =>
+            void exportStages({
+              // Ze store'u, nie z `body` — dokument żyje obok tresci wyceny
+              // i moze byc swiezszy niz ostatni zapis.
+              doc: useEditorStore.getState().documents?.stages ?? null,
+              number,
+              issueDate,
+            })
+          }
+          exportingStages={exportingStages}
           onSaveAsTemplate={() => setSaveTemplateOpen(true)}
           onOverwriteTemplate={() => setOverwriteTemplateOpen(true)}
           canOverwriteTemplate={templates.canOverwrite}
@@ -520,10 +533,16 @@ function EditorSurface({
             onSelect={() => setTab('schedule')}
             label={pl.editor.tabSchedule}
           />
+          <EditorTab
+            active={tab === 'documents'}
+            onSelect={() => setTab('documents')}
+            label={pl.editor.tabDocuments}
+          />
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto">
           {tab === 'schedule' ? <ScheduleTab editing={editing} /> : null}
+          {tab === 'documents' ? <StagesDocTab editing={editing} /> : null}
           <div
             className={cn(
               'mx-auto grid w-full max-w-[1320px] items-start gap-7 px-7 pt-6 pb-14 lg:grid-cols-[1fr_336px]',
@@ -549,7 +568,7 @@ function EditorSurface({
                       currency="PLN"
                       vatRate={body.vatRate}
                       pricesInclude={body.pricesInclude}
-                    rooms={body.rooms}
+                      rooms={body.rooms}
                       textInfo={textInfo}
                       pricing={pricing}
                       variants={variants}
@@ -564,12 +583,12 @@ function EditorSurface({
                       onToggleItem={toggleItem}
                       onPatchItem={updateItem}
                       onRemoveItem={removeItem}
-                    onInsertItems={handleInsertItems}
-                    onInsertGroup={insertGroup}
-                    onSaveItemToLibrary={library.saveItem}
-                    onSaveGroupToLibrary={library.saveGroup}
-                    onAddRoomBlocks={handleAddRoomBlocks}
-                    onInsertItemToRoomBlocks={handleInsertItemToRoomBlocks}
+                      onInsertItems={handleInsertItems}
+                      onInsertGroup={insertGroup}
+                      onSaveItemToLibrary={library.saveItem}
+                      onSaveGroupToLibrary={library.saveGroup}
+                      onAddRoomBlocks={handleAddRoomBlocks}
+                      onInsertItemToRoomBlocks={handleInsertItemToRoomBlocks}
                     />
                   ))}
                 </SortableContext>

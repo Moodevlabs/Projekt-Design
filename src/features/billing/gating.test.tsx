@@ -74,6 +74,7 @@ function makeQuote(): Quote {
     }),
     bodyError: null,
     schedule: null,
+    documents: null,
   };
 }
 

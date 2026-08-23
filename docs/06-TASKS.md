@@ -537,10 +537,20 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - Ramy czasowe stoją **na górze**, nie na końcu: to jedyna liczba, po którą inwestor sięga, otwierając ten dokument.
   > **Nie zweryfikowane wizualnie:** render sprawdzony nagłówkiem `%PDF-` i rozmiarem, treść — czystymi funkcjami (`renderToString` zwraca binarny plik, patrz pułapka z T-13). Samego wyglądu na papierze nikt jeszcze nie oglądał.
 
-- [ ] **T-46 Dokument „Etapy współpracy”** (F6.1)
+- [x] **T-46 Dokument „Etapy współpracy”** (F6.1)
   Migracja `workspace_doc_templates`, seed 19 etapów, zakładka Dokumenty, `StagesPdfDocument`.
   ✅ Parytet z arkuszem `ETAPY WSPÓŁPRACY`.
   ⚠️ To **nie to samo** co T-11: tam szablon całej wyceny (tabela `templates`), tu szablon dokumentu towarzyszącego. Nazwy w UI muszą je rozróżniać, inaczej użytkownik utonie w dwóch „szablonach”.
+  > **Zrobione.** `domain/documents/` (schemat + 19 etapów w 5 częściach), migracja `0013_quote_documents.sql` (kolumna `quotes.documents`), zakładka **Dokumenty** w edytorze (`StagesDocTab`), `StagesPdfDocument` + `useExportStagesPdf` + pozycja „Eksportuj etapy współpracy (PDF)” w menu. 902 testy jednostkowe.
+  > **Na co uważać:**
+  > - **Etapy poza zakresem ZOSTAJĄ na liście i w PDF, z krzyżykiem.** To jest sedno tego dokumentu — inwestor ma przeczytać, czego nie zamawia, zanim dowie się o tym w połowie projektu. Znikający etap zamienia dokument o zakresie w listę życzeń. Odznaczony etap **nie jest przekreślony ani wyszarzony do nieczytelności** — zmienia się sam kolor.
+  > - **Odstępstwo: bez tabeli `workspace_doc_templates`.** Szablon etapów siedzi w `workspaces.settings.stagesTemplate`. Osobna tabela dla jednej listy per workspace to RLS, migracja i repozytorium za rzecz, która jest ustawieniem. Wróci, jeśli szablonów ma być wiele albo mają być wersjonowane.
+  > - **Odstępstwo: dokumenty są częścią wyceny (`quotes.documents`), nie osobną encją.** Pakiet dla jednego inwestora nosi jeden numer, jednego klienta i jedną stopkę — osobne encje znaczyłyby synchronizowanie tych trzech rzeczy. `null` = „ta wycena nie ma dokumentów dodatkowych” i jest w pełni poprawnym stanem.
+  > - **Ważność jest w samym dokumencie (14 dni), nie w argumencie eksportu** — inaczej niż przy terminie (F5.3). Etapy są zakresem umowy, więc to użytkownik decyduje w zakładce, jak długo deklaracja obowiązuje.
+  > - **Nazwa pliku ma przyrostek `-etapy`.** Ta sama zasada co przy `-termin`: bez rozróżnienia drugi zapis nadpisałby pierwszy.
+  > - **`linkedItemTags` działa jak w F5.2** (`useStageEntryAutoSync`): włączona pozycja z etykietą wciąga pasujący etap do zakresu — raz na etap, tylko w edycji, tylko w jedną stronę, z cofnięciem. Dokument mówiący „nie robimy wizualizacji” obok pozycji „Wizualizacje 3D” w cenniku jest gorszy niż brak dokumentu.
+  > - **Dokument zakłada się dopiero przy pierwszym wejściu w zakładkę i tylko w trybie edycji** — obejrzenie oferty nie ma prawa dopisać jej dokumentu ani zabrudzić autozapisu.
+  > **Nie zweryfikowane:** „parytet z arkuszem `ETAPY WSPÓŁPRACY`” sprawdzony **strukturalnie** (19 etapów, 5 części, podział zgodny ze specyfikacją). **Brzmienie opisów jest nasze, nie przepisane z arkusza** — samego pliku nie ma w repozytorium. Warto skonfrontować z oryginałem, zanim trafi do klientów. Wyglądu PDF na papierze nikt nie oglądał (render sprawdzony nagłówkiem `%PDF-` i rozmiarem).
 
 - [ ] **T-47 Dokument „Cennik usług dodatkowych”** (F6.2)
   Przedziały cen, jednostka `zł/h`, termin realizacji, `formatMoneyRange`, `PriceListPdfDocument`, przycisk „Dodaj do wyceny jako pozycję”.

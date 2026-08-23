@@ -41,7 +41,9 @@ function quoteWithLinkedItem(): Quote {
         groups: [
           newGroup({
             name: 'Grupa',
-            items: [newItem({ name: 'Blat kuchenny', libraryItemId: LIB_ID, unitPriceCents: 120_000 })],
+            items: [
+              newItem({ name: 'Blat kuchenny', libraryItemId: LIB_ID, unitPriceCents: 120_000 }),
+            ],
           }),
         ],
       }),
@@ -67,6 +69,7 @@ function quoteWithLinkedItem(): Quote {
     body,
     bodyError: null,
     schedule: null,
+    documents: null,
   };
 }
 

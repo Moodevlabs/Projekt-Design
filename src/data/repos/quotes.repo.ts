@@ -8,6 +8,7 @@ import {
   type QuoteStatus,
 } from '@/domain/quote';
 import { parseScheduleBody, type ScheduleBody } from '@/domain/schedule';
+import { parseQuoteDocuments, type QuoteDocuments } from '@/domain/documents';
 import { getSupabase } from '@/data/supabase';
 import type { TablesUpdate } from '@/data/types.generated';
 import { ConflictError, RepoError, unwrap } from './errors';
@@ -47,6 +48,11 @@ export interface Quote extends QuoteSummary {
    * a nie brak danych. Pusty obiekt znaczylby harmonogram bez etapow.
    */
   schedule: ScheduleBody | null;
+  /**
+   * Dokumenty towarzyszace (F6): etapy wspolpracy, cennik dodatkowy.
+   * `null` = ta wycena ich nie ma — normalny stan, nie brak danych.
+   */
+  documents: QuoteDocuments | null;
 }
 
 export type QuoteSort = 'updated_desc' | 'created_desc' | 'total_desc' | 'number_asc';
@@ -101,6 +107,7 @@ function mapQuote(row: Row): Quote {
     // Miekko, jak `pricing` w bibliotece: zepsuty harmonogram nie ma prawa
     // zablokowac calej wyceny. `parseScheduleBody` zwroci wtedy `null`.
     schedule: parseScheduleBody(row.schedule),
+    documents: parseQuoteDocuments(row.documents),
   };
 }
 
@@ -191,6 +198,8 @@ export interface SaveQuoteInput {
    * „Wycena" nie ma prawa skasowac tego, co ktos ustawil w zakladce „Termin".
    */
   schedule?: ScheduleBody | null;
+  /** Jak `schedule`: pomin, zeby NIE ruszac dokumentow towarzyszacych. */
+  documents?: QuoteDocuments | null;
   id: string;
   body: QuoteBody;
   /** `updated_at` ostatnio widziany przez klienta — podstawa blokady optymistycznej. */
@@ -224,6 +233,7 @@ export async function saveQuote(input: SaveQuoteInput): Promise<Quote> {
         // `undefined` = „nie ruszaj harmonogramu"; `null` = „skasuj go".
         // Bez tego rozroznienia zapis samej wyceny kasowalby termin.
         ...(input.schedule !== undefined ? { schedule: input.schedule } : {}),
+        ...(input.documents !== undefined ? { documents: input.documents } : {}),
       })
       .eq('id', input.id)
       .eq('updated_at', input.lastSeenUpdatedAt)

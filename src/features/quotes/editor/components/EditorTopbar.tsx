@@ -33,6 +33,8 @@ export function EditorTopbar({
   exportingPdf,
   onExportSchedule,
   exportingSchedule,
+  onExportStages,
+  exportingStages,
   onSaveAsTemplate,
   onOverwriteTemplate,
   canOverwriteTemplate,
@@ -55,6 +57,9 @@ export function EditorTopbar({
   /** Osobny dokument „Szacowany termin" (F5.3). */
   onExportSchedule: () => void;
   exportingSchedule: boolean;
+  /** Osobny dokument „Etapy współpracy” (F6.1). */
+  onExportStages: () => void;
+  exportingStages: boolean;
   onSaveAsTemplate: () => void;
   onOverwriteTemplate: () => void;
   /** Bez szablonów nie ma czego nadpisywać — pozycja menu znika. */
@@ -88,35 +93,35 @@ export function EditorTopbar({
       </div>
 
       <div className="ml-auto flex items-center gap-2">
-      <div className="flex items-center rounded-[var(--radius-pill)] border border-white/60 bg-white/45 p-0.5">
-        {(['edit', 'preview'] as const).map((value) => {
-          const Icon = value === 'edit' ? Pencil : Eye;
-          const label = value === 'edit' ? pl.editor.edit : pl.editor.preview;
-          // Po wygasnieciu dostepu wlaczenie edycji tylko by skusilo do
-          // pisania w dokument, ktorego i tak nie da sie zapisac.
-          const locked = value === 'edit' && !canWrite;
-          return (
-            <button
-              key={value}
-              type="button"
-              aria-pressed={mode === value}
-              disabled={locked}
-              title={locked ? pl.billing.readOnlyEditHint : undefined}
-              onClick={() => onModeChange(value)}
-              className={cn(
-                'flex items-center gap-1.5 rounded-[var(--radius-pill)] px-3 py-1.5 text-sm transition-colors',
-                locked && 'cursor-not-allowed opacity-45',
-                mode === value
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-ink-soft hover:text-ink',
-              )}
-            >
-              <Icon className="size-3.5" aria-hidden />
-              {label}
-            </button>
-          );
-        })}
-      </div>
+        <div className="flex items-center rounded-[var(--radius-pill)] border border-white/60 bg-white/45 p-0.5">
+          {(['edit', 'preview'] as const).map((value) => {
+            const Icon = value === 'edit' ? Pencil : Eye;
+            const label = value === 'edit' ? pl.editor.edit : pl.editor.preview;
+            // Po wygasnieciu dostepu wlaczenie edycji tylko by skusilo do
+            // pisania w dokument, ktorego i tak nie da sie zapisac.
+            const locked = value === 'edit' && !canWrite;
+            return (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={mode === value}
+                disabled={locked}
+                title={locked ? pl.billing.readOnlyEditHint : undefined}
+                onClick={() => onModeChange(value)}
+                className={cn(
+                  'flex items-center gap-1.5 rounded-[var(--radius-pill)] px-3 py-1.5 text-sm transition-colors',
+                  locked && 'cursor-not-allowed opacity-45',
+                  mode === value
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-ink-soft hover:text-ink',
+                )}
+              >
+                <Icon className="size-3.5" aria-hidden />
+                {label}
+              </button>
+            );
+          })}
+        </div>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -130,6 +135,9 @@ export function EditorTopbar({
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={onExportSchedule} disabled={exportingSchedule}>
               {pl.pdf.exportSchedule}
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={onExportStages} disabled={exportingStages}>
+              {pl.pdf.exportStages}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onSelect={onOpenLibrary}>{pl.library.title}</DropdownMenuItem>

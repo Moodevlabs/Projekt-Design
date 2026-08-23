@@ -148,6 +148,23 @@ export const pl = {
     // Zakladki edytora i harmonogram (F5.2).
     tabQuote: 'Wycena',
     tabSchedule: 'Termin',
+    tabDocuments: 'Dokumenty',
+
+    // Dokument „Etapy wspolpracy" (F6.1).
+    stagesDocTitle: 'Etapy współpracy',
+    stagesDocIntro: (objete: number, wszystkie: number) =>
+      `Zakres tej oferty obejmuje ${objete} z ${wszystkie} etapów. Pozostałe zostają na liście, żeby było jasne, czego nie zawiera.`,
+    stagesDocEmpty: 'Dokument powstanie po wejściu w tryb edycji.',
+    stagesDocValidDays: 'Ważny (dni)',
+    stagesDocFootnote: 'Przypis',
+    stagesDocFootnotePlaceholder: 'Uwagi do zakresu, zastrzeżenia…',
+    addStageEntry: 'Dodaj etap',
+    newStageEntryName: 'Nowy etap',
+    stageEntryIncluded: (name: string) => `Zawarte w ofercie: ${name}`,
+    stageEntryNameLabel: (name: string) => `Nazwa etapu: ${name}`,
+    stageEntryDescriptionLabel: (name: string) => `Opis etapu: ${name}`,
+    stageEntryDescriptionPlaceholder: 'Co obejmuje ten etap…',
+    removeStageEntry: (name: string) => `Usuń etap: ${name}`,
     scheduleTitle: 'Szacowany termin',
     scheduleIntro:
       'Etapy z dniami po stronie wykonawcy i inwestora. Etapy zależne od pomieszczeń liczą się z tych samych pomieszczeń co wycena.',
@@ -193,6 +210,8 @@ export const pl = {
     stageNoRoomTypes: 'Brak typów pomieszczeń — dodaj je w ustawieniach.',
     removeStage: (name: string) => `Usuń etap: ${name}`,
     stageAutoEnabled: (name: string) => `Włączono etap „${name}" — wycena go obejmuje.`,
+    stageEntryAutoIncluded: (name: string) =>
+      `Etap „${name}” wszedł do zakresu — wycena go obejmuje.`,
     roomBlockNameHint: 'Nazwę zmienisz w panelu „Pomieszczenia" obok — tutaj jest tylko pokazana.',
     itemFramesLabel: 'Liczba kadrów',
     pricingBasis: 'Sposób liczenia',
@@ -202,7 +221,8 @@ export const pl = {
     hourlyRateMissing: 'Bez stawki wszystkie kwoty wychodzą zerowe.',
     workload: 'Pracochłonność',
     workloadEstimate: 'Szacowana pracochłonność',
-    workloadEstimateHint: 'Szacunek wyliczony z cen według stawki z ustawień — nie z wpisanego czasu.',
+    workloadEstimateHint:
+      'Szacunek wyliczony z cen według stawki z ustawień — nie z wpisanego czasu.',
     workloadNoRate: 'Ustaw stawkę godzinową w ustawieniach, żeby dało się oszacować czas.',
     workloadCommunication: 'Komunikacja projektowa',
     workloadCommunicationHint: 'Liczba zawarta w sumie poniżej.',
@@ -324,7 +344,8 @@ export const pl = {
     moveUp: 'Przesuń wyżej',
     moveDown: 'Przesuń niżej',
     dnd: {
-      start: (name: string) => `Podniesiono: ${name}. Strzałkami wybierz miejsce, spacją upuść, Escape anuluje.`,
+      start: (name: string) =>
+        `Podniesiono: ${name}. Strzałkami wybierz miejsce, spacją upuść, Escape anuluje.`,
       over: (name: string, target: string) => `${name} nad: ${target}.`,
       dropped: (name: string) => `Upuszczono: ${name}.`,
       cancelled: (name: string) => `Anulowano przenoszenie: ${name}.`,
@@ -388,7 +409,8 @@ export const pl = {
     groups: 'Grupy',
     category: 'Kategoria',
     emptyTitle: 'Biblioteka jest pusta',
-    emptyDescription: 'Dodaj pozycje, których używasz najczęściej — wstawisz je do wyceny jednym kliknięciem.',
+    emptyDescription:
+      'Dodaj pozycje, których używasz najczęściej — wstawisz je do wyceny jednym kliknięciem.',
 
     // Zakładki i filtry.
     tabsLabel: 'Sekcje biblioteki',
@@ -476,8 +498,7 @@ export const pl = {
     importCsvApply: 'Wgraj stawki',
     importCsvMatched: (count: number) =>
       count === 1 ? 'Dopasowano 1 pozycję' : `Dopasowano ${count} pozycji`,
-    importCsvUnmatched: (names: string[]) =>
-      `Nie znaleziono w bibliotece: ${names.join(', ')}`,
+    importCsvUnmatched: (names: string[]) => `Nie znaleziono w bibliotece: ${names.join(', ')}`,
     importCsvUnknownColumns: (slugs: string[]) =>
       `Kolumny spoza słownika (pominięte): ${slugs.join(', ')}`,
     importCsvProblem: (line: number, message: string) => `Wiersz ${line}: ${message}`,
@@ -649,6 +670,13 @@ export const pl = {
     exportSchedule: 'Eksportuj termin (PDF)',
     scheduleMissing: 'Ta wycena nie ma jeszcze harmonogramu — ustaw go w zakładce „Termin".',
     scheduleSaved: 'Zapisano dokument „Szacowany termin"',
+    stagesIncluded: 'w zakresie',
+    stagesExcluded: 'poza zakresem',
+    stagesCount: (objete: number, wszystkie: number) =>
+      `${objete} z ${wszystkie} etapów w zakresie`,
+    exportStages: 'Eksportuj etapy współpracy (PDF)',
+    stagesMissing: 'Ta wycena nie ma jeszcze dokumentu etapów — złóż go w zakładce „Dokumenty”.',
+    stagesSaved: 'Zapisano dokument „Etapy współpracy”',
   },
 
   settings: {
@@ -740,7 +768,8 @@ export const pl = {
       if (days === 1) return 'Został 1 dzień okresu próbnego';
       const rest = days % 10;
       const tens = days % 100;
-      if (rest >= 2 && rest <= 4 && (tens < 12 || tens > 14)) return `Zostały ${days} dni okresu próbnego`;
+      if (rest >= 2 && rest <= 4 && (tens < 12 || tens > 14))
+        return `Zostały ${days} dni okresu próbnego`;
       return `Zostało ${days} dni okresu próbnego`;
     },
     trialExplainer: 'Okres próbny to czas na sprawdzenie aplikacji — nie wymaga karty.',

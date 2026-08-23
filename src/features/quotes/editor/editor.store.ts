@@ -31,6 +31,14 @@ import {
   type ScheduleStage,
   type StageTemplate,
 } from '@/domain/schedule';
+import {
+  newStagesDoc,
+  newStageEntry,
+  type QuoteDocuments,
+  type StageEntry,
+  type StagesDoc,
+  type StageTemplateEntry,
+} from '@/domain/documents';
 import { newId } from '@/domain/id';
 import type { Quote } from '@/data/repos/quotes.repo';
 
@@ -95,6 +103,8 @@ export interface EditorState {
    * store znaczyłby dwa niezależne cykle zapisu na tym samym wierszu.
    */
   schedule: ScheduleBody | null;
+  /** Dokumenty towarzyszące (F6) — ta sama zasada co `schedule`. */
+  documents: QuoteDocuments | null;
 
   mode: EditorMode;
   saveState: SaveState;
@@ -128,6 +138,14 @@ export interface EditorState {
   updateStage: (stageId: string, patch: Partial<ScheduleStage>) => void;
   addStage: (partial?: Partial<ScheduleStage>) => void;
   removeStage: (stageId: string) => void;
+
+  // --- dokumenty towarzyszące (F6.1) ---
+  /** Zakłada dokument „Etapy współpracy", jeśli wycena go nie ma. */
+  ensureStagesDoc: (template?: StageTemplateEntry[] | null) => void;
+  patchStagesDoc: (patch: Partial<StagesDoc>) => void;
+  updateStageEntry: (entryId: string, patch: Partial<StageEntry>) => void;
+  addStageEntry: (partial?: Partial<StageEntry>) => void;
+  removeStageEntry: (entryId: string) => void;
 
   // --- zapis ---
   markSaving: () => void;
@@ -233,6 +251,7 @@ const INITIAL = {
   status: 'draft' as QuoteStatus,
   body: null,
   schedule: null as ScheduleBody | null,
+  documents: null as QuoteDocuments | null,
   lastSeenUpdatedAt: null,
   mode: 'edit' as EditorMode,
   saveState: 'idle' as SaveState,
@@ -306,6 +325,7 @@ export const useEditorStore = create<EditorState>()(
         state.status = quote.status;
         state.body = quote.body;
         state.schedule = quote.schedule;
+        state.documents = quote.documents;
         state.lastSeenUpdatedAt = quote.updatedAt;
         state.saveState = 'idle';
         state.saveError = null;
@@ -360,6 +380,46 @@ export const useEditorStore = create<EditorState>()(
       set((state) => {
         if (!state.schedule) return;
         state.schedule.stages = state.schedule.stages.filter((stage) => stage.id !== stageId);
+        state.saveState = 'dirty';
+      }),
+
+    ensureStagesDoc: (template = null) =>
+      set((state) => {
+        // Idempotentne, jak `ensureSchedule` — wejście na zakładkę nie może
+        // skasować tego, co ktoś już opisał.
+        if (state.documents?.stages) return;
+        state.documents = { ...state.documents, stages: newStagesDoc({}, template ?? null) };
+        state.saveState = 'dirty';
+      }),
+
+    patchStagesDoc: (patch) =>
+      set((state) => {
+        if (!state.documents?.stages) return;
+        Object.assign(state.documents.stages, patch);
+        state.saveState = 'dirty';
+      }),
+
+    updateStageEntry: (entryId, patch) =>
+      set((state) => {
+        const entry = state.documents?.stages?.entries.find((item) => item.id === entryId);
+        if (!entry) return;
+        Object.assign(entry, patch);
+        state.saveState = 'dirty';
+      }),
+
+    addStageEntry: (partial) =>
+      set((state) => {
+        if (!state.documents?.stages) return;
+        state.documents.stages.entries.push(newStageEntry(partial));
+        state.saveState = 'dirty';
+      }),
+
+    removeStageEntry: (entryId) =>
+      set((state) => {
+        if (!state.documents?.stages) return;
+        state.documents.stages.entries = state.documents.stages.entries.filter(
+          (entry) => entry.id !== entryId,
+        );
         state.saveState = 'dirty';
       }),
 

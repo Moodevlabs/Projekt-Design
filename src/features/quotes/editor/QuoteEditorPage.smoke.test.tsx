@@ -97,6 +97,7 @@ function quote(): Quote {
     }),
     bodyError: null,
     schedule: null,
+    documents: null,
   };
 }
 

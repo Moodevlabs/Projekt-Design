@@ -413,6 +413,7 @@ export type Database = {
           created_by: string | null
           currency: string
           deleted_at: string | null
+          documents: Json | null
           id: string
           number: string | null
           schedule: Json | null
@@ -434,6 +435,7 @@ export type Database = {
           created_by?: string | null
           currency?: string
           deleted_at?: string | null
+          documents?: Json | null
           id?: string
           number?: string | null
           schedule?: Json | null
@@ -455,6 +457,7 @@ export type Database = {
           created_by?: string | null
           currency?: string
           deleted_at?: string | null
+          documents?: Json | null
           id?: string
           number?: string | null
           schedule?: Json | null

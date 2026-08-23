@@ -44,6 +44,7 @@ function makeQuote(): Quote {
     body: structuredClone(BODY),
     bodyError: null,
     schedule: null,
+    documents: null,
   };
 }
 

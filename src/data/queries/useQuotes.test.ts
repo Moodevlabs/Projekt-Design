@@ -51,6 +51,7 @@ function makeQuote(): Quote {
     body: newQuoteBody(),
     bodyError: null,
     schedule: null,
+    documents: null,
   };
 }
 
