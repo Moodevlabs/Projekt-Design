@@ -220,10 +220,17 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - `DiscountLine` zwraca `enabledInScope`/`itemsInScope` — to z tego T-36 zrobi etykietę „Warunek niespełniony (4/5 pozycji)". Bez niej zero wygląda jak błąd, a nie jak zachęta do dobrania etapu.
   > - Test parytetu 25% zrobiony na `scope: 'items'`, a nie na tagu `visualization` — **tagi pozycji przychodzą dopiero z T-42**.
 
-- [ ] **T-33 Słownik typów pomieszczeń** (F1.2)
+- [x] **T-33 Słownik typów pomieszczeń** (F1.2)
   Migracja `room_types` + seed 14 typów w `handle_new_user()`, `room-types.repo`, `useRoomTypes`.
   ✅ Nowe konto dostaje 14 typów; usunięcie używanego typu to soft delete z ostrzeżeniem.
   ⚠️ UI tego słownika mieszka w ustawieniach — rób go razem z **T-16**, nie osobno, żeby nie budować dwa razy tej samej strony.
+  > **Zrobione.** Migracja `0006_room_types.sql` (tabela, indeksy, RLS, granty, `seed_room_types()`, `handle_new_user()` + backfill), `room-types.repo.ts`, `useRoomTypes`, `queryKeys.roomTypes`. 419 testów jednostkowych, 44 integracyjne, **20/20 pgTAP**. UI świadomie zostawione do T-16.
+  > **Na co uważać:**
+  > - **Nowa tabela nie dziedziczy grantów.** 0004 nadaje je hurtem przez `on all tables in schema public`, co obejmuje tylko tabele istniejące w tamtej chwili. Bez jawnego `grant` w swojej migracji PostgREST odpowiada `42501 permission denied` — i to **zanim RLS w ogóle dojdzie do głosu**, więc objaw („brak uprawnień” nawet dla `service_role`) nie wskazuje na przyczynę. Każda kolejna migracja z nową tabelą musi to powtórzyć.
+  > - **Seed jest osobną funkcją `seed_room_types(ws)`**, bo korzystają z niego dwa miejsca: trigger zakładania konta i backfill istniejących workspace’ów. Dwie kopie listy rozjechałyby się przy pierwszej zmianie. Funkcja jest idempotentna (pomija slugi, które workspace już ma).
+  > - **`slug` nie zmienia się razem z nazwą** — to po nim reguły cenowe trafiają w kolumnę macierzy (F1.3) i po nim idzie import CSV. Gdyby szedł za nazwą, poprawienie literówki wyzerowałoby ceny. `RoomTypePatch` celowo nie zawiera `slug`.
+  > - **Unikalność sluga dotyczy tylko żywych wpisów** (indeks częściowy `where deleted_at is null`), więc raz usunięta „kuchnia” daje się dodać z powrotem.
+  > - Usuwanie to **soft delete** — `roomTypeId` siedzi w regułach cenowych i w pomieszczeniach zapisanych wycen. Ostrzeżenie „X pozycji używa tego typu” dochodzi razem z UI w T-16.
 
 - [ ] **T-34 Biblioteka: reguły cenowe i macierz** (F1.3)
   `library_items.pricing jsonb`, przełącznik trybu na karcie pozycji, macierz `pozycje × typy pomieszczeń`, import CSV.

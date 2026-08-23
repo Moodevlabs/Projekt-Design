@@ -105,6 +105,20 @@ describe('rejestracja', () => {
     const daysLeft = (new Date(sub?.trial_ends_at as string).getTime() - Date.now()) / 86_400_000;
     expect(daysLeft).toBeGreaterThan(13);
     expect(daysLeft).toBeLessThanOrEqual(14);
+
+    // --- slownik typow pomieszczen: 14 startowych (kryterium T-33) ---
+    const { data: roomTypes } = await admin
+      .from('room_types')
+      .select('name, slug, sort_order')
+      .eq('workspace_id', workspaceId)
+      .order('sort_order', { ascending: true });
+
+    const slugi = (roomTypes ?? []).map((typ) => String(typ.slug));
+    expect(slugi).toHaveLength(14);
+    expect(slugi[0]).toBe('sien-hol');
+    expect(slugi).toContain('kuchnia');
+    // Slug jest kluczem technicznym cennika — bez polskich znakow.
+    expect(slugi.every((slug) => /^[a-z0-9-]+$/.test(slug))).toBe(true);
   });
 
   it('nowy uzytkownik widzi swoj workspace przez RLS i zaden inny', async () => {

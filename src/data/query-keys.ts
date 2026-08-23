@@ -14,6 +14,8 @@ export const queryKeys = {
   brandKit: ['brand-kit'] as const,
   quotes: (filters?: unknown) => (filters ? (['quotes', filters] as const) : (['quotes'] as const)),
   quote: (id: string) => ['quotes', 'detail', id] as const,
+  roomTypes: (workspaceId?: string) =>
+    workspaceId ? (['room-types', workspaceId] as const) : (['room-types'] as const),
   libraryItems: (filters?: unknown) =>
     filters ? (['library', 'items', filters] as const) : (['library', 'items'] as const),
   libraryCategories: (workspaceId?: string) =>

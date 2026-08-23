@@ -15,7 +15,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions, pg_catalog;
 
-select plan(19);
+select plan(20);
 
 -- -----------------------------------------------------------------------------
 -- Przygotowanie (rola postgres — właściciel tabel, więc RLS jej nie dotyczy)
@@ -64,6 +64,11 @@ select 'bbbbbbbb-0000-4000-8000-000000000001', v, 'Wycena B', '{"sections":[]}':
 insert into public.library_items (workspace_id, name)
 select v, 'Pozycja B' from public.__rls_ctx where k = 'ws_b';
 
+-- Slownik typow pomieszczen tez jest workspace'owy (T-33): ceny per typ
+-- zdradzalyby konstrukcje cennika konkurencji.
+insert into public.room_types (workspace_id, name, slug)
+select v, 'Pracownia B', 'pracownia-b' from public.__rls_ctx where k = 'ws_b';
+
 -- =============================================================================
 -- CZĘŚĆ 1 — użytkownik A (trial aktywny)
 -- =============================================================================
@@ -86,6 +91,9 @@ insert into public.__rls_res (k, v)
 select 'a_members_count', count(*)::text from public.workspace_members;
 insert into public.__rls_res (k, v)
 select 'a_library_count', count(*)::text from public.library_items;
+insert into public.__rls_res (k, v)
+select 'a_room_types_b_count', count(*)::text from public.room_types rt
+  where rt.workspace_id = (select v from public.__rls_ctx where k = 'ws_b');
 insert into public.__rls_res (k, v)
 select 'a_subscriptions_count', count(*)::text from public.subscriptions;
 
@@ -212,6 +220,8 @@ select is(public.__rls_val('a_members_count'), '1',
           'User A widzi tylko swoje czlonkostwo');
 select is(public.__rls_val('a_library_count'), '0',
           'User A nie widzi biblioteki user B');
+select is(public.__rls_val('a_room_types_b_count'), '0',
+          'User A nie widzi slownika pomieszczen user B');
 select is(public.__rls_val('a_subscriptions_count'), '1',
           'User A widzi tylko swoja subskrypcje');
 

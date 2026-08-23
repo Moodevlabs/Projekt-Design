@@ -456,6 +456,47 @@ export type Database = {
           },
         ]
       }
+      room_types: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          id: string
+          name: string
+          slug: string
+          sort_order: number
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          name: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          name?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "room_types_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stripe_events: {
         Row: {
           id: string
@@ -590,6 +631,7 @@ export type Database = {
       is_workspace_owner: { Args: { ws: string }; Returns: boolean }
       next_quote_number: { Args: { ws: string }; Returns: string }
       quote_can_write: { Args: { q: string }; Returns: boolean }
+      seed_room_types: { Args: { ws: string }; Returns: undefined }
       storage_workspace_id: { Args: { object_name: string }; Returns: string }
       workspace_can_write: { Args: { ws: string }; Returns: boolean }
     }
