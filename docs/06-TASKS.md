@@ -366,6 +366,7 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - Stripe SDK wymaga `Stripe.createFetchHttpClient()` — bez tego próbuje użyć node'owego `http` i nie startuje.
   > - **Mapowanie statusów jest zduplikowane** (`src/domain/billing/entitlement.ts` i `supabase/functions/_shared/subscription-status.ts`), bo Deno nie importuje z `src/`. Pilnuje ich `edge-parity.test.ts`, który czyta plik funkcji i porównuje mapowanie — bez uruchamiania Deno.
   > - Hot reload `supabase functions serve` **wywraca runtime przy edycji pliku** (błąd montowania w Dockerze). Po każdej zmianie restartuj serwer, zamiast diagnozować 502.
+  > - **To NIE jest plan „Pro" i nie ma wersji darmowej.** Aplikacja jest płatna w całości, a `monthly`/`yearly` to wyłącznie **częstotliwość płatności**. Nazwa produktu w Stripe jest widoczna klientowi na stronie płatności, więc „Anzorge Pro" sugerowałoby istnienie darmowego tieru — poprawione w sandboxie i w kodzie (migracja `0009_plan_naming.sql` przenosi też stare wartości kolumny `plan`). Okres próbny to czas na sprawdzenie, a nie darmowy tier.
   > **Czego brakuje do produkcji:** `STRIPE_WEBHOOK_SECRET` z prawdziwego endpointu (lokalnie użyłem własnego), `supabase secrets set` na projekcie w chmurze i podpięcie URL webhooka w panelu Stripe.
 
 - [ ] **T-15 Gating + ekran subskrypcji** (03-BILLING §4)
