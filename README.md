@@ -47,6 +47,9 @@ uruchomieniu instalatora.
 
 ### macOS — podpis i notaryzacja
 
+> Krok po kroku (certyfikat, hasło dla aplikacji, weryfikacja gotowego pliku):
+> **[`docs/07-BUILD-MACOS.md`](docs/07-BUILD-MACOS.md)**.
+
 Bez notaryzacji Gatekeeper nie pozwoli uruchomić aplikacji ściągniętej z sieci.
 
 - Konto **Apple Developer Program** (99 USD/rok).
