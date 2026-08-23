@@ -177,6 +177,11 @@ export const pl = {
     discountsEmpty: 'Brak rabatów.',
     discountSectionMissing: 'Wskaż sekcję',
 
+    perSection: 'Per etap',
+    perSectionShow: 'Pokaż podział na etapy',
+    perSectionHide: 'Ukryj podział na etapy',
+    perSectionUnnamed: 'Bez nazwy',
+
     summary: 'Podsumowanie',
     itemsTotal: 'Suma pozycji',
     discounts: 'Rabaty',

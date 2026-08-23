@@ -297,10 +297,14 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - **Zakres rabatu czyści wskazania przy zmianie** — inaczej rabat przełączony z „wybrane pozycje" na „cała wycena" pamiętałby stare `itemIds`.
   > - Osobna **zakładka rabatów w bibliotece** (F3.2, ostatni punkt) świadomie nie weszła: rabaty biblioteczne działają dziś przez `library_items.kind`, a przenoszenie ich na własną strukturę to zmiana schematu biblioteki — wchodzi razem z **T-50**, gdzie i tak ruszamy tamten model.
 
-- [ ] **T-37 Podsumowania per sekcja** (F7.3)
-  `calcQuoteTotals` zwraca `bySection` z uwzględnieniem rabatów zakresowych; rozwijany blok „Per etap” w `TotalsCard`.
+- [x] **T-37 Podsumowania per sekcja** (F7.3)
+  `calcSectionBreakdown` z uwzględnieniem rabatów zakresowych; rozwijany blok „Per etap” w `TotalsCard`.
   ✅ Suma sekcji = pozycje sekcji − rabaty sekcji.
-  ⚠️ `calcSectionTotals` i `calcGroupTotals` **już istnieją** (`domain/quote/calc.ts`) — to rozszerzenie wyniku globalnego, nie nowa kalkulacja od zera.
+  > **Zrobione.** `calcSectionBreakdown` w `domain/quote/calc.ts` + rozwijany blok w `TotalsCard` (pokazywany dopiero przy 2+ sekcjach). 493 testy jednostkowe, 47 integracyjnych.
+  > **Na co uważać:**
+  > - **Rabat na całą wycenę NIE jest rozdzielany między sekcje.** Rozsmarowanie go proporcjonalnie dałoby liczby, których użytkownik nie odtworzy ręcznie — a ten podział służy właśnie do sprawdzania. Do sekcji trafia tylko rabat, który na pewno do niej należy: `scope: 'section'` wskazujący tę sekcję albo `scope: 'items'`, którego **wszystkie** pozycje w niej leżą.
+  > - Rabat rozłożony na dwie sekcje nie trafia do żadnej — świadomie, z tego samego powodu.
+  > - Blok jest **zwinięty domyślnie i ukryty przy jednej sekcji**: to narzędzie do sprawdzania, a nie główna liczba.
 
 ### Reszta Fazy 1
 

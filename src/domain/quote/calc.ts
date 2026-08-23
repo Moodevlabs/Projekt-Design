@@ -30,6 +30,61 @@ export interface TotalsOptions {
  */
 const DEFAULT_TOTALS_OPTIONS: TotalsOptions = { vatRate: 0, pricesInclude: 'net', rooms: [] };
 
+/** Podsumowanie jednej sekcji na potrzeby rozbicia „per etap". */
+export interface SectionTotal {
+  sectionId: string;
+  title: string;
+  itemsCents: number;
+  /** Rabaty, które da się jednoznacznie przypisać do tej sekcji. */
+  discountsCents: number;
+  netCents: number;
+}
+
+/**
+ * Rozbicie wyceny na sekcje (arkusz: `OFERTA - DANE` R50–R54).
+ *
+ * Do sekcji przypisujemy rabat wtedy i tylko wtedy, gdy **na pewno** do niej
+ * należy: `scope: 'section'` wskazujący tę sekcję albo `scope: 'items'`,
+ * którego wszystkie pozycje w niej leżą. Rabatu na całą wycenę nie rozdzielamy
+ * — rozsmarowanie go proporcjonalnie dałoby liczby, których nie da się
+ * odtworzyć ręcznie, a to podsumowanie ma służyć do sprawdzania.
+ */
+export function calcSectionBreakdown(body: QuoteBody): SectionTotal[] {
+  const { lines } = calcDiscounts(body, body.rooms);
+  const byId = new Map(body.discounts.map((discount) => [discount.id, discount]));
+
+  return body.sections.map((section) => {
+    const items = sectionItems(section);
+    const ids = new Set(items.map((item) => item.id));
+    const sums = sumItems(items, body.rooms);
+
+    const discountsCents = lines.reduce((total, line) => {
+      const discount = byId.get(line.discountId);
+      if (!discount) return total;
+
+      if (discount.scope === 'section') {
+        return discount.sectionId === section.id ? total + line.amountCents : total;
+      }
+
+      if (discount.scope === 'items') {
+        const wszystkieTutaj =
+          discount.itemIds.length > 0 && discount.itemIds.every((id) => ids.has(id));
+        return wszystkieTutaj ? total + line.amountCents : total;
+      }
+
+      return total;
+    }, 0);
+
+    return {
+      sectionId: section.id,
+      title: section.title,
+      itemsCents: sums.itemsCents,
+      discountsCents: sums.discountsCents + discountsCents,
+      netCents: Math.max(0, sums.itemsCents - sums.discountsCents - discountsCents),
+    };
+  });
+}
+
 /**
  * Podsumowanie całej wyceny (stawka VAT, tryb cen i pomieszczenia z `body`).
  *
