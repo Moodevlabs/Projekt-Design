@@ -334,6 +334,36 @@ export const pl = {
     pricingExample: (cents: string, rooms: number) =>
       rooms === 1 ? `Przy 1 pomieszczeniu: ${cents}` : `Przy ${rooms} pomieszczeniach: ${cents}`,
 
+    // Macierz cennika (widok zbiorczy).
+    matrix: 'Macierz cennika',
+    matrixHint: 'Stawki wszystkich pozycji naraz. Puste pole znaczy „stawka domyślna”.',
+    matrixEmpty: 'Brak pozycji liczonych za pomieszczenie.',
+    matrixNoRoomTypes: 'Najpierw dodaj typy pomieszczeń w ustawieniach.',
+    matrixColumnItem: 'Pozycja',
+    matrixColumnBase: 'Baza',
+    matrixColumnDefault: 'Pozostałe',
+    matrixOnlyParametric: 'Tylko liczone za pomieszczenie',
+    matrixCell: (item: string, room: string) => `${item} — ${room}`,
+    matrixBaseCell: (item: string) => `${item} — baza`,
+    matrixDefaultCell: (item: string) => `${item} — pozostałe`,
+
+    // Import CSV.
+    importCsv: 'Importuj CSV',
+    importCsvTitle: 'Import macierzy z pliku',
+    importCsvHint:
+      'Pierwszy wiersz to nagłówek: „nazwa”, opcjonalnie „baza” i „pozostałe”, a dalej slugi typów pomieszczeń.',
+    importCsvFile: 'Plik CSV',
+    importCsvApply: 'Wgraj stawki',
+    importCsvMatched: (count: number) =>
+      count === 1 ? 'Dopasowano 1 pozycję' : `Dopasowano ${count} pozycji`,
+    importCsvUnmatched: (names: string[]) =>
+      `Nie znaleziono w bibliotece: ${names.join(', ')}`,
+    importCsvUnknownColumns: (slugs: string[]) =>
+      `Kolumny spoza słownika (pominięte): ${slugs.join(', ')}`,
+    importCsvProblem: (line: number, message: string) => `Wiersz ${line}: ${message}`,
+    importCsvDone: (count: number) =>
+      count === 1 ? 'Zapisano stawki 1 pozycji' : `Zapisano stawki ${count} pozycji`,
+
     // Grupy.
     addGroup: 'Dodaj grupę',
     newGroupName: 'Nowa grupa',

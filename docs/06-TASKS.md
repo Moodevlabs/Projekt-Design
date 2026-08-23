@@ -243,11 +243,18 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - **Nieczytelna reguła w `jsonb` degraduje pozycję do `flat`**, a nie wywala biblioteki — jedna zepsuta pozycja nie może zabrać użytkownikowi całego cennika. Cena jednostkowa zostaje.
   > - `@tanstack/react-table` **nie** zostało dodane. Stawki to kilkanaście wierszy na kartę, `MoneyInput` już był — biblioteka nic by nie wniosła poza zależnością.
 
-- [ ] **T-50 Macierz cennika i import CSV** (F1.3 — reszta)
+- [x] **T-50 Macierz cennika i import CSV** (F1.3 — reszta)
   Widok `pozycje (wiersze) × typy pomieszczeń (kolumny)` z edycją w komórkach i filtrem po kategorii — dla ludzi, którzy lubią Excela. Import CSV macierzy (kolumny = slugi typów), parser w `domain/library/csv.ts`.
   ✅ Zmiana stawki w widoku zbiorczym daje ten sam efekt co edycja na karcie; import z pliku o kolumnach ze slugami wgrywa stawki bez ruszania pozostałych pól.
-  ⚠️ Wydzielone z T-34 świadomie: reguły cenowe **działają** bez tego widoku (edytuje się je na karcie pozycji), a zbiorcza tabela to wygoda przy przenoszeniu cennika z arkusza. Zrób ją, zanim klient zacznie przepisywać cennik ręcznie.
   ⚠️ `slug` jest kluczem importu — patrz notatka w T-33 o tym, dlaczego nie zmienia się razem z nazwą.
+  > **Zrobione.** `domain/library/csv.ts` (parser), `features/library/pricing/` — `PricingMatrixTab`, `CsvImportDialog`, `csv-apply.ts`. Trzecia zakładka biblioteki. 477 testów jednostkowych, 47 integracyjnych.
+  > **Na co uważać:**
+  > - **Pusta komórka to „brak stawki", nie zero.** Zapisanie zera przy imporcie częściowo wypełnionego arkusza skasowałoby cennik. Ta sama zasada w trzech miejscach: parser pomija puste komórki, `buildPricingFromCsv` **dokłada** stawki zamiast podmieniać całą mapę, a macierz pokazuje w pustej komórce wartość domyślną — czyli to, co faktycznie się policzy.
+  > - **Import jest dwuetapowy.** Najpierw podgląd (ile dopasowano, co odpadło, jakie kolumny są spoza słownika, które wiersze mają problemy), zapis dopiero po potwierdzeniu. Cennik to dane wpisywane godzinami.
+  > - **Wiersz bez odpowiednika nie zakłada nowej pozycji** — import ma uzupełnić cennik, nie rozmnożyć bibliotekę o literówki. Nazwy dopasowujemy bez wielkości liter i nadmiarowych spacji.
+  > - **Samo otwarcie macierzy nic nie zapisuje.** Pozycja stałocenowa staje się parametryczna dopiero, gdy ktoś wpisze jej stawkę; jej dotychczasowa cena zostaje wtedy bazą. Jest na to test.
+  > - Parser radzi sobie z tym, co realnie wypluwa Excel: separator `;` albo `,`, przecinek dziesiętny, BOM, cudzysłowy i `""` w środku tekstu. **Nie wstawiaj znaku BOM dosłownie w kodzie** — ESLint go odrzuca (`no-irregular-whitespace`); porównujemy `charCodeAt(0) === 0xfeff`.
+  > - `@tanstack/react-table` dalej niepotrzebne — kilkanaście kolumn, zwykła tabela z `overflow-x-auto`.
 
 - [x] **T-35 Edytor: panel pomieszczeń** (F1.4 — bez bloków per pomieszczenie)
   `RoomsPanel`, akcje store (`addRoom`/`updateRoom`/`removeRoom`), dopisek „baza + 7 pom.".

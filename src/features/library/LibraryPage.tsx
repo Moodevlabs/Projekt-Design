@@ -1,6 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LibraryItemsTab } from './items/LibraryItemsTab';
 import { LibraryGroupsTab } from './groups/LibraryGroupsTab';
+import { PricingMatrixTab } from './pricing/PricingMatrixTab';
 import { pl } from '@/i18n/pl';
 
 /**
@@ -15,6 +16,7 @@ export function LibraryPage() {
       <TabsList aria-label={pl.library.tabsLabel}>
         <TabsTrigger value="items">{pl.library.items}</TabsTrigger>
         <TabsTrigger value="groups">{pl.library.groups}</TabsTrigger>
+        <TabsTrigger value="matrix">{pl.library.matrix}</TabsTrigger>
       </TabsList>
 
       <TabsContent value="items">
@@ -22,6 +24,9 @@ export function LibraryPage() {
       </TabsContent>
       <TabsContent value="groups">
         <LibraryGroupsTab />
+      </TabsContent>
+      <TabsContent value="matrix">
+        <PricingMatrixTab />
       </TabsContent>
     </Tabs>
   );
