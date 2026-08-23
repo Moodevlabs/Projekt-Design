@@ -22,6 +22,7 @@ function libraryItem(overrides: Partial<LibraryItem> = {}): LibraryItem {
     description: 'Kamienny',
     unitPriceCents: 120_000,
     sortOrder: 0,
+    variantOf: null,
     pricing: { mode: 'flat' },
     ...overrides,
   };

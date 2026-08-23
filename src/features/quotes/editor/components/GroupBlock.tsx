@@ -11,6 +11,8 @@ import { LibraryPicker } from './LibraryPicker';
 import { SaveToLibraryButton } from './SaveToLibraryButton';
 import { DragHandle } from './DragHandle';
 import { useStableIds } from '../dnd/useStableIds';
+import type { VariantOptions } from '../useVariantOptions';
+import type { ItemVariant } from '../editor.store';
 import { ConfirmDialog } from '@/components/shared';
 import {
   calcGroupTotals,
@@ -32,6 +34,9 @@ export interface GroupBlockProps {
   pricesInclude: PricesInclude;
   /** Pomieszczenia wyceny — potrzebne do policzenia pozycji parametrycznych. */
   rooms: Room[];
+  /** Warianty pozycji (F1.4) — przekazywane w dół bez zmian. */
+  variants: VariantOptions;
+  onVariantChange: (itemId: string, variant: ItemVariant) => void;
   onRename: (groupId: string, name: string) => void;
   onRemove: (groupId: string) => void;
   onToggleGroup: (groupId: string) => void;
@@ -53,6 +58,8 @@ export const GroupBlock = memo(function GroupBlock({
   vatRate,
   pricesInclude,
   rooms,
+  variants,
+  onVariantChange,
   onRename,
   onRemove,
   onToggleGroup,
@@ -210,6 +217,8 @@ export const GroupBlock = memo(function GroupBlock({
               onRemove={onRemoveItem}
               onSaveToLibrary={onSaveItemToLibrary}
               rooms={rooms}
+              variants={variants}
+              onVariantChange={onVariantChange}
             />
           ))}
         </SortableContext>

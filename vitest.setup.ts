@@ -26,3 +26,15 @@ if (!globalThis.ResizeObserver) {
 if (!Element.prototype.scrollIntoView) {
   Element.prototype.scrollIntoView = vi.fn();
 }
+
+/*
+ * Pointer capture — jsdom go nie ma, a Radix woła go przy otwieraniu `Select`.
+ * Bez tego test, który klika w listę wyboru, wywala się na
+ * `target.hasPointerCapture is not a function`, i to w sposób mylący: błąd
+ * mówi o wskaźniku, a wygląda jak „nie znaleziono opcji".
+ */
+if (!Element.prototype.hasPointerCapture) {
+  Element.prototype.hasPointerCapture = () => false;
+  Element.prototype.setPointerCapture = () => {};
+  Element.prototype.releasePointerCapture = () => {};
+}

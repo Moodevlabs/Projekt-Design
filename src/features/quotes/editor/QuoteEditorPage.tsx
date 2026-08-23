@@ -23,6 +23,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import type { Item } from '@/domain/quote';
 import { useSaveToLibrary } from './useSaveToLibrary';
+import { useVariantOptions } from './useVariantOptions';
 import { useTemplateActions } from './useTemplateActions';
 import { useExportPdf } from '@/pdf/useExportPdf';
 import { ReadOnlyBanner } from '@/features/billing/ReadOnlyBanner';
@@ -195,6 +196,7 @@ function EditorSurface({
   const toggleDiscount = useEditorStore((state) => state.toggleDiscount);
   const addRoomBlocksAction = useEditorStore((state) => state.addRoomBlocks);
   const insertItemToRoomBlocks = useEditorStore((state) => state.insertItemToRoomBlocks);
+  const setItemVariant = useEditorStore((state) => state.setItemVariant);
   const [libraryOpen, setLibraryOpen] = useState(false);
   const templates = useTemplateActions();
   const { exportPdf, exporting: exportingPdf } = useExportPdf();
@@ -274,6 +276,7 @@ function EditorSurface({
    */
   const library = useSaveToLibrary();
   const canWrite = useEntitlement().canWrite;
+  const variants = useVariantOptions();
 
   if (!body) return <EditorSkeleton />;
 
@@ -358,6 +361,8 @@ function EditorSurface({
                       vatRate={body.vatRate}
                       pricesInclude={body.pricesInclude}
                     rooms={body.rooms}
+                      variants={variants}
+                      onVariantChange={setItemVariant}
                       onRename={renameSection}
                       onRemove={removeSection}
                       onAddGroup={addGroup}

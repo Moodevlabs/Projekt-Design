@@ -2,6 +2,7 @@ import { DndContext } from '@dnd-kit/core';
 import { act, render } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SectionBlock } from './SectionBlock';
+import { NO_VARIANTS } from '../useVariantOptions';
 import { useEditorStore } from '../editor.store';
 import { newGroup, newItem, newQuoteBody, newSection } from '@/domain/quote';
 import type { Quote } from '@/data/repos/quotes.repo';
@@ -89,6 +90,8 @@ function Harness() {
       vatRate={23}
       pricesInclude="net"
       rooms={NO_ROOMS}
+      variants={NO_VARIANTS}
+      onVariantChange={noop}
       onRename={noop}
       onRemove={noop}
       onAddGroup={noop}

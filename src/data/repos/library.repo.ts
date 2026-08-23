@@ -33,6 +33,11 @@ export interface LibraryItem {
   unitPriceCents: number;
   sortOrder: number;
   pricing: PricingRule;
+  /**
+   * Lider grupy wariantow (`null` = pozycja samodzielna albo sam lider).
+   * Uzasadnienie modelu stoi w migracji `0010_library_variants.sql`.
+   */
+  variantOf: string | null;
 }
 
 export interface LibraryItemFilters {
@@ -69,6 +74,7 @@ function mapItem(row: ItemRow): LibraryItem {
     unitPriceCents: Number(row.unit_price_cents ?? 0),
     sortOrder: Number(row.sort_order ?? 0),
     pricing: parsePricing(row.pricing, row.id),
+    variantOf: row.variant_of ?? null,
   };
 }
 
@@ -165,6 +171,7 @@ export interface CreateLibraryItemInput {
   unitPriceCents?: number;
   sortOrder?: number;
   pricing?: PricingRule;
+  variantOf?: string | null;
 }
 
 export async function createLibraryItem(input: CreateLibraryItemInput): Promise<LibraryItem> {
@@ -180,6 +187,7 @@ export async function createLibraryItem(input: CreateLibraryItemInput): Promise<
         unit_price_cents: input.unitPriceCents ?? 0,
         sort_order: input.sortOrder ?? 0,
         pricing: input.pricing ?? { mode: 'flat' },
+        variant_of: input.variantOf ?? null,
       })
       .select('*'),
     'Dodanie pozycji do biblioteki',
@@ -203,6 +211,8 @@ export async function updateLibraryItem(id: string, patch: LibraryItemPatch): Pr
   if (patch.unitPriceCents !== undefined) update.unit_price_cents = patch.unitPriceCents;
   if (patch.sortOrder !== undefined) update.sort_order = patch.sortOrder;
   if (patch.pricing !== undefined) update.pricing = patch.pricing;
+  // `null` jest tu znaczace („odepnij od grupy"), wiec sprawdzamy `undefined`.
+  if (patch.variantOf !== undefined) update.variant_of = patch.variantOf;
 
   const rows = unwrap(
     await getSupabase().from('library_items').update(update).eq('id', id).select('*'),

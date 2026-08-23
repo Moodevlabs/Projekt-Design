@@ -5,6 +5,7 @@ import type { LibraryItem, LibraryItemPatch } from '@/data/repos/library.repo';
 import { pl } from '@/i18n/pl';
 
 const useLibraryItems = vi.hoisted(() => vi.fn());
+const useAllLibraryItems = vi.hoisted(() => vi.fn());
 const useLibraryCategories = vi.hoisted(() => vi.fn());
 const createMutate = vi.hoisted(() => vi.fn());
 const deleteMutate = vi.hoisted(() => vi.fn());
@@ -37,6 +38,7 @@ function baseItem(partial: Partial<LibraryItem> = {}): LibraryItem {
     description: 'Dąb lity, 40 mm',
     unitPriceCents: 250_000,
     sortOrder: 10,
+    variantOf: null,
     pricing: { mode: 'flat' },
     ...partial,
   };
@@ -44,6 +46,7 @@ function baseItem(partial: Partial<LibraryItem> = {}): LibraryItem {
 
 vi.mock('@/data/queries/useLibrary', () => ({
   useLibraryItems,
+  useAllLibraryItems,
   useLibraryCategories,
   useCreateLibraryItem: () => ({ mutate: createMutate, isPending: false }),
   useUpdateLibraryItem: () => ({ mutate: updateMutate, isPending: false }),
@@ -74,6 +77,8 @@ function mockItems(rows: LibraryItem[], overrides: Record<string, unknown> = {})
     refetch: vi.fn(),
     ...overrides,
   });
+  // Niefiltrowana lista (grupy wariantow) — te same dane, osobne wywolanie.
+  useAllLibraryItems.mockReturnValue({ data: rows, isLoading: false, isError: false });
 }
 
 /** Ostatnie filtry, z jakimi zakładka zawołała hooka danych. */

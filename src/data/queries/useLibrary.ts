@@ -30,6 +30,18 @@ export function useLibraryItems(filters: LibraryItemFilters = {}) {
   });
 }
 
+/**
+ * Cala biblioteka, bez filtrow ekranu.
+ *
+ * Osobna nazwa, a nie drugie `useLibraryItems()` w komponencie: to samo
+ * wywolanie z roznymi argumentami dwa razy w jednym pliku czyta sie jak
+ * pomylka, a chodzi tu o cos innego — o zbior, ktory NIE ma zalezec od tego,
+ * co uzytkownik wpisal w szukajke (grupy wariantow, podpowiedzi).
+ */
+export function useAllLibraryItems() {
+  return useLibraryItems();
+}
+
 export function useLibraryCategories() {
   const workspaceId = useWorkspaceId();
 

@@ -10,6 +10,8 @@ import { AddLink } from './AddLink';
 import { LibraryPicker } from './LibraryPicker';
 import { DragHandle } from './DragHandle';
 import { useStableIds } from '../dnd/useStableIds';
+import type { VariantOptions } from '../useVariantOptions';
+import type { ItemVariant } from '../editor.store';
 import { ConfirmDialog } from '@/components/shared';
 import {
   calcSectionTotals,
@@ -31,6 +33,9 @@ export interface SectionBlockProps {
   pricesInclude: PricesInclude;
   /** Pomieszczenia wyceny — potrzebne do policzenia pozycji parametrycznych. */
   rooms: Room[];
+  /** Warianty pozycji (F1.4) — przekazywane w dół bez zmian. */
+  variants: VariantOptions;
+  onVariantChange: (itemId: string, variant: ItemVariant) => void;
   onRename: (sectionId: string, title: string) => void;
   onRemove: (sectionId: string) => void;
   onAddGroup: (sectionId: string) => void;
@@ -57,6 +62,8 @@ export const SectionBlock = memo(function SectionBlock({
   vatRate,
   pricesInclude,
   rooms,
+  variants,
+  onVariantChange,
   onRename,
   onRemove,
   onAddGroup,
@@ -176,6 +183,8 @@ export const SectionBlock = memo(function SectionBlock({
               onRemove={onRemoveItem}
               onSaveToLibrary={onSaveItemToLibrary}
               rooms={rooms}
+              variants={variants}
+              onVariantChange={onVariantChange}
             />
           ))}
         </SortableContext>
@@ -213,6 +222,8 @@ export const SectionBlock = memo(function SectionBlock({
               vatRate={vatRate}
               pricesInclude={pricesInclude}
               rooms={rooms}
+              variants={variants}
+              onVariantChange={onVariantChange}
               onRename={onRenameGroup}
               onRemove={onRemoveGroup}
               onToggleGroup={onToggleGroup}

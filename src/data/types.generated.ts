@@ -203,6 +203,7 @@ export type Database = {
           sort_order: number
           unit_price_cents: number
           updated_at: string
+          variant_of: string | null
           workspace_id: string
         }
         Insert: {
@@ -217,6 +218,7 @@ export type Database = {
           sort_order?: number
           unit_price_cents?: number
           updated_at?: string
+          variant_of?: string | null
           workspace_id: string
         }
         Update: {
@@ -231,9 +233,17 @@ export type Database = {
           sort_order?: number
           unit_price_cents?: number
           updated_at?: string
+          variant_of?: string | null
           workspace_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "library_items_variant_of_fkey"
+            columns: ["variant_of"]
+            isOneToOne: false
+            referencedRelation: "library_items"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "library_items_workspace_id_fkey"
             columns: ["workspace_id"]

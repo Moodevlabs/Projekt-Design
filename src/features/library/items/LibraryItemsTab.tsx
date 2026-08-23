@@ -3,6 +3,7 @@ import { Library } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog, EmptyState } from '@/components/shared';
 import {
+  useAllLibraryItems,
   useCreateLibraryItem,
   useDeleteLibraryItem,
   useLibraryCategories,
@@ -19,6 +20,9 @@ import { pl } from '@/i18n/pl';
 
 const CATEGORY_LIST_ID = 'library-categories';
 
+/** Stała referencja — pusta lista nie ma przerysowywać kart przy każdym renderze. */
+const EMPTY_ITEMS: LibraryItem[] = [];
+
 export function LibraryItemsTab() {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<string | null>(null);
@@ -31,6 +35,10 @@ export function LibraryItemsTab() {
   );
 
   const items = useLibraryItems(filters);
+  // Niefiltrowana lista — wybór grupy wariantów nie może zależeć od tego, co
+  // akurat jest wpisane w szukajce. Ten sam klucz zapytania obsługuje panel
+  // biblioteki w edytorze, więc cache jest wspólny.
+  const allItems = useAllLibraryItems();
   const categories = useLibraryCategories();
   const createItem = useCreateLibraryItem();
   const updateItem = useUpdateLibraryItem();
@@ -118,6 +126,7 @@ export function LibraryItemsTab() {
             <LibraryItemCard
               key={item.id}
               item={item}
+              allItems={allItems.data ?? EMPTY_ITEMS}
               categoryListId={CATEGORY_LIST_ID}
               saving={updateItem.isPending}
               onSave={(draft) => handleSave(item, draft)}

@@ -9,6 +9,8 @@ export interface ItemDraft {
   kind: ItemKind;
   unitPriceCents: number;
   pricing: PricingRule;
+  /** Lider grupy wariantow (`null` = pozycja samodzielna). */
+  variantOf: string | null;
 }
 
 export function toItemDraft(item: LibraryItem): ItemDraft {
@@ -19,6 +21,7 @@ export function toItemDraft(item: LibraryItem): ItemDraft {
     kind: item.kind,
     unitPriceCents: item.unitPriceCents,
     pricing: item.pricing,
+    variantOf: item.variantOf,
   };
 }
 
@@ -36,6 +39,7 @@ export function draftSignature(draft: ItemDraft): string {
     draft.kind,
     draft.unitPriceCents,
     draft.pricing,
+    draft.variantOf,
   ]);
 }
 

@@ -337,3 +337,55 @@ describe('library.repo — grupy', () => {
     expect(data?.[0]?.deleted_at).not.toBeNull();
   });
 });
+
+describe('warianty pozycji (F1.4)', () => {
+  it('wariant wskazuje na lidera i wraca z odczytu', async () => {
+    const lider = await makeItem('Wizualizacja 3D');
+    const wariant = await makeItem('Wizualizacja 360');
+    const zapisany = await updateLibraryItem(wariant.id, { variantOf: lider.id });
+
+    expect(zapisany.variantOf).toBe(lider.id);
+
+    const rows = await listLibraryItems(workspaceId, { category: TEST_CATEGORY });
+    expect(rows.find((row) => row.id === wariant.id)?.variantOf).toBe(lider.id);
+    expect(rows.find((row) => row.id === lider.id)?.variantOf).toBeNull();
+  });
+
+  it('BAZA odrzuca wariant wariantu — grupa ma zostac plaska', async () => {
+    // Gdyby wariant mogl wskazywac na wariant, „rodzenstwo" zalezaloby od tego,
+    // od ktorego wpisu zaczac liczyc. UI tez tego nie proponuje, ale to baza
+    // jest tu granica.
+    const lider = await makeItem('Baza wariantow');
+    const wariant = await makeItem('Wariant pierwszy');
+    await updateLibraryItem(wariant.id, { variantOf: lider.id });
+
+    const kolejny = await makeItem('Wariant drugiego poziomu');
+    // Sprawdzamy TRESC bledu, nie sam fakt wyjatku: `updateLibraryItem` rzuca
+    // takze wtedy, gdy update nie zwroci wiersza, wiec goly `toThrow()`
+    // przeszedlby rowniez bez wyzwalacza.
+    await expect(updateLibraryItem(kolejny.id, { variantOf: wariant.id })).rejects.toThrow(
+      /pozycję główną/,
+    );
+  });
+
+  it('BAZA odrzuca pozycje bedaca wariantem samej siebie', async () => {
+    const item = await makeItem('Sama dla siebie');
+    await expect(updateLibraryItem(item.id, { variantOf: item.id })).rejects.toThrow(
+      /wariantem samej siebie/,
+    );
+  });
+
+  it('odpiecie od grupy zostawia pozycje samodzielna', async () => {
+    const lider = await makeItem('Lider do odpiecia');
+    const wariant = await makeItem('Wariant do odpiecia');
+    await updateLibraryItem(wariant.id, { variantOf: lider.id });
+
+    const odpiety = await updateLibraryItem(wariant.id, { variantOf: null });
+    expect(odpiety.variantOf).toBeNull();
+  });
+
+  it('nowa pozycja domyslnie NIE jest niczyim wariantem', async () => {
+    const item = await makeItem('Zwykla pozycja');
+    expect(item.variantOf).toBeNull();
+  });
+});

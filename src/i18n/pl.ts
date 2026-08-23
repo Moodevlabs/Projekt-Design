@@ -144,6 +144,8 @@ export const pl = {
     roomBlockLabel: (room: string, qty: number) => (qty > 1 ? `${room} ×${qty}` : room),
     roomBlockOff: 'pominięte',
     itemFramesLabel: 'Liczba kadrów',
+    itemVariantLabel: 'Wariant pozycji',
+    itemVariantPlaceholder: 'Wybierz wariant',
     /** Skąd wzięła się cena pozycji parametrycznej — np. „baza 200,00 zł + 7 pom.”. */
     pricingFromRooms: (base: string, rooms: number) =>
       rooms === 1 ? `baza ${base} + 1 pom.` : `baza ${base} + ${rooms} pom.`,
@@ -338,6 +340,14 @@ export const pl = {
     pricingFlat: 'Stała',
     pricingPerRoom: 'Za pomieszczenie',
     pricingPerFrame: 'Za kadr',
+
+    variantOf: 'Wariant pozycji',
+    variantOfLabel: 'Wariant pozycji',
+    variantNone: 'Osobna pozycja',
+    variantLeaderNote: (count: number) =>
+      count === 1
+        ? 'Ta pozycja jest główna dla 1 wariantu — dlatego sama nie może być czyimś wariantem.'
+        : `Ta pozycja jest główna dla ${count} wariantów — dlatego sama nie może być czyimś wariantem.`,
     pricingFlatHint: 'Cena × ilość — jak dotąd.',
     pricingPerRoomHint: 'Baza plus stawka za każde zaznaczone pomieszczenie wyceny.',
     pricingPerFrameHint: 'Stawka pomieszczenia plus baza za każdy kadr.',

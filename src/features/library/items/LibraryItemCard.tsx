@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { MoneyInput } from '../components/MoneyInput';
 import { KindToggle } from '../components/KindToggle';
 import { PricingEditor } from './PricingEditor';
+import { VariantField } from './VariantField';
 import { draftSignature, itemSignature, toItemDraft, type ItemDraft } from './item-draft';
 import type { LibraryItem } from '@/data/repos/library.repo';
 import type { PricingRule } from '@/domain/quote';
@@ -21,6 +22,8 @@ const MODE_LABELS: Record<PricingRule['mode'], string> = {
 
 type LibraryItemCardProps = {
   item: LibraryItem;
+  /** Cala biblioteka — do wyboru grupy wariantow (F1.4). */
+  allItems: LibraryItem[];
   /** `id` wspólnej listy podpowiedzi kategorii (jedna na całą zakładkę). */
   categoryListId: string;
   onSave: (draft: ItemDraft) => void;
@@ -37,6 +40,7 @@ type LibraryItemCardProps = {
  */
 export function LibraryItemCard({
   item,
+  allItems,
   categoryListId,
   onSave,
   onDelete,
@@ -117,6 +121,13 @@ export function LibraryItemCard({
           className="w-36"
         />
       </div>
+
+      <VariantField
+        item={item}
+        allItems={allItems}
+        value={draft.variantOf}
+        onChange={(variantOf) => patch({ variantOf })}
+      />
 
       <button
         type="button"

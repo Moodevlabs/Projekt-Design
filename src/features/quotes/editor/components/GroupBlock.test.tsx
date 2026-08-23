@@ -5,6 +5,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { newGroup, newItem, type Group, type Item, type Room } from '@/domain/quote';
+import { NO_VARIANTS } from '../useVariantOptions';
 import { pl } from '@/i18n/pl';
 
 const useLibraryItems = vi.hoisted(() => vi.fn());
@@ -38,6 +39,8 @@ function setup(group: Group, editing = true) {
     onSaveItemToLibrary: vi.fn(),
     onSaveGroupToLibrary: vi.fn(),
     onInsertItemToRoomBlocks: vi.fn(),
+    variants: NO_VARIANTS,
+    onVariantChange: vi.fn(),
   };
 
   render(
@@ -72,6 +75,8 @@ function setupWithRooms(group: Group, rooms: Room[]) {
         vatRate={23}
         pricesInclude="net"
         rooms={rooms}
+        variants={NO_VARIANTS}
+        onVariantChange={vi.fn()}
         onRename={vi.fn()}
         onRemove={vi.fn()}
         onToggleGroup={vi.fn()}

@@ -5,6 +5,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { ItemRow } from './ItemRow';
+import { NO_VARIANTS } from '../useVariantOptions';
 import { newItem, type Item } from '@/domain/quote';
 import { pl } from '@/i18n/pl';
 
@@ -17,6 +18,9 @@ function Dnd({ ids, children }: { ids: string[]; children: ReactNode }) {
   );
 }
 
+/** Wiersz bez wariantow — domyslny przypadek. Stala referencja, jak w apce. */
+const BEZ_WARIANTOW = { variants: NO_VARIANTS, onVariantChange: vi.fn() };
+
 function setup(overrides: Partial<Item> = {}, editing = true) {
   const item = newItem({ name: 'Blat kuchenny', unitPriceCents: 120_000, ...overrides });
   const handlers = {
@@ -28,7 +32,14 @@ function setup(overrides: Partial<Item> = {}, editing = true) {
 
   render(
     <Dnd ids={[item.id]}>
-      <ItemRow item={item} editing={editing} currency="PLN" rooms={[]} {...handlers} />
+      <ItemRow
+        item={item}
+        editing={editing}
+        currency="PLN"
+        rooms={[]}
+        {...BEZ_WARIANTOW}
+        {...handlers}
+      />
     </Dnd>,
   );
   return { item, ...handlers };
@@ -95,6 +106,7 @@ describe('ItemRow', () => {
           onPatch={vi.fn()}
           onRemove={vi.fn()}
           onSaveToLibrary={vi.fn()}
+          {...BEZ_WARIANTOW}
         />
       </Dnd>,
     );
@@ -113,6 +125,7 @@ describe('ItemRow', () => {
           onPatch={vi.fn()}
           onRemove={vi.fn()}
           onSaveToLibrary={vi.fn()}
+          {...BEZ_WARIANTOW}
         />
       </Dnd>,
     );
@@ -211,6 +224,7 @@ describe('ItemRow — pozycja liczona za pomieszczenie', () => {
           onPatch={vi.fn()}
           onRemove={vi.fn()}
           onSaveToLibrary={vi.fn()}
+          {...BEZ_WARIANTOW}
         />
       </Dnd>,
     );
@@ -231,6 +245,7 @@ describe('ItemRow — pozycja liczona za pomieszczenie', () => {
           onPatch={vi.fn()}
           onRemove={vi.fn()}
           onSaveToLibrary={vi.fn()}
+          {...BEZ_WARIANTOW}
         />
       </Dnd>,
     );
@@ -251,6 +266,7 @@ describe('ItemRow — pozycja liczona za pomieszczenie', () => {
           onPatch={vi.fn()}
           onRemove={vi.fn()}
           onSaveToLibrary={vi.fn()}
+          {...BEZ_WARIANTOW}
         />
       </Dnd>,
     );
@@ -271,6 +287,7 @@ describe('ItemRow — pozycja liczona za pomieszczenie', () => {
           onPatch={vi.fn()}
           onRemove={vi.fn()}
           onSaveToLibrary={vi.fn()}
+          {...BEZ_WARIANTOW}
         />
       </Dnd>,
     );

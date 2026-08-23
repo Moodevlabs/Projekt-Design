@@ -280,11 +280,24 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - **Pomieszczenie odznaczone w obu częściach zostaje widoczne, ale oznaczone `(pominięte)`** — ma być jasne, dlaczego blok liczy zero.
   > - W trybie `per_frame` wiersz pokazuje **liczbę kadrów zamiast ilości**: bez tego pola ten tryb byłby w praktyce nieużywalny, bo wszystko liczyłoby się jak jeden kadr.
 
-- [ ] **T-52 Warianty pozycji (3D / 360)** (F1.4 — ostatni fragment)
+- [x] **T-52 Warianty pozycji (3D / 360)** (F1.4 — ostatni fragment)
   `Item.variantOf`, wybór wariantu w wierszu zamiast nazwy, podmiana reguły cenowej i opisu przy zmianie.
   ✅ Zmiana wariantu podmienia `pricing` i opis, nie ruszając ilości ani stanu TAK/NIE.
-  ⚠️ Wymaga decyzji, skąd biorą się warianty: osobne wpisy biblioteczne powiązane `variantOf`, czy lista wariantów w jednym wpisie. Pierwsze pasuje do dzisiejszej biblioteki, drugie do arkusza — rozstrzygnij, zanim ruszysz model.
   ⚠️ Wydzielone z T-51: bloki per pomieszczenie działają bez wariantów, a warianty to zmiana **modelu biblioteki**, nie edytora.
+  > **Zrobione.** Migracja `0010_library_variants.sql` (kolumna `variant_of` + wyzwalacz płaskiej grupy), `domain/library/variants.ts`, `useVariantOptions`, `ItemVariantSelect` w wierszu, `VariantField` na karcie biblioteki, akcja `setItemVariant`. 644 testy jednostkowe, 21 integracyjnych dla biblioteki.
+  > **Rozstrzygnięcie odłożonej decyzji: wariant to OSOBNY WPIS biblioteczny wskazujący na lidera**, a nie lista wariantów w jednym wpisie. Trzy powody:
+  > - wariant różni się dokładnie tymi polami, które wpis biblioteczny już ma (nazwa, opis, cena, reguła) — lista w `jsonb` byłaby drugą kopią tego samego modelu, z własnym parsowaniem i własną migracją;
+  > - wycena wiąże się z biblioteką przez `libraryItemId`, więc zmiana wariantu to przepięcie **jednego pola**. Kaskada zmian i licznik „ile pozycji używa tego wpisu" działają bez zmian; przy liście wariantów każde z tych miejsc potrzebowałoby drugiego klucza;
+  > - macierz cennika i import CSV (T-50) operują na wierszach — warianty jako wiersze pojawiają się tam same z siebie, w `jsonb` byłyby niewidoczne.
+  > **Odstępstwo od `FEATURES §F1.4`:** `Item.variantOf` w wycenie **nie powstało**. Wiersz już wie, którym wpisem bibliotecznym jest, a grupa wynika z biblioteki — drugie pole byłoby kopią cudzej informacji, a kopie się rozjeżdżają. Jeśli wpis biblioteczny zniknie, wiersz zostaje ze zwykłą nazwą; to akceptowalne.
+  > **Na co uważać:**
+  > - **Grupa jest płaska i pilnuje tego BAZA** (wyzwalacz), nie tylko UI. Wariant wariantu znaczyłby, że „rodzeństwo" zależy od tego, od którego wpisu zacząć liczyć. Testy integracyjne sprawdzają **treść** komunikatu z wyzwalacza — samo `rejects.toThrow()` przechodziłoby również bez niego, bo `updateLibraryItem` rzuca też przy zerowej liczbie wierszy.
+  > - **`on delete set null`, nie `cascade`.** Skasowanie lidera zostawia warianty jako samodzielne pozycje; kaskada skasowałaby razem z „Wizualizacją 3D" także „360" — czyli cudzy cennik przy okazji sprzątania jednego wpisu.
+  > - **Mapa wariantów jest indeksowana po każdym członku grupy, nie po liderze** — wiersz wyceny nie ma skąd znać lidera.
+  > - **Pusta mapa to stała `NO_VARIANTS`.** `new Map()` przy każdym renderze przebiłoby `memo` na wszystkich wierszach naraz — dokładnie ten błąd złapał kiedyś test wydajnościowy na `rooms={[]}` (T-35). Jest na to osobny test.
+  > - **Wariant zastępuje nazwę wiersza, a nie stoi obok niej** — inaczej dałoby się wpisać „Wizualizacja 3D" przy wybranym wariancie 360 i nikt by tego nie wyłapał.
+  > - **Kandydaci na lidera pochodzą z całej biblioteki, nie z przefiltrowanego widoku.** Stąd `useAllLibraryItems()` — osobna nazwa, bo dwa wywołania `useLibraryItems` z różnymi argumentami w jednym pliku czytają się jak pomyłka.
+  > - **jsdom nie ma pointer capture**, a Radix woła go przy otwieraniu `Select`. Polyfill jest w `vitest.setup.ts`; bez niego test kliknięcia w listę wywala się myląco („nie znaleziono opcji").
 
 - [x] **T-36 Edytor: UI rabatów** (F3.2 — bez zakładki w bibliotece)
   `DiscountRow` (typ zł/%, zakres, warunek, zaokrąglenie), wyszarzony rabat niespełniony z licznikiem „3/5 pozycji".

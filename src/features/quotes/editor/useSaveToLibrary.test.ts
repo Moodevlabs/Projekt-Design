@@ -33,6 +33,7 @@ function libraryEntry(partial: Partial<LibraryItem> = {}): LibraryItem {
     description: '',
     unitPriceCents: 120_000,
     sortOrder: 0,
+    variantOf: null,
     pricing: { mode: 'flat' },
     ...partial,
   };

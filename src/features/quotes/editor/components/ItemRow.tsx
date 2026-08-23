@@ -7,6 +7,10 @@ import { InlineMoney } from './InlineMoney';
 import { ItemToggle } from './ItemToggle';
 import { DragHandle } from './DragHandle';
 import { SaveToLibraryButton } from './SaveToLibraryButton';
+import { ItemVariantSelect } from './ItemVariantSelect';
+import type { VariantOptions } from '../useVariantOptions';
+import type { ItemVariant } from '../editor.store';
+import type { LibraryItem } from '@/data/repos/library.repo';
 import { formatMoney } from '@/domain/money';
 import { calcItemCents, type Item, type Room } from '@/domain/quote';
 import { pl } from '@/i18n/pl';
@@ -43,6 +47,9 @@ function pricingSummary(item: Item, rooms: Room[], currency: string): string | n
   return null;
 }
 
+/** Stała referencja: brak wariantów nie może przebijać `memo` na wierszach. */
+const EMPTY_VARIANTS: LibraryItem[] = [];
+
 export interface ItemRowProps {
   item: Item;
   editing: boolean;
@@ -53,6 +60,9 @@ export interface ItemRowProps {
   onSaveToLibrary: (item: Item) => void;
   /** Pomieszczenia wyceny — pozycja parametryczna bez nich policzy samą bazę. */
   rooms: Room[];
+  /** Warianty po id wpisu bibliotecznego (F1.4). Referencja musi być stabilna. */
+  variants: VariantOptions;
+  onVariantChange: (itemId: string, variant: ItemVariant) => void;
 }
 
 /**
@@ -74,12 +84,16 @@ export const ItemRow = memo(function ItemRow({
   onRemove,
   onSaveToLibrary,
   rooms,
+  variants,
+  onVariantChange,
 }: ItemRowProps) {
   const isDiscount = item.kind === 'discount';
   // Wartość liczy domena, a nie wiersz: pozycja `per_room` to baza plus
   // składniki za pomieszczenia, więc `qty × cena` dałoby tu inną kwotę niż
   // w podsumowaniu wyceny.
   const valueCents = calcItemCents(item, rooms);
+  // Wiersz niepowiązany z biblioteką nie ma wariantów — i nie musi ich mieć.
+  const itemVariants = (item.libraryItemId && variants.get(item.libraryItemId)) || EMPTY_VARIANTS;
   const parametric = pricingSummary(item, rooms, currency);
 
   const {
@@ -126,17 +140,27 @@ export const ItemRow = memo(function ItemRow({
       />
 
       <div className="min-w-0 flex-1">
-        <InlineText
-          value={item.name}
-          onCommit={(name) => onPatch(item.id, { name })}
-          readOnly={!editing}
-          placeholder={pl.editor.newItemName}
-          ariaLabel={pl.editor.itemNameLabel}
-          className={cn(
-            'inline-field text-[14.5px] font-semibold',
-            item.enabled ? 'text-[var(--doc-ink)]' : 'text-[var(--doc-ink-soft)]',
-          )}
-        />
+        {/* Wariant ZASTĘPUJE nazwę, a nie stoi obok niej — inaczej dałoby się
+            wpisać „Wizualizacja 3D" przy wybranym wariancie 360. */}
+        {editing && itemVariants.length > 1 ? (
+          <ItemVariantSelect
+            variants={itemVariants}
+            currentId={item.libraryItemId}
+            onChange={(variant) => onVariantChange(item.id, variant)}
+          />
+        ) : (
+          <InlineText
+            value={item.name}
+            onCommit={(name) => onPatch(item.id, { name })}
+            readOnly={!editing}
+            placeholder={pl.editor.newItemName}
+            ariaLabel={pl.editor.itemNameLabel}
+            className={cn(
+              'inline-field text-[14.5px] font-semibold',
+              item.enabled ? 'text-[var(--doc-ink)]' : 'text-[var(--doc-ink-soft)]',
+            )}
+          />
+        )}
         {editing || item.description ? (
           <InlineText
             value={item.description}

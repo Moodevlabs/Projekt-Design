@@ -15,6 +15,7 @@ import {
   type MoveItemArgs,
   type MoveSectionArgs,
   type Discount,
+  type PricingRule,
   type QuoteStatus,
   type Room,
   type Section,
@@ -31,6 +32,18 @@ import type { Quote } from '@/data/repos/quotes.repo';
  * dlatego kaskaduje — inaczej poprawka stawki za pomieszczenie omijałaby
  * wyceny, w których ta usługa już jest.
  */
+/**
+ * Wariant do wstawienia w wiersz. Swiadomie WASKI zestaw pol — wszystko poza
+ * nim (ilosc, TAK/NIE, pomieszczenie) nalezy do wyceny, nie do biblioteki.
+ */
+export interface ItemVariant {
+  libraryItemId: string;
+  name: string;
+  description: string;
+  unitPriceCents: number;
+  pricing: PricingRule;
+}
+
 export type LibraryCascadePatch = Partial<
   Pick<Item, 'name' | 'description' | 'unitPriceCents' | 'pricing'>
 >;
@@ -146,6 +159,16 @@ export interface EditorState {
    * zmian zrobiłoby się z tego kilkanaście osobnych operacji.
    */
   applyLibraryUpdate: (libraryItemId: string, patch: LibraryCascadePatch) => void;
+
+  /**
+   * Podmiana wariantu pozycji (F1.4) — np. „Wizualizacja 3D" na „360".
+   *
+   * Zmienia to, CO jest wycenione (nazwa, opis, cena, regula cenowa), i nie
+   * rusza tego, co uzytkownik zdecydowal o TEJ wycenie: ilosci, stanu TAK/NIE,
+   * przypisania do pomieszczenia ani `id` wiersza. `frames` tez zostaje —
+   * powrot do wariantu `per_frame` ma pamietac liczbe kadrow.
+   */
+  setItemVariant: (itemId: string, variant: ItemVariant) => void;
 
   // --- kolejność (T-09). Zmiana kolejności idzie wyłącznie przeciąganiem. ---
   moveItem: (args: MoveItemArgs) => void;
@@ -507,6 +530,20 @@ export const useEditorStore = create<EditorState>()(
         const item = findItem(state.body, itemId);
         if (!item) return;
         Object.assign(item, patch);
+        state.saveState = 'dirty';
+      }),
+
+    setItemVariant: (itemId, variant) =>
+      set((state) => {
+        if (!state.body) return;
+        const item = findItem(state.body, itemId);
+        if (!item) return;
+
+        item.libraryItemId = variant.libraryItemId;
+        item.name = variant.name;
+        item.description = variant.description;
+        item.unitPriceCents = variant.unitPriceCents;
+        item.pricing = variant.pricing;
         state.saveState = 'dirty';
       }),
 
