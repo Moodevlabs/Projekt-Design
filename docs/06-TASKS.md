@@ -267,11 +267,24 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - **Usunięcie pomieszczenia ODPINA pozycje, nie kasuje ich** (wbrew pierwotnej notatce). Użytkownik usuwa pomieszczenie, nie usługi — ale martwy `roomId` zostawiłby pozycję `per_frame` liczoną po cenie nieistniejącego pomieszczenia, więc czyścimy wskaźnik. Dialog potwierdzenia mówi wprost, co się stanie.
   > - Liczba w dopisku jest filtrowana **po zasięgu reguły**, więc „3 pom." zgadza się z kwotą także wtedy, gdy część pomieszczeń ma odznaczoną flagę.
 
-- [ ] **T-51 Edytor: bloki per pomieszczenie i warianty** (F1.4 — reszta)
-  Sekcja renderująca blok na każde pomieszczenie (pozycje z `roomId`), „dodaj pozycję do wszystkich pomieszczeń", pytanie „skopiować zestaw z pomieszczenia X?" przy dodawaniu nowego, warianty pozycji (Wizualizacja 3D / 360) i stepper kadrów dla `per_frame`.
-  ✅ Powielenie usługi na 7 pomieszczeń jednym kliknięciem; zmiana wariantu podmienia regułę i opis.
-  ⚠️ **Tu wraca decyzja odłożona przy T-31: `Group.roomId` czy nowy byt.** Rekomendacja bez zmian — grupa wskazująca na `Room` daje przeciąganie, zapis zestawu do biblioteki i kaskadę za darmo; osobny byt znaczy czwarty poziom w DnD.
-  ⚠️ Wydzielone z T-35 świadomie: cennik parametryczny **działa** bez bloków (pomieszczenia + usługa `per_room` = poprawna cena). Bloki to sposób pracy z arkusza, gdzie każda usługa jest powielona per pomieszczenie — wygodne przy dużych wycenach, ale nie warunek działania.
+- [x] **T-51 Edytor: bloki per pomieszczenie** (F1.4 — reszta, bez wariantów 3D/360)
+  Blok na każde pomieszczenie, „dodaj pozycję do wszystkich pomieszczeń", stepper kadrów dla `per_frame`.
+  ✅ Powielenie usługi na 7 pomieszczeń jednym kliknięciem.
+  > **Zrobione.** `Group.roomId`, akcje `addRoomBlocks` / `insertItemToRoomBlocks`, nagłówek bloku z etykietą pomieszczenia i `×qty`, „Rozpisz na pomieszczenia" w sekcji, drugi picker „Do wszystkich pomieszczeń" w bloku, pole liczby kadrów w wierszu. 486 testów jednostkowych, 47 integracyjnych.
+  > **Rozstrzygnięcie odłożonej decyzji: blok pomieszczenia to GRUPA z `roomId`.** DnD zna wyłącznie sekcje, grupy i pozycje (`dnd/drop-resolution.ts`), więc osobny byt znaczyłby czwarty poziom i duplikat całej logiki przeciągania. Grupa dała przeciąganie, zapis zestawu do biblioteki i kaskadę bez jednej linijki w DnD.
+  > **Na co uważać:**
+  > - **`bodyVersion` NIE został podbity.** `Group.roomId` ma `default(null)`, więc stare dokumenty wczytują się bez kroku migracji — wersję podbijamy tylko wtedy, gdy trzeba **przekształcić** kształt, a nie dołożyć pole z wartością domyślną.
+  > - **Nazwa bloku pochodzi z `Room.label` i nie jest edytowalna w nagłówku** — edycja w dwóch miejscach rozjechałaby etykietę z tym, co liczy cennik. `group.name` zapisujemy mimo to, żeby zestaw zapisany do biblioteki i wycena po usunięciu pomieszczenia miały czytelny nagłówek.
+  > - **Każda kopia pozycji dostaje własne `id` i własny `roomId`.** Wspólna referencja znaczyłaby, że edycja jednej pozycji zmienia je we wszystkich pomieszczeniach.
+  > - **Powtórne „Rozpisz" nie dubluje bloków** i nie brudzi dokumentu, gdy nie ma czego dodać — inaczej autozapis leciałby po nic. Akcja mówi, ile bloków przybyło; przy kilkunastu wierszach naraz cisza byłaby niepokojąca.
+  > - **Pomieszczenie odznaczone w obu częściach zostaje widoczne, ale oznaczone `(pominięte)`** — ma być jasne, dlaczego blok liczy zero.
+  > - W trybie `per_frame` wiersz pokazuje **liczbę kadrów zamiast ilości**: bez tego pola ten tryb byłby w praktyce nieużywalny, bo wszystko liczyłoby się jak jeden kadr.
+
+- [ ] **T-52 Warianty pozycji (3D / 360)** (F1.4 — ostatni fragment)
+  `Item.variantOf`, wybór wariantu w wierszu zamiast nazwy, podmiana reguły cenowej i opisu przy zmianie.
+  ✅ Zmiana wariantu podmienia `pricing` i opis, nie ruszając ilości ani stanu TAK/NIE.
+  ⚠️ Wymaga decyzji, skąd biorą się warianty: osobne wpisy biblioteczne powiązane `variantOf`, czy lista wariantów w jednym wpisie. Pierwsze pasuje do dzisiejszej biblioteki, drugie do arkusza — rozstrzygnij, zanim ruszysz model.
+  ⚠️ Wydzielone z T-51: bloki per pomieszczenie działają bez wariantów, a warianty to zmiana **modelu biblioteki**, nie edytora.
 
 - [x] **T-36 Edytor: UI rabatów** (F3.2 — bez zakładki w bibliotece)
   `DiscountRow` (typ zł/%, zakres, warunek, zaokrąglenie), wyszarzony rabat niespełniony z licznikiem „3/5 pozycji".

@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 import { AlertTriangle, Plus } from 'lucide-react';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { toast } from 'sonner';
 import { useEditorStore } from './editor.store';
 import { QuoteDndProvider } from './dnd/QuoteDndProvider';
 import { useStableIds } from './dnd/useStableIds';
@@ -187,7 +188,51 @@ function EditorSurface({
   const updateDiscount = useEditorStore((state) => state.updateDiscount);
   const removeDiscount = useEditorStore((state) => state.removeDiscount);
   const toggleDiscount = useEditorStore((state) => state.toggleDiscount);
+  const addRoomBlocksAction = useEditorStore((state) => state.addRoomBlocks);
+  const insertItemToRoomBlocks = useEditorStore((state) => state.insertItemToRoomBlocks);
   const [libraryOpen, setLibraryOpen] = useState(false);
+
+  /**
+   * „Rozpisz na pomieszczenia”. Mówimy wprost, ile bloków przybyło — akcja
+   * potrafi dodać kilkanaście wierszy naraz i cisza po kliknięciu byłaby
+   * niepokojąca. Osobno komunikat, gdy nie ma czego rozpisywać.
+   */
+  const handleAddRoomBlocks = useCallback(
+    (sectionId: string) => {
+      const state = useEditorStore.getState();
+      const rooms = state.body?.rooms ?? [];
+      if (rooms.length === 0) {
+        toast.info(pl.editor.addRoomBlocksNoRooms);
+        return;
+      }
+
+      const przed =
+        state.body?.sections.find((section) => section.id === sectionId)?.groups.length ?? 0;
+      addRoomBlocksAction(sectionId);
+      const po =
+        useEditorStore.getState().body?.sections.find((section) => section.id === sectionId)?.groups
+          .length ?? 0;
+
+      const dodane = po - przed;
+      if (dodane > 0) toast.success(pl.editor.addRoomBlocksDone(dodane));
+      else toast.info(pl.editor.addRoomBlocksNothing);
+    },
+    [addRoomBlocksAction],
+  );
+
+  const handleInsertItemToRoomBlocks = useCallback(
+    (sectionId: string, item: Item) => {
+      const state = useEditorStore.getState();
+      const bloki =
+        state.body?.sections
+          .find((section) => section.id === sectionId)
+          ?.groups.filter((group) => group.roomId !== null).length ?? 0;
+
+      insertItemToRoomBlocks(sectionId, item);
+      if (bloki > 0) toast.success(pl.editor.addItemToAllRoomsDone(bloki));
+    },
+    [insertItemToRoomBlocks],
+  );
 
   /**
    * Wstawianie z biblioteki. Wpis oznaczony jako rabat trafia do **listy
@@ -286,6 +331,8 @@ function EditorSurface({
                     onInsertGroup={insertGroup}
                     onSaveItemToLibrary={library.saveItem}
                     onSaveGroupToLibrary={library.saveGroup}
+                    onAddRoomBlocks={handleAddRoomBlocks}
+                    onInsertItemToRoomBlocks={handleInsertItemToRoomBlocks}
                     />
                   ))}
                 </SortableContext>

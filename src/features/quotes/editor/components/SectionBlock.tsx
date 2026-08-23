@@ -2,7 +2,7 @@ import { memo, useState } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Trash2 } from 'lucide-react';
+import { LayoutGrid, Trash2 } from 'lucide-react';
 import { InlineText } from './InlineText';
 import { ItemRow } from './ItemRow';
 import { GroupBlock } from './GroupBlock';
@@ -45,6 +45,9 @@ export interface SectionBlockProps {
   onInsertGroup: (sectionId: string, group: Group) => void;
   onSaveItemToLibrary: (item: Item) => void;
   onSaveGroupToLibrary: (group: Group) => void;
+  /** „Rozpisz na pomieszczenia” — po jednym bloku na każde pomieszczenie wyceny. */
+  onAddRoomBlocks: (sectionId: string) => void;
+  onInsertItemToRoomBlocks: (sectionId: string, item: Item) => void;
 }
 
 export const SectionBlock = memo(function SectionBlock({
@@ -68,6 +71,8 @@ export const SectionBlock = memo(function SectionBlock({
   onInsertGroup,
   onSaveItemToLibrary,
   onSaveGroupToLibrary,
+  onAddRoomBlocks,
+  onInsertItemToRoomBlocks,
 }: SectionBlockProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const totals = calcSectionTotals(section, { vatRate, pricesInclude, rooms });
@@ -184,6 +189,9 @@ export const SectionBlock = memo(function SectionBlock({
             onPickItem={(item) => onInsertItems(section.id, null, [item])}
             onPickGroup={(group) => onInsertGroup(section.id, group)}
           />
+          <AddLink icon={LayoutGrid} onClick={() => onAddRoomBlocks(section.id)}>
+            {pl.editor.addRoomBlocks}
+          </AddLink>
         </div>
       ) : null}
 
@@ -215,6 +223,7 @@ export const SectionBlock = memo(function SectionBlock({
               onInsertItems={onInsertItems}
               onSaveItemToLibrary={onSaveItemToLibrary}
               onSaveGroupToLibrary={onSaveGroupToLibrary}
+              onInsertItemToRoomBlocks={onInsertItemToRoomBlocks}
             />
           ))}
         </SortableContext>

@@ -28,6 +28,7 @@ export function newGroup(partial: Partial<Group> = {}): Group {
     id: newId(),
     name: 'Nowa grupa',
     items: [],
+    roomId: null,
     ...partial,
   };
 }

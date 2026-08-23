@@ -53,6 +53,9 @@ export function LibraryGroupCard({
         id: group.id,
         name: group.name,
         items: group.items.map(librarySnapshotToQuoteItem),
+        // Zestaw biblioteczny nie należy do żadnego pomieszczenia — to szablon,
+        // a pomieszczenia są własnością konkretnej wyceny.
+        roomId: null,
       }),
     [group.id, group.name, group.items],
   );

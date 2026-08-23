@@ -131,6 +131,18 @@ export const pl = {
     roomVisualShort: 'W',
     roomTechnicalShort: 'T',
     roomFlagsHint: 'W — część wizualna, T — techniczna. Decydują, co wchodzi do której usługi.',
+    /** Bloki per pomieszczenie w sekcji. */
+    addRoomBlocks: 'Rozpisz na pomieszczenia',
+    addRoomBlocksDone: (count: number) =>
+      count === 1 ? 'Dodano blok 1 pomieszczenia' : `Dodano bloki ${count} pomieszczeń`,
+    addRoomBlocksNothing: 'Wszystkie pomieszczenia mają już swoje bloki.',
+    addRoomBlocksNoRooms: 'Najpierw dodaj pomieszczenia w panelu obok.',
+    addItemToAllRooms: 'Do wszystkich pomieszczeń',
+    addItemToAllRoomsDone: (count: number) =>
+      count === 1 ? 'Dodano do 1 pomieszczenia' : `Dodano do ${count} pomieszczeń`,
+    roomBlockLabel: (room: string, qty: number) => (qty > 1 ? `${room} ×${qty}` : room),
+    roomBlockOff: 'pominięte',
+    itemFramesLabel: 'Liczba kadrów',
     /** Skąd wzięła się cena pozycji parametrycznej — np. „baza 200,00 zł + 7 pom.”. */
     pricingFromRooms: (base: string, rooms: number) =>
       rooms === 1 ? `baza ${base} + 1 pom.` : `baza ${base} + ${rooms} pom.`,

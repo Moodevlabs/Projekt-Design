@@ -93,6 +93,16 @@ export const GroupSchema = z.object({
   id: z.string().uuid(),
   name: z.string().default(''),
   items: z.array(ItemSchema).default([]),
+  /**
+   * Grupa reprezentująca **pomieszczenie** (bloki per-room z arkusza, wiersze
+   * 22–92). `null` = zwykła grupa tematyczna.
+   *
+   * Blok pomieszczenia jest grupą, a nie osobnym bytem, świadomie: przeciąganie
+   * (`dnd/drop-resolution.ts` zna tylko sekcje, grupy i pozycje), zapis zestawu
+   * do biblioteki i kaskada działają wtedy bez dopisywania czwartego poziomu.
+   * Nazwa takiej grupy pochodzi z `Room.label`, więc nie edytuje się jej tutaj.
+   */
+  roomId: z.string().uuid().nullable().default(null),
 });
 export type Group = z.infer<typeof GroupSchema>;
 

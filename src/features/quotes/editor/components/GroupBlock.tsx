@@ -42,6 +42,7 @@ export interface GroupBlockProps {
   onInsertItems: (sectionId: string, groupId: string | null, items: Item[]) => void;
   onSaveItemToLibrary: (item: Item) => void;
   onSaveGroupToLibrary: (group: Group) => void;
+  onInsertItemToRoomBlocks: (sectionId: string, item: Item) => void;
 }
 
 export const GroupBlock = memo(function GroupBlock({
@@ -62,6 +63,7 @@ export const GroupBlock = memo(function GroupBlock({
   onInsertItems,
   onSaveItemToLibrary,
   onSaveGroupToLibrary,
+  onInsertItemToRoomBlocks,
 }: GroupBlockProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   // `rooms` są konieczne: bez nich pozycja `per_room` policzyłaby samą bazę
@@ -71,6 +73,12 @@ export const GroupBlock = memo(function GroupBlock({
   // Do biblioteki idą tylko nazwane pozycje (snapshot wymaga nazwy), więc po
   // nich poznajemy też, czy jest w ogóle co zapisywać.
   const namedItems = group.items.filter((item) => item.name.trim().length > 0);
+
+  // Blok pomieszczenia: nazwa i stan biora sie z `Room`, nie z samej grupy.
+  const room = group.roomId ? (rooms.find((r) => r.id === group.roomId) ?? null) : null;
+  // Pomieszczenie odznaczone w OBU czesciach nie wchodzi do zadnej uslugi —
+  // blok zostaje widoczny, ale oznaczony, zeby bylo wiadomo dlaczego liczy zero.
+  const pominiete = room !== null && !room.includedInVisual && !room.includedInTechnical;
 
   // Stan przelacznika grupy wyliczamy z pozycji — nie trzymamy go w modelu.
   const enabledCount = group.items.filter((item) => item.enabled).length;
@@ -127,14 +135,30 @@ export const GroupBlock = memo(function GroupBlock({
           label={`${pl.editor.toggleGroup}: ${group.name}`}
         />
 
-        <InlineText
-          value={group.name}
-          onCommit={(name) => onRename(group.id, name)}
-          readOnly={!editing}
-          placeholder={pl.editor.newGroupName}
-          ariaLabel={pl.editor.groupNameLabel}
-          className="inline-field flex-1 text-[13px] font-semibold tracking-[0.03em] text-[var(--doc-sage)] uppercase"
-        />
+        {room ? (
+          // Blok pomieszczenia bierze nazwe z panelu pomieszczen — edycja tutaj
+          // rozjechalaby etykiete z tym, co liczy cennik.
+          <span
+            className={cn(
+              'flex-1 text-[13px] font-semibold tracking-[0.03em] uppercase',
+              pominiete ? 'text-[var(--doc-ink-soft)]' : 'text-[var(--doc-sage)]',
+            )}
+          >
+            {pl.editor.roomBlockLabel(room.label || pl.editor.newRoomName, room.qty)}
+            {pominiete ? (
+              <span className="ml-1.5 text-[11px] normal-case">({pl.editor.roomBlockOff})</span>
+            ) : null}
+          </span>
+        ) : (
+          <InlineText
+            value={group.name}
+            onCommit={(name) => onRename(group.id, name)}
+            readOnly={!editing}
+            placeholder={pl.editor.newGroupName}
+            ariaLabel={pl.editor.groupNameLabel}
+            className="inline-field flex-1 text-[13px] font-semibold tracking-[0.03em] text-[var(--doc-sage)] uppercase"
+          />
+        )}
 
         <span className="amount text-[13px] text-[var(--doc-ink-soft)]">
           {formatMoney(totals.netCents, currency)}
@@ -198,6 +222,15 @@ export const GroupBlock = memo(function GroupBlock({
             priorityCategory={group.name}
             onPickItem={(item) => onInsertItems(sectionId, group.id, [item])}
           />
+          {room ? (
+            // Skrót z arkusza: ta sama usługa idzie zwykle do każdego
+            // pomieszczenia naraz, a nie do jednego.
+            <LibraryPicker
+              priorityCategory={group.name}
+              label={pl.editor.addItemToAllRooms}
+              onPickItem={(item) => onInsertItemToRoomBlocks(sectionId, item)}
+            />
+          ) : null}
         </div>
       ) : null}
 

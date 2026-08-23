@@ -102,6 +102,8 @@ function Harness() {
       onInsertItems={noop}
       onInsertGroup={noop}
       onSaveItemToLibrary={noop}
+      onAddRoomBlocks={noop}
+      onInsertItemToRoomBlocks={noop}
       onSaveGroupToLibrary={noop}
     />
   );

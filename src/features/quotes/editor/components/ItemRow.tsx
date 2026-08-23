@@ -150,7 +150,22 @@ export const ItemRow = memo(function ItemRow({
         ) : null}
       </div>
 
-      {editing ? (
+      {editing && item.pricing.mode === 'per_frame' ? (
+        // Wizualizacja bez liczby kadrów liczy się jak jeden kadr, więc bez
+        // tego pola tryb `per_frame` byłby w praktyce nieużywalny.
+        <input
+          type="number"
+          min={1}
+          step={1}
+          value={item.frames ?? 1}
+          aria-label={pl.editor.itemFramesLabel}
+          onChange={(event) => {
+            const next = Number.parseInt(event.target.value, 10);
+            if (Number.isInteger(next) && next > 0) onPatch(item.id, { frames: next });
+          }}
+          className="inline-field price-field amount w-14 px-1 py-[2px] text-right text-[14.5px]"
+        />
+      ) : editing ? (
         <input
           type="number"
           min={0}

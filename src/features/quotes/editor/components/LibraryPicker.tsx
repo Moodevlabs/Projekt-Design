@@ -24,13 +24,20 @@ export interface LibraryPickerProps {
   onPickItem: (item: Item) => void;
   /** Gdy podane, popover dostaje drugą zakładkę z zestawami. */
   onPickGroup?: (group: Group) => void;
+  /** Własny tekst linku — domyślnie „Z biblioteki”. */
+  label?: string;
 }
 
 /**
  * Wybór z biblioteki. `Command` daje szukajkę, nawigację strzałkami i Enter
  * bez dopisywania własnej obsługi klawiatury.
  */
-export function LibraryPicker({ priorityCategory, onPickItem, onPickGroup }: LibraryPickerProps) {
+export function LibraryPicker({
+  priorityCategory,
+  onPickItem,
+  onPickGroup,
+  label,
+}: LibraryPickerProps) {
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<'items' | 'groups'>('items');
 
@@ -71,7 +78,7 @@ export function LibraryPicker({ priorityCategory, onPickItem, onPickGroup }: Lib
         nigdy by popovera nie zamknęło.
       */}
       <PopoverTrigger asChild>
-        <AddLink icon={Library}>{pl.editor.fromLibrary}</AddLink>
+        <AddLink icon={Library}>{label ?? pl.editor.fromLibrary}</AddLink>
       </PopoverTrigger>
 
       <PopoverContent align="start" className="w-[300px] p-0">

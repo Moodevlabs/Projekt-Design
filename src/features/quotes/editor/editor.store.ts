@@ -105,6 +105,15 @@ export interface EditorState {
   /** Usuwa pomieszczenie i odpina od niego pozycje — patrz komentarz w implementacji. */
   removeRoom: (roomId: string) => void;
 
+  /**
+   * Zakłada w sekcji blok (grupę) dla każdego pomieszczenia, którego jeszcze
+   * nie ma. Zwraca liczbę utworzonych bloków — UI mówi użytkownikowi, co się
+   * stało, zamiast po cichu dorzucać wiersze.
+   */
+  addRoomBlocks: (sectionId: string) => void;
+  /** Wstawia kopię pozycji do każdego bloku pomieszczenia w sekcji. */
+  insertItemToRoomBlocks: (sectionId: string, item: Item) => void;
+
   // --- rabaty (T-36): osobny byt, nie pozycja wyceny ---
   addDiscount: (partial?: Partial<Discount>) => void;
   updateDiscount: (discountId: string, patch: Partial<Discount>) => void;
@@ -370,6 +379,49 @@ export const useEditorStore = create<EditorState>()(
           for (const item of list) {
             if (item.roomId === roomId) item.roomId = null;
           }
+        }
+
+        state.saveState = 'dirty';
+      }),
+
+    addRoomBlocks: (sectionId) =>
+      set((state) => {
+        if (!state.body) return;
+        const section = findSection(state.body, sectionId);
+        if (!section) return;
+
+        const juzSa = new Set(
+          section.groups.map((group) => group.roomId).filter((id): id is string => id !== null),
+        );
+
+        let dodane = 0;
+        for (const room of state.body.rooms) {
+          if (juzSa.has(room.id)) continue;
+          // Nazwa bloku bierze się z pomieszczenia przy renderowaniu, ale
+          // zapisujemy ją też tutaj — dzięki temu zestaw zapisany do biblioteki
+          // albo wycena otwarta po usunięciu pomieszczenia dalej mają czytelny
+          // nagłówek zamiast pustki.
+          section.groups.push(newGroup({ name: room.label, roomId: room.id }));
+          dodane += 1;
+        }
+
+        if (dodane > 0) state.saveState = 'dirty';
+      }),
+
+    insertItemToRoomBlocks: (sectionId, item) =>
+      set((state) => {
+        if (!state.body) return;
+        const section = findSection(state.body, sectionId);
+        if (!section) return;
+
+        const bloki = section.groups.filter((group) => group.roomId !== null);
+        if (bloki.length === 0) return;
+
+        for (const blok of bloki) {
+          // Każdy blok dostaje WŁASNĄ kopię z własnym `id` i przypięciem do
+          // swojego pomieszczenia — wspólna referencja znaczyłaby, że edycja
+          // jednej pozycji zmienia je wszystkie.
+          blok.items.push({ ...item, id: newId(), roomId: blok.roomId });
         }
 
         state.saveState = 'dirty';
