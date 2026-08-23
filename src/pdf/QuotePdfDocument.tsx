@@ -3,6 +3,10 @@ import {
   calcDiscounts,
   calcItemCents,
   calcQuoteTotals,
+  documentTextInfo,
+  itemTextContext,
+  quoteTextContext,
+  renderText,
   type Group,
   type Item,
   type QuoteBody,
@@ -89,6 +93,15 @@ export function QuotePdfDocument({
   const totals = calcQuoteTotals(body);
   const discounts = calcDiscounts(body, body.rooms);
   const validUntil = addDays(new Date(issueDate), body.validDays);
+  /*
+   * Placeholdery w opisach (F4.2) podstawiamy w JEDNYM miejscu i przekazujemy
+   * w dol jako funkcje. Gdyby kazdy wiersz skladal kontekst po swojemu, PDF
+   * i podglad w edytorze moglyby wymieniac inne pomieszczenia — ta sama klasa
+   * bledu, ktora wyszla przy kwotach pozycji w T-35.
+   */
+  const textInfo = documentTextInfo(body, formatDate(validUntil));
+  const describeItem = (item: Item) => renderText(item.description, itemTextContext(textInfo, item));
+  const docText = (template: string) => renderText(template, quoteTextContext(textInfo));
   const money = (cents: number) => formatMoney(cents, currency);
 
   const visibleItems = (items: Item[]) => visibleItemsOf(items, body.showDisabledItems);
@@ -144,13 +157,13 @@ export function QuotePdfDocument({
 
           {body.intro ? (
             <Text style={{ marginTop: 14, fontSize: theme.sizes.body, color: theme.ink }}>
-              {body.intro}
+              {docText(body.intro)}
             </Text>
           ) : null}
 
           {body.projectDescription ? (
             <Text style={{ marginTop: 8, fontSize: theme.sizes.body, color: theme.inkSoft }}>
-              {body.projectDescription}
+              {docText(body.projectDescription)}
             </Text>
           ) : null}
 
@@ -176,6 +189,7 @@ export function QuotePdfDocument({
                   rooms={body.rooms}
                   theme={theme}
                   money={money}
+                  describeItem={describeItem}
                 />
               ))}
 
@@ -188,6 +202,7 @@ export function QuotePdfDocument({
                   money={money}
                   visibleItems={visibleItems}
                   showDisabledItems={body.showDisabledItems}
+                  describeItem={describeItem}
                 />
               ))}
             </View>
@@ -324,6 +339,7 @@ function GroupBlockPdf({
   money,
   visibleItems,
   showDisabledItems,
+  describeItem,
 }: {
   group: Group;
   rooms: Room[];
@@ -331,6 +347,7 @@ function GroupBlockPdf({
   money: (cents: number) => string;
   visibleItems: (items: Item[]) => Item[];
   showDisabledItems: boolean;
+  describeItem: (item: Item) => string;
 }) {
   if (!shouldPrintGroup(group, rooms, showDisabledItems)) return null;
 
@@ -351,7 +368,14 @@ function GroupBlockPdf({
         {title}
       </Text>
       {items.map((item) => (
-        <ItemLine key={item.id} item={item} rooms={rooms} theme={theme} money={money} />
+        <ItemLine
+          key={item.id}
+          item={item}
+          rooms={rooms}
+          theme={theme}
+          money={money}
+          describeItem={describeItem}
+        />
       ))}
     </View>
   );
@@ -362,12 +386,15 @@ function ItemLine({
   rooms,
   theme,
   money,
+  describeItem,
 }: {
   item: Item;
   rooms: Room[];
   theme: PdfTheme;
   money: (cents: number) => string;
+  describeItem: (item: Item) => string;
 }) {
+  const description = describeItem(item);
   // Wartość z domeny — patrz komentarz przy `QuotePdfDocument`.
   const valueCents = calcItemCents(item, rooms);
   const off = !item.enabled;
@@ -384,9 +411,9 @@ function ItemLine({
         >
           {item.name}
         </Text>
-        {item.description ? (
+        {description ? (
           <Text style={{ fontSize: theme.sizes.small, color: theme.inkSoft, marginTop: 1 }}>
-            {item.description}
+            {description}
           </Text>
         ) : null}
       </View>

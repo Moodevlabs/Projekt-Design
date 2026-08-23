@@ -3,6 +3,9 @@ import { act, render } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SectionBlock } from './SectionBlock';
 import { NO_VARIANTS } from '../useVariantOptions';
+
+/** Stale referencje — sedno tego testu: nic nie moze przebijac `memo`. */
+const NO_TEXT = { rooms: [], client: '' };
 import { useEditorStore } from '../editor.store';
 import { newGroup, newItem, newQuoteBody, newSection } from '@/domain/quote';
 import type { Quote } from '@/data/repos/quotes.repo';
@@ -90,6 +93,7 @@ function Harness() {
       vatRate={23}
       pricesInclude="net"
       rooms={NO_ROOMS}
+      textInfo={NO_TEXT}
       variants={NO_VARIANTS}
       onVariantChange={noop}
       onRename={noop}

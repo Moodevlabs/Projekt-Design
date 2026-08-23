@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { MoneyInput } from '../components/MoneyInput';
 import { KindToggle } from '../components/KindToggle';
 import { PricingEditor } from './PricingEditor';
+import { PlaceholderMenu } from '@/components/shared';
 import { VariantField } from './VariantField';
 import { draftSignature, itemSignature, toItemDraft, type ItemDraft } from './item-draft';
 import type { LibraryItem } from '@/data/repos/library.repo';
@@ -96,13 +97,25 @@ export function LibraryItemCard({
         className="text-ink h-8 border-transparent px-2 text-sm font-semibold shadow-none"
       />
 
-      <Textarea
-        value={draft.description}
-        aria-label={`${pl.library.itemDescriptionLabel}: ${label}`}
-        placeholder={pl.library.itemDescriptionPlaceholder}
-        onChange={(event) => patch({ description: event.target.value })}
-        className="text-ink-soft min-h-10 border-transparent px-2 py-1 text-sm shadow-none"
-      />
+      {/*
+        Placeholdery (F4.2) autoruje sie WLASNIE TUTAJ: opis biblioteczny
+        kaskaduje do wycen, wiec zdanie „Widoki scian dla: {rooms}." napisane
+        raz obsluguje kazda przyszla oferte.
+      */}
+      <div className="flex items-start gap-1">
+        <Textarea
+          value={draft.description}
+          aria-label={`${pl.library.itemDescriptionLabel}: ${label}`}
+          placeholder={pl.library.itemDescriptionPlaceholder}
+          onChange={(event) => patch({ description: event.target.value })}
+          className="text-ink-soft min-h-10 border-transparent px-2 py-1 text-sm shadow-none"
+        />
+        <PlaceholderMenu
+          value={draft.description}
+          onInsert={(description) => patch({ description })}
+          className="mt-1"
+        />
+      </div>
 
       <div className="flex items-center gap-2">
         <Input

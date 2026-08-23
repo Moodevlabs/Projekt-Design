@@ -12,7 +12,14 @@ import type { VariantOptions } from '../useVariantOptions';
 import type { ItemVariant } from '../editor.store';
 import type { LibraryItem } from '@/data/repos/library.repo';
 import { formatMoney } from '@/domain/money';
-import { calcItemCents, type Item, type Room } from '@/domain/quote';
+import {
+  calcItemCents,
+  itemTextContext,
+  renderText,
+  type DocumentTextInfo,
+  type Item,
+  type Room,
+} from '@/domain/quote';
 import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
 
@@ -60,6 +67,8 @@ export interface ItemRowProps {
   onSaveToLibrary: (item: Item) => void;
   /** Pomieszczenia wyceny — pozycja parametryczna bez nich policzy samą bazę. */
   rooms: Room[];
+  /** Dane dokumentu do placeholderów w opisie (F4.2). Stabilna referencja. */
+  textInfo: DocumentTextInfo;
   /** Warianty po id wpisu bibliotecznego (F1.4). Referencja musi być stabilna. */
   variants: VariantOptions;
   onVariantChange: (itemId: string, variant: ItemVariant) => void;
@@ -84,6 +93,7 @@ export const ItemRow = memo(function ItemRow({
   onRemove,
   onSaveToLibrary,
   rooms,
+  textInfo,
   variants,
   onVariantChange,
 }: ItemRowProps) {
@@ -166,6 +176,9 @@ export const ItemRow = memo(function ItemRow({
             value={item.description}
             onCommit={(description) => onPatch(item.id, { description })}
             readOnly={!editing}
+            // W edycji surowy tekst, w podgladzie podstawiony — inaczej nie
+            // dalo by sie poprawic placeholdera, ktory sie nie podstawil.
+            display={renderText(item.description, itemTextContext(textInfo, item))}
             multiline
             placeholder={pl.editor.newItemDescription}
             ariaLabel={pl.editor.itemDescriptionLabel}

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 import { AlertTriangle, Plus } from 'lucide-react';
@@ -21,7 +21,10 @@ import { useCreateQuote, useQuote } from '@/data/queries/useQuotes';
 import { ConfirmDialog, EmptyState } from '@/components/shared';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import type { Item } from '@/domain/quote';
+import type { Item, Room } from '@/domain/quote';
+
+/** Stała referencja — pusta lista nie może przebijać `memo` na wierszach. */
+const NO_ROOMS: Room[] = [];
 import { useSaveToLibrary } from './useSaveToLibrary';
 import { useVariantOptions } from './useVariantOptions';
 import { useMarkAsSentPrompt } from './useMarkAsSentPrompt';
@@ -279,6 +282,16 @@ function EditorSurface({
   const canWrite = useEntitlement().canWrite;
   const variants = useVariantOptions();
   const markAsSent = useMarkAsSentPrompt();
+  /*
+   * Dane do placeholderow (F4.2). Rozbite na kawalki, a nie cale `body`:
+   * wiersze sa zmemoizowane, a `body` dostaje nowa referencje przy kazdym
+   * nacisnieciu klawisza — przekazanie go w dol przerysowywaloby wszystkie
+   * pozycje przy kazdej literze.
+   */
+  const textInfo = useMemo(
+    () => ({ rooms: body?.rooms ?? NO_ROOMS, client: body?.client.name ?? '' }),
+    [body?.rooms, body?.client.name],
+  );
 
   if (!body) return <EditorSkeleton />;
 
@@ -380,6 +393,7 @@ function EditorSurface({
                       vatRate={body.vatRate}
                       pricesInclude={body.pricesInclude}
                     rooms={body.rooms}
+                      textInfo={textInfo}
                       variants={variants}
                       onVariantChange={setItemVariant}
                       onRename={renameSection}

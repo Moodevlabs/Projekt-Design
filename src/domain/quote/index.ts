@@ -5,3 +5,4 @@ export * from './discounts';
 export * from './factory';
 export * from './reorder';
 export * from './template-text';
+export * from './text-context';

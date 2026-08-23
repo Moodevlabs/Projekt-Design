@@ -433,9 +433,18 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - **`{rooms:visual}` i `{rooms:technical}` używają tego samego zakresu co cennik parametryczny** — zdanie wymienia dokładnie te pomieszczenia, za które klient płaci w danej pozycji. Rozjazd między tekstem a kwotą byłby gorszy niż brak tekstu.
   > - Wzorzec placeholdera dopuszcza tylko litery w nazwie, żeby nie zjadać zwykłych klamr w tekście (`{a+b}`, `{}`). Jest na to test.
 
-- [ ] **T-39 Auto-opisy w UI i PDF** (F4.2)
+- [x] **T-39 Auto-opisy w UI i PDF** (F4.2)
   Render w podglądzie i PDF, surowy tekst w edycji, przycisk `{}` z listą placeholderów, seed opisów z placeholderami.
   ✅ Zmiana pomieszczeń aktualizuje opis na żywo.
+  > **Zrobione.** `domain/quote/text-context.ts` (wspólny kontekst), render w `ItemRow`, `QuoteHeader` i `QuotePdfDocument`, `PlaceholderMenu` (przycisk `{}`), opisy z placeholderami w seedzie. 707 testów.
+  > **Na co uważać:**
+  > - **Kontekst placeholderów budują TE SAME funkcje w edytorze i w PDF.** Gdyby każde miejsce składało go po swojemu, oferta mogłaby wymieniać inne pomieszczenia niż to, co widział autor — dokładnie ta klasa błędu, która wyszła przy kwotach pozycji w T-35. Jest na to test spójności.
+  > - **`DocumentTextInfo` to rozbite kawałki, a nie całe `QuoteBody`** — i to jest wymaganie wydajnościowe. Wiersze są zmemoizowane, a `body` dostaje nową referencję przy każdym naciśnięciu klawisza; przekazanie go w dół przerysowywałoby wszystkie pozycje przy każdej literze. `rooms` i `client` zmieniają referencję tylko wtedy, gdy naprawdę się zmienią. Test wydajnościowy `SectionBlock.perf` tego pilnuje.
+  > - **W edycji pole pokazuje surowy tekst, w podglądzie podstawiony** (`InlineText` dostał `display`). Bez tego nie dałoby się poprawić placeholdera, który się nie podstawił — użytkownik widziałby wynik i nie miał czego kliknąć.
+  > - **`{frames}` trafia do kontekstu tylko przy pozycji liczonej za kadr.** Przy innych trybach ta liczba nic nie znaczy, a wstawienie jedynki byłoby zmyślaniem; dosłowny placeholder pokazuje pomyłkę autora tekstu.
+  > - **Przycisk `{}` dokleja na KOŃCU, nie w miejscu kursora.** Pola trzymają własny szkic i zatwierdzają go przy utracie ogniskowania, a otwarcie menu właśnie ją zabiera — udawanie, że wiemy, gdzie stał kursor, wstawiałoby w losowe miejsce.
+  > - Przycisku `{}` **nie ma przy wierszu wyceny**, tylko przy wstępie, opisie projektu i na karcie biblioteki. Opisy pozycji kaskadują z biblioteki, więc szablon zdania autoruje się tam raz; kolejny przycisk w każdym z kilkuset wierszy byłby szumem. To odstępstwo od litery `F4.2`.
+  > **Nie sprawdzone na żywo:** seed z placeholderami wykonuje się bez błędów (`psql`, exit 0), ale ma `on conflict do nothing` — istniejąca baza deweloperska zachowa stare opisy do czasu `supabase db reset`.
 
 - [ ] **T-40 Tryb godzinowy — domena** (F2.1)
   `pricingBasis`, snapshot `hourlyRateCents` w `body`, `toCents()`, `minutesTotal`/`minutesBySection`.

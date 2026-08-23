@@ -119,6 +119,12 @@ on conflict (id) do nothing;
 -- -----------------------------------------------------------------------------
 -- 4. Biblioteka — 15 pozycji w 3 kategoriach (Projekt / Nadzór / Dodatki)
 --    Ceny w groszach: 9000 = 90,00 zł.
+--
+--    Część opisów używa PLACEHOLDERÓW (F4.2): `{rooms}`, `{rooms:technical}`,
+--    `{frames|kadr|kadry|kadrów}`. W trybie edycji widać je dosłownie, a w
+--    podglądzie i w PDF podstawia się aktualna lista pomieszczeń. Dzięki temu
+--    świeże konto od razu widzi, że opisy potrafią nadążać za zakresem —
+--    inaczej nikt by tej funkcji nie odkrył.
 -- -----------------------------------------------------------------------------
 insert into public.library_items
   (id, workspace_id, category, kind, name, description, unit_price_cents, sort_order)
@@ -128,13 +134,13 @@ select v.id, w.id, v.category, v.kind, v.name, v.description, v.price, v.ord
    -- Projekt (rozliczane za m² powierzchni lub za sztukę)
    ('1b000000-0000-4000-8000-000000000001'::uuid, 'Projekt', 'item',
     'Projekt koncepcyjny wnętrza',
-    'Układ funkcjonalny, dwa warianty rozwiązań, moodboard. Cena za m².', 9000, 10),
+    'Układ funkcjonalny dla: {rooms}. Dwa warianty rozwiązań, moodboard. Cena za m².', 9000, 10),
    ('1b000000-0000-4000-8000-000000000002'::uuid, 'Projekt', 'item',
     'Projekt wykonawczy',
-    'Rysunki techniczne, kłady ścian, detale, rozrys płytek. Cena za m².', 12000, 20),
+    'Rysunki techniczne, kłady ścian, detale, rozrys płytek dla: {rooms:technical}. Cena za m².', 12000, 20),
    ('1b000000-0000-4000-8000-000000000003'::uuid, 'Projekt', 'item',
     'Wizualizacje 3D pomieszczenia',
-    'Fotorealistyczne wizualizacje, trzy ujęcia na pomieszczenie.', 45000, 30),
+    'Fotorealistyczne wizualizacje dla: {rooms:visual}. {frames|kadr|kadry|kadrów} na pomieszczenie.', 45000, 30),
    ('1b000000-0000-4000-8000-000000000004'::uuid, 'Projekt', 'item',
     'Projekt oświetlenia i elektryki',
     'Rozmieszczenie punktów świetlnych, gniazd i łączników. Cena za m².', 5000, 40),

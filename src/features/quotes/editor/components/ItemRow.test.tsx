@@ -19,7 +19,11 @@ function Dnd({ ids, children }: { ids: string[]; children: ReactNode }) {
 }
 
 /** Wiersz bez wariantow — domyslny przypadek. Stala referencja, jak w apce. */
-const BEZ_WARIANTOW = { variants: NO_VARIANTS, onVariantChange: vi.fn() };
+const BEZ_WARIANTOW = {
+  variants: NO_VARIANTS,
+  onVariantChange: vi.fn(),
+  textInfo: { rooms: [], client: '' },
+};
 
 function setup(overrides: Partial<Item> = {}, editing = true) {
   const item = newItem({ name: 'Blat kuchenny', unitPriceCents: 120_000, ...overrides });

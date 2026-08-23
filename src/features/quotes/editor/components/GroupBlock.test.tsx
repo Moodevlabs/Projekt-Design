@@ -41,6 +41,7 @@ function setup(group: Group, editing = true) {
     onInsertItemToRoomBlocks: vi.fn(),
     variants: NO_VARIANTS,
     onVariantChange: vi.fn(),
+    textInfo: { rooms: [], client: '' },
   };
 
   render(
@@ -75,6 +76,7 @@ function setupWithRooms(group: Group, rooms: Room[]) {
         vatRate={23}
         pricesInclude="net"
         rooms={rooms}
+        textInfo={{ rooms, client: '' }}
         variants={NO_VARIANTS}
         onVariantChange={vi.fn()}
         onRename={vi.fn()}

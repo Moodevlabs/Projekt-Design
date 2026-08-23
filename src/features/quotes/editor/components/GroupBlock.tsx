@@ -11,6 +11,7 @@ import { LibraryPicker } from './LibraryPicker';
 import { SaveToLibraryButton } from './SaveToLibraryButton';
 import { DragHandle } from './DragHandle';
 import { useStableIds } from '../dnd/useStableIds';
+import type { DocumentTextInfo } from '@/domain/quote';
 import type { VariantOptions } from '../useVariantOptions';
 import type { ItemVariant } from '../editor.store';
 import { ConfirmDialog } from '@/components/shared';
@@ -34,6 +35,8 @@ export interface GroupBlockProps {
   pricesInclude: PricesInclude;
   /** Pomieszczenia wyceny — potrzebne do policzenia pozycji parametrycznych. */
   rooms: Room[];
+  /** Dane dokumentu do placeholderów w opisach (F4.2). */
+  textInfo: DocumentTextInfo;
   /** Warianty pozycji (F1.4) — przekazywane w dół bez zmian. */
   variants: VariantOptions;
   onVariantChange: (itemId: string, variant: ItemVariant) => void;
@@ -58,6 +61,7 @@ export const GroupBlock = memo(function GroupBlock({
   vatRate,
   pricesInclude,
   rooms,
+  textInfo,
   variants,
   onVariantChange,
   onRename,
@@ -217,6 +221,7 @@ export const GroupBlock = memo(function GroupBlock({
               onRemove={onRemoveItem}
               onSaveToLibrary={onSaveItemToLibrary}
               rooms={rooms}
+              textInfo={textInfo}
               variants={variants}
               onVariantChange={onVariantChange}
             />

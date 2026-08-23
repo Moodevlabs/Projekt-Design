@@ -144,6 +144,8 @@ export const pl = {
     roomBlockLabel: (room: string, qty: number) => (qty > 1 ? `${room} ×${qty}` : room),
     roomBlockOff: 'pominięte',
     itemFramesLabel: 'Liczba kadrów',
+    insertPlaceholder: 'Wstaw pole automatyczne',
+    placeholdersTitle: 'Pola podstawiane przy podglądzie',
     itemVariantLabel: 'Wariant pozycji',
     itemVariantPlaceholder: 'Wybierz wariant',
     /** Skąd wzięła się cena pozycji parametrycznej — np. „baza 200,00 zł + 7 pom.”. */

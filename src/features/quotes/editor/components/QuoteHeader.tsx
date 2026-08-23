@@ -1,5 +1,6 @@
 import { InlineText } from './InlineText';
-import type { QuoteBody } from '@/domain/quote';
+import { PlaceholderMenu } from '@/components/shared';
+import { documentTextInfo, quoteTextContext, renderText, type QuoteBody } from '@/domain/quote';
 import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
 
@@ -45,6 +46,9 @@ export function QuoteHeader({
 }: QuoteHeaderProps) {
   const issueDate = body.issueDate ?? createdAt.slice(0, 10);
   const hasDescription = body.projectDescription.trim().length > 0;
+  // Placeholdery we wstępie i opisie projektu (F4.2) — w podglądzie
+  // podstawione, w edycji surowe.
+  const docText = (template: string) => renderText(template, quoteTextContext(documentTextInfo(body)));
 
   return (
     <header>
@@ -139,27 +143,46 @@ export function QuoteHeader({
       </div>
 
       {editing || body.intro ? (
+        <div className="mt-5 flex items-start gap-1">
         <InlineText
           value={body.intro}
           onCommit={(intro) => onPatch({ intro })}
           readOnly={!editing}
+          display={docText(body.intro)}
           multiline
           placeholder={pl.editor.introPlaceholder}
           ariaLabel={pl.editor.introPlaceholder}
-          className="inline-field mt-5 max-w-[560px] text-[14.5px] leading-[1.6] text-[var(--doc-ink-soft)]"
+          className="inline-field max-w-[560px] text-[14.5px] leading-[1.6] text-[var(--doc-ink-soft)]"
         />
+        {editing ? (
+          <PlaceholderMenu
+            value={body.intro}
+            onInsert={(intro) => onPatch({ intro })}
+            className="mt-1"
+          />
+        ) : null}
+        </div>
       ) : null}
 
       {/* Pusty opis projektu znika w podglądzie — jak w prototypie. */}
       {editing || hasDescription ? (
         <div className="mt-6">
-          <p className="text-[12px] font-semibold tracking-[0.1em] text-[var(--doc-sage)] uppercase">
-            {pl.editor.projectDescription}
-          </p>
+          <div className="flex items-center gap-1">
+            <p className="text-[12px] font-semibold tracking-[0.1em] text-[var(--doc-sage)] uppercase">
+              {pl.editor.projectDescription}
+            </p>
+            {editing ? (
+              <PlaceholderMenu
+                value={body.projectDescription}
+                onInsert={(projectDescription) => onPatch({ projectDescription })}
+              />
+            ) : null}
+          </div>
           <InlineText
             value={body.projectDescription}
             onCommit={(projectDescription) => onPatch({ projectDescription })}
             readOnly={!editing}
+            display={docText(body.projectDescription)}
             multiline
             placeholder={pl.editor.projectDescriptionPlaceholder}
             ariaLabel={pl.editor.projectDescription}

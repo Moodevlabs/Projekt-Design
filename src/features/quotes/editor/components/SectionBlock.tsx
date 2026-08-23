@@ -10,6 +10,7 @@ import { AddLink } from './AddLink';
 import { LibraryPicker } from './LibraryPicker';
 import { DragHandle } from './DragHandle';
 import { useStableIds } from '../dnd/useStableIds';
+import type { DocumentTextInfo } from '@/domain/quote';
 import type { VariantOptions } from '../useVariantOptions';
 import type { ItemVariant } from '../editor.store';
 import { ConfirmDialog } from '@/components/shared';
@@ -33,6 +34,8 @@ export interface SectionBlockProps {
   pricesInclude: PricesInclude;
   /** Pomieszczenia wyceny — potrzebne do policzenia pozycji parametrycznych. */
   rooms: Room[];
+  /** Dane dokumentu do placeholderów w opisach (F4.2). */
+  textInfo: DocumentTextInfo;
   /** Warianty pozycji (F1.4) — przekazywane w dół bez zmian. */
   variants: VariantOptions;
   onVariantChange: (itemId: string, variant: ItemVariant) => void;
@@ -62,6 +65,7 @@ export const SectionBlock = memo(function SectionBlock({
   vatRate,
   pricesInclude,
   rooms,
+  textInfo,
   variants,
   onVariantChange,
   onRename,
@@ -183,6 +187,7 @@ export const SectionBlock = memo(function SectionBlock({
               onRemove={onRemoveItem}
               onSaveToLibrary={onSaveItemToLibrary}
               rooms={rooms}
+              textInfo={textInfo}
               variants={variants}
               onVariantChange={onVariantChange}
             />
@@ -222,6 +227,7 @@ export const SectionBlock = memo(function SectionBlock({
               vatRate={vatRate}
               pricesInclude={pricesInclude}
               rooms={rooms}
+              textInfo={textInfo}
               variants={variants}
               onVariantChange={onVariantChange}
               onRename={onRenameGroup}

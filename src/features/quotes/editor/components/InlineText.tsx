@@ -18,6 +18,7 @@ export function InlineText({
   multiline = false,
   className,
   ariaLabel,
+  display,
 }: {
   value: string;
   onCommit: (next: string) => void;
@@ -26,6 +27,12 @@ export function InlineText({
   multiline?: boolean;
   className?: string;
   ariaLabel: string;
+  /**
+   * Tekst do pokazania w podgladzie, gdy rozni sie od zapisanej wartosci —
+   * opis z podstawionymi placeholderami (F4.2). W trybie edycji pole ZAWSZE
+   * pokazuje surowa tresc: inaczej nie dalo by sie tych placeholderow poprawic.
+   */
+  display?: string;
 }) {
   const [draft, setDraft] = useState(value);
   const committed = useRef(value);
@@ -98,7 +105,8 @@ export function InlineText({
    * przez czytniki ekranu jako treść, a nie jako pole formularza.
    */
   if (readOnly) {
-    if (!draft) return null;
+    const shown = display ?? draft;
+    if (!shown) return null;
     return (
       <div
         aria-label={ariaLabel}
@@ -108,7 +116,7 @@ export function InlineText({
           multiline && 'whitespace-pre-wrap',
         )}
       >
-        {draft}
+        {shown}
       </div>
     );
   }
