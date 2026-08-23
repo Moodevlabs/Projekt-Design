@@ -5,6 +5,7 @@ import {
   getTemplate,
   listTemplates,
   overwriteTemplate,
+  renameTemplate,
   type CreateTemplateInput,
   type Template,
 } from '@/data/repos/templates.repo';
@@ -51,6 +52,18 @@ export function useOverwriteTemplate() {
 
   return useMutation({
     mutationFn: ({ id, body }: { id: string; body: QuoteBody }) => overwriteTemplate(id, body),
+    onSuccess: (template) => {
+      queryClient.setQueryData<Template>(queryKeys.template(template.id), template);
+      void queryClient.invalidateQueries({ queryKey: queryKeys.templates() });
+    },
+  });
+}
+
+export function useRenameTemplate() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, name }: { id: string; name: string }) => renameTemplate(id, name),
     onSuccess: (template) => {
       queryClient.setQueryData<Template>(queryKeys.template(template.id), template);
       void queryClient.invalidateQueries({ queryKey: queryKeys.templates() });

@@ -8,6 +8,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { EditorMode, SaveState } from '../editor.store';
@@ -27,6 +28,9 @@ export function EditorTopbar({
   onRetry,
   onReload,
   onSaveAllToLibrary,
+  onSaveAsTemplate,
+  onOverwriteTemplate,
+  canOverwriteTemplate,
   onOpenLibrary,
 }: {
   number: string | null;
@@ -39,6 +43,10 @@ export function EditorTopbar({
   onRetry: () => void;
   onReload: () => void;
   onSaveAllToLibrary: () => void;
+  onSaveAsTemplate: () => void;
+  onOverwriteTemplate: () => void;
+  /** Bez szablonów nie ma czego nadpisywać — pozycja menu znika. */
+  canOverwriteTemplate: boolean;
   onOpenLibrary: () => void;
 }) {
   return (
@@ -103,6 +111,15 @@ export function EditorTopbar({
             <DropdownMenuItem onSelect={onSaveAllToLibrary}>
               {pl.editor.saveAllToLibrary}
             </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={onSaveAsTemplate}>
+              {pl.templates.saveAsTemplate}
+            </DropdownMenuItem>
+            {canOverwriteTemplate ? (
+              <DropdownMenuItem onSelect={onOverwriteTemplate}>
+                {pl.templates.overwrite}
+              </DropdownMenuItem>
+            ) : null}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

@@ -131,6 +131,18 @@ export async function overwriteTemplate(id: string, body: QuoteBody): Promise<Te
   return mapTemplate(row);
 }
 
+/** Zmiana samej nazwy — treść zostaje nietknięta. */
+export async function renameTemplate(id: string, name: string): Promise<Template> {
+  const rows = unwrap(
+    await getSupabase().from('quote_templates').update({ name }).eq('id', id).select('*'),
+    'Zmiana nazwy szablonu',
+  );
+
+  const row = rows[0];
+  if (!row) throw new RepoError('Nie udało się zapisać nazwy szablonu.');
+  return mapTemplate(row);
+}
+
 /**
  * Twarde delete — szablon to narzędzie pracy, a nie dane klienta: nie ma czego
  * przywracać ani do czego się odwoływać (wyceny trzymają własną kopię `body`).

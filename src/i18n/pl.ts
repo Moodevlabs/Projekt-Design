@@ -435,6 +435,41 @@ export const pl = {
     emptyTitle: 'Brak szablonów',
     emptyDescription: 'Zapisz gotową wycenę jako szablon, żeby następną zacząć od 80% roboty.',
     newFromTemplate: 'Nowa wycena z szablonu',
+
+    // Lista szablonów.
+    nameLabel: (name: string) => `Nazwa szablonu: ${name}`,
+    save: (name: string) => `Zapisz nazwę szablonu: ${name}`,
+    cancel: (name: string) => `Odrzuć zmianę nazwy: ${name}`,
+    use: (name: string) => `Nowa wycena z szablonu: ${name}`,
+    remove: (name: string) => `Usuń szablon: ${name}`,
+    removeTitle: 'Usunąć szablon?',
+    removeDescription: (name: string) =>
+      `„${name}” zniknie z listy. Wyceny utworzone z tego szablonu zostają nietknięte.`,
+    itemsCount: (count: number) => {
+      if (count === 1) return '1 pozycja';
+      const rest = count % 10;
+      const tens = count % 100;
+      if (rest >= 2 && rest <= 4 && (tens < 12 || tens > 14)) return `${count} pozycje`;
+      return `${count} pozycji`;
+    },
+    corrupted: 'Szablon uszkodzony — nie da się z niego utworzyć wyceny.',
+    loadError: 'Nie udało się wczytać szablonów.',
+    createdFrom: (name: string) => `Nowa wycena z szablonu „${name}”`,
+
+    // Zapis szablonu z edytora.
+    saveAsTemplate: 'Zapisz jako szablon',
+    saveAsTemplateTitle: 'Nowy szablon z tej wyceny',
+    saveAsTemplateDescription:
+      'Szablon zapamiętuje układ i pozycje, ale nie dane klienta ani numeru wyceny.',
+    saveAsTemplateName: 'Nazwa szablonu',
+    saveAsTemplateConfirm: 'Zapisz szablon',
+    saveAsTemplateDone: (name: string) => `Zapisano szablon „${name}”`,
+    overwrite: 'Nadpisz szablon',
+    overwriteTitle: 'Nadpisać szablon?',
+    overwriteDescription: (name: string) =>
+      `Zawartość „${name}” zostanie zastąpiona bieżącą wyceną. Tej zmiany nie da się cofnąć.`,
+    overwriteDone: (name: string) => `Nadpisano szablon „${name}”`,
+    overwriteEmpty: 'Nie masz jeszcze żadnego szablonu do nadpisania.',
   },
   brand: {
     title: 'Branding',

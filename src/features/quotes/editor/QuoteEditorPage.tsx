@@ -16,12 +16,14 @@ import { RoomsPanel } from './components/RoomsPanel';
 import { DiscountsSection } from './components/DiscountsSection';
 import { AddLink } from './components/AddLink';
 import { LibrarySheet } from './components/LibrarySheet';
+import { OverwriteTemplateDialog, SaveAsTemplateDialog } from './components/TemplateDialogs';
 import { useCreateQuote, useQuote } from '@/data/queries/useQuotes';
 import { EmptyState } from '@/components/shared';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import type { Item } from '@/domain/quote';
 import { useSaveToLibrary } from './useSaveToLibrary';
+import { useTemplateActions } from './useTemplateActions';
 import { routes } from '@/app/routes';
 import { pl } from '@/i18n/pl';
 
@@ -191,6 +193,9 @@ function EditorSurface({
   const addRoomBlocksAction = useEditorStore((state) => state.addRoomBlocks);
   const insertItemToRoomBlocks = useEditorStore((state) => state.insertItemToRoomBlocks);
   const [libraryOpen, setLibraryOpen] = useState(false);
+  const templates = useTemplateActions();
+  const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
+  const [overwriteTemplateOpen, setOverwriteTemplateOpen] = useState(false);
 
   /**
    * „Rozpisz na pomieszczenia”. Mówimy wprost, ile bloków przybyło — akcja
@@ -284,10 +289,29 @@ function EditorSurface({
           onRetry={onRetry}
           onReload={onReload}
           onSaveAllToLibrary={library.saveAll}
+          onSaveAsTemplate={() => setSaveTemplateOpen(true)}
+          onOverwriteTemplate={() => setOverwriteTemplateOpen(true)}
+          canOverwriteTemplate={templates.canOverwrite}
           onOpenLibrary={() => setLibraryOpen(true)}
         />
 
         <LibrarySheet open={libraryOpen} onOpenChange={setLibraryOpen} />
+
+        <SaveAsTemplateDialog
+          open={saveTemplateOpen}
+          onOpenChange={setSaveTemplateOpen}
+          defaultName={body.title}
+          saving={templates.saving}
+          onSave={templates.saveAs}
+        />
+
+        <OverwriteTemplateDialog
+          open={overwriteTemplateOpen}
+          onOpenChange={setOverwriteTemplateOpen}
+          templates={templates.templates}
+          saving={templates.saving}
+          onOverwrite={templates.overwrite}
+        />
 
         {saveState === 'conflict' ? (
           <Alert variant="destructive" className="mx-7 mt-4 w-auto">

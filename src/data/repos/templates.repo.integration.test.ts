@@ -11,6 +11,7 @@ import {
   getTemplate,
   listTemplates,
   overwriteTemplate,
+  renameTemplate,
   templateSummary,
 } from './templates.repo';
 import { CURRENT_BODY_VERSION, newGroup, newItem, newQuoteBody, newSection } from '@/domain/quote';
@@ -128,6 +129,17 @@ describe('templates.repo — CRUD', () => {
 
     const rows = await listTemplates(workspaceId);
     expect(rows.some((row) => row.id === template.id)).toBe(false);
+  });
+
+  it('zmienia sama nazwe, nie ruszajac tresci', async () => {
+    const template = await makeTemplate('Stara nazwa');
+    const przed = template.itemCount;
+
+    const po = await renameTemplate(template.id, 'Nowa nazwa');
+
+    expect(po.name).toBe('Nowa nazwa');
+    expect(po.itemCount).toBe(przed);
+    expect(po.bodyError).toBeNull();
   });
 
   it('nie wywala sie na uszkodzonym body — zwraca bodyError', async () => {

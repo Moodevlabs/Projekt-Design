@@ -308,9 +308,17 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
 
 ### Reszta Fazy 1
 
-- [ ] **T-11 Szablony** (00-PRD §4.1)
+- [x] **T-11 Szablony** (00-PRD §4.1)
   ✅ Zapisz jako szablon, nowa z szablonu, nadpisz, usuń.
   ⚠️ Po T-30: szablon zapisuje `body`, więc musi przejść tę samą migrację wersji co wycena.
+  > **Zrobione.** `TemplatesPage` + `TemplateCard` (lista, zmiana nazwy w miejscu, nowa wycena z szablonu, usuwanie), `useTemplateActions` + dialogi w edytorze („Zapisz jako szablon”, „Nadpisz szablon”), `renameTemplate` w repo i hook. 499 testów jednostkowych, 48 integracyjnych.
+  > **Na co uważać:**
+  > - **Szablon NIE zabiera danych klienta ani daty wystawienia.** Inaczej nowa wycena z szablonu startowałaby z cudzym nazwiskiem i telefonem — pomyłka, którą łatwo wysłać do klienta. Jest na to test.
+  > - **Zapisujemy `structuredClone`, nie referencję** do dokumentu w edytorze; dalsze pisanie po zapisie nie może zmieniać treści wysłanej do bazy. To samo przy tworzeniu wyceny z szablonu — od tej chwili oba dokumenty żyją osobno.
+  > - **Nadpisanie pokazuje nazwę celu w chwili kliknięcia** i nie da się go cofnąć, dlatego wybór szablonu i potwierdzenie są w jednym dialogu.
+  > - Pozycja „Nadpisz szablon" znika z menu, gdy nie ma żadnego szablonu — martwa opcja tylko myli.
+  > - Szablon z uszkodzonym `body` **zostaje na liście**, ale bez przycisku tworzenia wyceny: ukrycie go zostawiłoby wiersz, którego nie da się ani użyć, ani skasować.
+  > - Migracja `body` działa dla szablonów od T-30 — `parseQuoteBody` jest wspólnym wejściem, więc dokumenty sprzed wersjonowania wczytują się tak samo jak wyceny (jest test integracyjny).
 
 - [ ] **T-12 Brand kit — ustawienia + Storage** (04-PDF §3–4, 02-DATABASE storage) **+ F7.2**
   Formularz, upload logo do bucketa `brand`, signed URL, walidacja kolorów, kontrast.
