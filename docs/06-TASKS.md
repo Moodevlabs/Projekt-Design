@@ -580,10 +580,21 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - **Dokumenty renderują się równolegle** (`Promise.all`) — szeregowanie ich tylko dlatego, że kod czyta się liniowo, kosztowałoby sekundy.
   > **Nie zweryfikowane:** kryterium **„< 5 s” nie jest sprawdzone w warunkach docelowych.** Zmierzony render czterech dokumentów plus scalanie: **~0,1–0,25 s w Node**, ale **bez osadzonych fontów** (test używa wbudowanej Helvetiki) i bez Web Workera. W aplikacji dochodzi embedowanie Intera, więc realny czas będzie wyższy — rząd wielkości nadal daleko od 5 s, ale **liczby z appki nikt jeszcze nie zmierzył**. Test wydajnościowy asertuje luźny próg 30 s (zegar ścienny w CI to loteria); łapie katastrofę, nie regresję o 200 ms. Wyglądu scalonego pliku na papierze nikt nie oglądał.
 
-- [ ] **T-49 Rejestr ofert — pola z arkusza `OFERTY`** (F7.1)
+- [x] **T-49 Rejestr ofert — pola z arkusza `OFERTY`** (F7.1)
   `quotes.city`, `internal_notes`, `doc_kind`; kolumna „Miasto”, filtr, szybkie notatki; eksport CSV w układzie arkusza.
   ✅ Eksport otwiera się w Excelu bez przekodowania (UTF-8 BOM, separator `;`).
   ⚠️ Pokrywa się z **T-23** (import/eksport CSV) i **T-18** (klienci — `city` naturalnie należy do klienta, nie do wyceny). Zrób te trzy razem albo świadomie zduplikuj `city`.
+  > **Zrobione.** Migracja `0014_quotes_register_fields.sql`, `body.client.city`, `lib/csv.ts`, `list/register-csv.ts`, kolumna „Miasto” + filtr + popover notatek, przycisk „Eksportuj rejestr (CSV)”. `QuotesListPage` rozbity na `QuotesToolbar` i `QuotesTable` (przekroczył 250 linii). 997 testów jednostkowych.
+  > **Na co uważać:**
+  > - **`city` jest świadomie ZDUPLIKOWANE** — tak jak ostrzegało zadanie. Źródłem prawdy jest `body.client.city`, a kolumna `quotes.city` to kopia dla listy i filtra, dokładnie na zasadzie `client_name`. Tabeli `clients` (T-18) jeszcze nie ma; **przy T-18 trzeba będzie rozstrzygnąć, które z tych dwóch miejsc wygrywa.**
+  > - **`internal_notes` NIE idzie do `body`** i to jest sedno tego pola: notatki są wewnętrzne, nigdy nie trafiają do PDF, a `body` bywa kopiowane do szablonu i duplikatu. Notatka „klient marudzi przy każdej zmianie” powielona do szablonu to wypadek nie do cofnięcia.
+  > - **`doc_kind` ustawia człowiek, nie automat.** Wycena, która ma cennik dodatkowy, nie jest „samym cennikiem” — o tym, co poszło do inwestora, wie tylko autor. Ustawia się go w tym samym popoverze co notatki.
+  > - **Notatka zapisuje się po opuszczeniu pola, nie przy każdym znaku** — to lista, nie edytor; mutacja na literę zalałaby bazę i migała optymistycznymi aktualizacjami wiersza. Jest na to test.
+  > - **CSV: separator `;` i BOM UTF-8.** Excel w PL czyta przecinek jako separator dziesiętny, a bez BOM-u „Kraków” robi się „KrakÃ³w”. Wiersze CRLF. Wiodące `=`, `+`, `-`, `@` poprzedzamy apostrofem — **CSV injection**: notatka `=HYPERLINK(...)` w cudzym arkuszu to nie żart.
+  > - **Eksport bierze to, co WIDAĆ po filtrach.** Plik inny niż lista na ekranie byłby gorszy niż brak eksportu.
+  > - **Rejestr to osobne zapytanie** (`listQuoteRegister`) — telefon i e-mail siedzą w `body`, a lista nie ma prawa ciągnąć dokumentów przy każdym otwarciu. Uszkodzony `body` trafia do rejestru z tym, co wiadomo z kolumn, zamiast wywracać cały eksport.
+  > - **`bodyVersion` NIE idzie w górę**: `city` ma `default('')`, więc to dodanie pola, a nie zmiana kształtu dokumentu.
+  > **Nie zweryfikowane:** „otwiera się w Excelu bez przekodowania” sprawdzone **regułami** (BOM, `;`, CRLF, cytowanie, neutralizacja formuł) — **w prawdziwym Excelu tego pliku nikt jeszcze nie otworzył.** Nie ma też eksportu XLSX (`FEATURES` wspomina „CSV/XLSX”; zrobiony jest CSV, który pokrywa kryterium odbioru).
 
 ## Faza 2
 

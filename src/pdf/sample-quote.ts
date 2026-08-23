@@ -19,7 +19,7 @@ export function sampleQuoteBody(): QuoteBody {
     subtitle: 'Tak zobaczy ją Twój klient',
     intro:
       'To podgląd wyglądu, nie prawdziwa wycena. Kolory, logo i stopka pochodzą z ustawień obok.',
-    client: { name: 'Jan Przykładowy', phone: '600 000 000', email: 'jan@przyklad.pl' },
+    client: { name: 'Jan Przykładowy', phone: '600 000 000', email: 'jan@przyklad.pl', city: '' },
     issueDate: SAMPLE_DATE,
     preparedBy: 'Zespół projektowy',
     rooms: [{ ...kuchnia, roomTypeId: null, includedInVisual: true, includedInTechnical: true }],

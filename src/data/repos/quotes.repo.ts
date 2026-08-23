@@ -1,9 +1,11 @@
 import {
+  DocKindSchema,
   QuoteStatusSchema,
   calcQuoteTotals,
   duplicateQuoteBody,
   newQuoteBody,
   parseQuoteBody,
+  type DocKind,
   type QuoteBody,
   type QuoteStatus,
 } from '@/domain/quote';
@@ -18,7 +20,7 @@ const log = createLogger('quotes.repo');
 
 /** Kolumny listy — bez `body`, zeby nie ciagnac calych dokumentow do tabeli. */
 const LIST_COLUMNS =
-  'id, workspace_id, number, title, status, total_net_cents, total_gross_cents, currency, client_name, valid_until, sent_at, accepted_at, created_at, updated_at';
+  'id, workspace_id, number, title, status, total_net_cents, total_gross_cents, currency, client_name, city, internal_notes, doc_kind, valid_until, sent_at, accepted_at, created_at, updated_at';
 
 export interface QuoteSummary {
   id: string;
@@ -30,6 +32,12 @@ export interface QuoteSummary {
   totalGrossCents: number;
   currency: string;
   clientName: string | null;
+  /** Kopia `body.client.city` — do kolumny i filtra rejestru (F7.1). */
+  city: string | null;
+  /** Notatki wewnetrzne. **Nigdy nie ida do PDF ani do duplikatu wyceny.** */
+  internalNotes: string | null;
+  /** Rodzaj dokumentu wyslanego inwestorowi — ustawia czlowiek, nie automat. */
+  docKind: DocKind;
   validUntil: string | null;
   sentAt: string | null;
   acceptedAt: string | null;
@@ -61,6 +69,8 @@ export interface QuoteFilters {
   workspaceId: string;
   search?: string;
   status?: QuoteStatus | 'all';
+  /** Filtr rejestru po miescie klienta (F7.1). Pusty = wszystkie. */
+  city?: string;
   includeArchived?: boolean;
   sort?: QuoteSort;
 }
@@ -85,6 +95,9 @@ function mapSummary(row: Row): QuoteSummary {
     totalGrossCents: Number(row.total_gross_cents ?? 0),
     currency: (row.currency as string) ?? 'PLN',
     clientName: (row.client_name as string | null) ?? null,
+    city: (row.city as string | null) ?? null,
+    internalNotes: (row.internal_notes as string | null) ?? null,
+    docKind: DocKindSchema.catch('offer').parse(row.doc_kind),
     validUntil: (row.valid_until as string | null) ?? null,
     sentAt: (row.sent_at as string | null) ?? null,
     acceptedAt: (row.accepted_at as string | null) ?? null,
@@ -121,6 +134,7 @@ export async function listQuotes(filters: QuoteFilters): Promise<QuoteSummary[]>
 
   if (!filters.includeArchived) query = query.is('deleted_at', null);
   if (filters.status && filters.status !== 'all') query = query.eq('status', filters.status);
+  if (filters.city) query = query.eq('city', filters.city);
 
   const term = filters.search?.trim();
   if (term) {
@@ -136,6 +150,82 @@ export async function listQuotes(filters: QuoteFilters): Promise<QuoteSummary[]>
     'Lista wycen',
   );
   return rows.map((row) => mapSummary(row as unknown as Row));
+}
+
+/** Wiersz rejestru do eksportu CSV (F7.1) — uklad arkusza `OFERTY`. */
+export interface QuoteRegisterRow {
+  number: string | null;
+  createdAt: string;
+  docKind: DocKind;
+  clientName: string | null;
+  clientPhone: string;
+  clientEmail: string;
+  city: string | null;
+  internalNotes: string | null;
+}
+
+/**
+ * Rejestr do eksportu.
+ *
+ * Osobne zapytanie od `listQuotes`, bo telefon i e-mail siedza w `body` —
+ * na liscie ich nie ma i nie ma powodu, zeby byly. Eksport jest akcja
+ * jednorazowa, wiec stac go na sciagniecie dokumentow; **lista nie ma prawa
+ * ich ciagnac przy kazdym otwarciu**.
+ */
+export async function listQuoteRegister(filters: QuoteFilters): Promise<QuoteRegisterRow[]> {
+  let query = getSupabase()
+    .from('quotes')
+    .select('number, created_at, doc_kind, client_name, city, internal_notes, body')
+    .eq('workspace_id', filters.workspaceId);
+
+  if (!filters.includeArchived) query = query.is('deleted_at', null);
+  if (filters.status && filters.status !== 'all') query = query.eq('status', filters.status);
+
+  const rows = unwrap(await query.order('created_at', { ascending: true }), 'Rejestr ofert');
+
+  return (rows as unknown as Row[]).map((row) => {
+    // Czytamy `body` defensywnie: uszkodzony dokument ma sie znalezc
+    // w rejestrze z tym, co wiadomo z kolumn, a nie wywrocic caly eksport.
+    const client = (row.body as { client?: { phone?: unknown; email?: unknown } } | null)?.client;
+
+    return {
+      number: (row.number as string | null) ?? null,
+      createdAt: row.created_at as string,
+      docKind: DocKindSchema.catch('offer').parse(row.doc_kind),
+      clientName: (row.client_name as string | null) ?? null,
+      clientPhone: typeof client?.phone === 'string' ? client.phone : '',
+      clientEmail: typeof client?.email === 'string' ? client.email : '',
+      city: (row.city as string | null) ?? null,
+      internalNotes: (row.internal_notes as string | null) ?? null,
+    };
+  });
+}
+
+/**
+ * Miasta obecne w rejestrze — do listy wyboru w filtrze.
+ *
+ * Postgres nie da nam `distinct` przez PostgREST, wiec sciagamy JEDNA kolumne
+ * i odsiewamy duplikaty tutaj. To kilka bajtow na wiersz; ciagniecie calych
+ * wierszy tylko po to, zeby poznac miasta, byloby marnotrawstwem.
+ */
+export async function listQuoteCities(workspaceId: string): Promise<string[]> {
+  const rows = unwrap(
+    await getSupabase()
+      .from('quotes')
+      .select('city')
+      .eq('workspace_id', workspaceId)
+      .is('deleted_at', null)
+      .not('city', 'is', null),
+    'Miasta w rejestrze',
+  );
+
+  const miasta = new Set(
+    (rows as unknown as Row[])
+      .map((row) => (row.city as string | null)?.trim())
+      .filter((city): city is string => Boolean(city)),
+  );
+
+  return [...miasta].sort((a, b) => a.localeCompare(b, 'pl'));
 }
 
 export async function getQuote(id: string): Promise<Quote> {
@@ -226,6 +316,9 @@ export async function saveQuote(input: SaveQuoteInput): Promise<Quote> {
         body: input.body,
         title: input.body.title,
         client_name: input.body.client.name || null,
+        // Miasto denormalizujemy tak samo jak nazwe: lista i filtr rejestru
+        // nie maja rozpakowywac JSONB kazdego wiersza.
+        city: input.body.client.city || null,
         total_net_cents: totals.netCents,
         total_gross_cents: totals.grossCents,
         ...(input.status ? { status: input.status } : {}),
@@ -244,6 +337,33 @@ export async function saveQuote(input: SaveQuoteInput): Promise<Quote> {
   const row = rows[0];
   if (!row) throw new ConflictError('Wycena zmieniona w innym miejscu — przeladuj.');
   return mapQuote(row);
+}
+
+/**
+ * Pola rejestru: notatki wewnetrzne i rodzaj dokumentu (F7.1).
+ *
+ * Bez blokady optymistycznej, jak `setQuoteStatus`: to sa dane OBOK dokumentu,
+ * wiec nie moga wywolac konfliktu na `body` ani go nadpisac. Notatka zmieniona
+ * z listy w trakcie edycji wyceny w drugim oknie ma po prostu zadzialac.
+ */
+export async function setQuoteRegisterFields(
+  id: string,
+  patch: { internalNotes?: string | null; docKind?: DocKind },
+): Promise<QuoteSummary> {
+  const update: TablesUpdate<'quotes'> = {};
+  // Pusta notatka to `null`, nie `''` — inaczej filtr „ma notatke" musialby
+  // znac oba zapisy tego samego.
+  if (patch.internalNotes !== undefined) update.internal_notes = patch.internalNotes || null;
+  if (patch.docKind !== undefined) update.doc_kind = patch.docKind;
+
+  const rows = unwrap(
+    await getSupabase().from('quotes').update(update).eq('id', id).select(LIST_COLUMNS),
+    'Zapis notatek wyceny',
+  );
+
+  const row = rows[0];
+  if (!row) throw new RepoError('Nie udalo sie zapisac notatek.');
+  return mapSummary(row);
 }
 
 /** Zmiana statusu nie rusza `body`, wiec nie wymaga blokady optymistycznej. */

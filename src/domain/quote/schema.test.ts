@@ -81,7 +81,7 @@ describe('QuoteBodySchema', () => {
   it('z pustego obiektu buduje kompletny dokument', () => {
     const body = QuoteBodySchema.parse({});
     expect(body.title).toBe('Wycena');
-    expect(body.client).toEqual({ name: '', phone: '', email: '' });
+    expect(body.client).toEqual({ name: '', phone: '', email: '', city: '' });
     expect(body.validDays).toBe(7);
     expect(body.vatRate).toBe(23);
     expect(body.pricesInclude).toBe('net');

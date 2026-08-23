@@ -132,7 +132,7 @@ export function newQuoteBody(partial: Partial<QuoteBody> = {}): QuoteBody {
     subtitle: '',
     intro: '',
     projectDescription: '',
-    client: { name: '', phone: '', email: '' },
+    client: { name: '', phone: '', email: '', city: '' },
     // `null` = UI pokaze `quotes.created_at`; edytor moze to nadpisac.
     issueDate: null,
     validDays: 7,
@@ -168,7 +168,7 @@ export function duplicateQuoteBody(body: QuoteBody): QuoteBody {
 export function fromTemplate(body: QuoteBody): QuoteBody {
   return {
     ...duplicateQuoteBody(body),
-    client: { name: '', phone: '', email: '' },
+    client: { name: '', phone: '', email: '', city: '' },
   };
 }
 

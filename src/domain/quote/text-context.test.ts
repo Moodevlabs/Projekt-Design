@@ -19,7 +19,7 @@ const KUCHNIA = room({ label: 'kuchnia' });
 const SALON = room({ label: 'salon', qty: 2 });
 
 const BODY = newQuoteBody({
-  client: { name: 'Jan Kowalski', phone: '', email: '' },
+  client: { name: 'Jan Kowalski', phone: '', email: '', city: '' },
   rooms: [KUCHNIA, SALON],
 });
 

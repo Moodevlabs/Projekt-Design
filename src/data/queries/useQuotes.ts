@@ -5,7 +5,10 @@ import {
   duplicateQuote,
   getQuote,
   listQuotes,
+  listQuoteCities,
+  listQuoteRegister,
   saveQuote,
+  setQuoteRegisterFields,
   setQuoteStatus,
   type CreateQuoteInput,
   type Quote,
@@ -15,7 +18,7 @@ import {
 import { ConflictError } from '@/data/repos/errors';
 import { queryKeys } from '@/data/query-keys';
 import { requireWorkspaceId, useWorkspaceId } from './useWorkspace';
-import type { QuoteStatus } from '@/domain/quote';
+import type { DocKind, QuoteStatus } from '@/domain/quote';
 import { createLogger } from '@/lib/logger';
 
 const log = createLogger('useQuotes');
@@ -181,5 +184,80 @@ export function useSetQuoteStatus() {
       void queryClient.invalidateQueries(listQueries);
       void queryClient.invalidateQueries({ queryKey: queryKeys.quote(id) });
     },
+  });
+}
+
+export interface RegisterFieldsVars {
+  id: string;
+  internalNotes?: string | null;
+  docKind?: DocKind;
+}
+
+/**
+ * Notatki wewnetrzne i rodzaj dokumentu (F7.1).
+ *
+ * Optymistycznie, jak status: to sa pola OBOK dokumentu, wiec nie moga
+ * wywolac konfliktu na `body`. Notatka ma sie pojawic w chwili wpisania,
+ * a nie po powrocie z serwera.
+ */
+export function useSetQuoteRegisterFields() {
+  const queryClient = useQueryClient();
+
+  return useMutation<QuoteSummary, Error, RegisterFieldsVars, StatusRollback>({
+    mutationFn: ({ id, internalNotes, docKind }) =>
+      setQuoteRegisterFields(id, { internalNotes, docKind }),
+
+    onMutate: async ({ id, internalNotes, docKind }) => {
+      await queryClient.cancelQueries(listQueries);
+
+      const lists = queryClient.getQueriesData<QuoteSummary[]>(listQueries);
+      const patch = {
+        ...(internalNotes === undefined ? {} : { internalNotes: internalNotes || null }),
+        ...(docKind === undefined ? {} : { docKind }),
+      };
+
+      queryClient.setQueriesData<QuoteSummary[]>(listQueries, (rows) =>
+        rows?.map((row) => (row.id === id ? { ...row, ...patch } : row)),
+      );
+
+      return { lists, detail: undefined };
+    },
+
+    onError: (_error, _vars, rollback) => {
+      if (!rollback) return;
+      for (const [key, rows] of rollback.lists) {
+        queryClient.setQueryData(key, rows);
+      }
+    },
+
+    onSettled: () => {
+      void queryClient.invalidateQueries(listQueries);
+    },
+  });
+}
+
+/**
+ * Rejestr do eksportu — pobierany NA ZADANIE, nie razem z lista.
+ *
+ * Ciagnie `body` kazdej wyceny (telefon i e-mail siedza w dokumencie), wiec
+ * nie ma prawa chodzic przy kazdym otwarciu listy.
+ */
+export function useQuoteRegisterExport() {
+  const workspaceId = useWorkspaceId();
+
+  return useMutation({
+    mutationFn: (filters: QuoteListFilters) =>
+      listQuoteRegister({ workspaceId: requireWorkspaceId(workspaceId), ...filters }),
+  });
+}
+
+/** Miasta do filtra rejestru (F7.1). */
+export function useQuoteCities() {
+  const workspaceId = useWorkspaceId();
+
+  return useQuery({
+    queryKey: queryKeys.quotes({ workspaceId, kind: 'cities' }),
+    queryFn: () => listQuoteCities(requireWorkspaceId(workspaceId)),
+    enabled: Boolean(workspaceId),
   });
 }

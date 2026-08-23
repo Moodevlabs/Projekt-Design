@@ -41,7 +41,7 @@ async function render(fontFamily: 'Inter' | 'Lato', useFonts: boolean) {
 
   const body = newQuoteBody({
     title: 'Zażółć gęślą jaźń ĄĆĘŁŃÓŚŹŻ ąćęłńóśźż',
-    client: { name: 'Łukasz Świderski', phone: '', email: '' },
+    client: { name: 'Łukasz Świderski', phone: '', email: '', city: '' },
     sections: [
       newSection({
         title: 'Wykończenie wnętrz',

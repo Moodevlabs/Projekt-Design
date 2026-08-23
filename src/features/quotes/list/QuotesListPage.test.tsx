@@ -8,8 +8,19 @@ import { pl } from '@/i18n/pl';
 const useQuotesList = vi.hoisted(() => vi.fn());
 const mutationStub = vi.hoisted(() => () => ({ mutate: vi.fn(), isPending: false }));
 
+const useQuoteCities = vi.hoisted(() => vi.fn(() => ({ data: [] as string[] })));
+const useQuoteRegisterExport = vi.hoisted(() =>
+  vi.fn(() => ({
+    mutateAsync: vi.fn(() => Promise.resolve([])),
+    isPending: false,
+  })),
+);
+
 vi.mock('@/data/queries/useQuotes', () => ({
   useQuotesList,
+  useQuoteCities,
+  useQuoteRegisterExport,
+  useSetQuoteRegisterFields: mutationStub,
   useDuplicateQuote: mutationStub,
   useArchiveQuote: mutationStub,
 }));
@@ -27,6 +38,9 @@ function summary(partial: Partial<QuoteSummary> = {}): QuoteSummary {
     totalGrossCents: 553_500,
     currency: 'PLN',
     clientName: 'Anna Kowalska',
+    city: null,
+    internalNotes: null,
+    docKind: 'offer' as const,
     validUntil: null,
     sentAt: null,
     acceptedAt: null,
@@ -130,8 +144,12 @@ describe('QuotesListPage', () => {
     mockResult([summary({ id: 'a', title: 'Pierwsza' }), summary({ id: 'b', title: 'Druga' })]);
     renderPage();
 
-    expect(screen.getByRole('button', { name: `${pl.quotes.rowActions}: Pierwsza` })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: `${pl.quotes.rowActions}: Druga` })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: `${pl.quotes.rowActions}: Pierwsza` }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: `${pl.quotes.rowActions}: Druga` }),
+    ).toBeInTheDocument();
   });
 
   it('pokazuje blad wczytywania z mozliwoscia ponowienia', () => {

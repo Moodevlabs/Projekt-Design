@@ -36,7 +36,7 @@ export function useTemplateActions(): TemplateActions {
     return {
       ...structuredClone(body),
       // Dane odbiorcy i data wystawienia należą do konkretnej oferty.
-      client: { name: '', phone: '', email: '' },
+      client: { name: '', phone: '', email: '', city: '' },
       issueDate: null,
     };
   };

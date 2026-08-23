@@ -60,7 +60,7 @@ describe('fabryki', () => {
       pricesInclude: 'net',
       sections: [],
       showDisabledItems: true,
-      client: { name: '', phone: '', email: '' },
+      client: { name: '', phone: '', email: '', city: '' },
     });
   });
 
@@ -73,7 +73,7 @@ describe('fabryki', () => {
 describe('duplicateQuoteBody', () => {
   const source = newQuoteBody({
     title: 'Wycena wnętrza',
-    client: { name: 'Jan Kowalski', phone: '600100200', email: 'jan@example.com' },
+    client: { name: 'Jan Kowalski', phone: '600100200', email: 'jan@example.com', city: '' },
     sections: [
       newSection({
         title: 'Projekt',
@@ -111,12 +111,12 @@ describe('fromTemplate', () => {
   it('czyści dane inwestora, zachowując strukturę', () => {
     const template = newQuoteBody({
       title: 'Szablon standard',
-      client: { name: 'Jan', phone: '600', email: 'j@x.pl' },
+      client: { name: 'Jan', phone: '600', email: 'j@x.pl', city: '' },
       sections: [newSection({ items: [newItem({ name: 'Koncepcja' })] })],
     });
 
     const created = fromTemplate(template);
-    expect(created.client).toEqual({ name: '', phone: '', email: '' });
+    expect(created.client).toEqual({ name: '', phone: '', email: '', city: '' });
     expect(created.title).toBe('Szablon standard');
     expect(created.sections[0]?.items[0]?.name).toBe('Koncepcja');
     expect(created.sections[0]?.id).not.toBe(template.sections[0]?.id);

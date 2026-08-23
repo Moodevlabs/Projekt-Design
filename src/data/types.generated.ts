@@ -407,14 +407,17 @@ export type Database = {
         Row: {
           accepted_at: string | null
           body: Json
+          city: string | null
           client_id: string | null
           client_name: string | null
           created_at: string
           created_by: string | null
           currency: string
           deleted_at: string | null
+          doc_kind: string
           documents: Json | null
           id: string
+          internal_notes: string | null
           number: string | null
           schedule: Json | null
           sent_at: string | null
@@ -429,14 +432,17 @@ export type Database = {
         Insert: {
           accepted_at?: string | null
           body: Json
+          city?: string | null
           client_id?: string | null
           client_name?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string
           deleted_at?: string | null
+          doc_kind?: string
           documents?: Json | null
           id?: string
+          internal_notes?: string | null
           number?: string | null
           schedule?: Json | null
           sent_at?: string | null
@@ -451,14 +457,17 @@ export type Database = {
         Update: {
           accepted_at?: string | null
           body?: Json
+          city?: string | null
           client_id?: string | null
           client_name?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string
           deleted_at?: string | null
+          doc_kind?: string
           documents?: Json | null
           id?: string
+          internal_notes?: string | null
           number?: string | null
           schedule?: Json | null
           sent_at?: string | null

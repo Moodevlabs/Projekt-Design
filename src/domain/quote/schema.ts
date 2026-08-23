@@ -11,6 +11,16 @@ import { CURRENT_BODY_VERSION, migrateBody } from './migrate';
 export const QuoteStatusSchema = z.enum(['draft', 'sent', 'accepted', 'rejected', 'expired']);
 export type QuoteStatus = z.infer<typeof QuoteStatusSchema>;
 
+/**
+ * Rodzaj dokumentu wyslanego inwestorowi (F7.1, arkusz `OFERTY` — RODZAJ).
+ *
+ * **Nie wyliczamy tego z zawartosci wyceny.** Wycena, ktora ma cennik
+ * dodatkowy, nie jest „samym cennikiem" — o tym, co naprawde poszlo do
+ * inwestora, wie tylko czlowiek.
+ */
+export const DocKindSchema = z.enum(['offer', 'schedule_only', 'price_list_only']);
+export type DocKind = z.infer<typeof DocKindSchema>;
+
 /** Rodzaj pozycji: zwykła pozycja albo rabat. */
 export const ItemKindSchema = z.enum(['item', 'discount']);
 export type ItemKind = z.infer<typeof ItemKindSchema>;
@@ -184,6 +194,14 @@ export const QuoteClientSchema = z.object({
   name: z.string().default(''),
   phone: z.string().default(''),
   email: z.string().default(''),
+  /**
+   * Miasto inwestora (F7.1, arkusz `OFERTY` — kolumna MIASTO).
+   *
+   * `default('')` znaczy, ze dokumenty sprzed T-49 czytaja sie dalej — nie
+   * ma tu zmiany KSZTALTU, wiec `bodyVersion` nie idzie w gore. Kolumna
+   * `quotes.city` to kopia tego pola, jak `client_name` dla nazwy.
+   */
+  city: z.string().default(''),
 });
 export type QuoteClient = z.infer<typeof QuoteClientSchema>;
 

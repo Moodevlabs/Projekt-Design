@@ -22,7 +22,7 @@ const { useTemplateActions } = await import('./useTemplateActions');
 function makeBody(): QuoteBody {
   return newQuoteBody({
     title: 'Wycena dla Kowalskiego',
-    client: { name: 'Jan Kowalski', phone: '600100200', email: 'jan@example.com' },
+    client: { name: 'Jan Kowalski', phone: '600100200', email: 'jan@example.com', city: '' },
     issueDate: '2026-08-01',
     sections: [newSection({ title: 'Prace', items: [newItem({ name: 'Projekt' })] })],
   });
@@ -39,6 +39,9 @@ function makeQuote(body: QuoteBody): Quote {
     totalGrossCents: 0,
     currency: 'PLN',
     clientName: null,
+    city: null,
+    internalNotes: null,
+    docKind: 'offer' as const,
     validUntil: null,
     sentAt: null,
     acceptedAt: null,
@@ -88,7 +91,7 @@ describe('useTemplateActions — zapis jako szablon', () => {
     result.current.saveAs('Szablon');
 
     const vars = createMutate.mock.calls[0]?.[0] as { body: QuoteBody };
-    expect(vars.body.client).toEqual({ name: '', phone: '', email: '' });
+    expect(vars.body.client).toEqual({ name: '', phone: '', email: '', city: '' });
     expect(vars.body.issueDate).toBeNull();
   });
 

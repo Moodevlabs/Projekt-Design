@@ -123,6 +123,16 @@ export function QuoteHeader({
           />
         </MetaField>
 
+        <MetaField label={pl.editor.city}>
+          <InlineText
+            value={body.client.city}
+            onCommit={(city) => onPatchClient({ city })}
+            readOnly={!editing}
+            ariaLabel={pl.editor.city}
+            className="inline-field w-full"
+          />
+        </MetaField>
+
         <MetaField label={pl.editor.validity}>
           {editing ? (
             <input

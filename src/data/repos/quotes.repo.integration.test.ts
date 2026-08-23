@@ -33,7 +33,7 @@ const created: string[] = [];
 function sampleBody(title: string) {
   return newQuoteBody({
     title,
-    client: { name: 'Testowy Klient', phone: '', email: '' },
+    client: { name: 'Testowy Klient', phone: '', email: '', city: '' },
     vatRate: 23,
     pricesInclude: 'net',
     sections: [
