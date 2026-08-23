@@ -61,6 +61,7 @@ function NewQuoteRedirect() {
   const workspace = useWorkspace();
   const settings = workspace.data?.settings;
   const started = useRef(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // Czekamy na ustawienia: dokument zakłada się RAZ i bierze z nich kopię,
@@ -69,19 +70,35 @@ function NewQuoteRedirect() {
     if (started.current || !settings) return;
     started.current = true;
 
-    create.mutate(
-      { body: quoteBodyFromSettings(settings) },
-      {
-        onSuccess: (quote) => void navigate(routes.quote(quote.id), { replace: true }),
-      },
-    );
+    /*
+     * `mutateAsync` i zwykła obietnica, a NIE `onSuccess` z `mutate` ani stan
+     * mutacji.
+     *
+     * TanStack Query wiąże jedno i drugie z obserwatorem hooka, a `StrictMode`
+     * w trybie deweloperskim montuje komponent dwa razy (mount → cleanup →
+     * mount) i pierwszego obserwatora porzuca. Skutek: wycena POWSTAWAŁA
+     * w bazie, ale nikt na nią nie przechodził — użytkownik zostawał na
+     * szkielecie, a na liście przybywało pustych dokumentów. W zbudowanej
+     * aplikacji tego nie widać, bo StrictMode działa wyłącznie w devie.
+     *
+     * Obietnica nie zależy od cyklu życia komponentu, więc przekierowanie
+     * dochodzi do skutku niezależnie od tego, ile razy React nas przemontuje.
+     */
+    void create
+      .mutateAsync({ body: quoteBodyFromSettings(settings) })
+      .then((quote) => navigate(routes.quote(quote.id), { replace: true }))
+      .catch((reason: unknown) => {
+        // Bez własnego stanu błąd zginąłby razem z porzuconym obserwatorem
+        // i użytkownik zostałby na szkielecie bez wyjaśnienia.
+        setError(reason instanceof Error ? reason.message : pl.quotes.loadError);
+      });
   }, [create, navigate, settings]);
 
-  if (create.isError) {
+  if (error) {
     return (
       <div className="p-7">
         <Alert variant="destructive">
-          <AlertDescription>{create.error.message}</AlertDescription>
+          <AlertDescription>{error}</AlertDescription>
         </Alert>
       </div>
     );
@@ -112,12 +129,28 @@ function ExistingQuoteEditor({ quoteId }: { quoteId: string }) {
   useEffect(() => {
     const data = quote.data;
     if (!data) return;
+
     const version = `${data.id}:${data.updatedAt}`;
-    if (loadedVersion.current === version) return;
-    if (loadedVersion.current?.startsWith(`${data.id}:`) && useEditorStore.getState().body) {
+    const state = useEditorStore.getState();
+
+    /*
+     * Pytamy STORE, a nie tylko `loadedVersion`.
+     *
+     * Ref przeżywa odmontowanie, a store jest wtedy czyszczony (`reset`).
+     * W trybie deweloperskim `StrictMode` montuje komponent dwa razy
+     * (mount → cleanup → mount), więc po powrocie ref twierdził „ta wersja
+     * jest już wczytana", podczas gdy dokument został właśnie skasowany —
+     * i edytor zostawał na szkielecie na zawsze. W zbudowanej aplikacji tego
+     * nie widać, bo StrictMode działa wyłącznie w devie.
+     */
+    const wStorze = state.quoteId === data.id && state.body !== null;
+
+    if (wStorze) {
+      if (loadedVersion.current === version) return;
       // Ta sama wycena, świeższy serwer — przejmujemy tylko po konflikcie.
-      if (!useEditorStore.getState().hasConflict) return;
+      if (loadedVersion.current?.startsWith(`${data.id}:`) && !state.hasConflict) return;
     }
+
     loadedVersion.current = version;
     load(data);
   }, [quote.data, load]);
