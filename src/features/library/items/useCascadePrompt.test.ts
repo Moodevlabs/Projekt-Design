@@ -23,6 +23,7 @@ function libraryItem(overrides: Partial<LibraryItem> = {}): LibraryItem {
     unitPriceCents: 120_000,
     sortOrder: 0,
     variantOf: null,
+    pricingBasis: 'amount',
     pricing: { mode: 'flat' },
     ...overrides,
   };

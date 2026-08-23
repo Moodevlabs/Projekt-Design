@@ -5,7 +5,14 @@ import {
   type LibraryGroup,
   type LibraryItemSnapshot,
 } from '@/domain/library/schema';
-import { ItemKindSchema, PricingRuleSchema, type ItemKind, type PricingRule } from '@/domain/quote';
+import {
+  ItemKindSchema,
+  PricingBasisSchema,
+  PricingRuleSchema,
+  type ItemKind,
+  type PricingBasis,
+  type PricingRule,
+} from '@/domain/quote';
 import { getSupabase } from '@/data/supabase';
 import type { Tables, TablesUpdate } from '@/data/types.generated';
 import { RepoError, unwrap } from './errors';
@@ -38,6 +45,14 @@ export interface LibraryItem {
    * Uzasadnienie modelu stoi w migracji `0010_library_variants.sql`.
    */
   variantOf: string | null;
+  /**
+   * Czym sa liczby tego wpisu: `amount` = grosze, `time` = minuty pracy.
+   *
+   * Wpis OPISUJE SAM SIEBIE, zamiast zalezec od trybu wyceny, ktora go
+   * czyta — inaczej „45" z wyceny godzinowej wstawione do kwotowej stalo by
+   * sie 45 groszy i nikt by tego nie zauwazyl. Patrz migracja `0011`.
+   */
+  pricingBasis: PricingBasis;
 }
 
 export interface LibraryItemFilters {
@@ -75,6 +90,8 @@ function mapItem(row: ItemRow): LibraryItem {
     sortOrder: Number(row.sort_order ?? 0),
     pricing: parsePricing(row.pricing, row.id),
     variantOf: row.variant_of ?? null,
+    // Kolumna ma CHECK w bazie; `catch` chroni przed rozjazdem migracji.
+    pricingBasis: PricingBasisSchema.catch('amount').parse(row.pricing_basis),
   };
 }
 
@@ -172,6 +189,7 @@ export interface CreateLibraryItemInput {
   sortOrder?: number;
   pricing?: PricingRule;
   variantOf?: string | null;
+  pricingBasis?: PricingBasis;
 }
 
 export async function createLibraryItem(input: CreateLibraryItemInput): Promise<LibraryItem> {
@@ -188,6 +206,7 @@ export async function createLibraryItem(input: CreateLibraryItemInput): Promise<
         sort_order: input.sortOrder ?? 0,
         pricing: input.pricing ?? { mode: 'flat' },
         variant_of: input.variantOf ?? null,
+        pricing_basis: input.pricingBasis ?? 'amount',
       })
       .select('*'),
     'Dodanie pozycji do biblioteki',
@@ -213,6 +232,7 @@ export async function updateLibraryItem(id: string, patch: LibraryItemPatch): Pr
   if (patch.pricing !== undefined) update.pricing = patch.pricing;
   // `null` jest tu znaczace („odepnij od grupy"), wiec sprawdzamy `undefined`.
   if (patch.variantOf !== undefined) update.variant_of = patch.variantOf;
+  if (patch.pricingBasis !== undefined) update.pricing_basis = patch.pricingBasis;
 
   const rows = unwrap(
     await getSupabase().from('library_items').update(update).eq('id', id).select('*'),

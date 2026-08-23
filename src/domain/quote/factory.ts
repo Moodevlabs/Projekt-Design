@@ -60,6 +60,9 @@ export function newQuoteBody(partial: Partial<QuoteBody> = {}): QuoteBody {
     validDays: 7,
     vatRate: 23,
     pricesInclude: 'net',
+    // Nowa wycena jest kwotowa; tryb godzinowy wlacza sie swiadomie (F2.2).
+    pricingBasis: 'amount',
+    hourlyRateCents: null,
     rooms: [],
     discounts: [],
     sections: [],

@@ -39,6 +39,7 @@ function baseItem(partial: Partial<LibraryItem> = {}): LibraryItem {
     unitPriceCents: 250_000,
     sortOrder: 10,
     variantOf: null,
+    pricingBasis: 'amount',
     pricing: { mode: 'flat' },
     ...partial,
   };

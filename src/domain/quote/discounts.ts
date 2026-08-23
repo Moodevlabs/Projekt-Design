@@ -1,5 +1,5 @@
 import { roundCents } from '../money';
-import { calcItemCents } from './calc';
+import { calcItemCents, pricingContextOf } from './calc';
 import type { Discount, Item, QuoteBody, Room, Section } from './schema';
 
 /**
@@ -78,7 +78,10 @@ export function calcDiscounts(body: QuoteBody, rooms: Room[] = body.rooms): Disc
   const valueOf = (items: Item[]) =>
     items
       .filter((item) => item.enabled)
-      .reduce((sum, item) => sum + calcItemCents(item, rooms), 0);
+      // Rabaty liczymy juz w GROSZACH, nie w jednostkach dokumentu: rabat to
+      // ustepstwo na cenie, a nie na pracy. „Rabat 500 zl" znaczy 500 zl tak
+      // samo w wycenie kwotowej, jak i godzinowej.
+      .reduce((sum, item) => sum + calcItemCents(item, rooms, pricingContextOf(body)), 0);
 
   const itemsTotal = valueOf(allItems(body).filter((item) => item.kind !== 'discount'));
 

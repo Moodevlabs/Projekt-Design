@@ -200,6 +200,7 @@ export type Database = {
           kind: string
           name: string
           pricing: Json
+          pricing_basis: string
           sort_order: number
           unit_price_cents: number
           updated_at: string
@@ -215,6 +216,7 @@ export type Database = {
           kind?: string
           name: string
           pricing?: Json
+          pricing_basis?: string
           sort_order?: number
           unit_price_cents?: number
           updated_at?: string
@@ -230,6 +232,7 @@ export type Database = {
           kind?: string
           name?: string
           pricing?: Json
+          pricing_basis?: string
           sort_order?: number
           unit_price_cents?: number
           updated_at?: string

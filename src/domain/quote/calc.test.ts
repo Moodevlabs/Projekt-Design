@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { calcGroupTotals, calcQuoteTotals, calcSectionTotals } from './calc';
+import { AMOUNT_BASIS, calcGroupTotals, calcQuoteTotals, calcSectionTotals } from './calc';
 import { newGroup, newItem, newQuoteBody, newSection } from './factory';
 import type { Item, QuoteBody, Section } from './schema';
 
@@ -218,7 +218,7 @@ describe('calcSectionTotals / calcGroupTotals', () => {
   const section = newSection({ items: [item({ unitPriceCents: 2000 })], groups: [group] });
 
   it('grupa liczona domyślnie bez VAT', () => {
-    expect(calcGroupTotals(group)).toEqual({
+    expect(calcGroupTotals(group, AMOUNT_BASIS)).toEqual({
       itemsCents: 4000,
       discountsCents: 1000,
       netCents: 3000,
@@ -228,7 +228,7 @@ describe('calcSectionTotals / calcGroupTotals', () => {
   });
 
   it('grupa z przekazanym kontekstem VAT', () => {
-    expect(calcGroupTotals(group, { vatRate: 23 })).toMatchObject({
+    expect(calcGroupTotals(group, AMOUNT_BASIS, { vatRate: 23 })).toMatchObject({
       netCents: 3000,
       vatCents: 690,
       grossCents: 3690,
@@ -236,7 +236,7 @@ describe('calcSectionTotals / calcGroupTotals', () => {
   });
 
   it('sekcja sumuje luźne pozycje i grupy', () => {
-    expect(calcSectionTotals(section)).toMatchObject({
+    expect(calcSectionTotals(section, AMOUNT_BASIS)).toMatchObject({
       itemsCents: 6000,
       discountsCents: 1000,
       netCents: 5000,
@@ -244,7 +244,7 @@ describe('calcSectionTotals / calcGroupTotals', () => {
   });
 
   it('sekcja z kontekstem brutto', () => {
-    expect(calcSectionTotals(section, { vatRate: 23, pricesInclude: 'gross' })).toMatchObject({
+    expect(calcSectionTotals(section, AMOUNT_BASIS, { vatRate: 23, pricesInclude: 'gross' })).toMatchObject({
       grossCents: 5000,
       netCents: 4065,
       vatCents: 935,

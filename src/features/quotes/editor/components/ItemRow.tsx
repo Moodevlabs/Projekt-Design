@@ -15,6 +15,7 @@ import { formatMoney } from '@/domain/money';
 import {
   calcItemCents,
   itemTextContext,
+  type PricingContext,
   renderText,
   type DocumentTextInfo,
   type Item,
@@ -69,6 +70,8 @@ export interface ItemRowProps {
   rooms: Room[];
   /** Dane dokumentu do placeholderów w opisie (F4.2). Stabilna referencja. */
   textInfo: DocumentTextInfo;
+  /** Tryb liczenia (F2.1) — w trybie godzinowym liczby są minutami. */
+  pricing: PricingContext;
   /** Warianty po id wpisu bibliotecznego (F1.4). Referencja musi być stabilna. */
   variants: VariantOptions;
   onVariantChange: (itemId: string, variant: ItemVariant) => void;
@@ -94,6 +97,7 @@ export const ItemRow = memo(function ItemRow({
   onSaveToLibrary,
   rooms,
   textInfo,
+  pricing,
   variants,
   onVariantChange,
 }: ItemRowProps) {
@@ -101,7 +105,7 @@ export const ItemRow = memo(function ItemRow({
   // Wartość liczy domena, a nie wiersz: pozycja `per_room` to baza plus
   // składniki za pomieszczenia, więc `qty × cena` dałoby tu inną kwotę niż
   // w podsumowaniu wyceny.
-  const valueCents = calcItemCents(item, rooms);
+  const valueCents = calcItemCents(item, rooms, pricing);
   // Wiersz niepowiązany z biblioteką nie ma wariantów — i nie musi ich mieć.
   const itemVariants = (item.libraryItemId && variants.get(item.libraryItemId)) || EMPTY_VARIANTS;
   const parametric = pricingSummary(item, rooms, currency);

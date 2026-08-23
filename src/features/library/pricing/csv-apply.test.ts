@@ -18,6 +18,7 @@ function item(partial: Partial<LibraryItem> & { id: string; name: string }): Lib
     unitPriceCents: 0,
     sortOrder: 0,
     variantOf: null,
+    pricingBasis: 'amount',
     pricing: { mode: 'flat' },
     ...partial,
   };

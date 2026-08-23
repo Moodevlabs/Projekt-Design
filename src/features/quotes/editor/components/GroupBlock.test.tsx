@@ -6,6 +6,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { newGroup, newItem, type Group, type Item, type Room } from '@/domain/quote';
 import { NO_VARIANTS } from '../useVariantOptions';
+import { AMOUNT_BASIS } from '@/domain/quote';
 import { pl } from '@/i18n/pl';
 
 const useLibraryItems = vi.hoisted(() => vi.fn());
@@ -42,6 +43,7 @@ function setup(group: Group, editing = true) {
     variants: NO_VARIANTS,
     onVariantChange: vi.fn(),
     textInfo: { rooms: [], client: '' },
+    pricing: AMOUNT_BASIS,
   };
 
   render(
@@ -77,6 +79,7 @@ function setupWithRooms(group: Group, rooms: Room[]) {
         pricesInclude="net"
         rooms={rooms}
         textInfo={{ rooms, client: '' }}
+        pricing={AMOUNT_BASIS}
         variants={NO_VARIANTS}
         onVariantChange={vi.fn()}
         onRename={vi.fn()}

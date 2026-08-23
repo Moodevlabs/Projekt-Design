@@ -6,6 +6,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { ItemRow } from './ItemRow';
 import { NO_VARIANTS } from '../useVariantOptions';
+import { AMOUNT_BASIS } from '@/domain/quote';
 import { newItem, type Item } from '@/domain/quote';
 import { pl } from '@/i18n/pl';
 
@@ -23,6 +24,7 @@ const BEZ_WARIANTOW = {
   variants: NO_VARIANTS,
   onVariantChange: vi.fn(),
   textInfo: { rooms: [], client: '' },
+  pricing: AMOUNT_BASIS,
 };
 
 function setup(overrides: Partial<Item> = {}, editing = true) {

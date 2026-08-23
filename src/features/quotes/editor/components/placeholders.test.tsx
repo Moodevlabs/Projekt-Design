@@ -5,7 +5,7 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { ItemRow } from './ItemRow';
 import { NO_VARIANTS } from '../useVariantOptions';
-import { newItem, type DocumentTextInfo, type Room } from '@/domain/quote';
+import { AMOUNT_BASIS, newItem, type DocumentTextInfo, type Room } from '@/domain/quote';
 import { pl } from '@/i18n/pl';
 
 function Dnd({ ids, children }: { ids: string[]; children: ReactNode }) {
@@ -41,6 +41,7 @@ function renderRow(editing: boolean, description = OPIS) {
         currency="PLN"
         rooms={TEXT_INFO.rooms}
         textInfo={TEXT_INFO}
+        pricing={AMOUNT_BASIS}
         variants={NO_VARIANTS}
         onVariantChange={vi.fn()}
         onToggle={vi.fn()}

@@ -163,6 +163,10 @@ export const QuoteClientSchema = z.object({
 });
 export type QuoteClient = z.infer<typeof QuoteClientSchema>;
 
+/** Czym są liczby w cenniku: groszami czy minutami pracy (F2.1). */
+export const PricingBasisSchema = z.enum(['amount', 'time']);
+export type PricingBasis = z.infer<typeof PricingBasisSchema>;
+
 export const QuoteBodySchema = z.object({
   /**
    * Wersja kształtu dokumentu. Dokument z bazy przechodzi przez `migrateBody`,
@@ -190,6 +194,21 @@ export const QuoteBodySchema = z.object({
   /** Stawka VAT w procentach (0–100). Ograniczona, żeby calc nie dzielił przez zero. */
   vatRate: z.number().min(0).max(100).default(23),
   pricesInclude: PricesIncludeSchema.default('net'),
+  /**
+   * Czym są liczby w tym dokumencie (F2.1).
+   *
+   * `amount` — grosze. `time` — **minuty**; kwota powstaje dopiero z
+   * przemnożenia przez stawkę. Tak działa arkusz (`SYSTEM PRACY`) i dzięki
+   * temu biblioteka oraz macierz cennika obsługują oba tryby bez duplikowania
+   * pól. Konwersja siedzi w jednym miejscu: `toCents()` w `calc.ts`.
+   */
+  pricingBasis: PricingBasisSchema.default('amount'),
+  /**
+   * Stawka godzinowa w groszach — **kopia** ustawienia workspace'u z chwili
+   * utworzenia wyceny, a nie odwołanie do niego. Podniesienie cennika nie ma
+   * prawa zmienić kwot w ofertach, które już poszły do klientów.
+   */
+  hourlyRateCents: z.number().int().positive().nullable().default(null),
   /** Pomieszczenia wyceny — wymiar, po którym liczy się cennik parametryczny. */
   rooms: z.array(RoomSchema).default([]),
   /** Rabaty procentowe i warunkowe. Kwotowe z pozycji (`kind`) działają nadal. */

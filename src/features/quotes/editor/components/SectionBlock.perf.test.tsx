@@ -3,6 +3,7 @@ import { act, render } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SectionBlock } from './SectionBlock';
 import { NO_VARIANTS } from '../useVariantOptions';
+import { AMOUNT_BASIS } from '@/domain/quote';
 
 /** Stale referencje — sedno tego testu: nic nie moze przebijac `memo`. */
 const NO_TEXT = { rooms: [], client: '' };
@@ -94,6 +95,7 @@ function Harness() {
       pricesInclude="net"
       rooms={NO_ROOMS}
       textInfo={NO_TEXT}
+      pricing={AMOUNT_BASIS}
       variants={NO_VARIANTS}
       onVariantChange={noop}
       onRename={noop}

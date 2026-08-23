@@ -446,10 +446,20 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - Przycisku `{}` **nie ma przy wierszu wyceny**, tylko przy wstępie, opisie projektu i na karcie biblioteki. Opisy pozycji kaskadują z biblioteki, więc szablon zdania autoruje się tam raz; kolejny przycisk w każdym z kilkuset wierszy byłby szumem. To odstępstwo od litery `F4.2`.
   > **Nie sprawdzone na żywo:** seed z placeholderami wykonuje się bez błędów (`psql`, exit 0), ale ma `on conflict do nothing` — istniejąca baza deweloperska zachowa stare opisy do czasu `supabase db reset`.
 
-- [ ] **T-40 Tryb godzinowy — domena** (F2.1)
+- [x] **T-40 Tryb godzinowy — domena** (F2.1)
   `pricingBasis`, snapshot `hourlyRateCents` w `body`, `toCents()`, `minutesTotal`/`minutesBySection`.
   ✅ Wycena przełączona amount↔time przy stawce 60 zł/h daje zgodne liczby.
-  ⚠️ **Pułapka nazw.** Decyzja z `FEATURES` (te same pola `*Cents` znaczą minuty w trybie `time`) jest tania w domenie, ale niebezpieczna na granicach: `formatMoney`, komponent `Money`, `MoneyInput` w bibliotece i **kaskada biblioteki** nie wiedzą o trybie. Pozycja zapisana do biblioteki z wyceny godzinowej wjedzie do wyceny kwotowej jako grosze (45 min → 0,45 zł). Albo zapisz `pricingBasis` przy wpisie bibliotecznym, albo zablokuj kaskadę między trybami — rozstrzygnij w tym zadaniu, nie w UI.
+  > **Zrobione.** `pricingBasis` + `hourlyRateCents` w `QuoteBody`, `toCents`/`toMinutes`/`PricingContext`, rozdział `calcItemUnits` (jednostki) od `calcItemCents` (grosze), `calcWorkload`, `hourlyRateCents`/`defaultPricingBasis` w ustawieniach workspace, migracja `0011_library_pricing_basis.sql`. 723 testy jednostkowe, 24 integracyjne dla biblioteki.
+  > **Rozstrzygnięcie pułapki nazw: wpis biblioteczny SAM MÓWI, czym są jego liczby** (`library_items.pricing_basis`). Dane opisują siebie, zamiast zależeć od tego, kto je czyta. Alternatywa (blokada kaskady między trybami) byłaby mniejszą zmianą, ale zostawiałaby bibliotekę, w której nie da się odróżnić 45 minut od 45 groszy — a to samo pytanie wróciłoby przy imporcie CSV, macierzy cennika i eksporcie danych.
+  > **Na co uważać:**
+  > - **`calcItemCents` wymaga trybu jako argumentu** — nie ma wartości domyślnej i to jest celowe. Domyślny „kwotowy" przepuszczałby po cichu wycenę godzinową liczoną jak kwotowa (45 minut → 45 groszy). To samo dotyczy `calcSectionTotals`/`calcGroupTotals`, gdzie tryb jest **osobnym argumentem**, a nie polem w częściowych opcjach: pominięte pole wpadłoby cicho w domyślne, osobny argument zmusza wołającego do odpowiedzi. Kompilator wskazał przy tej zmianie dokładnie te miejsca, które pokazują kwotę.
+  > - **Zaokrąglamy PER POZYCJĘ, arkusz nie zaokrągla wcale.** Przy stawce niepodzielnej przez 60 rozejdziemy się z Excelem o grosze — jest na to jawny test z wyliczoną różnicą. Wybór jest po stronie użytkownika: kwoty wierszy muszą się dodawać do pokazanej sumy, bo klient sumuje kolumnę.
+  > - **Rabaty są w złotówkach w OBU trybach.** Rabat to ustępstwo na cenie, nie na pracy — „rabat 500 zł" znaczy 500 zł także w wycenie godzinowej. Dlatego `calcDiscounts` liczy już na groszach, nie na jednostkach.
+  > - **Brak stawki w trybie godzinowym daje 0, a nie wyjątek.** Wycena bez stawki jest niedokończona, ale ma się otwierać i dawać poprawić; rzucenie błędu z funkcji liczącej zamieniłoby brakujące pole w biały ekran.
+  > - **`calcWorkload` liczy z surowych jednostek, nie z groszy przez `toMinutes`** — droga w tę i z powrotem przez stawkę gubi resztę przy zaokrągleniu, a minuty są tym, co użytkownik faktycznie wpisał.
+  > - **`bodyVersion` NIE został podbity** — oba nowe pola mają wartości domyślne, więc stare dokumenty wczytują się bez kroku migracji (ta sama zasada co przy `Group.roomId` w T-51).
+  > - Świadome odstępstwo od `FEATURES §F2.1`: minuty **nie siedzą w `calcQuoteTotals`**, tylko w osobnym `calcWorkload`. Inaczej każdy odbiorca podsumowania musiałby obsługiwać pola, które w trybie kwotowym zawsze są puste.
+  > **Nie zrobione tutaj (świadomie, wchodzi z T-41):** picker biblioteki nie sprawdza jeszcze, czy jednostka wpisu zgadza się z trybem wyceny. Dziś jest to nieosiągalne — trybu godzinowego nie da się włączyć bez UI — ale **przy T-41 to jest pierwsza rzecz do zrobienia**, zanim przełącznik trafi do interfejsu.
 
 - [ ] **T-41 Tryb godzinowy — UI** (F2.2)
   Segment „Kwotowa | Godzinowa” w `QuoteHeader`, pole stawki, etykiety „min”, `45 min → 150 zł` w wierszu, „Pracochłonność” w `TotalsCard`, dialog przy zmianie trybu.

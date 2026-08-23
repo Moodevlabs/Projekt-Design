@@ -5,6 +5,8 @@ import {
   calcQuoteTotals,
   documentTextInfo,
   itemTextContext,
+  pricingContextOf,
+  type PricingContext,
   quoteTextContext,
   renderText,
   type Group,
@@ -99,6 +101,7 @@ export function QuotePdfDocument({
    * i podglad w edytorze moglyby wymieniac inne pomieszczenia — ta sama klasa
    * bledu, ktora wyszla przy kwotach pozycji w T-35.
    */
+  const pricing = pricingContextOf(body);
   const textInfo = documentTextInfo(body, formatDate(validUntil));
   const describeItem = (item: Item) => renderText(item.description, itemTextContext(textInfo, item));
   const docText = (template: string) => renderText(template, quoteTextContext(textInfo));
@@ -190,6 +193,7 @@ export function QuotePdfDocument({
                   theme={theme}
                   money={money}
                   describeItem={describeItem}
+                  pricing={pricing}
                 />
               ))}
 
@@ -203,6 +207,7 @@ export function QuotePdfDocument({
                   visibleItems={visibleItems}
                   showDisabledItems={body.showDisabledItems}
                   describeItem={describeItem}
+                  pricing={pricing}
                 />
               ))}
             </View>
@@ -340,6 +345,7 @@ function GroupBlockPdf({
   visibleItems,
   showDisabledItems,
   describeItem,
+  pricing,
 }: {
   group: Group;
   rooms: Room[];
@@ -348,6 +354,7 @@ function GroupBlockPdf({
   visibleItems: (items: Item[]) => Item[];
   showDisabledItems: boolean;
   describeItem: (item: Item) => string;
+  pricing: PricingContext;
 }) {
   if (!shouldPrintGroup(group, rooms, showDisabledItems)) return null;
 
@@ -375,6 +382,7 @@ function GroupBlockPdf({
           theme={theme}
           money={money}
           describeItem={describeItem}
+          pricing={pricing}
         />
       ))}
     </View>
@@ -387,16 +395,18 @@ function ItemLine({
   theme,
   money,
   describeItem,
+  pricing,
 }: {
   item: Item;
   rooms: Room[];
+  pricing: PricingContext;
   theme: PdfTheme;
   money: (cents: number) => string;
   describeItem: (item: Item) => string;
 }) {
   const description = describeItem(item);
   // Wartość z domeny — patrz komentarz przy `QuotePdfDocument`.
-  const valueCents = calcItemCents(item, rooms);
+  const valueCents = calcItemCents(item, rooms, pricing);
   const off = !item.enabled;
 
   return (

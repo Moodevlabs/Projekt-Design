@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { calcItemCents, calcQuoteTotals } from './calc';
+import { calcItemUnits, calcQuoteTotals } from './calc';
 import { newItem, newQuoteBody, newSection } from './factory';
 import { newId } from '../id';
 import type { Item, Room } from './schema';
@@ -36,19 +36,19 @@ function siedemPomieszczen(): Room[] {
   ];
 }
 
-describe('calcItemCents — tryb flat (bez zmian wobec modelu sprzed cennika)', () => {
+describe('calcItemUnits — tryb flat (bez zmian wobec modelu sprzed cennika)', () => {
   it('liczy qty × cena i nie oglada sie na pomieszczenia', () => {
     const pozycja = newItem({ name: 'Nadzor', qty: 3, unitPriceCents: 25_000 });
-    expect(calcItemCents(pozycja, siedemPomieszczen())).toBe(75_000);
+    expect(calcItemUnits(pozycja, siedemPomieszczen())).toBe(75_000);
   });
 
   it('qty ulamkowe zaokragla sie raz, na wartosci pozycji', () => {
     const pozycja = newItem({ name: 'Konsultacja', qty: 2.5, unitPriceCents: 12_333 });
-    expect(calcItemCents(pozycja)).toBe(30_833); // 30 832,5 → 30 833
+    expect(calcItemUnits(pozycja)).toBe(30_833); // 30 832,5 → 30 833
   });
 });
 
-describe('calcItemCents — per_room (parytet z K95)', () => {
+describe('calcItemUnits — per_room (parytet z K95)', () => {
   /** „Projekt budowlany”: baza 200 zl + 15 zl za kazde pomieszczenie. */
   const projektBudowlany = (partial: Partial<Item> = {}): Item =>
     newItem({
@@ -65,7 +65,7 @@ describe('calcItemCents — per_room (parytet z K95)', () => {
 
   it('baza + skladnik za kazde pomieszczenie', () => {
     // Arkusz K95: 200 + 15 × 7 = 305 zl.
-    expect(calcItemCents(projektBudowlany(), siedemPomieszczen())).toBe(30_500);
+    expect(calcItemUnits(projektBudowlany(), siedemPomieszczen())).toBe(30_500);
   });
 
   it('pomieszczenie poza zasiegiem nie doklada sie do ceny', () => {
@@ -75,7 +75,7 @@ describe('calcItemCents — per_room (parytet z K95)', () => {
     pomieszczenia[3] = { ...pomieszczenia[3]!, includedInVisual: false };
 
     const techniczna = projektBudowlany();
-    expect(calcItemCents(techniczna, pomieszczenia)).toBe(30_500);
+    expect(calcItemUnits(techniczna, pomieszczenia)).toBe(30_500);
 
     const wizualna = projektBudowlany({
       pricing: {
@@ -87,7 +87,7 @@ describe('calcItemCents — per_room (parytet z K95)', () => {
       },
     });
     // O jedno pomieszczenie mniej: 305 − 15 = 290 zl.
-    expect(calcItemCents(wizualna, pomieszczenia)).toBe(29_000);
+    expect(calcItemUnits(wizualna, pomieszczenia)).toBe(29_000);
   });
 
   it('ilosc pomieszczenia mnozy jego skladnik (kuchnia x2)', () => {
@@ -95,7 +95,7 @@ describe('calcItemCents — per_room (parytet z K95)', () => {
     pomieszczenia[2] = { ...pomieszczenia[2]!, qty: 2 };
 
     // Kuchnia liczona dwa razy: 305 + 15 = 320 zl.
-    expect(calcItemCents(projektBudowlany(), pomieszczenia)).toBe(32_000);
+    expect(calcItemUnits(projektBudowlany(), pomieszczenia)).toBe(32_000);
   });
 
   it('cennik per typ pomieszczenia bierze pierwszenstwo przed domyslna cena', () => {
@@ -110,7 +110,7 @@ describe('calcItemCents — per_room (parytet z K95)', () => {
     });
 
     // 200 + kuchnia 50 + lazienka 40 + 5 × 15 = 365 zl.
-    expect(calcItemCents(pozycja, siedemPomieszczen())).toBe(36_500);
+    expect(calcItemUnits(pozycja, siedemPomieszczen())).toBe(36_500);
   });
 
   it('pomieszczenie spoza slownika liczy sie po cenie domyslnej', () => {
@@ -125,19 +125,19 @@ describe('calcItemCents — per_room (parytet z K95)', () => {
     });
 
     const pomieszczenia = [room({ label: 'Pracownia', roomTypeId: null })];
-    expect(calcItemCents(pozycja, pomieszczenia)).toBe(1_500);
+    expect(calcItemUnits(pozycja, pomieszczenia)).toBe(1_500);
   });
 
   it('bez pomieszczen zostaje sama baza', () => {
-    expect(calcItemCents(projektBudowlany(), [])).toBe(20_000);
+    expect(calcItemUnits(projektBudowlany(), [])).toBe(20_000);
   });
 
   it('qty pozycji mnozy calosc', () => {
-    expect(calcItemCents(projektBudowlany({ qty: 2 }), siedemPomieszczen())).toBe(61_000);
+    expect(calcItemUnits(projektBudowlany({ qty: 2 }), siedemPomieszczen())).toBe(61_000);
   });
 });
 
-describe('calcItemCents — per_frame (parytet z K26)', () => {
+describe('calcItemUnits — per_frame (parytet z K26)', () => {
   /** „Wizualizacja 3D”: cena pomieszczenia 350 zl + 50 zl za kazdy kadr. */
   const wizualizacja = (partial: Partial<Item> = {}): Item =>
     newItem({
@@ -154,22 +154,22 @@ describe('calcItemCents — per_frame (parytet z K26)', () => {
   it('cena pomieszczenia + baza × liczba kadrow', () => {
     const kuchnia = room({ label: 'Kuchnia', roomTypeId: KUCHNIA });
     // Arkusz K26: 350 + 50 × 3 = 500 zl.
-    expect(calcItemCents(wizualizacja({ roomId: kuchnia.id, frames: 3 }), [kuchnia])).toBe(50_000);
+    expect(calcItemUnits(wizualizacja({ roomId: kuchnia.id, frames: 3 }), [kuchnia])).toBe(50_000);
   });
 
   it('brak liczby kadrow znaczy jeden kadr', () => {
     const kuchnia = room({ label: 'Kuchnia', roomTypeId: KUCHNIA });
-    expect(calcItemCents(wizualizacja({ roomId: kuchnia.id }), [kuchnia])).toBe(40_000);
+    expect(calcItemUnits(wizualizacja({ roomId: kuchnia.id }), [kuchnia])).toBe(40_000);
   });
 
   it('ilosc pomieszczenia mnozy cala pozycje', () => {
     const kuchnia = room({ label: 'Kuchnia', roomTypeId: KUCHNIA, qty: 2 });
-    expect(calcItemCents(wizualizacja({ roomId: kuchnia.id, frames: 3 }), [kuchnia])).toBe(100_000);
+    expect(calcItemUnits(wizualizacja({ roomId: kuchnia.id, frames: 3 }), [kuchnia])).toBe(100_000);
   });
 
   it('pozycja bez przypisanego pomieszczenia liczy sie raz, po cenie domyslnej', () => {
     // Cicha zerowa cena bylaby gorsza — wizualizacja „luzem” wypadlaby z wyceny.
-    expect(calcItemCents(wizualizacja({ frames: 2 }), siedemPomieszczen())).toBe(40_000);
+    expect(calcItemUnits(wizualizacja({ frames: 2 }), siedemPomieszczen())).toBe(40_000);
   });
 });
 

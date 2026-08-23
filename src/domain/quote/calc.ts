@@ -1,6 +1,64 @@
 import { roundCents } from '../money';
 import { calcDiscounts } from './discounts';
-import type { Group, Item, PricesInclude, QuoteBody, Room, RoomScope, Section } from './schema';
+import type {
+  Group,
+  Item,
+  PricesInclude,
+  PricingBasis,
+  QuoteBody,
+  Room,
+  RoomScope,
+  Section,
+} from './schema';
+
+/** Minut w godzinie — stawka jest godzinowa, a liczby w dokumencie minutowe. */
+const MINUTES_PER_HOUR = 60;
+
+/**
+ * Tryb liczenia dokumentu (F2.1).
+ *
+ * Wydzielony z `QuoteBody`, żeby funkcje liczące dało się wołać także dla
+ * fragmentu (sekcja, grupa), gdzie całego dokumentu nie ma pod ręką.
+ */
+export interface PricingContext {
+  pricingBasis: PricingBasis;
+  /** Stawka w groszach za godzinę. `null` w trybie `time` = nie ma z czego liczyć. */
+  hourlyRateCents: number | null;
+}
+
+/** Tryb kwotowy — liczby w dokumencie SĄ groszami. */
+export const AMOUNT_BASIS: PricingContext = { pricingBasis: 'amount', hourlyRateCents: null };
+
+/** Wyciąga tryb z dokumentu. */
+export function pricingContextOf(body: QuoteBody): PricingContext {
+  return { pricingBasis: body.pricingBasis, hourlyRateCents: body.hourlyRateCents };
+}
+
+/**
+ * Zamienia „jednostki dokumentu" na grosze.
+ *
+ * W trybie kwotowym to tożsamość. W godzinowym liczby są **minutami**, więc
+ * kwota powstaje dopiero tutaj: `minuty / 60 × stawka`. Dzielimy na poziomie
+ * wartości pozycji, a nie każdej minuty z osobna — inaczej zaokrąglenia
+ * zbierałyby się po kilka groszy na wiersz.
+ *
+ * **Brak stawki w trybie godzinowym daje 0, a nie wyjątek.** Wycena bez
+ * ustawionej stawki jest niedokończona, ale ma się dalej otwierać i dawać
+ * poprawić — rzucenie błędu z funkcji liczącej zamieniłoby brakujące pole
+ * w biały ekran.
+ */
+export function toCents(units: number, context: PricingContext): number {
+  if (context.pricingBasis === 'amount') return units;
+  if (!context.hourlyRateCents) return 0;
+  return roundCents((units / MINUTES_PER_HOUR) * context.hourlyRateCents);
+}
+
+/** Odwrotność `toCents` — ile minut pracy odpowiada kwocie przy danej stawce. */
+export function toMinutes(cents: number, context: PricingContext): number {
+  if (context.pricingBasis === 'amount') return 0;
+  if (!context.hourlyRateCents) return 0;
+  return Math.round((cents / context.hourlyRateCents) * MINUTES_PER_HOUR);
+}
 
 /** Podsumowanie kwotowe — wszystkie wartości to całkowite grosze. */
 export interface QuoteTotals {
@@ -22,13 +80,20 @@ export interface TotalsOptions {
   vatRate: number;
   pricesInclude: PricesInclude;
   rooms: Room[];
+  /** Tryb liczenia (F2.1). Domyślnie kwotowy — liczby SĄ groszami. */
+  pricing: PricingContext;
 }
 
 /**
  * Domyślnie fragmenty (grupa/sekcja) liczymy bez VAT-u — UI pokazuje przy nich
  * sumę „jak wpisano”. Pełny kontekst przekazuje `calcQuoteTotals`.
  */
-const DEFAULT_TOTALS_OPTIONS: TotalsOptions = { vatRate: 0, pricesInclude: 'net', rooms: [] };
+const DEFAULT_TOTALS_OPTIONS: TotalsOptions = {
+  vatRate: 0,
+  pricesInclude: 'net',
+  rooms: [],
+  pricing: AMOUNT_BASIS,
+};
 
 /** Podsumowanie jednej sekcji na potrzeby rozbicia „per etap". */
 export interface SectionTotal {
@@ -56,7 +121,7 @@ export function calcSectionBreakdown(body: QuoteBody): SectionTotal[] {
   return body.sections.map((section) => {
     const items = sectionItems(section);
     const ids = new Set(items.map((item) => item.id));
-    const sums = sumItems(items, body.rooms);
+    const sums = sumItems(items, body.rooms, pricingContextOf(body));
 
     const discountsCents = lines.reduce((total, line) => {
       const discount = byId.get(line.discountId);
@@ -95,7 +160,7 @@ export function calcSectionBreakdown(body: QuoteBody): SectionTotal[] {
  * inaczej istniejące wyceny nagle podrożałyby.
  */
 export function calcQuoteTotals(body: QuoteBody): QuoteTotals {
-  const sums = sumItems(body.sections.flatMap(sectionItems), body.rooms);
+  const sums = sumItems(body.sections.flatMap(sectionItems), body.rooms, pricingContextOf(body));
   const discounts = calcDiscounts(body, body.rooms);
 
   return buildTotals(
@@ -104,8 +169,47 @@ export function calcQuoteTotals(body: QuoteBody): QuoteTotals {
       vatRate: body.vatRate,
       pricesInclude: body.pricesInclude,
       rooms: body.rooms,
+      pricing: pricingContextOf(body),
     },
   );
+}
+
+/** Pracochłonność dokumentu w minutach (F2.1). */
+export interface Workload {
+  minutesTotal: number;
+  minutesBySection: { sectionId: string; title: string; minutes: number }[];
+}
+
+/**
+ * Suma minut pracy (F2.1).
+ *
+ * Liczy się **tylko w trybie godzinowym** — w kwotowym liczby są groszami
+ * i przeliczanie ich na minuty wymagałoby stawki, której wycena kwotowa nie
+ * musi mieć. Zwracamy zera zamiast zgadywać.
+ *
+ * Wyliczamy z surowych jednostek, a nie z groszy przez `toMinutes`: droga
+ * w tę i z powrotem przez stawkę gubi resztę przy zaokrągleniu, a minuty są
+ * tym, co użytkownik faktycznie wpisał.
+ *
+ * Świadome odstępstwo od `FEATURES §F2.1`, gdzie te liczby miały siedzieć
+ * w `calcQuoteTotals`: osobna funkcja nie zmusza wszystkich odbiorców
+ * podsumowania do obsługi pól, które w trybie kwotowym zawsze są puste.
+ */
+export function calcWorkload(body: QuoteBody): Workload {
+  if (body.pricingBasis !== 'time') return { minutesTotal: 0, minutesBySection: [] };
+
+  const minutesBySection = body.sections.map((section) => ({
+    sectionId: section.id,
+    title: section.title,
+    minutes: sectionItems(section)
+      .filter((item) => item.enabled && item.kind !== 'discount')
+      .reduce((sum, item) => sum + calcItemUnits(item, body.rooms), 0),
+  }));
+
+  return {
+    minutesTotal: minutesBySection.reduce((sum, row) => sum + row.minutes, 0),
+    minutesBySection,
+  };
 }
 
 /**
@@ -113,19 +217,29 @@ export function calcQuoteTotals(body: QuoteBody): QuoteTotals {
  *
  * Wołający musi podać `rooms`, jeśli sekcja zawiera pozycje parametryczne;
  * bez nich policzy się sama baza. `calcQuoteTotals` robi to za niego.
+ *
+ * **Tryb jest osobnym, wymaganym argumentem**, a nie polem w opcjach z
+ * wartością domyślną. Opcje są częściowe, więc pominięty tryb wpadłby cicho
+ * w „kwotowy" i nagłówek sekcji w wycenie godzinowej pokazywałby minuty jako
+ * grosze. Osobny argument zmusza wołającego do odpowiedzi.
  */
 export function calcSectionTotals(
   section: Section,
-  options: Partial<TotalsOptions> = {},
+  pricing: PricingContext,
+  options: Partial<Omit<TotalsOptions, 'pricing'>> = {},
 ): QuoteTotals {
-  const merged = { ...DEFAULT_TOTALS_OPTIONS, ...options };
-  return buildTotals(sumItems(sectionItems(section), merged.rooms), merged);
+  const merged = { ...DEFAULT_TOTALS_OPTIONS, ...options, pricing };
+  return buildTotals(sumItems(sectionItems(section), merged.rooms, pricing), merged);
 }
 
 /** Podsumowanie pojedynczej grupy — do nagłówków w edytorze i PDF. */
-export function calcGroupTotals(group: Group, options: Partial<TotalsOptions> = {}): QuoteTotals {
-  const merged = { ...DEFAULT_TOTALS_OPTIONS, ...options };
-  return buildTotals(sumItems(group.items, merged.rooms), merged);
+export function calcGroupTotals(
+  group: Group,
+  pricing: PricingContext,
+  options: Partial<Omit<TotalsOptions, 'pricing'>> = {},
+): QuoteTotals {
+  const merged = { ...DEFAULT_TOTALS_OPTIONS, ...options, pricing };
+  return buildTotals(sumItems(group.items, merged.rooms, pricing), merged);
 }
 
 /** Wszystkie pozycje sekcji: luźne + te w grupach. */
@@ -166,7 +280,7 @@ function perRoomPrice(
  * Zaokrąglamy **raz**, na końcu: `qty` bywa ułamkowe, a cena za pomieszczenie
  * całkowita, więc zaokrąglanie składników gubiłoby grosze.
  */
-export function calcItemCents(item: Item, rooms: Room[] = []): number {
+export function calcItemUnits(item: Item, rooms: Room[] = []): number {
   const pricing = item.pricing;
 
   if (pricing.mode === 'per_room') {
@@ -195,17 +309,37 @@ export function calcItemCents(item: Item, rooms: Room[] = []): number {
   return roundCents(item.qty * item.unitPriceCents);
 }
 
+/**
+ * Wartość pozycji w GROSZACH.
+ *
+ * Tryb jest argumentem **wymaganym**, choć w większości wywołań będzie to
+ * `AMOUNT_BASIS`. To celowe: w trybie godzinowym te same liczby znaczą minuty,
+ * więc każde miejsce pokazujące kwotę musi jawnie powiedzieć, co liczy.
+ * Domyślna wartość przepuszczałaby po cichu wycenę godzinową liczoną jak
+ * kwotowa — 45 minut wyszłoby jako 45 groszy.
+ *
+ * Zaokrąglamy **na poziomie pozycji**, a nie na końcu sumowania: kwoty
+ * wierszy muszą się dodawać do pokazanej sumy. Klient, który zsumuje kolumnę
+ * i dostanie inną liczbę niż w podsumowaniu, ma prawo stracić zaufanie do
+ * całej oferty. Arkusz tego nie robi i przy stawkach niepodzielnych przez 60
+ * potrafi się z nami rozejść o grosze — jest na to jawny test.
+ */
+export function calcItemCents(item: Item, rooms: Room[], context: PricingContext): number {
+  return toCents(calcItemUnits(item, rooms), context);
+}
+
 /** Sumuje włączone pozycje, rozdzielając zwykłe pozycje od rabatów. */
 function sumItems(
   items: Item[],
-  rooms: Room[] = [],
+  rooms: Room[],
+  context: PricingContext,
 ): Pick<QuoteTotals, 'itemsCents' | 'discountsCents'> {
   let itemsCents = 0;
   let discountsCents = 0;
 
   for (const item of items) {
     if (!item.enabled) continue;
-    const valueCents = calcItemCents(item, rooms);
+    const valueCents = calcItemCents(item, rooms, context);
     if (item.kind === 'discount') {
       discountsCents += valueCents;
     } else {

@@ -3,7 +3,7 @@ import { ChevronDown, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Money } from '@/components/shared';
-import { calcGroupTotals } from '@/domain/quote';
+import { AMOUNT_BASIS, calcGroupTotals } from '@/domain/quote';
 import {
   librarySnapshotToQuoteItem,
   type LibraryGroup,
@@ -49,14 +49,21 @@ export function LibraryGroupCard({
 
   const totals = useMemo(
     () =>
-      calcGroupTotals({
-        id: group.id,
-        name: group.name,
-        items: group.items.map(librarySnapshotToQuoteItem),
-        // Zestaw biblioteczny nie należy do żadnego pomieszczenia — to szablon,
-        // a pomieszczenia są własnością konkretnej wyceny.
-        roomId: null,
-      }),
+      calcGroupTotals(
+        {
+          id: group.id,
+          name: group.name,
+          items: group.items.map(librarySnapshotToQuoteItem),
+          // Zestaw biblioteczny nie należy do żadnego pomieszczenia — to szablon,
+          // a pomieszczenia są własnością konkretnej wyceny.
+          roomId: null,
+        },
+        // Biblioteka jest KWOTOWA. Wpis biblioteczny niesie wlasny `pricingBasis`
+        // (patrz `library_items.pricing_basis`), ale karta zestawu pokazuje sume
+        // orientacyjna — a zestaw moze mieszac wpisy z obu trybow. Liczenie jej
+        // wg stawki nieistniejacej wyceny bylo by zmyslaniem.
+        AMOUNT_BASIS,
+      ),
     [group.id, group.name, group.items],
   );
 

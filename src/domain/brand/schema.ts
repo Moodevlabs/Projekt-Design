@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { DEFAULT_NUMBER_PATTERN } from '../numbering';
-import { PricesIncludeSchema } from '../quote/schema';
+import { PricesIncludeSchema, PricingBasisSchema } from '../quote/schema';
 
 /**
  * Brand kit i ustawienia workspace — parytet z tabelą `brand_kits`
@@ -68,6 +68,15 @@ export const WorkspaceSettingsSchema = z.object({
   numberPattern: z.string().min(1).default(DEFAULT_NUMBER_PATTERN),
   showDisabledItems: z.boolean().default(true),
   pricesInclude: PricesIncludeSchema.default('net'),
+  /**
+   * Stawka godzinowa w groszach (F2.1) — **wzorzec** dla nowych wycen.
+   *
+   * Wycena bierze z niej kopię w chwili utworzenia (`body.hourlyRateCents`),
+   * więc podniesienie cennika tutaj nie rusza ofert, które już poszły.
+   */
+  hourlyRateCents: z.number().int().positive().nullable().default(null),
+  /** Czy nowa wycena startuje jako kwotowa, czy godzinowa. */
+  defaultPricingBasis: PricingBasisSchema.default('amount'),
 });
 export type WorkspaceSettings = z.infer<typeof WorkspaceSettingsSchema>;
 

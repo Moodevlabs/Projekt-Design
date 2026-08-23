@@ -27,6 +27,7 @@ function libItem(partial: Partial<LibraryItem>): LibraryItem {
     unitPriceCents: 350_00,
     sortOrder: 0,
     variantOf: null,
+    pricingBasis: 'amount',
     pricing: { mode: 'flat' },
     ...partial,
   };

@@ -11,7 +11,7 @@ import { LibraryPicker } from './LibraryPicker';
 import { SaveToLibraryButton } from './SaveToLibraryButton';
 import { DragHandle } from './DragHandle';
 import { useStableIds } from '../dnd/useStableIds';
-import type { DocumentTextInfo } from '@/domain/quote';
+import type { DocumentTextInfo, PricingContext } from '@/domain/quote';
 import type { VariantOptions } from '../useVariantOptions';
 import type { ItemVariant } from '../editor.store';
 import { ConfirmDialog } from '@/components/shared';
@@ -37,6 +37,8 @@ export interface GroupBlockProps {
   rooms: Room[];
   /** Dane dokumentu do placeholderów w opisach (F4.2). */
   textInfo: DocumentTextInfo;
+  /** Tryb liczenia (F2.1) — przekazywany w dół bez zmian. */
+  pricing: PricingContext;
   /** Warianty pozycji (F1.4) — przekazywane w dół bez zmian. */
   variants: VariantOptions;
   onVariantChange: (itemId: string, variant: ItemVariant) => void;
@@ -62,6 +64,7 @@ export const GroupBlock = memo(function GroupBlock({
   pricesInclude,
   rooms,
   textInfo,
+  pricing,
   variants,
   onVariantChange,
   onRename,
@@ -79,7 +82,7 @@ export const GroupBlock = memo(function GroupBlock({
   const [confirmOpen, setConfirmOpen] = useState(false);
   // `rooms` są konieczne: bez nich pozycja `per_room` policzyłaby samą bazę
   // i nagłówek pokazałby inną kwotę niż podsumowanie wyceny.
-  const totals = calcGroupTotals(group, { vatRate, pricesInclude, rooms });
+  const totals = calcGroupTotals(group, pricing, { vatRate, pricesInclude, rooms });
 
   // Do biblioteki idą tylko nazwane pozycje (snapshot wymaga nazwy), więc po
   // nich poznajemy też, czy jest w ogóle co zapisywać.
@@ -222,6 +225,7 @@ export const GroupBlock = memo(function GroupBlock({
               onSaveToLibrary={onSaveItemToLibrary}
               rooms={rooms}
               textInfo={textInfo}
+              pricing={pricing}
               variants={variants}
               onVariantChange={onVariantChange}
             />

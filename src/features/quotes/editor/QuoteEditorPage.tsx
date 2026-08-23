@@ -288,6 +288,15 @@ function EditorSurface({
    * nacisnieciu klawisza — przekazanie go w dol przerysowywaloby wszystkie
    * pozycje przy kazdej literze.
    */
+  // Tryb liczenia (F2.1). `useMemo` na dwoch prostych polach, bo `ItemRow`
+  // jest zmemoizowany — nowy obiekt przy kazdym renderze przebijalby `memo`.
+  const pricing = useMemo(
+    () => ({
+      pricingBasis: body?.pricingBasis ?? 'amount',
+      hourlyRateCents: body?.hourlyRateCents ?? null,
+    }),
+    [body?.pricingBasis, body?.hourlyRateCents],
+  );
   const textInfo = useMemo(
     () => ({ rooms: body?.rooms ?? NO_ROOMS, client: body?.client.name ?? '' }),
     [body?.rooms, body?.client.name],
@@ -394,6 +403,7 @@ function EditorSurface({
                       pricesInclude={body.pricesInclude}
                     rooms={body.rooms}
                       textInfo={textInfo}
+                      pricing={pricing}
                       variants={variants}
                       onVariantChange={setItemVariant}
                       onRename={renameSection}

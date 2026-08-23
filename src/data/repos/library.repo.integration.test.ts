@@ -389,3 +389,33 @@ describe('warianty pozycji (F1.4)', () => {
     expect(item.variantOf).toBeNull();
   });
 });
+
+describe('jednostka wpisu bibliotecznego (F2.1)', () => {
+  it('nowy wpis jest KWOTOWY', async () => {
+    // Tryb godzinowy nie istnial przed migracja 0011, wiec nie ma wpisu,
+    // ktorego liczby znaczylyby minuty.
+    const item = await makeItem('Domyslna jednostka');
+    expect(item.pricingBasis).toBe('amount');
+  });
+
+  it('wpis moze byc godzinowy i wraca taki z odczytu', async () => {
+    const item = await makeItem('Wpis godzinowy');
+    const zapisany = await updateLibraryItem(item.id, { pricingBasis: 'time' });
+    expect(zapisany.pricingBasis).toBe('time');
+
+    const rows = await listLibraryItems(workspaceId, { category: TEST_CATEGORY });
+    expect(rows.find((row) => row.id === item.id)?.pricingBasis).toBe('time');
+  });
+
+  it('BAZA odrzuca jednostke spoza slownika', async () => {
+    // Bez CHECK-a literowka w zapisie zamienilaby wpis w cos, czego zadna
+    // strona nie umie zinterpretowac — a liczby dalej wygladalyby wiarygodnie.
+    const item = await makeItem('Zla jednostka');
+    const { error } = await getSupabase()
+      .from('library_items')
+      .update({ pricing_basis: 'minuty' })
+      .eq('id', item.id);
+
+    expect(error).not.toBeNull();
+  });
+});

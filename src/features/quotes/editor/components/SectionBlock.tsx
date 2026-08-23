@@ -10,7 +10,7 @@ import { AddLink } from './AddLink';
 import { LibraryPicker } from './LibraryPicker';
 import { DragHandle } from './DragHandle';
 import { useStableIds } from '../dnd/useStableIds';
-import type { DocumentTextInfo } from '@/domain/quote';
+import type { DocumentTextInfo, PricingContext } from '@/domain/quote';
 import type { VariantOptions } from '../useVariantOptions';
 import type { ItemVariant } from '../editor.store';
 import { ConfirmDialog } from '@/components/shared';
@@ -36,6 +36,8 @@ export interface SectionBlockProps {
   rooms: Room[];
   /** Dane dokumentu do placeholderów w opisach (F4.2). */
   textInfo: DocumentTextInfo;
+  /** Tryb liczenia (F2.1) — przekazywany w dół bez zmian. */
+  pricing: PricingContext;
   /** Warianty pozycji (F1.4) — przekazywane w dół bez zmian. */
   variants: VariantOptions;
   onVariantChange: (itemId: string, variant: ItemVariant) => void;
@@ -66,6 +68,7 @@ export const SectionBlock = memo(function SectionBlock({
   pricesInclude,
   rooms,
   textInfo,
+  pricing,
   variants,
   onVariantChange,
   onRename,
@@ -86,7 +89,7 @@ export const SectionBlock = memo(function SectionBlock({
   onInsertItemToRoomBlocks,
 }: SectionBlockProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const totals = calcSectionTotals(section, { vatRate, pricesInclude, rooms });
+  const totals = calcSectionTotals(section, pricing, { vatRate, pricesInclude, rooms });
   const isEmpty = section.items.length === 0 && section.groups.length === 0;
 
   const {
@@ -188,6 +191,7 @@ export const SectionBlock = memo(function SectionBlock({
               onSaveToLibrary={onSaveItemToLibrary}
               rooms={rooms}
               textInfo={textInfo}
+              pricing={pricing}
               variants={variants}
               onVariantChange={onVariantChange}
             />
@@ -228,6 +232,7 @@ export const SectionBlock = memo(function SectionBlock({
               pricesInclude={pricesInclude}
               rooms={rooms}
               textInfo={textInfo}
+              pricing={pricing}
               variants={variants}
               onVariantChange={onVariantChange}
               onRename={onRenameGroup}

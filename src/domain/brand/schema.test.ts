@@ -82,6 +82,10 @@ describe('WorkspaceSettingsSchema', () => {
       numberPattern: DEFAULT_NUMBER_PATTERN,
       showDisabledItems: true,
       pricesInclude: 'net',
+      // Tryb godzinowy (F2.1) włącza się świadomie; bez stawki nie ma z czego
+      // liczyć, więc domyślnie jej nie ma.
+      hourlyRateCents: null,
+      defaultPricingBasis: 'amount',
     });
   });
 
