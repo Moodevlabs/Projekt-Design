@@ -143,6 +143,7 @@ export const pl = {
       count === 1 ? 'Dodano do 1 pomieszczenia' : `Dodano do ${count} pomieszczeń`,
     roomBlockLabel: (room: string, qty: number) => (qty > 1 ? `${room} ×${qty}` : room),
     roomBlockOff: 'pominięte',
+    roomBlockNameHint: 'Nazwę zmienisz w panelu „Pomieszczenia" obok — tutaj jest tylko pokazana.',
     itemFramesLabel: 'Liczba kadrów',
     pricingBasis: 'Sposób liczenia',
     basisAmount: 'Kwotowo',

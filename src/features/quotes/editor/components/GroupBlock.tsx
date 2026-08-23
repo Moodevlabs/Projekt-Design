@@ -153,6 +153,9 @@ export const GroupBlock = memo(function GroupBlock({
           // Blok pomieszczenia bierze nazwe z panelu pomieszczen — edycja tutaj
           // rozjechalaby etykiete z tym, co liczy cennik.
           <span
+            // Nazwa nie jest tu edytowalna, wiec bez tej podpowiedzi czlowiek
+            // klika w naglowek i nie rozumie, dlaczego nic sie nie dzieje.
+            title={editing ? pl.editor.roomBlockNameHint : undefined}
             className={cn(
               'flex-1 text-[13px] font-semibold tracking-[0.03em] uppercase',
               pominiete ? 'text-[var(--doc-ink-soft)]' : 'text-[var(--doc-sage)]',

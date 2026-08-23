@@ -1,7 +1,7 @@
 import { Trash2 } from 'lucide-react';
 import { InlineText } from './InlineText';
 import type { RoomType } from '@/data/repos/room-types.repo';
-import type { Room } from '@/domain/quote';
+import { nextRoomLabel, type Room } from '@/domain/quote';
 import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
 
@@ -73,7 +73,22 @@ export function RoomRow({
         <select
           value={room.roomTypeId ?? ''}
           aria-label={pl.editor.roomTypeLabel(label)}
-          onChange={(event) => onPatch({ roomTypeId: event.target.value || null })}
+          onChange={(event) => {
+            const roomTypeId = event.target.value || null;
+            const nazwaTypu = (id: string | null) =>
+              roomTypes.find((type) => type.id === id)?.name ?? null;
+
+            // Wybór typu NAZYWA pomieszczenie — patrz `nextRoomLabel`.
+            onPatch({
+              roomTypeId,
+              label: nextRoomLabel({
+                currentLabel: room.label,
+                previousTypeName: nazwaTypu(room.roomTypeId),
+                nextTypeName: nazwaTypu(roomTypeId),
+                defaultLabel: pl.editor.newRoomName,
+              }),
+            });
+          }}
           className="border-hair focus-within:border-ring min-w-0 flex-1 rounded-[var(--radius-control)] border bg-transparent px-1.5 py-0.5 text-xs outline-none"
         >
           {/* Pusty typ znaczy „spoza słownika” — wtedy cennik bierze stawkę domyślną. */}

@@ -8,3 +8,4 @@ export * from './template-text';
 export * from './text-context';
 export * from './convert-units';
 export * from './from-settings';
+export * from './room-label';
