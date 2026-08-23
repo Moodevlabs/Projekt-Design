@@ -4,7 +4,9 @@ import { useSaveQuote } from '@/data/queries/useQuotes';
 import { ConflictError } from '@/data/repos/errors';
 import { onWindowCloseRequested, runningInTauri } from '@/lib/tauri';
 import { useEntitlement } from '@/features/billing/useEntitlement';
+import { toast } from 'sonner';
 import { createLogger } from '@/lib/logger';
+import { pl } from '@/i18n/pl';
 
 const log = createLogger('autosave');
 
@@ -77,6 +79,14 @@ export function useAutosave() {
         log.error('Autozapis nieudany', error);
         const message = error instanceof Error ? error.message : 'Nieznany błąd';
         useEditorStore.getState().markError(message);
+        /*
+         * POWÓD, nie tylko fakt. Wskaźnik przy numerze wyceny pokazuje ogólne
+         * „Błąd zapisu — ponów" i gubi to, co naprawdę poszło nie tak: brak
+         * sieci, wygasły dostęp, odrzucenie przez bazę. Człowiek widział mały
+         * czerwony napis i nie miał pojęcia, co z nim zrobić — a bez tej
+         * informacji nie da się nawet zgłosić sensownego błędu.
+         */
+        toast.error(`${pl.editor.saveError}: ${message}`);
       }
     }
   }, [save]);

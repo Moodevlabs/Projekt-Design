@@ -315,3 +315,61 @@ describe('quotes.repo — harmonogram (F5.1)', () => {
     expect(fresh.body).not.toBeNull();
   });
 });
+
+describe('quotes.repo — dodanie pomieszczenia', () => {
+  it('zapisuje wycene z pomieszczeniem', async () => {
+    /*
+     * Zgloszenie uzytkownika: „Blad zapisu — ponow!" po dodaniu pomieszczenia
+     * w panelu Pomieszczenia. Ten test idzie ta sama droga co autozapis:
+     * wczytaj dokument, dopisz pomieszczenie, zapisz na PRAWDZIWEJ bazie.
+     */
+    const quote = await makeQuote('Z pomieszczeniem');
+    const body = quote.body;
+    if (!body) throw new Error('brak body');
+
+    body.rooms.push({
+      id: crypto.randomUUID(),
+      roomTypeId: null,
+      label: 'Nowe pomieszczenie',
+      qty: 1,
+      includedInVisual: true,
+      includedInTechnical: true,
+    });
+
+    const saved = await saveQuote({
+      id: quote.id,
+      body,
+      lastSeenUpdatedAt: quote.updatedAt,
+    });
+
+    expect(saved.body?.rooms).toHaveLength(1);
+    expect(saved.body?.rooms[0]?.label).toBe('Nowe pomieszczenie');
+  });
+
+  it('zapisuje wycene godzinowa z pomieszczeniem', async () => {
+    // Uzytkownik mial wlaczony tryb godzinowy — sprawdzamy te kombinacje.
+    const quote = await makeQuote('Godzinowa z pomieszczeniem');
+    const body = quote.body;
+    if (!body) throw new Error('brak body');
+
+    body.pricingBasis = 'time';
+    body.hourlyRateCents = 20_000;
+    body.rooms.push({
+      id: crypto.randomUUID(),
+      roomTypeId: null,
+      label: 'Kuchnia',
+      qty: 2,
+      includedInVisual: true,
+      includedInTechnical: true,
+    });
+
+    const saved = await saveQuote({
+      id: quote.id,
+      body,
+      lastSeenUpdatedAt: quote.updatedAt,
+    });
+
+    expect(saved.body?.pricingBasis).toBe('time');
+    expect(saved.body?.rooms[0]?.qty).toBe(2);
+  });
+});
