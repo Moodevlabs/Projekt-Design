@@ -490,10 +490,22 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > **Czego NIE dało się sprawdzić:** kryterium mówi o parytecie z `OFERTA - DANE` U/R48, ale **arkusza nie ma w repozytorium**, a `FEATURES` podaje tylko wzór, bez wartości oczekiwanych. Zweryfikowany jest **wzór** (`kwota / stawka × 60`) i sposób sumowania komunikacji; zgodność liczbowa z konkretnym arkuszem pozostaje niesprawdzona.
   > **Nie zrobione (faza 2, zgodnie z `FEATURES`):** kafel „Średnia pracochłonność zaakceptowanych wycen" na pulpicie — oznaczony tam jako `(f2)`.
 
-- [ ] **T-43 Harmonogram — domena** (F5.1)
+- [x] **T-43 Harmonogram — domena** (F5.1)
   `domain/schedule/`, `calcSchedule`, `domain/dates/workdays.ts` (polskie święta: stałe + Wielkanoc algorytmem Meeusa + Boże Ciało), szablon 11 etapów.
   ✅ Święta 2026/2027, przejście przez rok, 6-dniowy tydzień inwestora.
   ⚠️ `date-fns` to nowa zależność — uzasadnij w PR. Sama arytmetyka dni roboczych jest trywialna; `date-fns` bierzemy dla formatowania i bezpiecznych operacji na strefach, nie dla `addWorkdays`.
+  > **Zrobione.** `domain/dates/workdays.ts` (polskie święta z Wielkanocą wg Meeusa, `addWorkdays`), `domain/schedule/` (schemat, `calcSchedule`, szablon 11 etapów), `scheduleTemplate` w ustawieniach workspace'u, migracja `0012_quote_schedule.sql` + obsługa w repozytorium. 820 testów jednostkowych, 16 integracyjnych dla wycen.
+  > **Odstępstwo od `FEATURES`: NIE dodałem `date-fns`.** Potrzebna tu arytmetyka to „dodaj dzień" i „jaki to dzień tygodnia"; biblioteka byłaby wielokrotnie większa od tego, co z niej weźmiemy, a lista świąt i tak wymaga własnego kodu (Wielkanoc jest ruchoma). CLAUDE.md §„Czego NIE robić" mówi wprost o nieuzasadnionych bibliotekach.
+  > **Na co uważać:**
+  > - **Wszystko liczymy na UTC**, mimo że to daty bez godziny. Arytmetyka na czasie lokalnym gubi albo dokłada dzień przy zmianie czasu — a przesunięcie terminu oddania projektu o dobę dwa razy w roku to błąd, którego nikt nie powiąże z DST. Jest na to test.
+  > - **`addWorkdays` liczy święta z ROKU KAŻDEGO mijanego dnia**, nie tylko z roku startu. Przełom roku ma cztery dni wolne w krótkim odstępie (25–26 XII, 1 i 6 I), a to typowy moment startu projektu — liczenie tylko z roku startu dałoby termin o kilka dni za wcześnie. Test przechodzi przez tę granicę.
+  > - **Dwa terminy, nie jeden.** Optymalny liczy same dni wykonawcy, najpóźniejszy dokłada dni inwestora. Każda strona chodzi po **swoim** tygodniu roboczym (`D7`/`D8` z arkusza), bo inwestor bywa dostępny w soboty. Podanie jednej daty byłoby obietnicą, której nikt nie kontroluje w całości.
+  > - **Bez daty startu nie zgadujemy terminów** (`null`), ale dni i zgrubny przelicznik `dni / 5 × 7` z arkusza (`O39`) zostają dostępne. To dwie różne liczby i obie są potrzebne: przelicznik przy planowaniu „ile to potrwa", `realCalendarDays` gdy termin jest już konkretny i mają się zgadzać święta.
+  > - **`quotes.schedule` jest nullable i to znaczące:** `null` = „ta wycena nie ma harmonogramu", pusty obiekt = „ma, ale bez etapów".
+  > - **`saveQuote` pomija `schedule`, gdy go nie podano.** Zakładki „Wycena" i „Termin" zapisują ten sam wiersz — gdyby zapis dokumentu wysyłał `null`, każda edycja pozycji kasowałaby ustawiony termin. Jest na to test integracyjny.
+  > - Model etapu jest **bliźniaczo podobny do cennika parametrycznego** (baza + składnik per pomieszczenie, ten sam `roomScope`) i to celowe — termin i cena mają obejmować dokładnie te same pomieszczenia.
+  > - Szablon etapów daje **świeże `id` przy każdym wywołaniu**: etap należy do konkretnej wyceny, wspólne `id` znaczyłoby, że edycja jednego harmonogramu rusza drugi.
+  > **Czego NIE dało się sprawdzić:** kryterium mówi o parytecie z `TERMIN - DOKUMENT` (O37/Q37, O39, O47/O49), ale **arkusza nie ma w repozytorium** — tak samo jak przy T-42. Zweryfikowane są wzory i zachowanie na własnych przypadkach (święta 2026/2027, przełom roku, sześciodniowy tydzień inwestora); zgodność liczbowa z tamtym plikiem pozostaje niesprawdzona.
 
 - [ ] **T-44 Harmonogram — zakładka w edytorze** (F5.2)
   Zakładki **Wycena | Termin | Dokumenty**, tabela etapów, karta wyniku, Gantt na czystym CSS, auto-sync etapów po tagach pozycji.

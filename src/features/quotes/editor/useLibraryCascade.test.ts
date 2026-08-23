@@ -36,6 +36,7 @@ function makeQuote(): Quote {
     clientId: null,
     body,
     bodyError: null,
+    schedule: null,
   };
 }
 

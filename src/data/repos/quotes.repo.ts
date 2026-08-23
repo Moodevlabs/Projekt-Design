@@ -7,6 +7,7 @@ import {
   type QuoteBody,
   type QuoteStatus,
 } from '@/domain/quote';
+import { parseScheduleBody, type ScheduleBody } from '@/domain/schedule';
 import { getSupabase } from '@/data/supabase';
 import type { TablesUpdate } from '@/data/types.generated';
 import { ConflictError, RepoError, unwrap } from './errors';
@@ -41,6 +42,11 @@ export interface Quote extends QuoteSummary {
   body: QuoteBody | null;
   /** Opis problemu z walidacja. UI pokazuje „wycena uszkodzona" zamiast edytora. */
   bodyError: string | null;
+  /**
+   * Harmonogram (F5). `null` = ta wycena go nie ma — i to jest normalny stan,
+   * a nie brak danych. Pusty obiekt znaczylby harmonogram bez etapow.
+   */
+  schedule: ScheduleBody | null;
 }
 
 export type QuoteSort = 'updated_desc' | 'created_desc' | 'total_desc' | 'number_asc';
@@ -92,6 +98,9 @@ function mapQuote(row: Row): Quote {
     clientId: (row.client_id as string | null) ?? null,
     body: parsed.ok ? parsed.body : null,
     bodyError: parsed.ok ? null : parsed.error,
+    // Miekko, jak `pricing` w bibliotece: zepsuty harmonogram nie ma prawa
+    // zablokowac calej wyceny. `parseScheduleBody` zwroci wtedy `null`.
+    schedule: parseScheduleBody(row.schedule),
   };
 }
 
@@ -177,6 +186,11 @@ export async function createQuote(input: CreateQuoteInput): Promise<Quote> {
 }
 
 export interface SaveQuoteInput {
+  /**
+   * Harmonogram (F5). Pomin, zeby go NIE ruszac — zapis wyceny z zakladki
+   * „Wycena" nie ma prawa skasowac tego, co ktos ustawil w zakladce „Termin".
+   */
+  schedule?: ScheduleBody | null;
   id: string;
   body: QuoteBody;
   /** `updated_at` ostatnio widziany przez klienta — podstawa blokady optymistycznej. */
@@ -207,6 +221,9 @@ export async function saveQuote(input: SaveQuoteInput): Promise<Quote> {
         total_gross_cents: totals.grossCents,
         ...(input.status ? { status: input.status } : {}),
         ...(input.number !== undefined ? { number: input.number } : {}),
+        // `undefined` = „nie ruszaj harmonogramu"; `null` = „skasuj go".
+        // Bez tego rozroznienia zapis samej wyceny kasowalby termin.
+        ...(input.schedule !== undefined ? { schedule: input.schedule } : {}),
       })
       .eq('id', input.id)
       .eq('updated_at', input.lastSeenUpdatedAt)

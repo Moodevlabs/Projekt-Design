@@ -45,7 +45,13 @@ function makeSummary(): QuoteSummary {
 }
 
 function makeQuote(): Quote {
-  return { ...makeSummary(), clientId: null, body: newQuoteBody(), bodyError: null };
+  return {
+    ...makeSummary(),
+    clientId: null,
+    body: newQuoteBody(),
+    bodyError: null,
+    schedule: null,
+  };
 }
 
 /** Klient bez retry — inaczej odrzucona mutacja próbowałaby jeszcze raz. */

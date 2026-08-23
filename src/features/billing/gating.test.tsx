@@ -73,6 +73,7 @@ function makeQuote(): Quote {
       sections: [newSection({ title: 'Sekcja', items: [newItem({ name: 'Pozycja' })] })],
     }),
     bodyError: null,
+    schedule: null,
   };
 }
 

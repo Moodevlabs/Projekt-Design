@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { DEFAULT_NUMBER_PATTERN } from '../numbering';
 import { PricesIncludeSchema, PricingBasisSchema } from '../quote/schema';
+import { ScheduleStageSchema } from '../schedule/schema';
 
 /**
  * Brand kit i ustawienia workspace — parytet z tabelą `brand_kits`
@@ -77,6 +78,15 @@ export const WorkspaceSettingsSchema = z.object({
   hourlyRateCents: z.number().int().positive().nullable().default(null),
   /** Czy nowa wycena startuje jako kwotowa, czy godzinowa. */
   defaultPricingBasis: PricingBasisSchema.default('amount'),
+  /**
+   * Własny szablon etapów harmonogramu (F5.1).
+   *
+   * `null` = używamy szablonu wbudowanego. Trzymamy etapy **bez `id`**: to jest
+   * wzorzec, a nie harmonogram — identyfikatory powstają dopiero przy zakładaniu
+   * go w konkretnej wycenie. Wspólne `id` znaczyłoby, że edycja jednego
+   * dokumentu rusza drugi.
+   */
+  scheduleTemplate: z.array(ScheduleStageSchema.omit({ id: true })).nullable().default(null),
 });
 export type WorkspaceSettings = z.infer<typeof WorkspaceSettingsSchema>;
 

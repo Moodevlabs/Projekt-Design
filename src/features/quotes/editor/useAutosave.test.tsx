@@ -43,6 +43,7 @@ function makeQuote(): Quote {
     clientId: null,
     body: structuredClone(BODY),
     bodyError: null,
+    schedule: null,
   };
 }
 

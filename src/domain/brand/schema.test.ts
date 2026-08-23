@@ -86,6 +86,8 @@ describe('WorkspaceSettingsSchema', () => {
       // liczyć, więc domyślnie jej nie ma.
       hourlyRateCents: null,
       defaultPricingBasis: 'amount',
+      // `null` = uzywamy wbudowanego szablonu etapow (F5.1).
+      scheduleTemplate: null,
     });
   });
 

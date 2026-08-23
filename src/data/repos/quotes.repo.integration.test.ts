@@ -20,6 +20,7 @@ import {
   setQuoteStatus,
 } from './quotes.repo';
 import { ConflictError } from './errors';
+import { newScheduleBody } from '@/domain/schedule';
 import { newItem, newQuoteBody, newSection } from '@/domain/quote';
 
 const DEMO_EMAIL = 'demo@anzorge.local';
@@ -240,5 +241,77 @@ describe('quotes.repo — RLS', () => {
     const obcyWorkspace = '00000000-0000-4000-8000-000000000000';
     // RLS odrzuca insert; repo zamienia to na RepoError/ReadOnlyError.
     await expect(createQuote({ workspaceId: obcyWorkspace })).rejects.toThrow();
+  });
+});
+
+describe('quotes.repo — harmonogram (F5.1)', () => {
+  it('nowa wycena NIE ma harmonogramu', async () => {
+    // `null` to normalny stan, a nie brak danych: wiekszosc ofert obejdzie
+    // sie bez terminu.
+    const quote = await makeQuote('Bez terminu');
+    expect(quote.schedule).toBeNull();
+  });
+
+  it('zapisuje i odczytuje harmonogram', async () => {
+    const quote = await makeQuote('Z terminem');
+    const body = quote.body;
+    if (!body) throw new Error('brak body');
+
+    const schedule = newScheduleBody({ startDate: '2026-06-01', clientWorkdaysPerWeek: 6 });
+    const saved = await saveQuote({
+      id: quote.id,
+      body,
+      lastSeenUpdatedAt: quote.updatedAt,
+      schedule,
+    });
+
+    expect(saved.schedule?.startDate).toBe('2026-06-01');
+    expect(saved.schedule?.clientWorkdaysPerWeek).toBe(6);
+    expect(saved.schedule?.stages.length).toBeGreaterThanOrEqual(11);
+
+    const fresh = await getQuote(quote.id);
+    expect(fresh.schedule?.startDate).toBe('2026-06-01');
+  });
+
+  it('zapis samej wyceny NIE kasuje harmonogramu', async () => {
+    /*
+     * Kluczowe dla F5.2: zakladka „Wycena" i zakladka „Termin" zapisuja ten
+     * sam wiersz. Gdyby zapis dokumentu wysylal `schedule: null`, kazda edycja
+     * pozycji kasowalaby ustawiony termin — i nikt by nie wiedzial dlaczego.
+     */
+    const quote = await makeQuote('Termin przezywa zapis');
+    const body = quote.body;
+    if (!body) throw new Error('brak body');
+
+    const zHarmonogramem = await saveQuote({
+      id: quote.id,
+      body,
+      lastSeenUpdatedAt: quote.updatedAt,
+      schedule: newScheduleBody({ startDate: '2026-09-01' }),
+    });
+
+    body.title = 'Zmieniony tytul';
+    const poZapisie = await saveQuote({
+      id: quote.id,
+      body,
+      lastSeenUpdatedAt: zHarmonogramem.updatedAt,
+    });
+
+    expect(poZapisie.title).toBe('Zmieniony tytul');
+    expect(poZapisie.schedule?.startDate).toBe('2026-09-01');
+  });
+
+  it('uszkodzony harmonogram nie blokuje wyceny', async () => {
+    // Ta sama zasada co przy `pricing` w bibliotece: jeden zepsuty fragment
+    // ma nie zabrac dostepu do calego dokumentu.
+    const quote = await makeQuote('Uszkodzony termin');
+    await getSupabase()
+      .from('quotes')
+      .update({ schedule: { startDate: 'wczoraj', stages: 'brak' } })
+      .eq('id', quote.id);
+
+    const fresh = await getQuote(quote.id);
+    expect(fresh.schedule).toBeNull();
+    expect(fresh.body).not.toBeNull();
   });
 });

@@ -415,6 +415,7 @@ export type Database = {
           deleted_at: string | null
           id: string
           number: string | null
+          schedule: Json | null
           sent_at: string | null
           status: string
           title: string
@@ -435,6 +436,7 @@ export type Database = {
           deleted_at?: string | null
           id?: string
           number?: string | null
+          schedule?: Json | null
           sent_at?: string | null
           status?: string
           title?: string
@@ -455,6 +457,7 @@ export type Database = {
           deleted_at?: string | null
           id?: string
           number?: string | null
+          schedule?: Json | null
           sent_at?: string | null
           status?: string
           title?: string

@@ -66,6 +66,7 @@ function quoteWithLinkedItem(): Quote {
     clientId: null,
     body,
     bodyError: null,
+    schedule: null,
   };
 }
 
