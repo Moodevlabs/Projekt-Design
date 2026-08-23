@@ -24,6 +24,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import type { Item } from '@/domain/quote';
 import { useSaveToLibrary } from './useSaveToLibrary';
 import { useTemplateActions } from './useTemplateActions';
+import { useExportPdf } from '@/pdf/useExportPdf';
 import { routes } from '@/app/routes';
 import { pl } from '@/i18n/pl';
 
@@ -194,6 +195,7 @@ function EditorSurface({
   const insertItemToRoomBlocks = useEditorStore((state) => state.insertItemToRoomBlocks);
   const [libraryOpen, setLibraryOpen] = useState(false);
   const templates = useTemplateActions();
+  const { exportPdf, exporting: exportingPdf } = useExportPdf();
   const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
   const [overwriteTemplateOpen, setOverwriteTemplateOpen] = useState(false);
 
@@ -289,6 +291,10 @@ function EditorSurface({
           onRetry={onRetry}
           onReload={onReload}
           onSaveAllToLibrary={library.saveAll}
+          onExportPdf={() =>
+            void exportPdf({ body, number, issueDate, currency: 'PLN' })
+          }
+          exportingPdf={exportingPdf}
           onSaveAsTemplate={() => setSaveTemplateOpen(true)}
           onOverwriteTemplate={() => setOverwriteTemplateOpen(true)}
           canOverwriteTemplate={templates.canOverwrite}

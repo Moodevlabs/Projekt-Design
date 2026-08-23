@@ -183,6 +183,11 @@ export const pl = {
     perSectionHide: 'Ukryj podział na etapy',
     perSectionUnnamed: 'Bez nazwy',
 
+    exportPdf: 'Eksportuj PDF',
+    pdfSaved: 'Zapisano PDF',
+    pdfOpen: 'Otwórz',
+    pdfFailed: 'Nie udało się wygenerować PDF.',
+
     summary: 'Podsumowanie',
     itemsTotal: 'Suma pozycji',
     discounts: 'Rabaty',

@@ -340,6 +340,18 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   Z `F1.5`: bloki pomieszczeń z `x2`, wiersz „Pomieszczenia: …” (`showRoomsSummary`), opcjonalny rozkład ceny (`showPriceBreakdown`, domyślnie **off**).
   Z `F3.3`: sekcja rabatów z „−5% (etap funkcjonalny)”, niespełnione warunkowe pokazywane domyślnie (narzędzie sprzedażowe).
   ✅ PDF 10 stron < 3 s; polskie znaki; wyłączone pozycje wg ustawienia; numeracja stron; snapshot z sekcją pomieszczeń i rabatami.
+  > **Zrobione częściowo — patrz „czego brakuje".** `domain/brand/color.ts` (kontrast WCAG), `pdf/theme.ts`, `pdf/QuotePdfDocument.tsx` z blokami pomieszczeń i sekcją rabatów, `pdf/document-content.ts`, `pdf/file-name.ts`, `useExportPdf` z zapisem przez Tauri i pobieraniem w przeglądarce, pozycja „Eksportuj PDF" w menu edytora. 553 testy jednostkowe.
+  > **CZEGO BRAKUJE (blokada zewnętrzna):**
+  > - **Plików fontów `.ttf` nie ma w repo, więc PDF NIE MA POLSKICH ZNAKÓW.** `@react-pdf` spada wtedy na wbudowaną Helveticę. To decyzja licencyjna (każdy krój ma własne warunki redystrybucji), nie przeoczenie — dlatego nie pobrałem ich sam. `src/pdf/fonts/register.ts` czeka gotowy: wrzuć pliki 400 i 700 pod nazwami z `FONT_FILES`, a rejestracja podłączy je sama i `pdfFontsRegistered()` zacznie zwracać `true`. **Dopóki tego nie ma, kryterium „polskie znaki" jest niespełnione.**
+  > - Podgląd PDF na żywo w ustawieniach brandingu (04-PDF §4) i generowanie w Web Workerze — do dorobienia; dziś render idzie na głównym wątku przy kliknięciu eksportu.
+  > - Pytanie „Oznaczyć jako wysłaną?" po pierwszym eksporcie (04-PDF §5).
+  > **Na co uważać:**
+  > - **PDF to TRZECIE miejsce liczące kwotę pozycji** (po podsumowaniu i wierszu w edytorze) — czyta `calcItemCents`, nie liczy po swojemu. Dokładnie ta pułapka wyszła w T-35.
+  > - **`renderToString` z `@react-pdf` zwraca binarny PDF, nie XML.** Testy szukające tekstu w tym wyniku są bezwartościowe: `not.toContain('cokolwiek')` zawsze przechodzi. Dlatego reguły treści siedzą w `document-content.ts` jako czyste funkcje, a render sprawdzamy nagłówkiem `%PDF-` i rozmiarem bufora.
+  > - **Blok pomieszczenia odznaczonego w obu częściach nie trafia do oferty**, choć w edytorze zostaje widoczny — tam musi dać się z powrotem włączyć, tutaj byłby szumem.
+  > - **Blok wskazujący na skasowane pomieszczenie dalej się drukuje** (z nazwą grupy): lepiej niepełny nagłówek niż ciche wycięcie pozycji z oferty, którą klient już widział.
+  > - Kolor tekstu w nagłówku i wariant logo **wynikają z kontrastu**, nie z progu jasności — `contrastText` porównuje oba warianty, bo przy kolorach ze środka skali próg wskazuje gorszy.
+  > - Logo trafia do pliku jako **data URL**, nie link: podpisany URL wygasa, a dokument ma być samodzielny.
 
 - [ ] **T-14 Stripe — Edge Functions + webhook** (03-BILLING)
   3 funkcje + `_shared`, idempotencja, mapowanie statusów, testy Deno z mockiem.

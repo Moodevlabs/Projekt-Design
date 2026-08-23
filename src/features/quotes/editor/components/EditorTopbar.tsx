@@ -28,6 +28,8 @@ export function EditorTopbar({
   onRetry,
   onReload,
   onSaveAllToLibrary,
+  onExportPdf,
+  exportingPdf,
   onSaveAsTemplate,
   onOverwriteTemplate,
   canOverwriteTemplate,
@@ -43,6 +45,8 @@ export function EditorTopbar({
   onRetry: () => void;
   onReload: () => void;
   onSaveAllToLibrary: () => void;
+  onExportPdf: () => void;
+  exportingPdf: boolean;
   onSaveAsTemplate: () => void;
   onOverwriteTemplate: () => void;
   /** Bez szablonów nie ma czego nadpisywać — pozycja menu znika. */
@@ -107,6 +111,10 @@ export function EditorTopbar({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-64">
+            <DropdownMenuItem onSelect={onExportPdf} disabled={exportingPdf}>
+              {pl.editor.exportPdf}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuItem onSelect={onOpenLibrary}>{pl.library.title}</DropdownMenuItem>
             <DropdownMenuItem onSelect={onSaveAllToLibrary}>
               {pl.editor.saveAllToLibrary}
