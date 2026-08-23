@@ -325,6 +325,15 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   Z `F7.2`: `opening_hours jsonb` (max 4 wiersze), `signer_title`, `signer_name` — stopka „CZYNNE” i blok „wystawił”.
   ✅ Zapis i odczyt; logo widoczne po restarcie; stopka zgodna z arkuszami.
   ⚠️ Scalone świadomie: `F7.2` to trzy pola w tym samym formularzu i tej samej stopce PDF. Osobne zadanie znaczyłoby drugie przejście przez branding i drugą korektę layoutu stopki.
+  > **Zrobione.** Migracja `0008_brand_signer_hours.sql`, `openingHours`/`signerName`/`signerTitle` w schemacie i repo, operacje Storage (`uploadLogo`/`removeLogo`/`getLogoUrl`) + hooki, pełny formularz `BrandSettingsPage` z `LogoField`. 512 testów jednostkowych, 52 integracyjne, 20/20 pgTAP.
+  > **Na co uważać:**
+  > - **Ścieżka logo ma znacznik czasu w nazwie.** Signed URL i podgląd cache'ują się po adresie, więc nadpisanie tej samej ścieżki pokazywałoby stare logo do czasu wyczyszczenia cache.
+  > - **Kolejność przy podmianie logo: plik → ścieżka w brand kicie → kasowanie starego pliku.** Odwrotna zostawiałaby brand kit wskazujący na plik, którego nie ma. Nieudane kasowanie tylko logujemy — dla użytkownika liczy się, że logo zniknęło, a nie los obiektu w Storage.
+  > - **Formularz trzyma własny szkic i zapisuje jawnie.** Brand kit czyta generator PDF i podgląd, więc zapis przy każdym klawiszu przerysowywałby dokument w trakcie pisania. Pasek zapisu pojawia się dopiero przy zmianach.
+  > - **Puste pole tekstowe zapisuje się jako `null`, nie pusty string** — kolumny są nullable, a pusty string udawałby w PDF wypełnioną wartość.
+  > - **Rozmiar i typ pliku sprawdzamy przed wysyłką**, mimo że bucket i tak by odrzucił: komunikat ze Storage jest po angielsku i mówi o MIME, a użytkownik ma usłyszeć, że plik jest za duży.
+  > - Jasny wariant logo pokazujemy na ciemnym tle — na białym podglądzie byłby niewidoczny i wyglądałby jak nieudany upload.
+  > - **Pułapka narzędziowa:** `supabase db reset` potrafi wywalić się na kroku Storage **po** zastosowaniu migracji. Jeśli w tym stanie odpalisz `db:types`, plik typów nadpisze się okrojoną wersją. Generuj do pliku tymczasowego i sprawdź, zanim podmienisz `types.generated.ts`.
 
 - [ ] **T-13 PDF** (04-PDF) **+ F1.5, F3.3**
   `QuotePdfDocument`, fonty, theme z brand kitu, worker, eksport przez Tauri `save_file` + `open_path`, live preview w ustawieniach brandingu, snapshot test renderu (pdf → png przez `pdf-to-img` w teście lub porównanie struktury).

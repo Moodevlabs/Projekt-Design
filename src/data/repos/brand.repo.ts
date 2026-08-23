@@ -27,6 +27,9 @@ function parseBrandKit(row: BrandRow): BrandKit {
     footerText: row.footer_text,
     defaultIntro: row.default_intro,
     defaultValidDays: row.default_valid_days,
+    openingHours: row.opening_hours,
+    signerName: row.signer_name,
+    signerTitle: row.signer_title,
   });
 
   if (result.success) return result.data;
@@ -68,6 +71,9 @@ export async function updateBrandKit(workspaceId: string, patch: BrandKitPatch):
   if (patch.taxId !== undefined) update.tax_id = patch.taxId;
   if (patch.footerText !== undefined) update.footer_text = patch.footerText;
   if (patch.defaultIntro !== undefined) update.default_intro = patch.defaultIntro;
+  if (patch.openingHours !== undefined) update.opening_hours = patch.openingHours;
+  if (patch.signerName !== undefined) update.signer_name = patch.signerName;
+  if (patch.signerTitle !== undefined) update.signer_title = patch.signerTitle;
   if (patch.defaultValidDays !== undefined) update.default_valid_days = patch.defaultValidDays;
 
   const rows = unwrap(
@@ -82,4 +88,69 @@ export async function updateBrandKit(workspaceId: string, patch: BrandKitPatch):
   const row = rows[0];
   if (!row) throw new RepoError('Nie udało się zapisać brandingu — brak uprawnień.');
   return parseBrandKit(row);
+}
+
+/** Wariant logo — ciemne na jasne tło i jasne na ciemny nagłówek PDF (04-PDF §3). */
+export type LogoVariant = 'dark' | 'light';
+
+const BUCKET = 'brand';
+
+/**
+ * Ścieżka w buckecie. Pierwszy segment MUSI być `workspace_id` — na tym stoi
+ * polityka dostępu (`storage_workspace_id` w migracji 0005).
+ *
+ * W nazwie siedzi znacznik czasu, bo signed URL i podgląd w przeglądarce
+ * cache'ują się po adresie: nadpisanie tej samej ścieżki pokazywałoby stare
+ * logo do czasu wyczyszczenia cache.
+ */
+function logoPath(workspaceId: string, variant: LogoVariant, fileName: string): string {
+  const dot = fileName.lastIndexOf('.');
+  const ext = dot > 0 ? fileName.slice(dot + 1).toLowerCase() : 'png';
+  return `${workspaceId}/logo-${variant}-${Date.now()}.${ext}`;
+}
+
+/**
+ * Wgrywa logo i zwraca jego ścieżkę. Zapis ścieżki do brand kitu zostawiamy
+ * wołającemu — inaczej nieudany zapis kolumny zostawiłby osierocony plik bez
+ * możliwości powiązania go z workspace'em.
+ */
+export async function uploadLogo(
+  workspaceId: string,
+  variant: LogoVariant,
+  file: File,
+): Promise<string> {
+  const path = logoPath(workspaceId, variant, file.name);
+
+  const { error } = await getSupabase()
+    .storage.from(BUCKET)
+    .upload(path, file, { contentType: file.type, upsert: false });
+
+  if (error) throw new RepoError('Wgranie logo: ' + error.message, error);
+  return path;
+}
+
+/**
+ * Kasuje plik logo. Błąd tylko logujemy: plik mógł już nie istnieć (podwójne
+ * kliknięcie, wcześniejsze czyszczenie), a dla użytkownika liczy się to, że
+ * logo zniknęło z brandingu — nie los pojedynczego obiektu w Storage.
+ */
+export async function removeLogo(path: string): Promise<void> {
+  const { error } = await getSupabase().storage.from(BUCKET).remove([path]);
+  if (error) log.warn('Nie udało się skasować pliku logo', { path, error: error.message });
+}
+
+/**
+ * Podpisany URL do podglądu. Bucket jest prywatny, więc bez podpisu przeglądarka
+ * nie pobierze pliku.
+ */
+export async function getLogoUrl(path: string, expiresInSeconds = 3600): Promise<string | null> {
+  const { data, error } = await getSupabase()
+    .storage.from(BUCKET)
+    .createSignedUrl(path, expiresInSeconds);
+
+  if (error) {
+    log.warn('Nie udało się podpisać URL logo', { path, error: error.message });
+    return null;
+  }
+  return data.signedUrl;
 }

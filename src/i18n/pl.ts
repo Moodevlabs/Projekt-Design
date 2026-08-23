@@ -27,6 +27,7 @@ export const pl = {
     cancel: 'Anuluj',
     delete: 'Usuń',
     edit: 'Edytuj',
+    change: 'Zmień',
     duplicate: 'Duplikuj',
     archive: 'Archiwizuj',
     search: 'Szukaj',
@@ -480,6 +481,54 @@ export const pl = {
     font: 'Font',
     contacts: 'Kontakt',
     footer: 'Stopka',
+
+    // Sekcje formularza.
+    sectionIdentity: 'Firma',
+    sectionLook: 'Wygląd PDF',
+    sectionContact: 'Kontakt i stopka',
+    sectionDefaults: 'Domyślne w wycenie',
+
+    // Logo.
+    logoDark: 'Logo na jasne tło',
+    logoLight: 'Logo na ciemny nagłówek',
+    logoHint: 'PNG, JPG, WEBP lub SVG, do 5 MB.',
+    logoUpload: (variant: string) => `Wgraj: ${variant}`,
+    logoRemove: (variant: string) => `Usuń: ${variant}`,
+    logoEmpty: 'Brak logo',
+    logoTooBig: 'Plik jest większy niż 5 MB.',
+    logoWrongType: 'Dozwolone formaty: PNG, JPG, WEBP, SVG.',
+    logoUploaded: 'Zapisano logo',
+    logoRemoved: 'Usunięto logo',
+
+    // Pola.
+    address: 'Adres',
+    taxId: 'NIP',
+    footerText: 'Tekst stopki',
+    defaultIntro: 'Domyślny wstęp wyceny',
+    defaultValidDays: 'Domyślna ważność (dni)',
+    contactName: (index: number) => `Osoba ${index + 1} — imię i nazwisko`,
+    contactPhone: (index: number) => `Osoba ${index + 1} — telefon`,
+    contactEmail: (index: number) => `Osoba ${index + 1} — e-mail`,
+    addContact: 'Dodaj osobę',
+    removeContact: (index: number) => `Usuń osobę ${index + 1}`,
+
+    // F7.2 — godziny otwarcia i wystawiający.
+    openingHours: 'Godziny otwarcia',
+    openingHoursHint: 'Blok „CZYNNE" w stopce PDF. Bez wierszy nie drukuje się wcale.',
+    openingHoursLabel: (index: number) => `Wiersz ${index + 1} — dni`,
+    openingHoursValue: (index: number) => `Wiersz ${index + 1} — godziny`,
+    openingHoursLabelPlaceholder: 'poniedziałek – piątek',
+    openingHoursValuePlaceholder: '8.00 – 16.00',
+    addOpeningHours: 'Dodaj wiersz',
+    removeOpeningHours: (index: number) => `Usuń wiersz ${index + 1}`,
+    openingHoursFull: 'Więcej niż cztery wiersze nie zmieszczą się w stopce.',
+    signer: 'Wystawiający',
+    signerName: 'Imię i nazwisko',
+    signerTitle: 'Tytuł zawodowy',
+    signerTitlePlaceholder: 'projektant wnętrz',
+
+    saved: 'Zapisano branding',
+    invalidColor: 'Kolor musi być w formacie #RRGGBB',
   },
   settings: {
     title: 'Ustawienia',

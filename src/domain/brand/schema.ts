@@ -24,6 +24,21 @@ export const BrandContactSchema = z.object({
 });
 export type BrandContact = z.infer<typeof BrandContactSchema>;
 
+/**
+ * Wiersz stopki „CZYNNE" — etykieta i godziny jako **tekst**, nie godziny
+ * maszynowe. W arkuszu klienta stoi tam „poniedziałek – piątek / 8.00 – 16.00"
+ * i „sobota (tylko spotkania) / 10.00 – 13.00”; parsowanie tego na model
+ * czasowy nic by nie dało, a odebrałoby możliwość dopisania uwagi w nawiasie.
+ */
+export const OpeningHoursRowSchema = z.object({
+  label: z.string().default(''),
+  hours: z.string().default(''),
+});
+export type OpeningHoursRow = z.infer<typeof OpeningHoursRowSchema>;
+
+/** Stopka mieści maksymalnie cztery wiersze godzin — dalej rozjeżdża się layout PDF. */
+export const MAX_OPENING_HOURS_ROWS = 4;
+
 export const BrandKitSchema = z.object({
   companyName: z.string().default(''),
   /** Ścieżka w Storage, np. `brand/{workspaceId}/logo-dark.png`. */
@@ -38,6 +53,11 @@ export const BrandKitSchema = z.object({
   footerText: z.string().nullable().default(null),
   defaultIntro: z.string().nullable().default(null),
   defaultValidDays: z.number().int().nonnegative().default(7),
+  /** Stopka „CZYNNE" (F7.2). Pusta lista = blok w PDF się nie drukuje. */
+  openingHours: z.array(OpeningHoursRowSchema).max(MAX_OPENING_HOURS_ROWS).default([]),
+  signerName: z.string().nullable().default(null),
+  /** Tytuł zawodowy pod podpisem, np. „projektant wnętrz". */
+  signerTitle: z.string().nullable().default(null),
 });
 export type BrandKit = z.infer<typeof BrandKitSchema>;
 

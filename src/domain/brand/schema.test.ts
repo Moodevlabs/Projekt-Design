@@ -4,6 +4,7 @@ import {
   BrandKitSchema,
   FontFamilySchema,
   HexColorSchema,
+  MAX_OPENING_HOURS_ROWS,
   WorkspaceSettingsSchema,
   defaultBrandKit,
   defaultWorkspaceSettings,
@@ -53,6 +54,10 @@ describe('BrandKitSchema', () => {
       footerText: null,
       defaultIntro: null,
       defaultValidDays: 7,
+      // F7.2: bez wierszy blok „CZYNNE” w stopce się nie drukuje.
+      openingHours: [],
+      signerName: null,
+      signerTitle: null,
     });
   });
 
@@ -90,5 +95,44 @@ describe('WorkspaceSettingsSchema', () => {
     expect(
       WorkspaceSettingsSchema.parse({ numberPattern: 'OF/{YY}/{seq:6}', pricesInclude: 'gross' }),
     ).toMatchObject({ numberPattern: 'OF/{YY}/{seq:6}', pricesInclude: 'gross' });
+  });
+});
+
+describe('BrandKitSchema — godziny otwarcia i wystawiajacy (F7.2)', () => {
+  it('brak pol daje pusta stopke, a nie blad', () => {
+    // Konta zalozone przed migracja 0008 nie maja tych wartosci.
+    const kit = BrandKitSchema.parse({ companyName: 'Studio' });
+
+    expect(kit.openingHours).toEqual([]);
+    expect(kit.signerName).toBeNull();
+    expect(kit.signerTitle).toBeNull();
+  });
+
+  it('przyjmuje wiersze godzin jako wolny tekst', () => {
+    // W arkuszu stoi „sobota (tylko spotkania)” — parsowanie tego na model
+    // czasowy odebraloby mozliwosc dopisania uwagi.
+    const kit = BrandKitSchema.parse({
+      openingHours: [
+        { label: 'poniedziałek – piątek', hours: '8.00 – 16.00' },
+        { label: 'sobota (tylko spotkania)', hours: '10.00 – 13.00' },
+      ],
+    });
+
+    expect(kit.openingHours).toHaveLength(2);
+    expect(kit.openingHours[1]?.label).toContain('spotkania');
+  });
+
+  it('odrzuca wiecej niz cztery wiersze — stopka ich nie zmiesci', () => {
+    const rows = Array.from({ length: MAX_OPENING_HOURS_ROWS + 1 }, () => ({
+      label: 'dzien',
+      hours: '8-16',
+    }));
+
+    expect(BrandKitSchema.safeParse({ openingHours: rows }).success).toBe(false);
+  });
+
+  it('niekompletny wiersz uzupelnia sie pustymi tekstami', () => {
+    const kit = BrandKitSchema.parse({ openingHours: [{ label: 'poniedziałek' }] });
+    expect(kit.openingHours[0]).toEqual({ label: 'poniedziałek', hours: '' });
   });
 });

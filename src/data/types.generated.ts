@@ -48,6 +48,9 @@ export type Database = {
           footer_text: string | null
           logo_dark_path: string | null
           logo_light_path: string | null
+          opening_hours: Json
+          signer_name: string | null
+          signer_title: string | null
           tax_id: string | null
           updated_at: string
           workspace_id: string
@@ -65,6 +68,9 @@ export type Database = {
           footer_text?: string | null
           logo_dark_path?: string | null
           logo_light_path?: string | null
+          opening_hours?: Json
+          signer_name?: string | null
+          signer_title?: string | null
           tax_id?: string | null
           updated_at?: string
           workspace_id: string
@@ -82,6 +88,9 @@ export type Database = {
           footer_text?: string | null
           logo_dark_path?: string | null
           logo_light_path?: string | null
+          opening_hours?: Json
+          signer_name?: string | null
+          signer_title?: string | null
           tax_id?: string | null
           updated_at?: string
           workspace_id?: string
