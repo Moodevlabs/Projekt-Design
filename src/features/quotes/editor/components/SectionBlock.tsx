@@ -203,6 +203,7 @@ export const SectionBlock = memo(function SectionBlock({
         <div className="mt-2.5 flex items-center gap-4">
           <AddLink onClick={() => onAddItem(section.id, null)}>{pl.editor.addItem}</AddLink>
           <LibraryPicker
+            pricing={pricing}
             priorityCategory={section.title}
             onPickItem={(item) => onInsertItems(section.id, null, [item])}
             onPickGroup={(group) => onInsertGroup(section.id, group)}

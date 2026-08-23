@@ -13,7 +13,14 @@ import { AddLink } from './AddLink';
 import { useLibraryGroups, useLibraryItems } from '@/data/queries/useLibrary';
 import type { LibraryItem } from '@/data/repos/library.repo';
 import { byCategory } from './group-library-items';
-import { newGroup, type Group, type Item } from '@/domain/quote';
+import { toast } from 'sonner';
+import {
+  convertItemUnits,
+  newGroup,
+  type Group,
+  type Item,
+  type PricingContext,
+} from '@/domain/quote';
 import { libraryItemToQuoteItem, librarySnapshotToQuoteItem } from '@/domain/library/schema';
 import { formatMoney } from '@/domain/money';
 import { pl } from '@/i18n/pl';
@@ -22,6 +29,15 @@ export interface LibraryPickerProps {
   /** Kategoria wypychana na górę listy — nazwa grupy albo tytuł sekcji. */
   priorityCategory?: string;
   onPickItem: (item: Item) => void;
+  /**
+   * Tryb wyceny, do której wstawiamy (F2.2).
+   *
+   * Wpis biblioteczny niesie własną jednostkę (`pricingBasis`), a liczba bez
+   * jednostki kłamie: „45" z wyceny godzinowej wstawione do kwotowej to nie
+   * 45 groszy, tylko 45 minut pracy. Bez tego kontekstu picker nie ma jak
+   * ich rozróżnić.
+   */
+  pricing: PricingContext;
   /** Gdy podane, popover dostaje drugą zakładkę z zestawami. */
   onPickGroup?: (group: Group) => void;
   /** Własny tekst linku — domyślnie „Z biblioteki”. */
@@ -37,6 +53,7 @@ export function LibraryPicker({
   onPickItem,
   onPickGroup,
   label,
+  pricing,
 }: LibraryPickerProps) {
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<'items' | 'groups'>('items');
@@ -51,8 +68,41 @@ export function LibraryPicker({
     [items.data, priorityCategory],
   );
 
+  /**
+   * Wstawienie pozycji z biblioteki.
+   *
+   * Gdy jednostka wpisu nie zgadza się z trybem wyceny, **przeliczamy** po
+   * stawce dokumentu i mówimy o tym wprost. Bez stawki nie ma kursu wymiany,
+   * więc odmawiamy — wstawienie liczby „jak leci" wpisałoby do oferty 45 groszy
+   * tam, gdzie ktoś policzył 45 minut pracy, i nikt by tego nie zauważył.
+   */
   const pickItem = (libraryItem: LibraryItem) => {
-    onPickItem(libraryItemToQuoteItem(libraryItem));
+    const wyceniona = libraryItemToQuoteItem(libraryItem);
+
+    if (libraryItem.pricingBasis === pricing.pricingBasis) {
+      onPickItem(wyceniona);
+      setOpen(false);
+      return;
+    }
+
+    const przeliczona = convertItemUnits(
+      wyceniona,
+      libraryItem.pricingBasis,
+      pricing.pricingBasis,
+      pricing.hourlyRateCents,
+    );
+
+    if (!przeliczona) {
+      toast.error(pl.editor.libraryBasisMismatch);
+      return;
+    }
+
+    onPickItem(przeliczona);
+    toast.info(
+      pricing.pricingBasis === 'time'
+        ? pl.editor.libraryConvertedToTime
+        : pl.editor.libraryConvertedToAmount,
+    );
     setOpen(false);
   };
 

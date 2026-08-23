@@ -461,9 +461,19 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - Świadome odstępstwo od `FEATURES §F2.1`: minuty **nie siedzą w `calcQuoteTotals`**, tylko w osobnym `calcWorkload`. Inaczej każdy odbiorca podsumowania musiałby obsługiwać pola, które w trybie kwotowym zawsze są puste.
   > **Nie zrobione tutaj (świadomie, wchodzi z T-41):** picker biblioteki nie sprawdza jeszcze, czy jednostka wpisu zgadza się z trybem wyceny. Dziś jest to nieosiągalne — trybu godzinowego nie da się włączyć bez UI — ale **przy T-41 to jest pierwsza rzecz do zrobienia**, zanim przełącznik trafi do interfejsu.
 
-- [ ] **T-41 Tryb godzinowy — UI** (F2.2)
+- [x] **T-41 Tryb godzinowy — UI** (F2.2)
   Segment „Kwotowa | Godzinowa” w `QuoteHeader`, pole stawki, etykiety „min”, `45 min → 150 zł` w wierszu, „Pracochłonność” w `TotalsCard`, dialog przy zmianie trybu.
   ✅ Przełączenie nie psuje autozapisu ani kaskady.
+  > **Zrobione.** `convert-units.ts` (przeliczanie jednostek), zabezpieczenie pickera biblioteki, `PricingBasisCard`, `setPricingBasis` w store, `usePricingBasisChange` + dialog, minuty w `ItemRow` (`45 min → 90 zł`), pracochłonność w `TotalsCard`, `domain/time.ts`, stawka i domyślny tryb w ustawieniach, `quoteBodyFromSettings`. 762 testy.
+  > **Domknięcie długu z T-40:** picker biblioteki **przelicza albo odmawia**. Wpis godzinowy wstawiany do wyceny kwotowej idzie przez `convertItemUnits` po stawce dokumentu; bez stawki nie ma kursu wymiany, więc odmawiamy z komunikatem. Wstawienie liczby „jak leci" wpisałoby 45 groszy tam, gdzie ktoś policzył 45 minut pracy.
+  > **Na co uważać:**
+  > - **`convertUnits` zwraca `null`, a nie zero ani wartość niezmienioną.** Obie „wygodne" odpowiedzi byłyby kłamstwem: zero wpisuje do oferty darmową pracę, wartość niezmieniona myli grosze z minutami. `null` zmusza wołającego, żeby coś z tym zrobił. Konwersja pozycji jest **atomowa** — przeliczenie samej ceny jednostkowej przy nietkniętej regule dałoby pozycję, w której dwie liczby znaczą co innego.
+  > - **Dialog pyta tylko wtedy, gdy jest o co pytać.** Pusta wycena przełącza się od razu. Obie odpowiedzi są sensowne: „Przelicz" (mam gotową wycenę i chcę ją zobaczyć od strony czasu) i „Zostaw liczby" (liczby od początku były minutami, tylko dokument miał zły tryb). Cicha konwersja w którąkolwiek stronę zepsułaby połowę przypadków.
+  > - **Przeliczenie rusza WYŁĄCZNIE liczby cenowe.** `qty`, `frames`, `enabled` i pomieszczenie opisują zakres pracy, a nie jej wartość.
+  > - **Karta trybu stoi w prawej kolumnie, nie na papierze** — odstępstwo od `FEATURES §F2.2`, gdzie przełącznik miał trafić do nagłówka dokumentu. Stawka godzinowa to liczba wewnętrzna; na arkuszu idącym do klienta „150 zł/h" mówi mu, ile zarabiasz na godzinę, a to informacja do ujawniania świadomie, nie przez układ formularza.
+  > - **W trybie godzinowym wiersz edytuje MINUTY, kwota jest wynikiem.** Pole ze złotówkami sugerowałoby, że da się ją wpisać wprost — a wpisana kwota i tak wróciłaby zaokrąglona po przeliczeniu na minuty.
+  > - **Brak stawki mówi o sobie wprost** („bez stawki wszystkie kwoty wychodzą zerowe”). Bez tego komunikatu wycena wygląda na zepsutą.
+  > **Przy okazji naprawione:** nowa wycena brała VAT, tryb cen i `showDisabledItems` z wartości zaszytych w `newQuoteBody`, więc **ustawienie VAT 8% w ustawieniach i tak dawało w dokumencie 23%**. Teraz idzie przez `quoteBodyFromSettings` — i to jest **kopia, nie odwołanie**: późniejsza zmiana stawki czy VAT-u nie rusza ofert, które już poszły. Jest na to test.
 
 - [ ] **T-42 Szacowanie pracochłonności** (F2.3)
   Popover z minutami per sekcja, tag `communication`, `Item.tags`.

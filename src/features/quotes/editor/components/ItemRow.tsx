@@ -109,6 +109,7 @@ export const ItemRow = memo(function ItemRow({
   // Wiersz niepowiązany z biblioteką nie ma wariantów — i nie musi ich mieć.
   const itemVariants = (item.libraryItemId && variants.get(item.libraryItemId)) || EMPTY_VARIANTS;
   const parametric = pricingSummary(item, rooms, currency);
+  const godzinowa = pricing.pricingBasis === 'time';
 
   const {
     attributes,
@@ -239,7 +240,33 @@ export const ItemRow = memo(function ItemRow({
         )}
       >
         {isDiscount ? <span aria-hidden>−</span> : null}
-        {editing && parametric === null ? (
+        {editing && parametric === null && godzinowa ? (
+          /*
+           * W trybie godzinowym edytuje się MINUTY, a kwota jest wynikiem.
+           * Pole ze złotówkami sugerowałoby, że da się ją wpisać wprost —
+           * a wpisana kwota i tak przeliczyłaby się z powrotem na minuty
+           * i wróciła zaokrąglona.
+           */
+          <span className="flex items-center gap-1.5">
+            <input
+              type="number"
+              min={0}
+              step={5}
+              value={item.unitPriceCents}
+              aria-label={pl.editor.itemMinutesLabel}
+              onChange={(event) => {
+                const next = Number.parseInt(event.target.value, 10);
+                onPatch(item.id, { unitPriceCents: Number.isInteger(next) && next >= 0 ? next : 0 });
+              }}
+              className="inline-field price-field amount w-[64px] px-1 py-[2px] text-right text-[14.5px]"
+            />
+            <span className="text-[12px] text-[var(--doc-ink-soft)]">min</span>
+            <span aria-hidden className="text-[12px] text-[var(--doc-ink-soft)]">
+              →
+            </span>
+            <span className="amount">{formatMoney(valueCents, currency)}</span>
+          </span>
+        ) : editing && parametric === null ? (
           <InlineMoney
             cents={item.unitPriceCents}
             currency={currency}

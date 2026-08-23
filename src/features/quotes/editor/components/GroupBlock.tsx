@@ -237,6 +237,7 @@ export const GroupBlock = memo(function GroupBlock({
         <div className="mt-2.5 flex items-center gap-4">
           <AddLink onClick={() => onAddItem(sectionId, group.id)}>{pl.editor.addItem}</AddLink>
           <LibraryPicker
+            pricing={pricing}
             priorityCategory={group.name}
             onPickItem={(item) => onInsertItems(sectionId, group.id, [item])}
           />
@@ -244,6 +245,7 @@ export const GroupBlock = memo(function GroupBlock({
             // Skrót z arkusza: ta sama usługa idzie zwykle do każdego
             // pomieszczenia naraz, a nie do jednego.
             <LibraryPicker
+              pricing={pricing}
               priorityCategory={group.name}
               label={pl.editor.addItemToAllRooms}
               onPickItem={(item) => onInsertItemToRoomBlocks(sectionId, item)}

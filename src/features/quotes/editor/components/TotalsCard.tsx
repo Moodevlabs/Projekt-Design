@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { calcQuoteTotals, calcSectionBreakdown, type QuoteBody } from '@/domain/quote';
+import { calcWorkload, calcQuoteTotals, calcSectionBreakdown, type QuoteBody } from '@/domain/quote';
 import { formatMoney } from '@/domain/money';
+import { formatMinutes } from '@/domain/time';
 import { addDays, formatDate } from '@/lib/dates';
 import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
@@ -55,6 +56,7 @@ export function TotalsCard({
   const bySection = calcSectionBreakdown(body);
   const validUntil = addDays(new Date(issueDate), body.validDays);
   const showVat = body.vatRate > 0;
+  const workload = calcWorkload(body);
 
   return (
     <aside
@@ -79,6 +81,20 @@ export function TotalsCard({
           {formatMoney(totals.netCents, currency)}
         </p>
       </div>
+
+      {/*
+        Pracochlonnosc stoi PRZY sumie, a nie zamiast niej: w trybie godzinowym
+        obie liczby sa wazne — klient placi kwote, a wykonawca planuje czas.
+      */}
+      {workload.minutesTotal > 0 ? (
+        <div className="mt-3.5 border-t border-[var(--hair)] pt-3.5">
+          <Line
+            label={pl.editor.workload}
+            value={formatMinutes(workload.minutesTotal)}
+            tone="muted"
+          />
+        </div>
+      ) : null}
 
       {showVat ? (
         <div className="mt-3.5 space-y-2 border-t border-[var(--hair)] pt-3.5">

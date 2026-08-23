@@ -8,6 +8,7 @@ import {
   newGroup,
   newItem,
   newSection,
+  convertItemUnits,
   type Group,
   type Item,
   type QuoteBody,
@@ -15,6 +16,7 @@ import {
   type MoveItemArgs,
   type MoveSectionArgs,
   type Discount,
+  type PricingBasis,
   type PricingRule,
   type QuoteStatus,
   type Room,
@@ -178,6 +180,20 @@ export interface EditorState {
    * powrot do wariantu `per_frame` ma pamietac liczbe kadrow.
    */
   setItemVariant: (itemId: string, variant: ItemVariant) => void;
+
+  /**
+   * Zmiana sposobu liczenia wyceny (F2.2).
+   *
+   * `convert: true` przelicza liczby wszystkich pozycji po stawce dokumentu;
+   * `false` zostawia je bez zmian, przez co zaczynaja znaczyc co innego
+   * (45 groszy staje sie 45 minutami). Oba warianty sa sensowne — pierwszy,
+   * gdy ktos ma gotowa wycene i chce ja zobaczyc „od strony czasu"; drugi,
+   * gdy liczby od poczatku byly minutami, tylko dokument mial zly tryb.
+   *
+   * Dlatego to WOLAJACY decyduje, a UI pyta. Cicha konwersja w jedna albo
+   * w druga strone zepsulaby polowe przypadkow.
+   */
+  setPricingBasis: (basis: PricingBasis, convert: boolean) => void;
 
   // --- kolejność (T-09). Zmiana kolejności idzie wyłącznie przeciąganiem. ---
   moveItem: (args: MoveItemArgs) => void;
@@ -544,6 +560,33 @@ export const useEditorStore = create<EditorState>()(
         const item = findItem(state.body, itemId);
         if (!item) return;
         Object.assign(item, patch);
+        state.saveState = 'dirty';
+      }),
+
+    setPricingBasis: (basis, convert) =>
+      set((state) => {
+        if (!state.body) return;
+        const previous = state.body.pricingBasis;
+        if (previous === basis) return;
+
+        if (convert) {
+          const rate = state.body.hourlyRateCents;
+          for (const items of itemLists(state.body)) {
+            for (const item of items) {
+              const przeliczona = convertItemUnits(current(item), previous, basis, rate);
+              // `null` = brak stawki, czyli brak kursu wymiany. Zostawiamy
+              // pozycję nietkniętą zamiast wpisywać zero.
+              if (!przeliczona) continue;
+
+              // Podmieniamy TYLKO liczby cenowe: `qty`, `frames`, `enabled`
+              // i pomieszczenie opisują zakres pracy, a nie jej wartość.
+              item.unitPriceCents = przeliczona.unitPriceCents;
+              item.pricing = przeliczona.pricing;
+            }
+          }
+        }
+
+        state.body.pricingBasis = basis;
         state.saveState = 'dirty';
       }),
 

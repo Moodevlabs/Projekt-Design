@@ -144,6 +144,26 @@ export const pl = {
     roomBlockLabel: (room: string, qty: number) => (qty > 1 ? `${room} ×${qty}` : room),
     roomBlockOff: 'pominięte',
     itemFramesLabel: 'Liczba kadrów',
+    pricingBasis: 'Sposób liczenia',
+    basisAmount: 'Kwotowo',
+    basisTime: 'Godzinowo',
+    hourlyRate: 'Stawka za godzinę',
+    hourlyRateMissing: 'Bez stawki wszystkie kwoty wychodzą zerowe.',
+    workload: 'Pracochłonność',
+    itemMinutesLabel: 'Minuty pracy',
+    convertTitle: 'Przeliczyć wartości?',
+    convertDescription: (rate: string) =>
+      `Wycena ma już pozycje. Przeliczyć ich liczby według stawki ${rate}, czy zostawić je bez zmian?`,
+    convertDescriptionNoRate:
+      'Wycena ma już pozycje, ale nie ma stawki godzinowej — nie ma po czym przeliczać. Liczby zostaną bez zmian i będą znaczyć minuty.',
+    convertYes: 'Przelicz',
+    convertNo: 'Zostaw liczby',
+    convertedToTime: 'Kwoty przeliczone na minuty.',
+    convertedToAmount: 'Minuty przeliczone na kwoty.',
+    libraryBasisMismatch:
+      'Ta pozycja jest liczona w innych jednostkach. Ustaw stawkę godzinową, żeby dało się ją przeliczyć.',
+    libraryConvertedToTime: 'Przeliczono z kwoty na minuty według stawki wyceny.',
+    libraryConvertedToAmount: 'Przeliczono z minut na kwotę według stawki wyceny.',
     insertPlaceholder: 'Wstaw pole automatyczne',
     placeholdersTitle: 'Pola podstawiane przy podglądzie',
     itemVariantLabel: 'Wariant pozycji',
@@ -569,6 +589,11 @@ export const pl = {
     pricesGross: 'brutto (VAT w cenie)',
     pricesIncludeHint:
       'Dotyczy nowych wycen. Wyceny już zapisane zachowują ustawienie sprzed zmiany.',
+    defaultPricingBasis: 'Nowe wyceny liczę',
+    hourlyRate: 'Stawka za godzinę (zł)',
+    hourlyRateEmpty: 'nie podano',
+    hourlyRateHint:
+      'Wycena bierze stawkę jako kopię w chwili utworzenia — późniejsza zmiana tutaj nie rusza ofert, które już poszły.',
     numberPattern: 'Wzorzec numeracji',
     numberPatternPreview: 'Następna wycena dostanie numer',
     numberPatternHint: 'Tokeny: {YYYY}, {YY}, {MM}, {DD}, {seq}, {seq:6}.',

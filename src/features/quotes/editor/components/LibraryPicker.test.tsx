@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { LibraryItem } from '@/data/repos/library.repo';
+import { AMOUNT_BASIS } from '@/domain/quote';
 import { pl } from '@/i18n/pl';
 
 const useLibraryItems = vi.hoisted(() => vi.fn());
@@ -65,7 +66,7 @@ describe('LibraryPicker', () => {
   it('wstawia wybraną pozycję jako pozycję wyceny powiązaną z biblioteką', async () => {
     const user = userEvent.setup();
     const onPickItem = vi.fn();
-    render(<LibraryPicker onPickItem={onPickItem} />);
+    render(<LibraryPicker onPickItem={onPickItem} pricing={AMOUNT_BASIS} />);
 
     await user.click(screen.getByRole('button', { name: pl.editor.fromLibrary }));
     await user.click(await screen.findByText('Blat kuchenny'));
@@ -86,7 +87,7 @@ describe('LibraryPicker', () => {
    */
   it('trigger jest sterowany przez Radiksa, a nie lokalnym stanem', async () => {
     const user = userEvent.setup();
-    render(<LibraryPicker onPickItem={vi.fn()} />);
+    render(<LibraryPicker onPickItem={vi.fn()} pricing={AMOUNT_BASIS} />);
 
     const trigger = screen.getByRole('button', { name: pl.editor.fromLibrary });
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
@@ -125,7 +126,7 @@ describe('LibraryPicker', () => {
         },
       ],
     });
-    render(<LibraryPicker onPickItem={vi.fn()} onPickGroup={onPickGroup} />);
+    render(<LibraryPicker onPickItem={vi.fn()} onPickGroup={onPickGroup} pricing={AMOUNT_BASIS} />);
 
     await user.click(screen.getByRole('button', { name: pl.editor.fromLibrary }));
     await user.click(screen.getByRole('button', { name: pl.editor.pickerGroupsTab }));
@@ -140,7 +141,7 @@ describe('LibraryPicker', () => {
 
   it('bez obsługi grup nie pokazuje zakładek', async () => {
     const user = userEvent.setup();
-    render(<LibraryPicker onPickItem={vi.fn()} />);
+    render(<LibraryPicker onPickItem={vi.fn()} pricing={AMOUNT_BASIS} />);
 
     await user.click(screen.getByRole('button', { name: pl.editor.fromLibrary }));
     expect(screen.queryByRole('button', { name: pl.editor.pickerGroupsTab })).not.toBeInTheDocument();

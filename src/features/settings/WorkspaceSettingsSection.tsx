@@ -113,6 +113,49 @@ export function WorkspaceSettingsSection({ canWrite }: { canWrite: boolean }) {
         <p className="text-ink-soft text-xs">{pl.settings.pricesIncludeHint}</p>
       </div>
 
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor="defaultPricingBasis">{pl.settings.defaultPricingBasis}</Label>
+          <Select
+            value={draft.defaultPricingBasis}
+            onValueChange={(value) =>
+              patch({ defaultPricingBasis: value === 'time' ? 'time' : 'amount' })
+            }
+            disabled={!canWrite}
+          >
+            <SelectTrigger id="defaultPricingBasis">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="amount">{pl.editor.basisAmount}</SelectItem>
+              <SelectItem value="time">{pl.editor.basisTime}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="hourlyRate">{pl.settings.hourlyRate}</Label>
+          <Input
+            id="hourlyRate"
+            type="number"
+            min={0}
+            step={10}
+            disabled={!canWrite}
+            value={draft.hourlyRateCents === null ? '' : draft.hourlyRateCents / 100}
+            placeholder={pl.settings.hourlyRateEmpty}
+            onChange={(event) => {
+              const zl = Number.parseFloat(event.target.value);
+              // Puste pole i zero znacza „nie podano" — zapisanie zera
+              // udawaloby darmowa prace.
+              patch({
+                hourlyRateCents: Number.isFinite(zl) && zl > 0 ? Math.round(zl * 100) : null,
+              });
+            }}
+          />
+        </div>
+      </div>
+      <p className="text-ink-soft text-xs">{pl.settings.hourlyRateHint}</p>
+
       <div className="space-y-2">
         <Label htmlFor="numberPattern">{pl.settings.numberPattern}</Label>
         <Input

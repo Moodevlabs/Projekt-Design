@@ -13,13 +13,25 @@ import { QuoteHeader } from './components/QuoteHeader';
 import { SectionBlock } from './components/SectionBlock';
 import { TotalsCard } from './components/TotalsCard';
 import { RoomsPanel } from './components/RoomsPanel';
+import { PricingBasisCard } from './components/PricingBasisCard';
 import { DiscountsSection } from './components/DiscountsSection';
 import { AddLink } from './components/AddLink';
 import { LibrarySheet } from './components/LibrarySheet';
 import { OverwriteTemplateDialog, SaveAsTemplateDialog } from './components/TemplateDialogs';
 import { useCreateQuote, useQuote } from '@/data/queries/useQuotes';
+import { useWorkspace } from '@/data/queries/useWorkspace';
+import { quoteBodyFromSettings } from '@/domain/quote';
 import { ConfirmDialog, EmptyState } from '@/components/shared';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import type { Item, Room } from '@/domain/quote';
 
@@ -28,6 +40,7 @@ const NO_ROOMS: Room[] = [];
 import { useSaveToLibrary } from './useSaveToLibrary';
 import { useVariantOptions } from './useVariantOptions';
 import { useMarkAsSentPrompt } from './useMarkAsSentPrompt';
+import { usePricingBasisChange } from './usePricingBasisChange';
 import { useTemplateActions } from './useTemplateActions';
 import { useExportPdf } from '@/pdf/useExportPdf';
 import { ReadOnlyBanner } from '@/features/billing/ReadOnlyBanner';
@@ -45,19 +58,24 @@ export function QuoteEditorPage() {
 function NewQuoteRedirect() {
   const navigate = useNavigate();
   const create = useCreateQuote();
+  const workspace = useWorkspace();
+  const settings = workspace.data?.settings;
   const started = useRef(false);
 
   useEffect(() => {
-    if (started.current) return;
+    // Czekamy na ustawienia: dokument zakłada się RAZ i bierze z nich kopię,
+    // więc utworzenie go przed ich wczytaniem zapisałoby domyślne wartości
+    // i nie dałoby się tego już naprawić inaczej niż ręcznie.
+    if (started.current || !settings) return;
     started.current = true;
 
     create.mutate(
-      {},
+      { body: quoteBodyFromSettings(settings) },
       {
         onSuccess: (quote) => void navigate(routes.quote(quote.id), { replace: true }),
       },
     );
-  }, [create, navigate]);
+  }, [create, navigate, settings]);
 
   if (create.isError) {
     return (
@@ -282,6 +300,7 @@ function EditorSurface({
   const canWrite = useEntitlement().canWrite;
   const variants = useVariantOptions();
   const markAsSent = useMarkAsSentPrompt();
+  const basisChange = usePricingBasisChange();
   /*
    * Dane do placeholderow (F4.2). Rozbite na kawalki, a nie cale `body`:
    * wiersze sa zmemoizowane, a `body` dostaje nowa referencje przy kazdym
@@ -355,6 +374,32 @@ function EditorSurface({
           cancelLabel={pl.editor.markAsSentDismiss}
           onConfirm={markAsSent.confirm}
         />
+
+        {/* Zmiana trybu w wycenie z pozycjami — liczby zmieniaja znaczenie. */}
+        <Dialog
+          open={basisChange.pending !== null}
+          onOpenChange={(open) => {
+            if (!open) basisChange.cancel();
+          }}
+        >
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>{pl.editor.convertTitle}</DialogTitle>
+              <DialogDescription>{basisChange.description}</DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="ghost" onClick={basisChange.cancel}>
+                {pl.common.cancel}
+              </Button>
+              <Button variant="outline" onClick={() => basisChange.resolve(false)}>
+                {pl.editor.convertNo}
+              </Button>
+              {basisChange.canConvert ? (
+                <Button onClick={() => basisChange.resolve(true)}>{pl.editor.convertYes}</Button>
+              ) : null}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         <LibrarySheet open={libraryOpen} onOpenChange={setLibraryOpen} />
 
@@ -457,6 +502,16 @@ function EditorSurface({
             <div className="flex flex-col gap-4 lg:sticky lg:top-6">
               {/* Nad podsumowaniem, bo to pomieszczenia decydują o kwotach
                   usług liczonych za pomieszczenie. */}
+              {/* Tylko w edycji — w podgladzie nie ma czego przelaczac, a stawka
+                  godzinowa to liczba wewnetrzna, nie tresc oferty. */}
+              {editing ? (
+                <PricingBasisCard
+                  body={body}
+                  onPatch={patchHeader}
+                  onBasisChange={basisChange.request}
+                />
+              ) : null}
+
               <RoomsPanel
                 rooms={body.rooms}
                 editing={editing}
