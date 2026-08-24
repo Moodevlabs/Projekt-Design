@@ -48,9 +48,9 @@ Ten plik jest źródłem prawdy o zasadach pracy. Szczegóły są w `docs/` — 
 9. **Migracje Supabase tylko przez pliki SQL** w `supabase/migrations/`. Nigdy nie zmieniaj schematu z dashboardu bez migracji. Każda tabela ma RLS.
 10. **Sekrety nigdy w repo.** Frontend widzi tylko `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_STRIPE_PUBLISHABLE_KEY`. Klucz Stripe secret i webhook secret — tylko w Edge Functions.
 11. **Tauri commands (Rust)** tylko dla: zapis pliku PDF na dysk, dialogi systemowe, deep link, updater, keychain (sesja). Logika biznesowa nie idzie do Rusta.
+12. **Commity:** Conventional Commits (`feat:`, `fix:`, `chore:`, `refactor:`, `db:`). Jeden task z `docs/06-TASKS.md` = jedna gałąź / jeden PR.
 13. **Pliki użytkownika = Supabase Storage (bucket `files`) + wiersz w tabeli `files`.** Metadane w Postgresie są jedynym źródłem listy; limit 2 GB/workspace i 25 MB/plik egzekwowany w bazie (trigger), nie tylko w UI. Każdy wygenerowany PDF może trafić do archiwum klienta jako plik `kind: 'generated'`.
 14. **Dane klienta w wycenie są snapshotem** (`body.client`) skopiowanym z `clients` w chwili utworzenia — edycja klienta nie zmienia wysłanej oferty. Odświeżenie jest jawną akcją użytkownika.
-12. **Commity:** Conventional Commits (`feat:`, `fix:`, `chore:`, `refactor:`, `db:`). Jeden task z `docs/06-TASKS.md` = jedna gałąź / jeden PR.
 
 ## Workflow pracy z zadaniami
 
