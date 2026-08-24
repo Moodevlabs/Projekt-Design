@@ -97,6 +97,9 @@ export const pl = {
       total_desc: 'Najwyższa kwota',
       number_asc: 'Numer rosnąco',
     },
+    filterByClient: 'Filtruj po kliencie',
+    allClients: 'Wszyscy klienci',
+    openClient: (name: string) => `Otwórz kartę klienta: ${name}`,
     archived: 'Zarchiwizowane',
     archiveConfirmTitle: 'Zarchiwizować wycenę?',
     archiveConfirmDescription:
@@ -104,6 +107,90 @@ export const pl = {
     duplicated: 'Utworzono kopię wyceny',
     archivedToast: 'Wycena zarchiwizowana',
     loadError: 'Nie udało się wczytać wycen.',
+  },
+  clients: {
+    title: 'Klienci',
+    new: 'Nowy klient',
+    first: 'Dodaj pierwszego klienta',
+    editTitle: 'Edytuj klienta',
+    newTitle: 'Nowy klient',
+    formHint: 'Wystarczy nazwa. Resztę uzupełnisz w każdej chwili.',
+
+    name: 'Nazwa',
+    namePlaceholder: 'Anna i Piotr Kowalscy',
+    phone: 'Telefon',
+    email: 'E-mail',
+    address: 'Adres inwestycji',
+    addressPlaceholder: 'ul. Wiosenna 12/3',
+    city: 'Miasto',
+    notes: 'Notatki',
+    notesPlaceholder: 'Ustalenia, preferencje, historia kontaktu…',
+    notesHint: 'Widoczne tylko dla Ciebie. Nie trafiają do wyceny ani do PDF.',
+
+    quotesCount: 'Wyceny',
+    acceptedValue: 'Zaakceptowane',
+    lastActivity: 'Ostatnia aktywność',
+    statusColumn: 'Status',
+    contact: 'Kontakt',
+    noContact: 'Brak danych kontaktowych',
+    noCity: '—',
+    noValue: '—',
+
+    status: {
+      active: 'Aktywny',
+      archived: 'Zarchiwizowany',
+    },
+    filters: {
+      active: 'Aktywni',
+      archived: 'Zarchiwizowani',
+      all: 'Wszyscy',
+    },
+    filterByStatus: 'Filtruj po statusie',
+    sort: {
+      label: 'Sortuj',
+      activity_desc: 'Ostatnia aktywność',
+      name_asc: 'Nazwa A–Z',
+      value_desc: 'Najwyższa wartość',
+      created_desc: 'Najnowsi',
+    },
+
+    searchPlaceholder: 'Szukaj po nazwie, e-mailu, telefonie lub mieście',
+    clearSearch: 'Wyczyść wyszukiwanie',
+    rowActions: 'Akcje klienta',
+    newQuote: 'Nowa wycena',
+
+    emptyTitle: 'Nie masz jeszcze żadnego klienta',
+    emptyDescription:
+      'Klient to teczka: dane kontaktowe, wyceny i notatki w jednym miejscu. Wycena wypełni się jego danymi.',
+    noResultsTitle: 'Brak wyników',
+    noResultsDescription: 'Zmień filtr albo wyczyść wyszukiwanie.',
+    loadError: 'Nie udało się wczytać klientów.',
+    notFoundTitle: 'Nie znaleziono klienta',
+    notFoundDescription: 'Klient mógł zostać usunięty albo nigdy nie istniał.',
+    backToList: 'Wszyscy klienci',
+
+    tabQuotes: 'Wyceny',
+    tabNotes: 'Notatki',
+    quotesEmptyTitle: 'Brak wycen dla tego klienta',
+    quotesEmptyDescription: 'Załóż pierwszą — dane inwestora wypełnią się same.',
+    notesEmpty: 'Brak notatek.',
+    notesSaved: 'Zapisano notatkę',
+
+    created: 'Dodano klienta',
+    saved: 'Zapisano zmiany',
+    archive: 'Archiwizuj',
+    restore: 'Przywróć',
+    archived: 'Klient zarchiwizowany',
+    restored: 'Klient przywrócony',
+    archiveConfirmTitle: 'Zarchiwizować klienta?',
+    archiveConfirmDescription:
+      'Zniknie z listy aktywnych, ale jego wyceny i dane zostają nietknięte. Możesz go przywrócić.',
+    deleteConfirmTitle: 'Usunąć klienta?',
+    deleteConfirmDescription: (quotes: number) =>
+      quotes > 0
+        ? `Klient trafi do kosza. Jego ${quotes === 1 ? 'wycena zostaje' : `wyceny (${quotes}) zostają`} nietknięte i dalej wskazują na tę kartę.`
+        : 'Klient trafi do kosza. Nie ma przypisanych wycen.',
+    deleted: 'Klient usunięty',
   },
   editor: {
     preview: 'Podgląd',
@@ -360,6 +447,23 @@ export const pl = {
     reload: 'Przeładuj',
 
     eyebrow: 'Oferta projektowa',
+
+    // Karta „Klient" w prawej kolumnie (T-53).
+    clientCard: 'Klient',
+    clientPick: 'Wybierz klienta',
+    clientSearch: 'Szukaj klienta…',
+    clientEmpty: 'Nie znaleziono klienta',
+    clientNone: 'Bez klienta',
+    clientNew: 'Nowy klient',
+    clientOpen: 'Otwórz kartę klienta',
+    clientRefresh: 'Odśwież dane klienta',
+    clientRefreshed: 'Przepisano dane z kartoteki',
+    clientOutdated: 'Dane w dokumencie różnią się od kartoteki.',
+    clientSnapshotHint:
+      'Wycena trzyma kopię danych z chwili utworzenia — edycja kartoteki nie zmienia wysłanej oferty.',
+    clientAttached: (name: string) => `Wycena przypięta do klienta: ${name}`,
+    clientDetached: 'Wycena odpięta od klienta',
+
     investor: 'Inwestor',
     date: 'Data',
     phone: 'Telefon',

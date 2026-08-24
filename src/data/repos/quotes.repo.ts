@@ -20,11 +20,13 @@ const log = createLogger('quotes.repo');
 
 /** Kolumny listy — bez `body`, zeby nie ciagnac calych dokumentow do tabeli. */
 const LIST_COLUMNS =
-  'id, workspace_id, number, title, status, total_net_cents, total_gross_cents, currency, client_name, city, internal_notes, doc_kind, valid_until, sent_at, accepted_at, created_at, updated_at';
+  'id, workspace_id, client_id, number, title, status, total_net_cents, total_gross_cents, currency, client_name, city, internal_notes, doc_kind, valid_until, sent_at, accepted_at, created_at, updated_at';
 
 export interface QuoteSummary {
   id: string;
   workspaceId: string;
+  /** Klient z kartoteki (T-53). `null` = wycena bez klienta — dopuszczalny stan. */
+  clientId: string | null;
   number: string | null;
   title: string;
   status: QuoteStatus;
@@ -46,7 +48,6 @@ export interface QuoteSummary {
 }
 
 export interface Quote extends QuoteSummary {
-  clientId: string | null;
   /** `null`, gdy `body` w bazie nie przechodzi walidacji — patrz `bodyError`. */
   body: QuoteBody | null;
   /** Opis problemu z walidacja. UI pokazuje „wycena uszkodzona" zamiast edytora. */
@@ -71,6 +72,8 @@ export interface QuoteFilters {
   status?: QuoteStatus | 'all';
   /** Filtr rejestru po miescie klienta (F7.1). Pusty = wszystkie. */
   city?: string;
+  /** Wyceny jednego klienta — zakladka „Wyceny" na karcie i filtr rejestru (T-53). */
+  clientId?: string;
   includeArchived?: boolean;
   sort?: QuoteSort;
 }
@@ -88,6 +91,7 @@ function mapSummary(row: Row): QuoteSummary {
   return {
     id: row.id as string,
     workspaceId: row.workspace_id as string,
+    clientId: (row.client_id as string | null) ?? null,
     number: (row.number as string | null) ?? null,
     title: row.title as string,
     status: QuoteStatusSchema.catch('draft').parse(row.status),
@@ -114,7 +118,6 @@ function mapQuote(row: Row): Quote {
 
   return {
     ...mapSummary(row),
-    clientId: (row.client_id as string | null) ?? null,
     body: parsed.ok ? parsed.body : null,
     bodyError: parsed.ok ? null : parsed.error,
     // Miekko, jak `pricing` w bibliotece: zepsuty harmonogram nie ma prawa
@@ -135,6 +138,7 @@ export async function listQuotes(filters: QuoteFilters): Promise<QuoteSummary[]>
   if (!filters.includeArchived) query = query.is('deleted_at', null);
   if (filters.status && filters.status !== 'all') query = query.eq('status', filters.status);
   if (filters.city) query = query.eq('city', filters.city);
+  if (filters.clientId) query = query.eq('client_id', filters.clientId);
 
   const term = filters.search?.trim();
   if (term) {
@@ -272,6 +276,10 @@ export async function createQuote(input: CreateQuoteInput): Promise<Quote> {
         total_gross_cents: totals.grossCents,
         currency: input.currency ?? 'PLN',
         client_name: body.client.name || null,
+        // Jak w `saveQuote`: kolumny listowe to kopia snapshotu. Bez tego
+        // wycena zalozona z karty klienta wpadalaby do rejestru bez miasta
+        // az do pierwszego autozapisu.
+        city: body.client.city || null,
       })
       .select('*'),
     'Utworzenie wyceny',
@@ -292,6 +300,12 @@ export interface SaveQuoteInput {
   documents?: QuoteDocuments | null;
   id: string;
   body: QuoteBody;
+  /**
+   * Klient z kartoteki (T-53). Pomin, zeby NIE ruszac przypisania; `null`
+   * odpina wycene od klienta. Snapshot danych i tak siedzi w `body.client`,
+   * wiec odpiecie nie kasuje tresci dokumentu.
+   */
+  clientId?: string | null;
   /** `updated_at` ostatnio widziany przez klienta — podstawa blokady optymistycznej. */
   lastSeenUpdatedAt: string;
   status?: QuoteStatus;
@@ -321,6 +335,10 @@ export async function saveQuote(input: SaveQuoteInput): Promise<Quote> {
         city: input.body.client.city || null,
         total_net_cents: totals.netCents,
         total_gross_cents: totals.grossCents,
+        // Ta sama zasada co przy harmonogramie: `undefined` = „nie ruszaj",
+        // `null` = „odepnij". Zapis wyceny bez tego rozroznienia odpinalby
+        // klienta przy kazdym autozapisie ze starego edytora.
+        ...(input.clientId !== undefined ? { client_id: input.clientId } : {}),
         ...(input.status ? { status: input.status } : {}),
         ...(input.number !== undefined ? { number: input.number } : {}),
         // `undefined` = „nie ruszaj harmonogramu"; `null` = „skasuj go".

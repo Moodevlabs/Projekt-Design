@@ -14,6 +14,15 @@ export const queryKeys = {
   brandKit: ['brand-kit'] as const,
   quotes: (filters?: unknown) => (filters ? (['quotes', filters] as const) : (['quotes'] as const)),
   quote: (id: string) => ['quotes', 'detail', id] as const,
+  clients: (filters?: unknown) =>
+    filters ? (['clients', filters] as const) : (['clients'] as const),
+  client: (id: string) => ['clients', 'detail', id] as const,
+  /**
+   * Osobno od `client`, bo to inne dane: rekord vs rekord z sumami z wycen.
+   * Wspólny klucz znaczyłby, że combobox w edytorze (któremu wystarczy nazwa
+   * i telefon) nadpisuje w cache to, co nagłówek karty właśnie policzył.
+   */
+  clientOverview: (id: string) => ['clients', 'detail', id, 'overview'] as const,
   roomTypes: (workspaceId?: string) =>
     workspaceId ? (['room-types', workspaceId] as const) : (['room-types'] as const),
   libraryItems: (filters?: unknown) =>

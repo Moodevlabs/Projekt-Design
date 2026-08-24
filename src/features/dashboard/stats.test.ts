@@ -8,6 +8,7 @@ function quote(partial: Partial<QuoteSummary> & { createdAt: string }): QuoteSum
   return {
     id: partial.id ?? Math.random().toString(36).slice(2),
     workspaceId: 'ws',
+    clientId: null,
     number: null,
     title: 'Wycena',
     status: partial.status ?? 'draft',

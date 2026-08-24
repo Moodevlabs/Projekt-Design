@@ -120,6 +120,37 @@ describe('useAutosave', () => {
     expect(saveQuote).toHaveBeenCalledTimes(1);
   });
 
+  it('zapisuje przypisanie do klienta razem z dokumentem', async () => {
+    vi.mocked(saveQuote).mockResolvedValue(makeQuote());
+    renderHook(() => useAutosave(), { wrapper });
+
+    // Klient siedzi w KOLUMNIE, nie w `body` — bez osobnego sledzenia
+    // przypiecie klienta o danych identycznych z naglowkiem nie ruszyloby
+    // dokumentu i autozapis nigdy by nie wystartowal.
+    act(() => useEditorStore.getState().setClient('c1'));
+
+    await act(async () => {
+      vi.advanceTimersByTime(AUTOSAVE_DELAY_MS);
+      await Promise.resolve();
+    });
+
+    expect(saveQuote).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(saveQuote).mock.calls[0]?.[0]).toMatchObject({ clientId: 'c1' });
+  });
+
+  it('zapis wyceny bez klienta wysyla `null`, a nie pomija pola', async () => {
+    vi.mocked(saveQuote).mockResolvedValue(makeQuote());
+    renderHook(() => useAutosave(), { wrapper });
+
+    act(() => useEditorStore.getState().updateItem(firstItemId(), { name: 'Nowa' }));
+    await act(async () => {
+      vi.advanceTimersByTime(AUTOSAVE_DELAY_MS);
+      await Promise.resolve();
+    });
+
+    expect(vi.mocked(saveQuote).mock.calls[0]?.[0]).toMatchObject({ clientId: null });
+  });
+
   it('przelaczenie trybu podgladu nie wywoluje zapisu', () => {
     renderHook(() => useAutosave(), { wrapper });
     act(() => useEditorStore.getState().setMode('preview'));

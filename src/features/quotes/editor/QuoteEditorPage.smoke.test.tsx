@@ -54,6 +54,15 @@ vi.mock('@/data/queries/useRoomTypes', () => ({
   useRoomTypes: () => ({ data: [] }),
 }));
 
+// Karta „Klient" w prawej kolumnie (T-53) pyta o kartotekę — bez tego mocka
+// test dymny ciągnąłby tu TanStack Query i Supabase.
+vi.mock('@/data/queries/useClients', () => ({
+  useClients: () => ({ data: [] }),
+  useClient: () => ({ data: null }),
+  useCreateClient: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useUpdateClient: () => ({ mutateAsync: vi.fn(), isPending: false }),
+}));
+
 vi.mock('@/data/queries/useTemplates', () => ({
   useTemplates: () => ({ data: [] }),
   useCreateTemplate: () => ({ mutateAsync: vi.fn(), isPending: false }),

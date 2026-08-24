@@ -29,6 +29,7 @@ function makeSummary(): QuoteSummary {
   return {
     id: QUOTE_ID,
     workspaceId: 'ws-1',
+    clientId: null,
     number: 'WYC/2026/08/0001',
     title: 'Wycena testowa',
     status: 'draft',

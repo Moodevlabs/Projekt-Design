@@ -23,6 +23,9 @@ const SORT_OPTIONS: QuoteSort[] = ['updated_desc', 'created_desc', 'total_desc',
 /** Wartość „wszystkie miasta" — Radix Select nie przyjmuje pustego stringa. */
 export const ALL_CITIES = '__all__';
 
+/** To samo dla filtra klienta (T-53). */
+export const ALL_CLIENTS = '__all__';
+
 function statusLabel(status: StatusFilter): string {
   return status === 'all' ? pl.common.all : pl.status[status];
 }
@@ -35,6 +38,9 @@ export interface QuotesToolbarProps {
   city: string;
   onCityChange: (next: string) => void;
   cities: string[];
+  clientId: string;
+  onClientChange: (next: string) => void;
+  clients: { id: string; name: string }[];
   sort: QuoteSort;
   onSortChange: (next: QuoteSort) => void;
   onExport: () => void;
@@ -49,6 +55,9 @@ export function QuotesToolbar({
   city,
   onCityChange,
   cities,
+  clientId,
+  onClientChange,
+  clients,
   sort,
   onSortChange,
   onExport,
@@ -92,6 +101,20 @@ export function QuotesToolbar({
             {cities.map((option) => (
               <SelectItem key={option} value={option}>
                 {option}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={clientId} onValueChange={onClientChange}>
+          <SelectTrigger className="w-48" aria-label={pl.quotes.filterByClient}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL_CLIENTS}>{pl.quotes.allClients}</SelectItem>
+            {clients.map((option) => (
+              <SelectItem key={option.id} value={option.id}>
+                {option.name}
               </SelectItem>
             ))}
           </SelectContent>

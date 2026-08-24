@@ -107,6 +107,9 @@ export type Database = {
       }
       clients: {
         Row: {
+          address: string | null
+          archived_at: string | null
+          city: string | null
           created_at: string
           deleted_at: string | null
           email: string | null
@@ -114,10 +117,14 @@ export type Database = {
           name: string
           notes: string | null
           phone: string | null
+          status: string
           updated_at: string
           workspace_id: string
         }
         Insert: {
+          address?: string | null
+          archived_at?: string | null
+          city?: string | null
           created_at?: string
           deleted_at?: string | null
           email?: string | null
@@ -125,10 +132,14 @@ export type Database = {
           name: string
           notes?: string | null
           phone?: string | null
+          status?: string
           updated_at?: string
           workspace_id: string
         }
         Update: {
+          address?: string | null
+          archived_at?: string | null
+          city?: string | null
           created_at?: string
           deleted_at?: string | null
           email?: string | null
@@ -136,6 +147,7 @@ export type Database = {
           name?: string
           notes?: string | null
           phone?: string | null
+          status?: string
           updated_at?: string
           workspace_id?: string
         }
@@ -488,6 +500,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "quotes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients_overview"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "quotes_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
@@ -663,7 +682,35 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      clients_overview: {
+        Row: {
+          accepted_net_cents: number | null
+          address: string | null
+          archived_at: string | null
+          city: string | null
+          created_at: string | null
+          deleted_at: string | null
+          email: string | null
+          id: string | null
+          last_activity_at: string | null
+          name: string | null
+          notes: string | null
+          phone: string | null
+          quotes_count: number | null
+          status: string | null
+          updated_at: string | null
+          workspace_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clients_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       is_member: { Args: { ws: string }; Returns: boolean }
@@ -672,6 +719,8 @@ export type Database = {
       next_quote_number: { Args: { ws: string }; Returns: string }
       quote_can_write: { Args: { q: string }; Returns: boolean }
       seed_room_types: { Args: { ws: string }; Returns: undefined }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
       storage_workspace_id: { Args: { object_name: string }; Returns: string }
       workspace_can_write: { Args: { ws: string }; Returns: boolean }
     }

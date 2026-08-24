@@ -91,6 +91,12 @@ export type EditorMode = 'edit' | 'preview';
 
 export interface EditorState {
   quoteId: string | null;
+  /**
+   * Klient z kartoteki (T-53). Kolumna, nie `body` — snapshot danych siedzi
+   * osobno w `body.client` i to on idzie do PDF. Tu jest wylacznie
+   * przypisanie: „ta wycena nalezy do tego klienta".
+   */
+  clientId: string | null;
   number: string | null;
   status: QuoteStatus;
   body: QuoteBody | null;
@@ -170,6 +176,18 @@ export interface EditorState {
   setNumber: (number: string) => void;
   patchHeader: (patch: Partial<QuoteBody>) => void;
   patchClient: (patch: Partial<QuoteBody['client']>) => void;
+  /**
+   * Przypina wycene do klienta i przepisuje jego dane do dokumentu.
+   *
+   * Jedna akcja, a nie dwie, bo to jedna decyzja uzytkownika: wybor klienta
+   * w comboboxie ma ustawic `client_id` ORAZ wypelnic naglowek. Rozbicie na
+   * `setClientId` + `patchClient` zostawialoby okno, w ktorym wycena jest juz
+   * czyjas, a w naglowku stoi cudze nazwisko.
+   *
+   * `snapshot` pomijamy przy samym odpieciu (`null`) — dokument zostaje
+   * z danymi, ktore w nim byly.
+   */
+  setClient: (clientId: string | null, snapshot?: Partial<QuoteBody['client']>) => void;
 
   // --- struktura ---
   addSection: () => void;
@@ -260,6 +278,7 @@ export interface EditorState {
 
 const INITIAL = {
   quoteId: null,
+  clientId: null as string | null,
   number: null,
   status: 'draft' as QuoteStatus,
   body: null,
@@ -334,6 +353,7 @@ export const useEditorStore = create<EditorState>()(
     load: (quote) =>
       set((state) => {
         state.quoteId = quote.id;
+        state.clientId = quote.clientId;
         state.number = quote.number;
         state.status = quote.status;
         state.body = quote.body;
@@ -525,6 +545,13 @@ export const useEditorStore = create<EditorState>()(
       set((state) => {
         if (!state.body) return;
         Object.assign(state.body.client, patch);
+        state.saveState = 'dirty';
+      }),
+
+    setClient: (clientId, snapshot) =>
+      set((state) => {
+        state.clientId = clientId;
+        if (snapshot && state.body) Object.assign(state.body.client, snapshot);
         state.saveState = 'dirty';
       }),
 

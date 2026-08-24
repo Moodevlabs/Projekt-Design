@@ -16,6 +16,7 @@ import { RoomsPanel } from './components/RoomsPanel';
 import { ScheduleTab } from './schedule/ScheduleTab';
 import { DocumentsTab } from './documents/DocumentsTab';
 import { PricingBasisCard } from './components/PricingBasisCard';
+import { ClientCard } from './components/ClientCard';
 import { DiscountsSection } from './components/DiscountsSection';
 import { AddLink } from './components/AddLink';
 import { LibrarySheet } from './components/LibrarySheet';
@@ -678,6 +679,11 @@ function EditorSurface({
                   onBasisChange={basisChange.request}
                 />
               ) : null}
+
+              {/* Karta klienta tylko w edycji: przypisanie do kartoteki jest
+                  informacja robocza, a nie trescia oferty. W podgladzie liczy
+                  sie to, co w naglowku dokumentu. */}
+              {editing ? <ClientCard /> : null}
 
               <RoomsPanel
                 rooms={body.rooms}

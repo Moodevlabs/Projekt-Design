@@ -53,7 +53,20 @@ export function QuotesTable({ rows, loading }: { rows: QuoteSummary[]; loading: 
                   </Link>
                 </TableCell>
                 <TableCell className="text-ink-soft max-w-0 truncate">
-                  {quote.clientName ?? pl.quotes.noClient}
+                  {/* Link tylko wtedy, gdy wycena jest przypieta do kartoteki.
+                      Sama nazwa w `client_name` to snapshot z dokumentu —
+                      klikalna prowadzilaby donikad. */}
+                  {quote.clientId ? (
+                    <Link
+                      to={routes.client(quote.clientId)}
+                      aria-label={pl.quotes.openClient(quote.clientName ?? pl.quotes.noClient)}
+                      className="underline-offset-4 hover:underline"
+                    >
+                      {quote.clientName ?? pl.quotes.noClient}
+                    </Link>
+                  ) : (
+                    (quote.clientName ?? pl.quotes.noClient)
+                  )}
                 </TableCell>
                 <TableCell className="text-ink-soft max-w-0 truncate">
                   {quote.city ?? pl.quotes.noCity}

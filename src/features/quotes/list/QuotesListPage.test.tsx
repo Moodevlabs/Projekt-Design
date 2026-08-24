@@ -16,6 +16,15 @@ const useQuoteRegisterExport = vi.hoisted(() =>
   })),
 );
 
+// Filtr klienta (T-53) pyta o kartotekę — lista wycen testuje się bez niej.
+const useClients = vi.hoisted(() => vi.fn(() => ({ data: [] as { id: string; name: string }[] })));
+
+vi.mock('@/data/queries/useClients', () => ({
+  useClients,
+  useDeleteClient: mutationStub,
+  useSetClientStatus: mutationStub,
+}));
+
 vi.mock('@/data/queries/useQuotes', () => ({
   useQuotesList,
   useQuoteCities,
@@ -31,6 +40,7 @@ function summary(partial: Partial<QuoteSummary> = {}): QuoteSummary {
   return {
     id: 'q1',
     workspaceId: 'ws',
+    clientId: null,
     number: 'WYC/2026/08/0001',
     title: 'Remont kuchni',
     status: 'draft',
@@ -91,6 +101,35 @@ describe('QuotesListPage', () => {
     expect(screen.getByRole('columnheader', { name: pl.quotes.statusColumn })).toBeInTheDocument();
     // 450 000 gr = 4500 zl netto.
     expect(screen.getByText(/4\s?500,00/)).toBeInTheDocument();
+  });
+
+  it('robi z klienta link do jego karty, gdy wycena jest przypieta', () => {
+    mockResult([summary({ clientId: 'c1', clientName: 'Anna Kowalska' })]);
+    renderPage();
+
+    expect(screen.getByRole('link', { name: pl.quotes.openClient('Anna Kowalska') })).toHaveAttribute(
+      'href',
+      '/klienci/c1',
+    );
+  });
+
+  it('nazwa z samego snapshotu NIE jest linkiem — prowadzilby donikad', () => {
+    mockResult([summary({ clientId: null, clientName: 'Anna Kowalska' })]);
+    renderPage();
+
+    expect(screen.getByText('Anna Kowalska')).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /Anna Kowalska/ })).not.toBeInTheDocument();
+  });
+
+  it('przekazuje filtr klienta do zapytania', async () => {
+    const user = userEvent.setup();
+    useClients.mockReturnValue({ data: [{ id: 'c1', name: 'Anna Kowalska' }] });
+    mockResult([summary()]);
+    renderPage();
+
+    await user.click(screen.getByRole('combobox', { name: pl.quotes.filterByClient }));
+    await user.click(screen.getByRole('option', { name: 'Anna Kowalska' }));
+    expect(lastFilters().clientId).toBe('c1');
   });
 
   it('przekazuje filtr statusu do zapytania, a nie filtruje w przegladarce', async () => {

@@ -8,6 +8,7 @@ function quote(partial: Partial<QuoteSummary>): QuoteSummary {
   return {
     id: 'q',
     workspaceId: 'ws',
+    clientId: null,
     number: null,
     title: 'Wycena',
     status: 'draft',

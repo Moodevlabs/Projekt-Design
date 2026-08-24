@@ -47,7 +47,8 @@ export function useAutosave() {
 
   const runSave = useCallback(async () => {
     const state = useEditorStore.getState();
-    const { quoteId, body, schedule, documents, number, lastSeenUpdatedAt, hasConflict } = state;
+    const { quoteId, clientId, body, schedule, documents, number, lastSeenUpdatedAt, hasConflict } =
+      state;
 
     if (!quoteId || !body || !lastSeenUpdatedAt) return;
     if (!canWriteRef.current) return;
@@ -63,6 +64,12 @@ export function useAutosave() {
         body,
         lastSeenUpdatedAt,
         ...(number ? { number } : {}),
+        /*
+         * Przypisanie do klienta jedzie z dokumentem, tak jak harmonogram.
+         * Wysylamy zawsze to, co jest w store — takze `null`, bo to wartosc
+         * wczytana z bazy, wiec zapisanie jej z powrotem niczego nie kasuje.
+         */
+        clientId,
         /*
          * Harmonogram jedzie RAZEM z dokumentem, a nie osobnym zapisem.
          * Zakladki „Wycena" i „Termin" pisza do tego samego wiersza, wiec dwa
@@ -154,8 +161,16 @@ export function useAutosave() {
   // `idle`), a immer gwarantuje, że przełączenie trybu podglądu nie rusza `body`.
   useEffect(() => {
     const unsubscribe = useEditorStore.subscribe((state, previous) => {
-      // Numer nie siedzi w `body`, wiec jego zmiane sledzimy osobno.
-      if (state.body === previous.body && state.number === previous.number) return;
+      // Numer i klient nie siedza w `body`, wiec ich zmiany sledzimy osobno.
+      // Bez `clientId` przypiecie klienta o danych identycznych z naglowkiem
+      // nie ruszyloby `body` i autozapis by nie wystartowal.
+      if (
+        state.body === previous.body &&
+        state.number === previous.number &&
+        state.clientId === previous.clientId
+      ) {
+        return;
+      }
       if (state.saveState !== 'dirty' || state.hasConflict) return;
 
       if (timer.current) clearTimeout(timer.current);

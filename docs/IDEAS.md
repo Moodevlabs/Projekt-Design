@@ -10,6 +10,7 @@
 - Kalkulator marży (koszt własny vs cena) widoczny tylko dla właściciela.
 - Przypomnienie o wygasającej ofercie (e-mail do klienta, faza 2+).
 - Integracja z fakturowaniem (Fakturownia/iFirma API) po akceptacji.
+- **Do poprawki:** `listQuotes` (`quotes.repo`) skleja `or(...)` bez cudzysłowów wokół wartości, więc szukanie wyceny po frazie z przecinkiem („Kowalski, Jan") wraca błędem `failed to parse logic tree`. W `clients.repo` naprawione w T-53 (`ilikeFilter`) — ten sam zabieg trzeba przenieść do wycen i biblioteki. Poza zakresem T-53, bo dotyka ścieżki, której to zadanie nie zmieniało.
 
 ## Świadome uproszczenia względem prototypu `projekt.html` (zanotowane przy T-08)
 - Prototyp miał w sekcji **dwie** listy luźnych pozycji: `items` (przed grupami) i `extra` (za grupami). Mamy jedną — przy imporcie `extra` scala się z `items` i traci pozycję na dole. Gdyby ktoś tego potrzebował, `extra` może zostać grupą bez nazwy.

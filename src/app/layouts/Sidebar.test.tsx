@@ -68,9 +68,21 @@ describe('Sidebar — aktywna pozycja', () => {
     expect(screen.queryByTestId('nav-active-marker')).not.toBeInTheDocument();
   });
 
-  it('oznacza pozycje z fazy 2 jako niedostępne', () => {
+  it('klienci sa dostepni — nie ma juz pozycji „wkrotce"', () => {
     renderAt('/');
-    expect(screen.getByRole('link', { name: /Klienci/ })).toHaveAttribute('aria-disabled', 'true');
+    const clients = screen.getByRole('link', { name: pl.nav.clients });
+    expect(clients).not.toHaveAttribute('aria-disabled', 'true');
+    expect(clients).toHaveAttribute('href', '/klienci');
+  });
+
+  it('zaznacza klientow takze na karcie klienta', () => {
+    // Pulapka z T-04 (§9.8): trasy zagniezdzone (`/klienci/:id`, pozniej
+    // `/klienci/:id/projekty/:pid`) musza podswietlac „Klienci".
+    renderAt('/klienci/abc');
+    expect(screen.getByRole('link', { name: pl.nav.clients })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
   });
 });
 

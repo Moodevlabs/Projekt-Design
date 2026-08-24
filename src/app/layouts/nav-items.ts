@@ -27,7 +27,7 @@ export const NAV_ROW_STEP = NAV_ROW_HEIGHT + NAV_ROW_GAP;
 export const NAV_ITEMS: NavItem[] = [
   { to: routes.dashboard, label: pl.nav.dashboard, icon: LayoutDashboard, end: true },
   { to: routes.quotes, label: pl.nav.quotes, icon: FileText },
-  { to: routes.clients, label: pl.nav.clients, icon: Users, disabled: true },
+  { to: routes.clients, label: pl.nav.clients, icon: Users },
   { to: routes.library, label: pl.nav.library, icon: Library },
   { to: routes.templates, label: pl.nav.templates, icon: LayoutTemplate },
   { to: routes.brand, label: pl.nav.brand, icon: Palette },

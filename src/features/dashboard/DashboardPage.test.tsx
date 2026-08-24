@@ -24,6 +24,7 @@ function quote(partial: Partial<QuoteSummary> = {}): QuoteSummary {
   return {
     id: 'q1',
     workspaceId: 'ws',
+    clientId: null,
     number: 'WYC/2026/08/0001',
     title: 'Remont kuchni',
     status: 'accepted',
