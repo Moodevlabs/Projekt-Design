@@ -13,6 +13,7 @@ import { QuotesListPage } from '@/features/quotes/list/QuotesListPage';
 import { QuoteEditorPage } from '@/features/quotes/editor/QuoteEditorPage';
 import { ClientsPage } from '@/features/clients/ClientsPage';
 import { ClientPage } from '@/features/clients/ClientPage';
+import { ProjectPage } from '@/features/projects/ProjectPage';
 import { LibraryPage } from '@/features/library/LibraryPage';
 import { TemplatesPage } from '@/features/templates/TemplatesPage';
 import { BrandSettingsPage } from '@/features/brand/BrandSettingsPage';
@@ -54,6 +55,11 @@ const routeTree = [
                 path: 'klienci/:id',
                 element: <ClientPage />,
                 handle: { title: pl.nav.clients },
+              },
+              {
+                path: 'klienci/:id/projekty/:projectId',
+                element: <ProjectPage />,
+                handle: { title: pl.projects.title },
               },
               { path: 'biblioteka', element: <LibraryPage />, handle: { title: pl.library.title } },
               { path: 'szablony', element: <TemplatesPage />, handle: { title: pl.templates.title } },

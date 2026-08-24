@@ -21,6 +21,17 @@ vi.mock('@/data/queries/useClients', () => ({
   useDeleteClient: mutationStub,
 }));
 
+vi.mock('@/data/queries/useProjects', () => ({
+  useProjects: () => ({ data: [], isLoading: false, isError: false }),
+  useProject: () => ({ data: null }),
+  useProjectOverview: () => ({ data: null }),
+  useCreateProject: asyncMutationStub,
+  useUpdateProject: asyncMutationStub,
+  useSetProjectStatus: mutationStub,
+  useDeleteProject: mutationStub,
+  useMoveQuoteToProject: mutationStub,
+}));
+
 vi.mock('@/data/queries/useQuotes', () => ({
   useQuotesList,
   useCreateQuote: asyncMutationStub,
@@ -51,6 +62,7 @@ function overview(partial: Partial<ClientOverview> = {}): ClientOverview {
     createdAt: '2026-08-01T10:00:00Z',
     updatedAt: '2026-08-01T10:00:00Z',
     quotesCount: 2,
+    projectsCount: 1,
     acceptedNetCents: 980_000,
     lastActivityAt: new Date().toISOString(),
     ...partial,
@@ -90,25 +102,26 @@ describe('ClientPage', () => {
     expect(screen.getByText(/9\s?800,00/)).toBeInTheDocument();
   });
 
-  it('ma zakladki Wyceny i Notatki', () => {
+  it('ma zakladki Projekty, Wyceny i Notatki', () => {
     renderPage(overview());
 
+    expect(screen.getByRole('tab', { name: pl.clients.tabProjects })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: pl.clients.tabQuotes })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: pl.clients.tabNotes })).toBeInTheDocument();
   });
 
   it('NIE renderuje zakladek, ktorych funkcji jeszcze nie ma', () => {
     // 05-UI §3a.8 (zasada z T-44): zakladka „wkrotce" jest gorsza niz jej brak.
-    // Projekty wchodza w T-54, Dokumenty i Pliki w T-55/T-56.
+    // Dokumenty i Pliki wchodza dopiero w T-55/T-56.
     renderPage(overview());
 
     const tabs = screen.getAllByRole('tab').map((tab) => tab.textContent);
-    expect(tabs).toEqual([pl.clients.tabQuotes, pl.clients.tabNotes]);
+    expect(tabs).toEqual([pl.clients.tabProjects, pl.clients.tabQuotes, pl.clients.tabNotes]);
   });
 
-  it('pokazuje pusty stan wycen z akcja', () => {
-    renderPage(overview({ quotesCount: 0 }));
-    expect(screen.getByText(pl.clients.quotesEmptyTitle)).toBeInTheDocument();
+  it('domyslna zakladka to Projekty — pusty stan z akcja', () => {
+    renderPage(overview({ projectsCount: 0 }));
+    expect(screen.getByText(pl.clients.projectsEmptyTitle)).toBeInTheDocument();
   });
 
   it('oznacza zarchiwizowanego klienta', () => {

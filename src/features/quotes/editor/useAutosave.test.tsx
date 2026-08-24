@@ -44,6 +44,7 @@ function makeQuote(): Quote {
     createdAt: '2026-08-01T10:00:00Z',
     updatedAt: '2026-08-01T10:00:00Z',
     clientId: null,
+    projectId: null,
     body: structuredClone(BODY),
     bodyError: null,
     schedule: null,
@@ -149,6 +150,33 @@ describe('useAutosave', () => {
     });
 
     expect(vi.mocked(saveQuote).mock.calls[0]?.[0]).toMatchObject({ clientId: null });
+  });
+
+  it('zapisuje przeniesienie do projektu razem z dokumentem', async () => {
+    vi.mocked(saveQuote).mockResolvedValue(makeQuote());
+    renderHook(() => useAutosave(), { wrapper });
+
+    act(() => useEditorStore.getState().setProject('p1'));
+
+    await act(async () => {
+      vi.advanceTimersByTime(AUTOSAVE_DELAY_MS);
+      await Promise.resolve();
+    });
+
+    expect(vi.mocked(saveQuote).mock.calls[0]?.[0]).toMatchObject({ projectId: 'p1' });
+  });
+
+  it('zmiana klienta wyjmuje wycene z dotychczasowej teczki', () => {
+    vi.mocked(saveQuote).mockResolvedValue(makeQuote());
+    renderHook(() => useAutosave(), { wrapper });
+
+    act(() => useEditorStore.getState().setClient('c1'));
+    act(() => useEditorStore.getState().setProject('p1'));
+    // Projekt nalezy do konkretnego klienta — zostawienie go po zmianie
+    // inwestora dawaloby oferte w cudzej teczce.
+    act(() => useEditorStore.getState().setClient('c2'));
+
+    expect(useEditorStore.getState().projectId).toBeNull();
   });
 
   it('przelaczenie trybu podgladu nie wywoluje zapisu', () => {

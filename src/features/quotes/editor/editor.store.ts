@@ -97,6 +97,8 @@ export interface EditorState {
    * przypisanie: „ta wycena nalezy do tego klienta".
    */
   clientId: string | null;
+  /** Projekt-teczka (T-54). Kolumna, nie `body` — jak `clientId`. */
+  projectId: string | null;
   number: string | null;
   status: QuoteStatus;
   body: QuoteBody | null;
@@ -188,6 +190,11 @@ export interface EditorState {
    * z danymi, ktore w nim byly.
    */
   setClient: (clientId: string | null, snapshot?: Partial<QuoteBody['client']>) => void;
+  /**
+   * Przenosi wycene do innego projektu (albo wyjmuje ja z teczki przez `null`).
+   * Nie rusza `body` — to zmiana szuflady, a nie tresci oferty.
+   */
+  setProject: (projectId: string | null) => void;
 
   // --- struktura ---
   addSection: () => void;
@@ -279,6 +286,7 @@ export interface EditorState {
 const INITIAL = {
   quoteId: null,
   clientId: null as string | null,
+  projectId: null as string | null,
   number: null,
   status: 'draft' as QuoteStatus,
   body: null,
@@ -354,6 +362,7 @@ export const useEditorStore = create<EditorState>()(
       set((state) => {
         state.quoteId = quote.id;
         state.clientId = quote.clientId;
+        state.projectId = quote.projectId;
         state.number = quote.number;
         state.status = quote.status;
         state.body = quote.body;
@@ -550,8 +559,23 @@ export const useEditorStore = create<EditorState>()(
 
     setClient: (clientId, snapshot) =>
       set((state) => {
+        /*
+         * Zmiana klienta WYJMUJE wycene z dotychczasowej teczki.
+         *
+         * Projekt nalezy do konkretnego klienta, wiec zostawienie starego
+         * `projectId` zrobiloby z wyceny oferte w cudzym projekcie — wiersz
+         * lamiacy hierarchie KLIENT → PROJEKT → WYCENA. Lepiej zostawic ja
+         * przy samym kliencie i pozwolic wybrac teczke swiadomie.
+         */
+        if (state.clientId !== clientId) state.projectId = null;
         state.clientId = clientId;
         if (snapshot && state.body) Object.assign(state.body.client, snapshot);
+        state.saveState = 'dirty';
+      }),
+
+    setProject: (projectId) =>
+      set((state) => {
+        state.projectId = projectId;
         state.saveState = 'dirty';
       }),
 

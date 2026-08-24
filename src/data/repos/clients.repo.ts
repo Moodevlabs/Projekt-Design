@@ -44,6 +44,7 @@ function mapOverview(row: Row): ClientOverview {
   return {
     ...mapClient(row),
     quotesCount: Number(row.quotes_count ?? 0),
+    projectsCount: Number(row.projects_count ?? 0),
     acceptedNetCents: Number(row.accepted_net_cents ?? 0),
     lastActivityAt: (row.last_activity_at as string) ?? (row.updated_at as string),
   };

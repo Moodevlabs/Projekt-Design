@@ -20,13 +20,15 @@ const log = createLogger('quotes.repo');
 
 /** Kolumny listy — bez `body`, zeby nie ciagnac calych dokumentow do tabeli. */
 const LIST_COLUMNS =
-  'id, workspace_id, client_id, number, title, status, total_net_cents, total_gross_cents, currency, client_name, city, internal_notes, doc_kind, valid_until, sent_at, accepted_at, created_at, updated_at';
+  'id, workspace_id, client_id, project_id, number, title, status, total_net_cents, total_gross_cents, currency, client_name, city, internal_notes, doc_kind, valid_until, sent_at, accepted_at, created_at, updated_at';
 
 export interface QuoteSummary {
   id: string;
   workspaceId: string;
   /** Klient z kartoteki (T-53). `null` = wycena bez klienta — dopuszczalny stan. */
   clientId: string | null;
+  /** Projekt-teczka (T-54). `null` = „szybka wycena" — tez dopuszczalny stan. */
+  projectId: string | null;
   number: string | null;
   title: string;
   status: QuoteStatus;
@@ -74,6 +76,8 @@ export interface QuoteFilters {
   city?: string;
   /** Wyceny jednego klienta — zakladka „Wyceny" na karcie i filtr rejestru (T-53). */
   clientId?: string;
+  /** Wyceny jednego projektu — zakladka „Wyceny" w teczce (T-54). */
+  projectId?: string;
   includeArchived?: boolean;
   sort?: QuoteSort;
 }
@@ -92,6 +96,7 @@ function mapSummary(row: Row): QuoteSummary {
     id: row.id as string,
     workspaceId: row.workspace_id as string,
     clientId: (row.client_id as string | null) ?? null,
+    projectId: (row.project_id as string | null) ?? null,
     number: (row.number as string | null) ?? null,
     title: row.title as string,
     status: QuoteStatusSchema.catch('draft').parse(row.status),
@@ -139,6 +144,7 @@ export async function listQuotes(filters: QuoteFilters): Promise<QuoteSummary[]>
   if (filters.status && filters.status !== 'all') query = query.eq('status', filters.status);
   if (filters.city) query = query.eq('city', filters.city);
   if (filters.clientId) query = query.eq('client_id', filters.clientId);
+  if (filters.projectId) query = query.eq('project_id', filters.projectId);
 
   const term = filters.search?.trim();
   if (term) {
@@ -254,6 +260,7 @@ export interface CreateQuoteInput {
   body?: QuoteBody;
   title?: string;
   clientId?: string | null;
+  projectId?: string | null;
   currency?: string;
 }
 
@@ -268,6 +275,7 @@ export async function createQuote(input: CreateQuoteInput): Promise<Quote> {
       .insert({
         workspace_id: input.workspaceId,
         client_id: input.clientId ?? null,
+        project_id: input.projectId ?? null,
         number,
         title: body.title,
         status: 'draft',
@@ -306,6 +314,8 @@ export interface SaveQuoteInput {
    * wiec odpiecie nie kasuje tresci dokumentu.
    */
   clientId?: string | null;
+  /** Projekt-teczka (T-54). Ta sama zasada co `clientId`. */
+  projectId?: string | null;
   /** `updated_at` ostatnio widziany przez klienta — podstawa blokady optymistycznej. */
   lastSeenUpdatedAt: string;
   status?: QuoteStatus;
@@ -339,6 +349,7 @@ export async function saveQuote(input: SaveQuoteInput): Promise<Quote> {
         // `null` = „odepnij". Zapis wyceny bez tego rozroznienia odpinalby
         // klienta przy kazdym autozapisie ze starego edytora.
         ...(input.clientId !== undefined ? { client_id: input.clientId } : {}),
+        ...(input.projectId !== undefined ? { project_id: input.projectId } : {}),
         ...(input.status ? { status: input.status } : {}),
         ...(input.number !== undefined ? { number: input.number } : {}),
         // `undefined` = „nie ruszaj harmonogramu"; `null` = „skasuj go".
@@ -411,6 +422,7 @@ export async function duplicateQuote(id: string): Promise<Quote> {
     workspaceId: source.workspaceId,
     body,
     clientId: source.clientId,
+    projectId: source.projectId,
     currency: source.currency,
   });
 }

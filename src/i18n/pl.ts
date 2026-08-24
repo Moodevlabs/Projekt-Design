@@ -98,6 +98,9 @@ export const pl = {
       number_asc: 'Numer rosnąco',
     },
     filterByClient: 'Filtruj po kliencie',
+    moveToProject: 'Przenieś do projektu',
+    markAs: 'Oznacz jako',
+    statusChanged: 'Status wyceny zmieniony',
     allClients: 'Wszyscy klienci',
     openClient: (name: string) => `Otwórz kartę klienta: ${name}`,
     archived: 'Zarchiwizowane',
@@ -191,6 +194,99 @@ export const pl = {
         ? `Klient trafi do kosza. Jego ${quotes === 1 ? 'wycena zostaje' : `wyceny (${quotes}) zostają`} nietknięte i dalej wskazują na tę kartę.`
         : 'Klient trafi do kosza. Nie ma przypisanych wycen.',
     deleted: 'Klient usunięty',
+
+    // Zakładka „Projekty" na karcie klienta (T-54).
+    tabProjects: 'Projekty',
+    projectsEmptyTitle: 'Brak projektów',
+    projectsEmptyDescription:
+      'Projekt to teczka jednej inwestycji: adres, metraż, wyceny i notatki w jednym miejscu.',
+  },
+  projects: {
+    title: 'Projekty',
+    new: 'Nowy projekt',
+    first: 'Dodaj pierwszy projekt',
+    editTitle: 'Edytuj projekt',
+    newTitle: 'Nowy projekt',
+    formHint: 'Adres podpowiadamy z kartoteki klienta — możesz go nadpisać.',
+
+    name: 'Nazwa projektu',
+    namePlaceholder: 'Dom 164 m² — Konstancin',
+    address: 'Adres inwestycji',
+    city: 'Miasto',
+    area: 'Metraż (m²)',
+    areaPlaceholder: '164,5',
+    kind: 'Typ',
+    kindNone: 'Nie określono',
+    kinds: {
+      apartment: 'Mieszkanie',
+      house: 'Dom',
+      commercial: 'Lokal użytkowy',
+      other: 'Inny',
+    },
+    statusLabel: 'Status',
+    status: {
+      lead: 'Zapytanie',
+      offer: 'Oferta',
+      in_progress: 'W realizacji',
+      done: 'Zakończony',
+      canceled: 'Anulowany',
+    },
+    startDate: 'Data startu',
+    notes: 'Notatki',
+    notesPlaceholder: 'Ustalenia, zakres, terminy…',
+    notesHint: 'Widoczne tylko dla Ciebie. Nie trafiają do wyceny ani do PDF.',
+    notesSaved: 'Zapisano notatkę',
+
+    client: 'Klient',
+    quotesCount: 'Wyceny',
+    acceptedValue: 'Zaakceptowane',
+    lastActivity: 'Ostatnia aktywność',
+    noArea: '—',
+    noValue: '—',
+
+    rowActions: 'Akcje projektu',
+    newQuote: 'Nowa wycena',
+    open: 'Otwórz projekt',
+
+    created: 'Dodano projekt',
+    saved: 'Zapisano zmiany',
+    deleted: 'Projekt usunięty',
+    deleteConfirmTitle: 'Usunąć projekt?',
+    deleteConfirmDescription: (quotes: number) =>
+      quotes > 0
+        ? `Projekt trafi do kosza. Jego ${quotes === 1 ? 'wycena zostaje' : `wyceny (${quotes}) zostają`} nietknięte — dalej znajdziesz je u klienta.`
+        : 'Projekt trafi do kosza. Nie ma przypisanych wycen.',
+
+    notFoundTitle: 'Nie znaleziono projektu',
+    notFoundDescription: 'Projekt mógł zostać usunięty albo nigdy nie istniał.',
+    loadError: 'Nie udało się wczytać projektów.',
+
+    tabQuotes: 'Wyceny',
+    tabNotes: 'Notatki',
+    quotesEmptyTitle: 'Brak wycen w tym projekcie',
+    quotesEmptyDescription: 'Załóż pierwszą — dane inwestora wypełnią się same.',
+
+    // Przenoszenie wyceny między teczkami.
+    moveTitle: 'Przenieś do projektu',
+    moveDescription: 'Zmieni się wyłącznie przypisanie. Treść oferty zostaje bez zmian.',
+    moveAttachesClient:
+      'Ta wycena nie ma jeszcze klienta — razem z projektem zostanie przypisana do jego właściciela.',
+    moveNone: 'Bez projektu',
+    moveEmpty: 'Ten klient nie ma jeszcze żadnego projektu.',
+    moved: (name: string) => `Przeniesiono do projektu: ${name}`,
+    movedOut: 'Wycena wyjęta z projektu',
+
+    // Kopiowanie pomieszczeń przy nowej wycenie w projekcie.
+    copyRoomsTitle: 'Skopiować pomieszczenia?',
+    copyRoomsDescription: (count: number, from: string) =>
+      `Ostatnia wycena w tym projekcie („${from}") ma ${count === 1 ? '1 pomieszczenie' : `${count} pomieszczeń`}. Przenieść je do nowej?`,
+    copyRoomsConfirm: 'Skopiuj',
+    copyRoomsSkip: 'Zacznij pusto',
+
+    // Propozycja przestawienia statusu po akceptacji wyceny.
+    suggestInProgress: (name: string) => `Wycena zaakceptowana. Przestawić „${name}" na realizację?`,
+    suggestInProgressAction: 'Przestaw',
+    statusChanged: 'Status projektu zmieniony',
   },
   editor: {
     preview: 'Podgląd',
@@ -463,6 +559,12 @@ export const pl = {
       'Wycena trzyma kopię danych z chwili utworzenia — edycja kartoteki nie zmienia wysłanej oferty.',
     clientAttached: (name: string) => `Wycena przypięta do klienta: ${name}`,
     clientDetached: 'Wycena odpięta od klienta',
+    projectLabel: 'Projekt',
+    projectPick: 'Wybierz projekt',
+    projectNone: 'Bez projektu',
+    projectNew: 'Nowy projekt',
+    projectNeedsClient: 'Najpierw wybierz klienta — projekty należą do niego.',
+    projectOpen: 'Otwórz projekt',
 
     investor: 'Inwestor',
     date: 'Data',

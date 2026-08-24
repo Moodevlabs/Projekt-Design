@@ -25,6 +25,13 @@ vi.mock('@/data/queries/useClients', () => ({
   useSetClientStatus: mutationStub,
 }));
 
+// Menu wiersza (T-54) umie przeniesc wycene do projektu i zmienic status.
+vi.mock('@/data/queries/useProjects', () => ({
+  useProjects: () => ({ data: [], isLoading: false, isError: false }),
+  useSetProjectStatus: mutationStub,
+  useMoveQuoteToProject: mutationStub,
+}));
+
 vi.mock('@/data/queries/useQuotes', () => ({
   useQuotesList,
   useQuoteCities,
@@ -32,6 +39,7 @@ vi.mock('@/data/queries/useQuotes', () => ({
   useSetQuoteRegisterFields: mutationStub,
   useDuplicateQuote: mutationStub,
   useArchiveQuote: mutationStub,
+  useSetQuoteStatus: mutationStub,
 }));
 
 const { QuotesListPage } = await import('./QuotesListPage');
@@ -41,6 +49,7 @@ function summary(partial: Partial<QuoteSummary> = {}): QuoteSummary {
     id: 'q1',
     workspaceId: 'ws',
     clientId: null,
+    projectId: null,
     number: 'WYC/2026/08/0001',
     title: 'Remont kuchni',
     status: 'draft',

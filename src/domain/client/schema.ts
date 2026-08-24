@@ -44,6 +44,7 @@ export type Client = z.infer<typeof ClientSchema>;
 /** Klient z sumami liczonymi w bazie (widok `clients_overview`). */
 export const ClientOverviewSchema = ClientSchema.extend({
   quotesCount: z.number().int().nonnegative().default(0),
+  projectsCount: z.number().int().nonnegative().default(0),
   acceptedNetCents: z.number().int().nonnegative().default(0),
   lastActivityAt: z.string(),
 });

@@ -105,14 +105,45 @@ update public.brand_kits b
 -- -----------------------------------------------------------------------------
 -- 3. Klienci
 -- -----------------------------------------------------------------------------
-insert into public.clients (id, workspace_id, name, phone, email, notes)
-select v.id, w.id, v.name, v.phone, v.email, v.notes
+insert into public.clients (id, workspace_id, name, phone, email, notes, address, city, status)
+select v.id, w.id, v.name, v.phone, v.email, v.notes, v.address, v.city, v.status
   from public.workspaces w
  cross join (values
-   ('1f000000-0000-4000-8000-000000000001'::uuid, 'Marta i Piotr Kowalscy', '+48 601 111 222', 'kowalscy@example.com', 'Mieszkanie 62 m2, Mokotów.'),
-   ('1f000000-0000-4000-8000-000000000002'::uuid, 'Anna Nowak',             '+48 602 333 444', 'anna.nowak@example.com', 'Remont kuchni i łazienki.'),
-   ('1f000000-0000-4000-8000-000000000003'::uuid, 'Tomasz Wiśniewski',      '+48 603 555 666', 't.wisniewski@example.com', 'Biuro 45 m2, do omówienia zakres.')
- ) as v(id, name, phone, email, notes)
+   ('1f000000-0000-4000-8000-000000000001'::uuid, 'Marta i Piotr Kowalscy', '+48 601 111 222', 'kowalscy@example.com', 'Mieszkanie 62 m2, Mokotów.', 'ul. Wiktorska 41/7', 'Warszawa', 'active'),
+   ('1f000000-0000-4000-8000-000000000002'::uuid, 'Anna Nowak',             '+48 602 333 444', 'anna.nowak@example.com', 'Remont kuchni i łazienki.', 'ul. Grunwaldzka 12', 'Poznań', 'active'),
+   -- Zarchiwizowany, żeby pigułka „Zarchiwizowani" nie była pusta w demo.
+   ('1f000000-0000-4000-8000-000000000003'::uuid, 'Tomasz Wiśniewski',      '+48 603 555 666', 't.wisniewski@example.com', 'Biuro 45 m2, do omówienia zakres.', 'al. Grunwaldzka 472', 'Gdańsk', 'archived')
+ ) as v(id, name, phone, email, notes, address, city, status)
+ where w.owner_id = '11111111-1111-4111-8111-111111111111'
+on conflict (id) do nothing;
+
+update public.clients
+   set archived_at = now() - interval '30 days'
+ where id = '1f000000-0000-4000-8000-000000000003'
+   and archived_at is null;
+
+-- -----------------------------------------------------------------------------
+-- 3a. Projekty (T-54) — 3 teczki u 2 klientów.
+--
+-- Kowalscy mają DWA projekty: to jest sedno kryterium odbioru („klient z dwoma
+-- projektami widzi dwie osobne listy wycen"). „Dom 164 m2" nie ma jeszcze
+-- żadnej wyceny — pusty projekt też musi się dobrze pokazywać.
+-- -----------------------------------------------------------------------------
+insert into public.projects
+  (id, workspace_id, client_id, name, address, city, area_m2, kind, status, notes, sort_order)
+select v.id, w.id, v.client_id, v.name, v.address, v.city, v.area_m2, v.kind, v.status, v.notes, v.sort_order
+  from public.workspaces w
+ cross join (values
+   ('1e000000-0000-4000-8000-000000000001'::uuid, '1f000000-0000-4000-8000-000000000001'::uuid,
+    'Mieszkanie 62 m2 — Mokotów', 'ul. Wiktorska 41/7', 'Warszawa', 62.0, 'apartment', 'in_progress',
+    'Realizacja ruszyła w sierpniu. Nadzór co dwa tygodnie.', 0),
+   ('1e000000-0000-4000-8000-000000000002'::uuid, '1f000000-0000-4000-8000-000000000001'::uuid,
+    'Dom 164 m2 — Konstancin', 'ul. Sosnowa 8', 'Konstancin-Jeziorna', 164.0, 'house', 'lead',
+    'Drugi projekt tych samych klientów. Czekamy na rzuty od architekta.', 1),
+   ('1e000000-0000-4000-8000-000000000003'::uuid, '1f000000-0000-4000-8000-000000000002'::uuid,
+    'Kuchnia i łazienka', 'ul. Grunwaldzka 12', 'Poznań', 28.5, 'apartment', 'offer',
+    'Zakres do potwierdzenia po wizji lokalnej.', 0)
+ ) as v(id, client_id, name, address, city, area_m2, kind, status, notes, sort_order)
  where w.owner_id = '11111111-1111-4111-8111-111111111111'
 on conflict (id) do nothing;
 
@@ -476,3 +507,21 @@ select
 from public.workspaces w
 where w.owner_id = '11111111-1111-4111-8111-111111111111'
 on conflict (id) do nothing;
+
+-- -----------------------------------------------------------------------------
+-- 8. Wpięcie wycen w projekty (T-54).
+--
+-- Osobnym UPDATE-em, a nie w insertach wyżej: projekty powstają po klientach,
+-- a wyceny po projektach — kolejność w jednym pliku i tak by to rozdzieliła,
+-- a tak widać wprost, która oferta należy do której teczki.
+--
+-- Wycena Wiśniewskiego zostaje BEZ projektu — „szybka wycena" to normalny
+-- stan (koncepcja §2 reguła 2) i demo ma go pokazywać.
+-- -----------------------------------------------------------------------------
+update public.quotes
+   set project_id = '1e000000-0000-4000-8000-000000000001'
+ where id = '1d000000-0000-4000-8000-000000000001';
+
+update public.quotes
+   set project_id = '1e000000-0000-4000-8000-000000000003'
+ where id = '1d000000-0000-4000-8000-000000000002';

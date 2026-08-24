@@ -13,6 +13,10 @@ const asyncMutationStub = vi.hoisted(() => () => ({
   isPending: false,
 }));
 
+vi.mock('@/data/queries/useProjects', () => ({
+  useProjects: () => ({ data: [], isLoading: false, isError: false }),
+}));
+
 vi.mock('@/data/queries/useClients', () => ({
   useClients,
   useClient,
@@ -37,6 +41,7 @@ const KOWALSCY: ClientOverview = {
   createdAt: '2026-08-01T10:00:00Z',
   updatedAt: '2026-08-01T10:00:00Z',
   quotesCount: 0,
+  projectsCount: 0,
   acceptedNetCents: 0,
   lastActivityAt: '2026-08-01T10:00:00Z',
 };
@@ -46,6 +51,7 @@ function loadQuote(clientId: string | null = null) {
     id: 'q1',
     workspaceId: 'ws',
     clientId,
+    projectId: null,
     number: 'WYC/2026/08/0001',
     title: 'Wycena',
     status: 'draft',

@@ -6,6 +6,7 @@ export const routes = {
   quoteNew: '/wyceny/nowa',
   clients: '/klienci',
   client: (id: string) => `/klienci/${id}`,
+  project: (clientId: string, projectId: string) => `/klienci/${clientId}/projekty/${projectId}`,
   library: '/biblioteka',
   templates: '/szablony',
   brand: '/branding',

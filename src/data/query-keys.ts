@@ -23,6 +23,10 @@ export const queryKeys = {
    * i telefon) nadpisuje w cache to, co nagłówek karty właśnie policzył.
    */
   clientOverview: (id: string) => ['clients', 'detail', id, 'overview'] as const,
+  projects: (filters?: unknown) =>
+    filters ? (['projects', filters] as const) : (['projects'] as const),
+  project: (id: string) => ['projects', 'detail', id] as const,
+  projectOverview: (id: string) => ['projects', 'detail', id, 'overview'] as const,
   roomTypes: (workspaceId?: string) =>
     workspaceId ? (['room-types', workspaceId] as const) : (['room-types'] as const),
   libraryItems: (filters?: unknown) =>

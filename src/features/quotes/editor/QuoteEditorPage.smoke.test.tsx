@@ -63,6 +63,10 @@ vi.mock('@/data/queries/useClients', () => ({
   useUpdateClient: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }));
 
+vi.mock('@/data/queries/useProjects', () => ({
+  useProjects: () => ({ data: [], isLoading: false, isError: false }),
+}));
+
 vi.mock('@/data/queries/useTemplates', () => ({
   useTemplates: () => ({ data: [] }),
   useCreateTemplate: () => ({ mutateAsync: vi.fn(), isPending: false }),
@@ -103,6 +107,7 @@ function quote(): Quote {
     createdAt: '2026-08-01T10:00:00Z',
     updatedAt: '2026-08-01T10:00:00Z',
     clientId: null,
+    projectId: null,
     body: newQuoteBody({
       title: 'Wycena testowa',
       sections: [newSection({ title: 'Sekcja', items: [newItem({ name: 'Pozycja' })] })],

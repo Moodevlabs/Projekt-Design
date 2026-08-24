@@ -89,7 +89,12 @@ export function QuotesTable({ rows, loading }: { rows: QuoteSummary[]; loading: 
                   />
                 </TableCell>
                 <TableCell>
-                  <QuoteRowMenu quoteId={quote.id} title={quote.title} />
+                  <QuoteRowMenu
+                    quoteId={quote.id}
+                    title={quote.title}
+                    clientId={quote.clientId}
+                    projectId={quote.projectId}
+                  />
                 </TableCell>
               </TableRow>
             ))

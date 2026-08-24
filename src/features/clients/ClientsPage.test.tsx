@@ -46,6 +46,7 @@ function overview(partial: Partial<ClientOverview> = {}): ClientOverview {
     createdAt: '2026-08-01T10:00:00Z',
     updatedAt: '2026-08-01T10:00:00Z',
     quotesCount: 3,
+    projectsCount: 2,
     acceptedNetCents: 1_250_000,
     lastActivityAt: new Date().toISOString(),
     ...partial,

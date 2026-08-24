@@ -69,6 +69,7 @@ function quoteWithLinkedItem(): Quote {
     createdAt: '2026-08-01T10:00:00Z',
     updatedAt: '2026-08-01T10:00:00Z',
     clientId: null,
+    projectId: null,
     body,
     bodyError: null,
     schedule: null,

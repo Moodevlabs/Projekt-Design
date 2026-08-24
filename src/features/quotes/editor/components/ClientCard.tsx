@@ -14,12 +14,23 @@ import {
 } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ClientFormDialog } from '@/features/clients/ClientFormDialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useProjects } from '@/data/queries/useProjects';
 import { useEditorStore } from '../editor.store';
 import { useClient, useClients } from '@/data/queries/useClients';
 import { clientSnapshot, clientSnapshotDiffers, type Client } from '@/domain/client/schema';
 import { routes } from '@/app/routes';
 import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
+
+/** Radix Select nie przyjmuje pustego stringa jako wartości pozycji. */
+const NO_PROJECT = '__none__';
 
 /**
  * Karta „Klient" w prawej kolumnie edytora (05-UI §3, T-53).
@@ -31,13 +42,15 @@ import { cn } from '@/lib/utils';
  * dokumentu jest decyzją, a nie efektem ubocznym poprawki telefonu.
  */
 export function ClientCard() {
-  const { clientId, snapshot } = useEditorStore(
+  const { clientId, projectId, snapshot } = useEditorStore(
     useShallow((state) => ({
       clientId: state.clientId,
+      projectId: state.projectId,
       snapshot: state.body?.client ?? null,
     })),
   );
   const setClient = useEditorStore((state) => state.setClient);
+  const setProject = useEditorStore((state) => state.setProject);
   const patchClient = useEditorStore((state) => state.patchClient);
 
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -48,6 +61,9 @@ export function ClientCard() {
   // też są: stary klient wraca po latach i wtedy chodzi o TĘ SAMĄ teczkę.
   const clients = useClients({ search: search.trim() || undefined, status: 'all', sort: 'name_asc' });
   const attached = useClient(clientId);
+  // Projekty należą do klienta, więc bez klienta nie ma czego pokazywać —
+  // `enabled` w hooku pilnuje, żeby zapytanie w ogóle nie poleciało.
+  const projects = useProjects(clientId ? { clientId } : {});
 
   if (!snapshot) return null;
 
@@ -156,6 +172,43 @@ export function ClientCard() {
             </Command>
           </PopoverContent>
         </Popover>
+
+        {/* Projekt-teczka (T-54). Bez klienta nie ma go z czego wybrać —
+            mówimy o tym wprost zamiast pokazywać pustą listę. */}
+        <div className="space-y-1.5">
+          <p className="text-ink-soft text-xs font-medium">{pl.editor.projectLabel}</p>
+          {clientId ? (
+            <div className="flex items-center gap-2">
+              <Select
+                value={projectId ?? NO_PROJECT}
+                onValueChange={(next) => setProject(next === NO_PROJECT ? null : next)}
+              >
+                <SelectTrigger className="h-9 flex-1" aria-label={pl.editor.projectPick}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NO_PROJECT}>{pl.editor.projectNone}</SelectItem>
+                  {(projects.data ?? []).map((project) => (
+                    <SelectItem key={project.id} value={project.id}>
+                      {project.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {projectId ? (
+                <Link
+                  to={routes.project(clientId, projectId)}
+                  aria-label={pl.editor.projectOpen}
+                  className="text-ink-soft hover:text-ink"
+                >
+                  <ExternalLink className="size-4" aria-hidden />
+                </Link>
+              ) : null}
+            </div>
+          ) : (
+            <p className="text-ink-soft text-xs">{pl.editor.projectNeedsClient}</p>
+          )}
+        </div>
 
         {outdated ? (
           <div className="space-y-2">

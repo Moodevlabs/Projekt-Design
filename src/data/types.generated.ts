@@ -297,6 +297,85 @@ export type Database = {
           },
         ]
       }
+      projects: {
+        Row: {
+          address: string | null
+          area_m2: number | null
+          city: string | null
+          client_id: string
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          id: string
+          kind: string | null
+          name: string
+          notes: string | null
+          sort_order: number
+          start_date: string | null
+          status: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          address?: string | null
+          area_m2?: number | null
+          city?: string | null
+          client_id: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          kind?: string | null
+          name: string
+          notes?: string | null
+          sort_order?: number
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          address?: string | null
+          area_m2?: number | null
+          city?: string | null
+          client_id?: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          kind?: string | null
+          name?: string
+          notes?: string | null
+          sort_order?: number
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quote_acceptances: {
         Row: {
           accepted_at: string
@@ -431,6 +510,7 @@ export type Database = {
           id: string
           internal_notes: string | null
           number: string | null
+          project_id: string | null
           schedule: Json | null
           sent_at: string | null
           status: string
@@ -456,6 +536,7 @@ export type Database = {
           id?: string
           internal_notes?: string | null
           number?: string | null
+          project_id?: string | null
           schedule?: Json | null
           sent_at?: string | null
           status?: string
@@ -481,6 +562,7 @@ export type Database = {
           id?: string
           internal_notes?: string | null
           number?: string | null
+          project_id?: string | null
           schedule?: Json | null
           sent_at?: string | null
           status?: string
@@ -504,6 +586,20 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotes_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotes_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects_overview"
             referencedColumns: ["id"]
           },
           {
@@ -696,6 +792,7 @@ export type Database = {
           name: string | null
           notes: string | null
           phone: string | null
+          projects_count: number | null
           quotes_count: number | null
           status: string | null
           updated_at: string | null
@@ -704,6 +801,52 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "clients_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects_overview: {
+        Row: {
+          accepted_net_cents: number | null
+          address: string | null
+          area_m2: number | null
+          city: string | null
+          client_id: string | null
+          client_name: string | null
+          created_at: string | null
+          deleted_at: string | null
+          id: string | null
+          kind: string | null
+          last_activity_at: string | null
+          name: string | null
+          notes: string | null
+          quotes_count: number | null
+          sort_order: number | null
+          start_date: string | null
+          status: string | null
+          updated_at: string | null
+          workspace_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"

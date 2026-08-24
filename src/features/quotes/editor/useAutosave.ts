@@ -47,8 +47,17 @@ export function useAutosave() {
 
   const runSave = useCallback(async () => {
     const state = useEditorStore.getState();
-    const { quoteId, clientId, body, schedule, documents, number, lastSeenUpdatedAt, hasConflict } =
-      state;
+    const {
+      quoteId,
+      clientId,
+      projectId,
+      body,
+      schedule,
+      documents,
+      number,
+      lastSeenUpdatedAt,
+      hasConflict,
+    } = state;
 
     if (!quoteId || !body || !lastSeenUpdatedAt) return;
     if (!canWriteRef.current) return;
@@ -70,6 +79,7 @@ export function useAutosave() {
          * wczytana z bazy, wiec zapisanie jej z powrotem niczego nie kasuje.
          */
         clientId,
+        projectId,
         /*
          * Harmonogram jedzie RAZEM z dokumentem, a nie osobnym zapisem.
          * Zakladki „Wycena" i „Termin" pisza do tego samego wiersza, wiec dwa
@@ -167,7 +177,8 @@ export function useAutosave() {
       if (
         state.body === previous.body &&
         state.number === previous.number &&
-        state.clientId === previous.clientId
+        state.clientId === previous.clientId &&
+        state.projectId === previous.projectId
       ) {
         return;
       }

@@ -9,6 +9,7 @@ import { ClientStatusBadge } from './ClientsTable';
 import { ClientFormDialog } from './ClientFormDialog';
 import { ClientQuotesTab } from './ClientQuotesTab';
 import { ClientNotesTab } from './ClientNotesTab';
+import { ClientProjectsTab } from '@/features/projects/ClientProjectsTab';
 import { ClientRowMenu } from './ClientRowMenu';
 import { useClientOverview } from '@/data/queries/useClients';
 import { useNewQuoteForClient } from './useNewQuoteForClient';
@@ -19,10 +20,14 @@ import { pl } from '@/i18n/pl';
 /**
  * Karta klienta (05-UI §3).
  *
- * Zakładek jest dwie: **Wyceny** i **Notatki**. „Projekty", „Dokumenty"
- * i „Pliki" NIE SĄ renderowane, bo tych funkcji jeszcze nie ma (T-54…T-56) —
- * zakładka z napisem „wkrótce" jest gorsza niż jej brak (05-UI §3a.8,
- * zasada z T-44). Wejdą razem ze swoimi danymi.
+ * Zakładki: **Projekty | Wyceny | Notatki**. „Dokumenty" i „Pliki" NIE SĄ
+ * renderowane, bo tych funkcji jeszcze nie ma (T-55/T-56) — zakładka z napisem
+ * „wkrótce" jest gorsza niż jej brak (05-UI §3a.8, zasada z T-44). Wejdą razem
+ * ze swoimi danymi.
+ *
+ * „Projekty" idą pierwsze, bo to one są teczkami inwestycji; lista wycen
+ * klienta zbiera wszystko ponad podziałem na projekty i jest widokiem
+ * pomocniczym.
  */
 export function ClientPage() {
   const { id } = useParams<{ id: string }>();
@@ -83,6 +88,7 @@ export function ClientPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-6">
+          <Stat label={pl.clients.tabProjects} value={String(data.projectsCount)} />
           <Stat label={pl.clients.quotesCount} value={String(data.quotesCount)} />
           <Stat
             label={pl.clients.acceptedValue}
@@ -110,12 +116,16 @@ export function ClientPage() {
         </div>
       </header>
 
-      <Tabs defaultValue="quotes" className="space-y-4">
+      <Tabs defaultValue="projects" className="space-y-4">
         <TabsList aria-label={pl.clients.title}>
+          <TabsTrigger value="projects">{pl.clients.tabProjects}</TabsTrigger>
           <TabsTrigger value="quotes">{pl.clients.tabQuotes}</TabsTrigger>
           <TabsTrigger value="notes">{pl.clients.tabNotes}</TabsTrigger>
         </TabsList>
 
+        <TabsContent value="projects">
+          <ClientProjectsTab client={data} />
+        </TabsContent>
         <TabsContent value="quotes">
           <ClientQuotesTab client={data} />
         </TabsContent>
