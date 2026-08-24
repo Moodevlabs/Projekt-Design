@@ -10,6 +10,7 @@ import { ClientFormDialog } from './ClientFormDialog';
 import { ClientQuotesTab } from './ClientQuotesTab';
 import { ClientNotesTab } from './ClientNotesTab';
 import { ClientProjectsTab } from '@/features/projects/ClientProjectsTab';
+import { FilesTab } from '@/features/files/FilesTab';
 import { ClientRowMenu } from './ClientRowMenu';
 import { useClientOverview } from '@/data/queries/useClients';
 import { useNewQuoteForClient } from './useNewQuoteForClient';
@@ -20,10 +21,10 @@ import { pl } from '@/i18n/pl';
 /**
  * Karta klienta (05-UI §3).
  *
- * Zakładki: **Projekty | Wyceny | Notatki**. „Dokumenty" i „Pliki" NIE SĄ
- * renderowane, bo tych funkcji jeszcze nie ma (T-55/T-56) — zakładka z napisem
- * „wkrótce" jest gorsza niż jej brak (05-UI §3a.8, zasada z T-44). Wejdą razem
- * ze swoimi danymi.
+ * Zakładki: **Projekty | Wyceny | Pliki | Notatki**. „Dokumenty" NIE SĄ
+ * renderowane, bo archiwum wygenerowanych PDF-ów wchodzi dopiero w T-56 —
+ * zakładka z napisem „wkrótce" jest gorsza niż jej brak (05-UI §3a.8,
+ * zasada z T-44).
  *
  * „Projekty" idą pierwsze, bo to one są teczkami inwestycji; lista wycen
  * klienta zbiera wszystko ponad podziałem na projekty i jest widokiem
@@ -120,6 +121,7 @@ export function ClientPage() {
         <TabsList aria-label={pl.clients.title}>
           <TabsTrigger value="projects">{pl.clients.tabProjects}</TabsTrigger>
           <TabsTrigger value="quotes">{pl.clients.tabQuotes}</TabsTrigger>
+          <TabsTrigger value="files">{pl.files.tab}</TabsTrigger>
           <TabsTrigger value="notes">{pl.clients.tabNotes}</TabsTrigger>
         </TabsList>
 
@@ -128,6 +130,9 @@ export function ClientPage() {
         </TabsContent>
         <TabsContent value="quotes">
           <ClientQuotesTab client={data} />
+        </TabsContent>
+        <TabsContent value="files">
+          <FilesTab clientId={data.id} />
         </TabsContent>
         <TabsContent value="notes">
           <ClientNotesTab client={data} />

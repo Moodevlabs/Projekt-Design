@@ -14,6 +14,14 @@ const asyncMutationStub = vi.hoisted(() => () => ({
   isPending: false,
 }));
 
+vi.mock('@/data/queries/useFiles', () => ({
+  useFiles: () => ({ data: [], isLoading: false, isError: false }),
+  useStorageUsage: () => ({ data: { usedBytes: 0, quotaBytes: 1 }, isLoading: false }),
+  useUploadFile: asyncMutationStub,
+  useRenameFile: mutationStub,
+  useDeleteFile: mutationStub,
+}));
+
 vi.mock('@/data/queries/useProjects', () => ({
   useProjectOverview,
   useProjects: () => ({ data: [], isLoading: false, isError: false }),
@@ -119,13 +127,13 @@ describe('ProjectPage', () => {
     expect(links[0]).toHaveAttribute('href', '/klienci/c1');
   });
 
-  it('ma zakladki Wyceny i Notatki — i tylko te', () => {
-    // 05-UI §3a.8: Dokumenty i Pliki wchodza z T-55/T-56. „Termin" jest
-    // zakladka wyceny, nie projektu.
+  it('ma zakladki Wyceny, Pliki i Notatki — i tylko te', () => {
+    // 05-UI §3a.8: Dokumenty wchodza z T-56. „Termin" jest zakladka wyceny,
+    // nie projektu.
     renderPage(overview());
 
     const tabs = screen.getAllByRole('tab').map((tab) => tab.textContent);
-    expect(tabs).toEqual([pl.projects.tabQuotes, pl.projects.tabNotes]);
+    expect(tabs).toEqual([pl.projects.tabQuotes, pl.files.tab, pl.projects.tabNotes]);
   });
 
   it('status da sie przestawic z naglowka, bez wchodzenia w edycje', () => {

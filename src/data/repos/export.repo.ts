@@ -24,6 +24,13 @@ export interface WorkspaceExport {
   brandKit: unknown;
   roomTypes: unknown[];
   clients: unknown[];
+  projects: unknown[];
+  /**
+   * **Metadane plików, nie bajty.** Zrzut ma ważyć tyle, co dokumenty, a nie
+   * tyle, co archiwum — pliki pobiera się osobno z zakładki „Pliki".
+   * Bez tej listy nie dałoby się jednak stwierdzić, co w archiwum było.
+   */
+  files: unknown[];
   libraryItems: unknown[];
   libraryGroups: unknown[];
   templates: unknown[];
@@ -35,6 +42,8 @@ type ExportedTable =
   | 'brand_kits'
   | 'room_types'
   | 'clients'
+  | 'projects'
+  | 'files'
   | 'library_items'
   | 'library_groups'
   | 'quote_templates'
@@ -53,6 +62,8 @@ export async function exportWorkspaceData(
     brandKits,
     roomTypes,
     clients,
+    projects,
+    files,
     libraryItems,
     libraryGroups,
     templates,
@@ -62,6 +73,8 @@ export async function exportWorkspaceData(
     forWorkspace('brand_kits'),
     forWorkspace('room_types'),
     forWorkspace('clients'),
+    forWorkspace('projects'),
+    forWorkspace('files'),
     forWorkspace('library_items'),
     forWorkspace('library_groups'),
     forWorkspace('quote_templates'),
@@ -75,6 +88,8 @@ export async function exportWorkspaceData(
     brandKit: unwrap(brandKits, 'Eksport: brand kit')[0] ?? null,
     roomTypes: unwrap(roomTypes, 'Eksport: typy pomieszczeń'),
     clients: unwrap(clients, 'Eksport: klienci'),
+    projects: unwrap(projects, 'Eksport: projekty'),
+    files: unwrap(files, 'Eksport: pliki'),
     libraryItems: unwrap(libraryItems, 'Eksport: biblioteka'),
     libraryGroups: unwrap(libraryGroups, 'Eksport: zestawy'),
     templates: unwrap(templates, 'Eksport: szablony'),

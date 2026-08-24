@@ -22,3 +22,14 @@ pub fn open_path(app: tauri::AppHandle, path: String) -> CommandResult<()> {
         .open_path(path, None::<&str>)
         .map_err(|e| CommandError::Other(e.to_string()))
 }
+
+/// Czyta plik wskazany przez uzytkownika w dialogu albo upuszczony na okno.
+///
+/// Dialog i drag&drop obsluguje frontend (plugin-dialog, `onDragDropEvent`),
+/// Rust tylko czyta bajty — dzieki temu nie potrzebujemy szerokiego
+/// `fs:allow-read-file` z zakresem na caly dysk. Ta sama zasada co przy
+/// `save_file`.
+#[tauri::command]
+pub fn read_file(path: String) -> CommandResult<Vec<u8>> {
+    Ok(std::fs::read(PathBuf::from(path))?)
+}

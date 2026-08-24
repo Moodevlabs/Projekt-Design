@@ -82,3 +82,64 @@ export async function secretSet(key: string, value: string): Promise<void> {
 export async function secretDelete(key: string): Promise<void> {
   await invoke('secret_delete', { key });
 }
+
+/**
+ * Czyta plik z dysku (dialog wyboru albo drag&drop w oknie Tauri).
+ *
+ * Bajty wraca komenda Rusta, a nie plugin `fs` — dzieki temu nie musimy
+ * nadawac aplikacji prawa czytania calego `$HOME`. Ta sama zasada co przy
+ * zapisie PDF (`saveFile`).
+ */
+export async function readFile(path: string): Promise<Uint8Array> {
+  const bytes = await invoke<number[]>('read_file', { path });
+  return Uint8Array.from(bytes);
+}
+
+/**
+ * Systemowy dialog wyboru plikow. Zwraca sciezki albo pusta liste, gdy
+ * uzytkownik zamknal okno — anulowanie nie jest bledem.
+ */
+export async function openFilesDialog(): Promise<string[]> {
+  const { open } = await import('@tauri-apps/plugin-dialog');
+  const wybrane = await open({ multiple: true });
+  if (!wybrane) return [];
+  return Array.isArray(wybrane) ? wybrane : [wybrane];
+}
+
+/**
+ * Upuszczenie plikow na okno.
+ *
+ * W Tauri webview NIE dostaje zdarzen HTML5 drag&drop dla plikow — przechwytuje
+ * je warstwa natywna i oddaje **sciezki** przez `onDragDropEvent`. W przegladarce
+ * (`pnpm dev`) jest odwrotnie: sa obiekty `File`, nie ma sciezek. Stad dwie
+ * osobne drogi w UI, spiete jednym adapterem.
+ *
+ * Zwraca funkcje odpinajaca nasluch. Wolaj wylacznie po `runningInTauri()`.
+ */
+export async function onFilesDropped(
+  handler: (paths: string[]) => void,
+  onHover?: (hovering: boolean) => void,
+): Promise<() => void> {
+  const appWindow = getCurrentWindow();
+
+  return appWindow.onDragDropEvent((event) => {
+    if (event.payload.type === 'over') {
+      onHover?.(true);
+      return;
+    }
+    if (event.payload.type === 'leave') {
+      onHover?.(false);
+      return;
+    }
+    if (event.payload.type === 'drop') {
+      onHover?.(false);
+      handler(event.payload.paths);
+    }
+  });
+}
+
+/** Nazwa pliku ze sciezki systemowej — dziala dla obu separatorow. */
+export function fileNameFromPath(path: string): string {
+  const parts = path.split(/[\\/]/);
+  return parts[parts.length - 1] ?? path;
+}

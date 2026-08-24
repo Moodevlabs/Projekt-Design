@@ -3,6 +3,7 @@ import { adminClient, ownedWorkspace, userClient } from '../_shared/supabase.ts'
 
 /** Bucket z logotypami — Storage NIE kasuje się kaskadą z bazy. */
 const BRAND_BUCKET = 'brand';
+const FILES_BUCKET = 'files';
 
 /**
  * `delete-account` — nieodwracalne skasowanie konta i wszystkich danych.
@@ -66,13 +67,35 @@ Deno.serve(async (request) => {
       }
     }
 
-    // 2. Pliki brandingu.
-    const { data: files } = await admin.storage.from(BRAND_BUCKET).list(workspace.id);
-    if (files && files.length > 0) {
-      const paths = files.map((file) => `${workspace.id}/${file.name}`);
-      const { error: removeError } = await admin.storage.from(BRAND_BUCKET).remove(paths);
-      if (removeError) {
-        console.error('delete-account: kasowanie plikow', removeError);
+    // 2. Pliki ze WSZYSTKICH bucketów.
+    //
+    // Kaskada `on delete cascade` sprząta tabele, ale **nie rusza Storage**.
+    // Pominięcie któregoś bucketa zostawia osierocone obiekty na koncie, za
+    // które dalej płacimy — i których nikt już nie ma jak znaleźć.
+    const brandRemoved = await removeBucketTree(admin, BRAND_BUCKET, workspace.id);
+    if (!brandRemoved) {
+      return errorResponse('Nie udało się usunąć plików. Konto nie zostało usunięte.', 500);
+    }
+
+    // Bucket `files` ma ścieżki {workspace}/{client}/{project|_}/{uuid.ext},
+    // więc płaskie `list()` po workspace zwróci same katalogi. Bierzemy
+    // ścieżki z tabeli `files` — jest jedynym źródłem listy (koncepcja §3
+    // reguła 1) i zna też wiersze skasowane miękko.
+    const { data: rows, error: rowsError } = await admin
+      .from('files')
+      .select('storage_path')
+      .eq('workspace_id', workspace.id);
+
+    if (rowsError) {
+      console.error('delete-account: odczyt listy plikow', rowsError);
+      return errorResponse('Nie udało się usunąć plików. Konto nie zostało usunięte.', 500);
+    }
+
+    const paths = (rows ?? []).map((row: { storage_path: string }) => row.storage_path);
+    if (paths.length > 0) {
+      const { error: filesError } = await admin.storage.from(FILES_BUCKET).remove(paths);
+      if (filesError) {
+        console.error('delete-account: kasowanie plikow uzytkownika', filesError);
         return errorResponse('Nie udało się usunąć plików. Konto nie zostało usunięte.', 500);
       }
     }
@@ -90,3 +113,31 @@ Deno.serve(async (request) => {
     return errorResponse(error instanceof Error ? error.message : 'Nieznany błąd.', 500);
   }
 });
+
+/**
+ * Kasuje wszystkie obiekty pod prefiksem workspace'u w danym buckecie.
+ *
+ * `list()` w Storage jest PŁASKIE — zwraca zawartość jednego poziomu.
+ * Dla `brand` (pliki leżą wprost pod workspace) to wystarcza; głębsze
+ * struktury trzeba brać z tabeli, bo inaczej zostają katalogi z bajtami.
+ */
+async function removeBucketTree(
+  admin: ReturnType<typeof adminClient>,
+  bucket: string,
+  workspaceId: string,
+): Promise<boolean> {
+  const { data, error } = await admin.storage.from(bucket).list(workspaceId);
+  if (error) {
+    console.error('delete-account: listowanie bucketa', bucket, error);
+    return false;
+  }
+  if (!data || data.length === 0) return true;
+
+  const paths = data.map((file) => `${workspaceId}/${file.name}`);
+  const { error: removeError } = await admin.storage.from(bucket).remove(paths);
+  if (removeError) {
+    console.error('delete-account: kasowanie bucketa', bucket, removeError);
+    return false;
+  }
+  return true;
+}

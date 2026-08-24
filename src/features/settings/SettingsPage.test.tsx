@@ -28,6 +28,11 @@ vi.mock('@/data/queries/useRoomTypes', () => ({
   useDeleteRoomType: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
+// Sekcja „Pliki" (T-55) pyta o zuzycie miejsca — ustawienia testuja sie bez niej.
+vi.mock('@/data/queries/useFiles', () => ({
+  useStorageUsage: () => ({ data: { usedBytes: 0, quotaBytes: 2147483648 }, isLoading: false }),
+}));
+
 vi.mock('@/features/billing/useEntitlement', () => ({
   useEntitlement: () => ({ canWrite: canWrite.value, reason: 'active', loading: false }),
 }));

@@ -288,6 +288,57 @@ export const pl = {
     suggestInProgressAction: 'Przestaw',
     statusChanged: 'Status projektu zmieniony',
   },
+  files: {
+    title: 'Pliki',
+    tab: 'Pliki',
+    add: 'Dodaj pliki',
+    dropHere: 'Upuść pliki tutaj',
+    dropHint: 'Przeciągnij pliki z pulpitu albo kliknij „Dodaj pliki". Do 25 MB na plik.',
+    emptyTitle: 'Brak plików',
+    emptyDescription:
+      'Rzuty, zdjęcia, umowy — wszystko, co dotyczy tego klienta, w jednym miejscu.',
+    loadError: 'Nie udało się wczytać plików.',
+
+    name: 'Nazwa',
+    size: 'Rozmiar',
+    added: 'Dodano',
+    rowActions: 'Akcje pliku',
+    download: 'Pobierz',
+    previewAction: 'Podgląd',
+    rename: 'Zmień nazwę',
+    renameTitle: 'Zmień nazwę pliku',
+    renameLabel: 'Nowa nazwa',
+    renamed: 'Zmieniono nazwę',
+    scope: 'Zakres',
+    scopeClient: 'Klient',
+    scopeProject: 'Projekt',
+
+    uploading: (done: number, total: number) => `Wysyłanie ${done} z ${total}…`,
+    uploaded: (count: number) =>
+      count === 1 ? 'Dodano 1 plik' : `Dodano ${count} plik${count < 5 ? 'i' : 'ów'}`,
+    uploadFailed: 'Nie udało się wysłać pliku.',
+    downloaded: 'Zapisano plik',
+    downloadFailed: 'Nie udało się pobrać pliku.',
+
+    // Odbicia PRZED wysyłką — po polsku i z nazwą pliku, bo Storage odrzuci
+    // to samo po angielsku i bez kontekstu (pułapka z T-12).
+    rejectedTooLarge: (name: string) => `${name}: plik jest za duży (maksymalnie 25 MB).`,
+    rejectedExtension: (name: string) =>
+      `${name}: ten typ pliku jest zablokowany ze względów bezpieczeństwa.`,
+    rejectedEmpty: (name: string) => `${name}: plik jest pusty.`,
+
+    deleteTitle: 'Usunąć plik?',
+    deleteDescription: (name: string) =>
+      `„${name}" zniknie bezpowrotnie — kosza na pliki nie ma. Zwolnione miejsce wróci do limitu.`,
+    deleted: 'Plik usunięty',
+
+    // Pasek zużycia w Ustawieniach.
+    usageTitle: 'Pliki',
+    usageDescription: 'Miejsce zajęte przez pliki klientów i wygenerowane dokumenty.',
+    usage: (used: string, quota: string) => `Zajęte ${used} z ${quota}`,
+    usageWarning: 'Zostało mało miejsca — usuń niepotrzebne pliki.',
+    usageFull: 'Limit wyczerpany. Nie dodasz nowych plików, dopóki czegoś nie usuniesz.',
+  },
   editor: {
     preview: 'Podgląd',
     edit: 'Edycja',

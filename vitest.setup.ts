@@ -38,3 +38,20 @@ if (!Element.prototype.hasPointerCapture) {
   Element.prototype.setPointerCapture = () => {};
   Element.prototype.releasePointerCapture = () => {};
 }
+
+/*
+ * `Blob.arrayBuffer()` — jsdom go nie implementuje, a wysylka plikow (T-55)
+ * czyta nim bajty z obiektu `File`. Bez tego test uploadu wywala sie na
+ * `file.arrayBuffer is not a function`, chociaz w przegladarce i w webview
+ * Tauri metoda istnieje od lat.
+ */
+if (!Blob.prototype.arrayBuffer) {
+  Blob.prototype.arrayBuffer = function arrayBuffer(this: Blob): Promise<ArrayBuffer> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as ArrayBuffer);
+      reader.onerror = () => reject(reader.error ?? new Error('Nie udalo sie odczytac pliku'));
+      reader.readAsArrayBuffer(this);
+    });
+  };
+}

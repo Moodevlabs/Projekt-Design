@@ -21,6 +21,14 @@ vi.mock('@/data/queries/useClients', () => ({
   useDeleteClient: mutationStub,
 }));
 
+vi.mock('@/data/queries/useFiles', () => ({
+  useFiles: () => ({ data: [], isLoading: false, isError: false }),
+  useStorageUsage: () => ({ data: { usedBytes: 0, quotaBytes: 1 }, isLoading: false }),
+  useUploadFile: asyncMutationStub,
+  useRenameFile: mutationStub,
+  useDeleteFile: mutationStub,
+}));
+
 vi.mock('@/data/queries/useProjects', () => ({
   useProjects: () => ({ data: [], isLoading: false, isError: false }),
   useProject: () => ({ data: null }),
@@ -102,9 +110,10 @@ describe('ClientPage', () => {
     expect(screen.getByText(/9\s?800,00/)).toBeInTheDocument();
   });
 
-  it('ma zakladki Projekty, Wyceny i Notatki', () => {
+  it('ma zakladki Projekty, Wyceny, Pliki i Notatki', () => {
     renderPage(overview());
 
+    expect(screen.getByRole('tab', { name: pl.files.tab })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: pl.clients.tabProjects })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: pl.clients.tabQuotes })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: pl.clients.tabNotes })).toBeInTheDocument();
@@ -112,11 +121,16 @@ describe('ClientPage', () => {
 
   it('NIE renderuje zakladek, ktorych funkcji jeszcze nie ma', () => {
     // 05-UI §3a.8 (zasada z T-44): zakladka „wkrotce" jest gorsza niz jej brak.
-    // Dokumenty i Pliki wchodza dopiero w T-55/T-56.
+    // Dokumenty wchodza dopiero w T-56.
     renderPage(overview());
 
     const tabs = screen.getAllByRole('tab').map((tab) => tab.textContent);
-    expect(tabs).toEqual([pl.clients.tabProjects, pl.clients.tabQuotes, pl.clients.tabNotes]);
+    expect(tabs).toEqual([
+      pl.clients.tabProjects,
+      pl.clients.tabQuotes,
+      pl.files.tab,
+      pl.clients.tabNotes,
+    ]);
   });
 
   it('domyslna zakladka to Projekty — pusty stan z akcja', () => {

@@ -161,6 +161,106 @@ export type Database = {
           },
         ]
       }
+      files: {
+        Row: {
+          client_id: string
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          doc_type: string | null
+          id: string
+          kind: string
+          mime: string | null
+          name: string
+          project_id: string | null
+          quote_id: string | null
+          quote_version: number | null
+          size_bytes: number
+          storage_path: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          doc_type?: string | null
+          id?: string
+          kind?: string
+          mime?: string | null
+          name: string
+          project_id?: string | null
+          quote_id?: string | null
+          quote_version?: number | null
+          size_bytes: number
+          storage_path: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          doc_type?: string | null
+          id?: string
+          kind?: string
+          mime?: string | null
+          name?: string
+          project_id?: string | null
+          quote_id?: string | null
+          quote_version?: number | null
+          size_bytes?: number
+          storage_path?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "files_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "files_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "files_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "files_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "files_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "files_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       library_groups: {
         Row: {
           created_at: string
@@ -754,6 +854,8 @@ export type Database = {
           owner_id: string
           quote_seq: number
           settings: Json
+          storage_quota_bytes: number
+          storage_used_bytes: number
           updated_at: string
         }
         Insert: {
@@ -763,6 +865,8 @@ export type Database = {
           owner_id: string
           quote_seq?: number
           settings?: Json
+          storage_quota_bytes?: number
+          storage_used_bytes?: number
           updated_at?: string
         }
         Update: {
@@ -772,6 +876,8 @@ export type Database = {
           owner_id?: string
           quote_seq?: number
           settings?: Json
+          storage_quota_bytes?: number
+          storage_used_bytes?: number
           updated_at?: string
         }
         Relationships: []
@@ -856,6 +962,10 @@ export type Database = {
       }
     }
     Functions: {
+      files_bump_usage: {
+        Args: { delta: number; ws: string }
+        Returns: undefined
+      }
       is_member: { Args: { ws: string }; Returns: boolean }
       is_quote_member: { Args: { q: string }; Returns: boolean }
       is_workspace_owner: { Args: { ws: string }; Returns: boolean }

@@ -8,6 +8,7 @@ import { EmptyState, Money } from '@/components/shared';
 import { ProjectFormDialog } from './ProjectFormDialog';
 import { ProjectQuotesTab } from './ProjectQuotesTab';
 import { ProjectNotesTab } from './ProjectNotesTab';
+import { FilesTab } from '@/features/files/FilesTab';
 import { ProjectRowMenu } from './ProjectRowMenu';
 import { ProjectStatusSelect } from './ProjectStatusSelect';
 import { kindLabel } from './kind-label';
@@ -21,9 +22,9 @@ import { pl } from '@/i18n/pl';
 /**
  * Karta projektu (05-UI §3).
  *
- * Zakładki: **Wyceny | Notatki**. „Dokumenty" i „Pliki" wchodzą razem ze
- * swoimi danymi w T-55/T-56 — zakładka bez funkcji nie jest renderowana
- * (05-UI §3a.8). „Termin" jest zakładką wyceny, nie projektu: harmonogram
+ * Zakładki: **Wyceny | Pliki | Notatki**. „Dokumenty" wchodzą razem ze swoimi
+ * danymi w T-56 — zakładka bez funkcji nie jest renderowana (05-UI §3a.8).
+ * „Termin" jest zakładką wyceny, nie projektu: harmonogram
  * dotyczy konkretnej oferty i duplikowanie go tutaj znaczyłoby dwa źródła
  * tej samej daty.
  */
@@ -124,11 +125,15 @@ export function ProjectPage() {
       <Tabs defaultValue="quotes" className="space-y-4">
         <TabsList aria-label={pl.projects.title}>
           <TabsTrigger value="quotes">{pl.projects.tabQuotes}</TabsTrigger>
+          <TabsTrigger value="files">{pl.files.tab}</TabsTrigger>
           <TabsTrigger value="notes">{pl.projects.tabNotes}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="quotes">
           <ProjectQuotesTab project={data} client={client.data ?? null} />
+        </TabsContent>
+        <TabsContent value="files">
+          <FilesTab clientId={data.clientId} projectId={data.id} />
         </TabsContent>
         <TabsContent value="notes">
           <ProjectNotesTab project={data} />
