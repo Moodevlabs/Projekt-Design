@@ -4,7 +4,7 @@ Format: `- [ ] T-xx Nazwa` — czytaj: wymagane dokumenty → kryteria akceptacj
 
 **Numer to tożsamość zadania, nie kolejność.** Kolejność wykonania = pozycja na liście. Po wchłonięciu `FEATURES-Z-EXCELA.md` (2026-08-22) zadania T-30+ zostały wplecione **pomiędzy** T-11…T-17, bo część z nich musi wyprzedzić PDF i brand kit — inaczej pisalibyśmy je dwa razy. Stare numery zostawiono nietknięte, żeby notatki i commity dalej się zgadzały.
 
-**2026-08-24 — koncepcja Toolier.** Zadania **T-53…T-66** (`FEATURES-Z-KONCEPCJI.md`) stoją **przed T-17**: oś klient → projekt → pliki, wersje wycen, restrukturyzacja biblioteki, rebranding i nowa cena wchodzą do 1.0. **Następne zadanie do wzięcia: T-53.**
+**2026-08-24 — koncepcja Toolier.** Zadania **T-53…T-66** (`FEATURES-Z-KONCEPCJI.md`) stoją **przed T-17**: oś klient → projekt → pliki, wersje wycen, restrukturyzacja biblioteki, rebranding i nowa cena wchodzą do 1.0. **Cała oś T-53…T-66 zrobiona (2026-08-25). Następne zadanie do wzięcia: T-17 (Polish & release 1.0).**
 
 Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełna specyfikacja, wzory z arkusza i model domenowy. Tutaj jest **kolejność, zależności i kolizje z istniejącym kodem**; nie duplikuję treści tamtego dokumentu.
 
