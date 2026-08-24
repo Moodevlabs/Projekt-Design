@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react';
+import { render as rtlRender, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { LibraryItem, LibraryItemPatch } from '@/data/repos/library.repo';
@@ -90,6 +91,14 @@ vi.mock('@/data/queries/useRoomTypes', () => ({
 }));
 
 const { LibraryItemsTab } = await import('./LibraryItemsTab');
+
+/**
+ * Karta uslugi prowadzi do pelnej strony edytora (T-61), wiec potrzebuje
+ * routera. Zawijamy raz, zamiast dopisywac go w kazdym tescie.
+ */
+function render(ui: React.ReactElement) {
+  return rtlRender(<MemoryRouter>{ui}</MemoryRouter>);
+}
 
 function mockItems(rows: LibraryItem[], overrides: Record<string, unknown> = {}) {
   useLibraryItems.mockReturnValue({

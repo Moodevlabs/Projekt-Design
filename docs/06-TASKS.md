@@ -559,10 +559,21 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > **Świadomie odłożone do T-61:** kontrolka „Sposób wyceny" (8 kafelków), pole „własna jednostka", przełącznik „Aktywna" i cena „od" **w interfejsie**. Model, domena i wyświetlanie są gotowe (`pricingChoiceFor` mapuje osiem opcji na parę `mode+unit`), ale sama kontrolka należy do pełnoekranowego edytora usługi, który T-61 i tak buduje od zera — wciskanie jej teraz w kartę w siatce znaczyłoby napisać ją dwa razy. Filtr „Aktywna" w pickerze wchodzi razem z nią.
   > **Zweryfikowane na żywo:** `supabase db reset` + `pnpm test:db` — 118 zielonych.
 
-- [ ] **T-61 Biblioteka: pełnoekranowy edytor usługi z podglądem + statystyki użycia** (FEATURES-Z-KONCEPCJI §5 B3, 05-UI §3 „Edytor usługi")
+- [x] **T-61 Biblioteka: pełnoekranowy edytor usługi z podglądem + statystyki użycia** (FEATURES-Z-KONCEPCJI §5 B3, 05-UI §3 „Edytor usługi")
   Trasy `/biblioteka/uslugi/:id` i `/nowa`; sekcje 1–6; prawa kolumna: „Podgląd w ofercie" (`ItemRow` w podglądzie + stawki dla `per_room`), „Jak to działa?" (4 warianty w i18n), „Statystyki użycia" (RPC `library_item_usage`, cache 5 min), „Wskazówka" z linkiem do Pomieszczeń; zapis jawny; inline-edit na karcie zostaje dla nazwy/ceny.
   ✅ Zmiana stawki odświeża podgląd bez zapisu; „Zapisz" = jedno wywołanie; statystyka zgodna z seedem.
   ⚠️ Kaskada do otwartej wyceny działa tylko z `LibrarySheet` w edytorze (T-10 — tam jest store); pełna strona ma to powiedzieć, nie udawać.
+
+  > **Zrobione.** Migracja `0021_library_usage.sql` (RPC `library_item_usage`), trasy `/biblioteka/uslugi/nowa` i `/:id`, `LibraryItemPage` z sekcjami 1–6, `PricingChoicePicker` (8 kafelków → para `mode+unit`), `ItemPreviewCard`, „Jak to działa?", `ItemUsageCard`, wejście z karty usługi. 13 nowych testów; 1194 + 118 zielone.
+  > **Na co uważać:**
+  > - **`/nowa` MUSI stać przed `/:id` w drzewie tras** — inaczej „nowa" wpada jako identyfikator usługi i strona szuka wpisu o takim id.
+  > - **Osiem kafelków to nie osiem algorytmów.** „Za m²" to `flat` + `m2`, „Indywidualnie" to `flat` z ceną `null`. Rozbicie tego na dwie kontrolki („tryb" + „jednostka") zmuszałoby użytkownika do tłumaczenia swojej intencji na nasz model.
+  > - **Podgląd NIE używa `ItemRow` z edytora**, wbrew literze zadania. Tamten wiersz potrzebuje kontekstu wyceny (pomieszczenia, tryb cen, dnd), którego na tej stronie nie ma — podrabianie go pustymi wartościami dawałoby podgląd czegoś innego niż to, co zobaczy klient. Własny, prosty komponent pokazuje dokładnie nazwę, opis i cenę z jednostką.
+  > - **Statystyki liczy RPC z `quotes.body`, nie licznik w tabeli.** `jsonb_path_query` po `$.**.libraryItemId`, bo pozycje leżą i luzem w sekcjach, i w grupach. `distinct` po parze (wycena, usługa): trzy wstawienia tej samej usługi to wciąż jedna wycena. Cache 5 minut — świeżość co do sekundy nic tu nie znaczy.
+  > - **Usługa nieużywana dostaje zdanie, nie zero** — „0" wygląda jak błąd ładowania.
+  > - **Strona mówi wprost, że kaskada z niej nie działa.** Kaskadę obsługuje `LibrarySheet` w edytorze, bo tylko tam jest otwarta wycena i store. Udawanie, że działa wszędzie, kończyłoby się cichym brakiem zmian w dokumencie, nad którym ktoś pracuje.
+  > **Świadomie inaczej niż w opisie:** sekcja 5 („Stawki wg pomieszczeń") **linkuje do zakładki Stawki**, zamiast powtarzać edytor macierzy. Drugi edytor tych samych liczb to dwa miejsca do poprawiania przy każdej zmianie modelu; macierz pokazuje przy tym całą siatkę naraz, czego pojedyncza karta i tak nie zrobi. „Wskazówka" z linkiem do Pomieszczeń wchodzi razem z tą sekcją, gdy stawki znajdą się na stronie usługi.
+  > **Zweryfikowane na żywo:** RPC sprawdzone na seedzie (`library_item_usage` zwraca 3 wyceny dla pozycji `…0001`); `pnpm test:db` — 118 zielonych.
 
 - [ ] **T-62 Biblioteka przykładowa na start konta** (FEATURES-Z-KONCEPCJI §5 B4, `reference/bilbioteka.md`)
   `seed_library_sample(ws)` (8 grup / 38 usług, nazwy i opisy **dosłownie** z `bilbioteka.md`, ceny `null`, `is_sample`), wpięcie w `handle_new_user()` (idempotentne, tylko pusta biblioteka; bez backfillu), badge „Przykładowa", zdejmowanie flagi przy edycji, „Usuń pozostałe przykładowe (N)" w Ustawieniach → Biblioteka, krok onboardingu „Przejrzyj bibliotekę" (rozstrzygnij §9.11).

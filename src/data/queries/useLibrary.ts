@@ -4,6 +4,7 @@ import {
   createLibraryItem,
   deleteLibraryGroup,
   deleteLibraryItem,
+  fetchLibraryUsage,
   listLibraryCategories,
   listLibraryGroups,
   listLibraryItems,
@@ -153,5 +154,23 @@ export function useDeleteLibraryGroup() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.libraryGroups() });
     },
+  });
+}
+
+/**
+ * Statystyki uzycia uslug (T-61).
+ *
+ * `staleTime` 5 minut: liczba jest orientacyjna i nie musi byc swieza co do
+ * sekundy, a RPC przechodzi po `body` wszystkich wycen — nie ma powodu robic
+ * tego przy kazdym wejsciu na karte.
+ */
+export function useLibraryUsage() {
+  const workspaceId = useWorkspaceId();
+
+  return useQuery({
+    queryKey: queryKeys.libraryUsage(workspaceId),
+    queryFn: () => fetchLibraryUsage(requireWorkspaceId(workspaceId)),
+    enabled: Boolean(workspaceId),
+    staleTime: 5 * 60 * 1000,
   });
 }

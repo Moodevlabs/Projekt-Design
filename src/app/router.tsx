@@ -15,6 +15,7 @@ import { ClientsPage } from '@/features/clients/ClientsPage';
 import { ClientPage } from '@/features/clients/ClientPage';
 import { ProjectPage } from '@/features/projects/ProjectPage';
 import { LibraryPage } from '@/features/library/LibraryPage';
+import { LibraryItemPage } from '@/features/library/items/LibraryItemPage';
 import { TemplatesPage } from '@/features/templates/TemplatesPage';
 import { BrandSettingsPage } from '@/features/brand/BrandSettingsPage';
 import { SettingsPage } from '@/features/settings/SettingsPage';
@@ -63,6 +64,21 @@ const routeTree = [
                 handle: { title: pl.projects.title },
               },
               { path: 'biblioteka', element: <LibraryPage />, handle: { title: pl.library.title } },
+              {
+                /*
+                 * Pełnoekranowy edytor usługi (T-61). `/nowa` stoi PRZED
+                 * `/:id`, inaczej „nowa" wpadłoby jako identyfikator usługi
+                 * i strona szukałaby wpisu o tym id.
+                 */
+                path: 'biblioteka/uslugi/nowa',
+                element: <LibraryItemPage />,
+                handle: { title: pl.library.title },
+              },
+              {
+                path: 'biblioteka/uslugi/:id',
+                element: <LibraryItemPage />,
+                handle: { title: pl.library.title },
+              },
               { path: 'szablony', element: <TemplatesPage />, handle: { title: pl.templates.title } },
               {
                 /*

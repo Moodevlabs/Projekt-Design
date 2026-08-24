@@ -437,3 +437,28 @@ export async function saveItemsToLibrary(
 
   return rows.map(mapItem);
 }
+
+export interface LibraryItemUsage {
+  itemId: string;
+  quotesCount: number;
+  lastUsedAt: string | null;
+}
+
+/**
+ * Statystyki uzycia uslug — „uzyta w 24 wycenach" na karcie (T-61).
+ *
+ * Liczone NA ZADANIE przez RPC z `quotes.body` (migracja 0021), a nie
+ * denormalizowane licznikiem: to liczba orientacyjna, nie dana, na ktorej
+ * cokolwiek sie opiera. Utrzymywanie jej triggerem przy kazdym zapisie
+ * wyceny kosztowaloby wiecej, niz jest warta.
+ */
+export async function fetchLibraryUsage(workspaceId: string): Promise<LibraryItemUsage[]> {
+  const { data, error } = await getSupabase().rpc('library_item_usage', { ws: workspaceId });
+  if (error) throw new RepoError(`Statystyki uzycia: ${error.message}`, error);
+
+  return (data ?? []).map((row) => ({
+    itemId: row.item_id,
+    quotesCount: Number(row.quotes_count ?? 0),
+    lastUsedAt: row.last_used_at,
+  }));
+}

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { ChevronDown, Trash2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ChevronDown, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -11,6 +12,7 @@ import { VariantField } from './VariantField';
 import { draftSignature, itemSignature, toItemDraft, type ItemDraft } from './item-draft';
 import type { LibraryItem } from '@/data/repos/library.repo';
 import type { PricingRule } from '@/domain/quote';
+import { routes } from '@/app/routes';
 import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
 
@@ -78,6 +80,23 @@ export function LibraryItemCard({
           onChange={(kind) => patch({ kind })}
           label={`${pl.library.itemKindLabel}: ${label}`}
         />
+        {/*
+          Szybkie poprawki (nazwa, cena) zostają na karcie — otwieranie pełnej
+          strony po to, żeby zmienić kwotę, byłoby karą za drobiazg. Reszta
+          (sposób wyceny, jednostka, „od", aktywna) siedzi na stronie usługi,
+          bo tam jest podgląd i miejsce na wyjaśnienia (05-UI §3a.4).
+        */}
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          aria-label={`${pl.library.editItem}: ${label}`}
+          asChild
+        >
+          <Link to={routes.libraryItem(item.id)}>
+            <Pencil aria-hidden />
+          </Link>
+        </Button>
         <Button
           type="button"
           variant="ghost"

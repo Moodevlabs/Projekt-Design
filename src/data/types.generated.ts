@@ -1047,6 +1047,14 @@ export type Database = {
       is_member: { Args: { ws: string }; Returns: boolean }
       is_quote_member: { Args: { q: string }; Returns: boolean }
       is_workspace_owner: { Args: { ws: string }; Returns: boolean }
+      library_item_usage: {
+        Args: { ws: string }
+        Returns: {
+          item_id: string
+          last_used_at: string
+          quotes_count: number
+        }[]
+      }
       next_quote_number: { Args: { ws: string }; Returns: string }
       quote_can_write: { Args: { q: string }; Returns: boolean }
       seed_room_types: { Args: { ws: string }; Returns: undefined }

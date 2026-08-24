@@ -789,6 +789,56 @@ export const pl = {
     sets: 'Zestawy',
     rooms: 'Pomieszczenia',
     rates: 'Stawki',
+    // Pelnoekranowy edytor uslugi (T-61).
+    pricingChoice: 'Sposób wyceny',
+    pricingChoices: {
+      flat_lump: 'Kwota stała',
+      flat_m2: 'Za m²',
+      per_room: 'Według pomieszczenia',
+      per_frame: 'Za kadr',
+      flat_hour: 'Za godzinę',
+      flat_visit: 'Za wizytę',
+      flat_element: 'Za element',
+      individual: 'Indywidualnie',
+    },
+    ratesSection: 'Stawki według pomieszczeń',
+    ratesHint: 'Stawki edytujesz w zakładce „Stawki" — tam widać całą macierz naraz.',
+    goToRates: 'Przejdź do stawek',
+    extraSettings: 'Ustawienia dodatkowe',
+    minPriceLabel: 'Cena „od"',
+    minPriceHint: 'Pokazywana na liście. Nie wpływa na obliczenia.',
+    customUnitLabel: 'Własna jednostka',
+    activeLabel: 'Aktywna w bibliotece',
+    activeHint: 'Nieaktywna znika z wyboru w edytorze, ale zostaje w wycenach, które ją mają.',
+    saveChanges: 'Zapisz zmiany',
+    nameRequired: 'Usługa musi mieć nazwę.',
+    itemSaved: 'Zapisano usługę',
+    cascadeHint:
+      'Zmiany trafią do nowych wycen. Otwartą wycenę zaktualizujesz z panelu biblioteki w edytorze.',
+    preview: 'Podgląd w ofercie',
+    howItWorks: 'Jak to działa?',
+    howItWorksText: {
+      flat: 'Cena jest stała. W wycenie mnożymy ją przez ilość — na przykład 4 godziny po 150 zł to 600 zł.',
+      per_room:
+        'Cena wynika ze stawek za pomieszczenia z zakładki „Stawki". Wycena liczy je z listy pomieszczeń danej oferty, więc ta sama usługa da inną kwotę przy innym metrażu.',
+      per_frame:
+        'Cena to stawka za pomieszczenie plus baza pomnożona przez liczbę kadrów. Używane przy wizualizacjach.',
+      individual:
+        'Pozycja jest w ofercie, ale nie ma ceny i nie wchodzi do sumy. Klient widzi „wycena indywidualna", a podsumowanie mówi, ile takich pozycji zawiera oferta.',
+    },
+    usageTitle: 'Statystyki użycia',
+    usageNever: 'Jeszcze nieużywana w żadnej wycenie.',
+    usageCount: (count: number) =>
+      count === 1
+        ? 'Użyta w 1 wycenie'
+        : count >= 2 && count <= 4
+          ? `Użyta w ${count} wycenach`
+          : `Użyta w ${count} wycenach`,
+    usageLast: (when: string) => `Ostatnio: ${when}`,
+    itemNotFoundTitle: 'Nie znaleziono usługi',
+    itemNotFoundDescription: 'Usługa mogła zostać usunięta albo nigdy nie istniała.',
+    editItem: 'Edytuj usługę',
+
     categoryNew: 'Nowa grupa',
     categoryName: 'Nazwa grupy',
     categoryNamePlaceholder: 'Przygotowanie projektu',
