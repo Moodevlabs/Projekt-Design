@@ -1,4 +1,4 @@
-# Anzorge — funkcje brakujące względem Excela klienta
+# Toolier — funkcje brakujące względem Excela klienta
 
 Źródło: `klientowy_excel.xlsx` (6 arkuszy: `TERMIN - DANE`, `TERMIN - DOKUMENT`, `OFERTA - DANE`, `OFERTA - DOKUMENT`, `OFERTY`, `ETAPY WSPÓŁPRACY`, `CENNIK USŁUG DODATKOWYCH`).
 Dokument jest **specyfikacją funkcji**: model domenowy, wzory z arkusza, kryteria parytetu. Odwołania do warstw zgodne z `01-ARCHITECTURE.md` (`domain/`, `data/`, `features/`, `pdf/`, `supabase/migrations/`).
@@ -9,7 +9,7 @@ Dokument jest **specyfikacją funkcji**: model domenowy, wzory z arkusza, kryter
 
 ## 0. Co Excel robi, a czego nasz PRD nie ma — mapa luk
 
-| # | Mechanizm w Excelu | Gdzie | Status w Anzorge | Feature |
+| # | Mechanizm w Excelu | Gdzie | Status w Toolier | Feature |
 |---|---|---|---|---|
 | 1 | **Cennik parametryczny**: usługa = `BAZA` + Σ(`cena za pomieszczenie` × `ilość`) po zaznaczonych pomieszczeniach | `OFERTA - DANE` F–S, `OFERTA - DOKUMENT` K95–K107 | Brak. Mamy tylko `qty × unitPrice` | **F1** |
 | 2 | **Pomieszczenia jako wymiar wyceny**: lista pomieszczeń z ilością (`x2`) i flagą „w projekcie" (M) + osobną flagą „w części technicznej" (A) | `OFERTA - DOKUMENT` A/G/J/M w wierszach 21–90 | Grupy są tylko nagłówkami. Brak ilości grupy i flag | **F1** |
@@ -36,7 +36,7 @@ Błędy Excela, których **nie przenosimy** (warto wiedzieć przy testach paryte
 
 ## F1 — Cennik parametryczny i pomieszczenia
 
-To największa luka i jednocześnie funkcja, która odróżni Anzorge od „listy z cenami". Cel: użytkownik definiuje raz **reguły cenowe** (usługa ma bazę + cenę zależną od pomieszczenia), a wycena liczy się sama po zaznaczeniu pomieszczeń.
+To największa luka i jednocześnie funkcja, która odróżni Toolier od „listy z cenami". Cel: użytkownik definiuje raz **reguły cenowe** (usługa ma bazę + cenę zależną od pomieszczenia), a wycena liczy się sama po zaznaczeniu pomieszczeń.
 
 ### Model domenowy (delta do `QuoteBody`)
 

@@ -1,4 +1,4 @@
-# Projekt Anzorge — paczka startowa dla Claude Code
+# Toolier — paczka startowa dla Claude Code
 
 Zawartość:
 - `CLAUDE.md` — zasady i stack (Claude Code czyta automatycznie)
@@ -16,7 +16,7 @@ Rzeczy, które musisz ogarnąć sam (Claude nie zrobi):
 - Stripe: produkt, 2 ceny, Stripe Tax, Customer Portal config, webhook endpoint na URL Edge Function.
 - Google OAuth client (dla logowania Google) z redirectem na Supabase.
 - Certyfikaty do podpisu: Apple Developer (notarization), Windows code signing (lub Azure Trusted Signing).
-- Domena `anzorge.pl` + strona landing (osobno).
+- Domena `toolier.pl` + strona landing (osobno).
 
 ---
 

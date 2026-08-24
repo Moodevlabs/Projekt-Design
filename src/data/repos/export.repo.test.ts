@@ -104,6 +104,6 @@ describe('exportWorkspaceData', () => {
 
 describe('exportFileName', () => {
   it('nazywa plik datą w czasie lokalnym', () => {
-    expect(exportFileName(new Date(2026, 7, 5))).toBe('anzorge-dane-2026-08-05.json');
+    expect(exportFileName(new Date(2026, 7, 5))).toBe('toolier-dane-2026-08-05.json');
   });
 });

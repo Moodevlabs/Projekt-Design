@@ -2,7 +2,7 @@
  * Testy integracyjne na zywym, lokalnym Supabase (`pnpm db:start`).
  * Uruchamianie: `pnpm test:db`.
  *
- * Logujemy sie kontem z seeda (demo@anzorge.local / demo1234) i pracujemy
+ * Logujemy sie kontem z seeda (demo@toolier.local / demo1234) i pracujemy
  * na prawdziwym RLS — dzieki temu test lapie takze bledy polityk, a nie tylko
  * bledy mapowania.
  */
@@ -23,7 +23,7 @@ import { ConflictError } from './errors';
 import { newScheduleBody } from '@/domain/schedule';
 import { newItem, newQuoteBody, newSection } from '@/domain/quote';
 
-const DEMO_EMAIL = 'demo@anzorge.local';
+const DEMO_EMAIL = 'demo@toolier.local';
 const DEMO_PASSWORD = 'demo1234';
 
 let workspaceId: string;

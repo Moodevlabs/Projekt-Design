@@ -4,9 +4,15 @@
  */
 export const pl = {
   app: {
-    name: 'Anzorge',
+    name: 'Toolier',
     tagline: 'Interaktywne wyceny',
-    /** Podpis wytłoczony w tle aplikacji. Nazwy własne — nie tłumaczymy. */
+    /**
+     * Podpis wytłoczony w tle aplikacji. Nazwy własne — nie tłumaczymy.
+     *
+     * „AnzorgeDesign" zostaje po rebrandingu (T-65) **celowo**: to nazwa
+     * studia, które zamówiło aplikację, a nie dawna nazwa produktu. Produkt
+     * nazywa się Toolier, autorzy nazywają się tak, jak się nazywają.
+     */
     credit: 'Developed by AnzorgeDesign & Moodevlabs',
   },
   nav: {
@@ -1289,7 +1295,7 @@ export const pl = {
      * Aplikacja jest płatna w całości — nie ma wersji darmowej ani pakietów.
      * Wybór dotyczy wyłącznie tego, jak często płacisz.
      */
-    intro: 'Anzorge jest aplikacją płatną. Wybierz, jak chcesz płacić.',
+    intro: 'Toolier jest aplikacją płatną. Wybierz, jak chcesz płacić.',
     monthly: 'Miesięcznie',
     yearly: 'Rocznie',
     monthlyPrice: '19,99 zł / mies.',

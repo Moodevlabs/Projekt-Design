@@ -34,7 +34,7 @@ afterAll(async () => {
 });
 
 function uniqueEmail() {
-  return 'test-' + Math.random().toString(36).slice(2, 10) + '@anzorge.local';
+  return 'test-' + Math.random().toString(36).slice(2, 10) + '@toolier.local';
 }
 
 describe('rejestracja', () => {

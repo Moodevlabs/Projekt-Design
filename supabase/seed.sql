@@ -1,7 +1,7 @@
 -- =============================================================================
 -- seed.sql — dane demonstracyjne dla lokalnego stacku (docs/02-DATABASE.md §5)
 --
--- Login: demo@anzorge.local / demo1234
+-- Login: demo@toolier.local / demo1234
 --
 -- Uwaga: wstawienie wiersza do auth.users odpala trigger on_auth_user_created,
 -- który sam zakłada workspace, członkostwo, profil, brand kit i trial.
@@ -37,7 +37,7 @@ insert into auth.users (
   '11111111-1111-4111-8111-111111111111',
   'authenticated',
   'authenticated',
-  'demo@anzorge.local',
+  'demo@toolier.local',
   extensions.crypt('demo1234', extensions.gen_salt('bf')),
   now(),
   now(),
@@ -63,7 +63,7 @@ insert into auth.identities (
   '11111111-1111-4111-8111-1111111111ff',
   '11111111-1111-4111-8111-111111111111',
   '11111111-1111-4111-8111-111111111111',
-  '{"sub":"11111111-1111-4111-8111-111111111111","email":"demo@anzorge.local","email_verified":true,"phone_verified":false}'::jsonb,
+  '{"sub":"11111111-1111-4111-8111-111111111111","email":"demo@toolier.local","email_verified":true,"phone_verified":false}'::jsonb,
   'email',
   now(),
   now(),

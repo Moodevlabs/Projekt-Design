@@ -23,7 +23,7 @@ const { BrandSettingsPage } = await import('./BrandSettingsPage');
 
 function mockKit(partial: Partial<BrandKit> = {}) {
   useBrandKit.mockReturnValue({
-    data: { ...defaultBrandKit(), companyName: 'Studio Anzorge', ...partial },
+    data: { ...defaultBrandKit(), companyName: 'Studio Wnętrz', ...partial },
     isLoading: false,
     isError: false,
   });
@@ -37,7 +37,7 @@ beforeEach(() => {
 describe('BrandSettingsPage', () => {
   it('pokazuje zapisane dane firmy', () => {
     render(<BrandSettingsPage />);
-    expect(screen.getByLabelText(pl.brand.companyName)).toHaveValue('Studio Anzorge');
+    expect(screen.getByLabelText(pl.brand.companyName)).toHaveValue('Studio Wnętrz');
   });
 
   it('bez zmian nie pokazuje paska zapisu', () => {
@@ -57,7 +57,7 @@ describe('BrandSettingsPage', () => {
 
     await user.click(screen.getByRole('button', { name: pl.common.save }));
     const patch = updateMutate.mock.calls[0]?.[0] as BrandKit;
-    expect(patch.companyName).toBe('Studio Anzorge!');
+    expect(patch.companyName).toBe('Studio Wnętrz!');
   });
 
   it('anulowanie przywraca zapisane wartosci', async () => {
@@ -68,7 +68,7 @@ describe('BrandSettingsPage', () => {
     await user.type(input, ' zmiana');
     await user.click(screen.getByRole('button', { name: pl.common.cancel }));
 
-    expect(input).toHaveValue('Studio Anzorge');
+    expect(input).toHaveValue('Studio Wnętrz');
     expect(updateMutate).not.toHaveBeenCalled();
   });
 

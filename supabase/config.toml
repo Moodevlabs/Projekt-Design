@@ -1,6 +1,6 @@
 # Konfiguracja lokalnego stacku Supabase (CLI v2).
 # Start: pnpm db:start  →  pnpm db:reset (migracje + seed)  →  pnpm db:types
-project_id = "anzorge"
+project_id = "toolier"
 
 [api]
 enabled = true
@@ -63,11 +63,11 @@ additional_redirect_urls = [
   "http://localhost:1420",
   "http://localhost:1420/**",
   "http://127.0.0.1:1420",
-  "anzorge://auth/callback",
-  "anzorge://auth/recovery",
-  "anzorge://billing/success",
-  "anzorge://billing/cancel",
-  "anzorge://billing/return",
+  "toolier://auth/callback",
+  "toolier://auth/recovery",
+  "toolier://billing/success",
+  "toolier://billing/cancel",
+  "toolier://billing/return",
 ]
 jwt_expiry = 3600
 enable_refresh_token_rotation = true

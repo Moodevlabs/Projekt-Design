@@ -3,7 +3,7 @@ import { getSupabase } from '@/data/supabase';
 import { runningInTauri } from '@/lib/tauri';
 
 /** Deep link, na który Supabase odsyła po zalogowaniu przez Google. */
-export const AUTH_CALLBACK_URL = 'anzorge://auth/callback';
+export const AUTH_CALLBACK_URL = 'toolier://auth/callback';
 
 /**
  * Logowanie Google. Checkout OAuth otwieramy w **przeglądarce systemowej**

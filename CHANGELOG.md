@@ -5,6 +5,26 @@ Wersje zgodne z [SemVer](https://semver.org/lang/pl/).
 
 ## [Nieopublikowane]
 
+### Zmienione
+
+**Nazwa produktu: Anzorge → Toolier.** Zmiana obejmuje nazwę aplikacji i okna,
+identyfikator pakietu (`pl.anzorge.app` → `pl.toolier.app`), schemat deep linku
+(`anzorge://` → `toolier://`), ikonę („A" → „T"), konto demo w seedzie
+(`demo@anzorge.local` → `demo@toolier.local`) i nazwę pliku zrzutu danych.
+
+> ⚠️ **Trzeba zalogować się ponownie.** Sesja siedzi w keychainie pod nazwą
+> usługi, która się zmieniła — po aktualizacji aplikacja zastanie pusty
+> keychain i pokaże ekran logowania. Stary wpis `pl.anzorge.app` zostaje
+> w systemie; można go skasować ręcznie. Ustawienia panelu bocznego wracają do
+> domyślnych z tego samego powodu (klucz w `localStorage`).
+>
+> **Poza kodem:** w panelu Supabase trzeba dodać adresy `toolier://auth/callback`
+> i `toolier://auth/recovery` do „Redirect URLs" — inaczej logowanie Google
+> i reset hasła nie wrócą do aplikacji.
+
+Nazwa „AnzorgeDesign" w podpisie aplikacji zostaje — to nazwa studia, które
+zamówiło aplikację, a nie dawna nazwa produktu.
+
 ### Dodane
 
 **Wycena**

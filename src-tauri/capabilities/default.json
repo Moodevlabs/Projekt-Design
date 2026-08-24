@@ -18,7 +18,7 @@
         { "url": "https://billing.stripe.com/*" },
         { "url": "https://*.supabase.co/*" },
         { "url": "https://accounts.google.com/*" },
-        { "url": "https://anzorge.pl/*" }
+        { "url": "https://toolier.pl/*" }
       ]
     },
     "deep-link:default"

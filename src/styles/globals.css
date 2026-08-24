@@ -4,7 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /* ===============================================================
-   ANZORGE — system wizualny
+   TOOLIER — system wizualny
    ---------------------------------------------------------------
    Teza: CHROM APLIKACJI JEST ZE SZKŁA, DOKUMENT JEST Z PAPIERU.
    Powłoka (sidebar, paski, karty) jest chłodna, warstwowa i
@@ -95,7 +95,7 @@
   --ease-out-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
   --dur-slide: 480ms;
 
-  /* shadcn/ui — mapowane na paletę Anzorge */
+  /* shadcn/ui — mapowane na paletę Toolier */
   --radius: var(--radius-control);
   --background: var(--canvas);
   --foreground: var(--ink);

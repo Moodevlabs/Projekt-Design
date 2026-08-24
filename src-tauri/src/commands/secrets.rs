@@ -1,7 +1,7 @@
 use super::{CommandError, CommandResult};
 
 /// Usluga w keychainie systemowym. Jedna na aplikacje; klucz = nazwa wpisu.
-const SERVICE: &str = "pl.anzorge.app";
+const SERVICE: &str = "pl.toolier.app";
 
 /// Maksymalny rozmiar JEDNEGO kawalka sekretu w bajtach UTF-8.
 ///

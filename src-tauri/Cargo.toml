@@ -1,13 +1,13 @@
 [package]
-name = "anzorge"
+name = "toolier"
 version = "0.1.0"
-description = "Anzorge — interaktywne wyceny z brandowanym PDF"
-authors = ["Anzorge"]
+description = "Toolier — interaktywne wyceny z brandowanym PDF"
+authors = ["Toolier"]
 edition = "2021"
 rust-version = "1.77.2"
 
 [lib]
-name = "anzorge_lib"
+name = "toolier_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]

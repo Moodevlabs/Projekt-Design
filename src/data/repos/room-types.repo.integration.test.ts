@@ -12,7 +12,7 @@ import {
   updateRoomType,
 } from './room-types.repo';
 
-const DEMO_EMAIL = 'demo@anzorge.local';
+const DEMO_EMAIL = 'demo@toolier.local';
 const DEMO_PASSWORD = 'demo1234';
 
 let workspaceId: string;

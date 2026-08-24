@@ -21,17 +21,17 @@ describe('createSessionStorage', () => {
 
     it('trzyma sesję w pamięci i nie dotyka keychaina', async () => {
       const storage = createSessionStorage();
-      await storage.setItem('anzorge-auth', 'token');
+      await storage.setItem('toolier-auth', 'token');
 
-      expect(await storage.getItem('anzorge-auth')).toBe('token');
+      expect(await storage.getItem('toolier-auth')).toBe('token');
       expect(tauriMock.secretSet).not.toHaveBeenCalled();
     });
 
     it('nie zapisuje niczego do localStorage', async () => {
       const storage = createSessionStorage();
-      await storage.setItem('anzorge-auth', 'token');
+      await storage.setItem('toolier-auth', 'token');
       // Refresh token w localStorage webview to dokładnie to, czego unikamy.
-      expect(window.localStorage.getItem('anzorge-auth')).toBeNull();
+      expect(window.localStorage.getItem('toolier-auth')).toBeNull();
     });
 
     it('kasuje wpis', async () => {
@@ -54,11 +54,11 @@ describe('createSessionStorage', () => {
       tauriMock.secretGet.mockResolvedValue('token-z-keychaina');
 
       const storage = createSessionStorage();
-      await storage.setItem('anzorge-auth', 'token');
+      await storage.setItem('toolier-auth', 'token');
 
-      expect(tauriMock.secretSet).toHaveBeenCalledWith('anzorge-auth', 'token');
+      expect(tauriMock.secretSet).toHaveBeenCalledWith('toolier-auth', 'token');
       // Odczyt po zapisie oddaje to, co zapisano — nie starą zawartość keychaina.
-      expect(await storage.getItem('anzorge-auth')).toBe('token');
+      expect(await storage.getItem('toolier-auth')).toBe('token');
     });
 
     it('schodzi na pamięć, gdy keychain jest niedostępny', async () => {
@@ -66,10 +66,10 @@ describe('createSessionStorage', () => {
       tauriMock.secretGet.mockRejectedValue(new Error('brak Secret Service'));
 
       const storage = createSessionStorage();
-      await storage.setItem('anzorge-auth', 'token');
+      await storage.setItem('toolier-auth', 'token');
 
       // Aplikacja ma działać dalej — użytkownik zaloguje się ponownie po restarcie.
-      expect(await storage.getItem('anzorge-auth')).toBe('token');
+      expect(await storage.getItem('toolier-auth')).toBe('token');
     });
 
     it('REGRESJA: nieudany zapis nie może unieważnić świeżej sesji', async () => {
@@ -82,9 +82,9 @@ describe('createSessionStorage', () => {
       tauriMock.secretGet.mockResolvedValue(null);
 
       const storage = createSessionStorage();
-      await storage.setItem('anzorge-auth', 'swieza-sesja');
+      await storage.setItem('toolier-auth', 'swieza-sesja');
 
-      expect(await storage.getItem('anzorge-auth')).toBe('swieza-sesja');
+      expect(await storage.getItem('toolier-auth')).toBe('swieza-sesja');
     });
 
     it('czyta z pamięci zamiast bić po keychainie przy każdym żądaniu', async () => {
@@ -92,11 +92,11 @@ describe('createSessionStorage', () => {
       tauriMock.secretGet.mockResolvedValue('z-keychaina');
 
       const storage = createSessionStorage();
-      await storage.setItem('anzorge-auth', 'token');
+      await storage.setItem('toolier-auth', 'token');
 
-      await storage.getItem('anzorge-auth');
-      await storage.getItem('anzorge-auth');
-      await storage.getItem('anzorge-auth');
+      await storage.getItem('toolier-auth');
+      await storage.getItem('toolier-auth');
+      await storage.getItem('toolier-auth');
 
       // supabase-js czyta sesję przed żądaniami; każdy odczyt to skok do Rusta.
       expect(tauriMock.secretGet).not.toHaveBeenCalled();
@@ -106,8 +106,8 @@ describe('createSessionStorage', () => {
       tauriMock.secretGet.mockResolvedValue('sesja-po-restarcie');
 
       const storage = createSessionStorage();
-      expect(await storage.getItem('anzorge-auth')).toBe('sesja-po-restarcie');
-      expect(tauriMock.secretGet).toHaveBeenCalledWith('anzorge-auth');
+      expect(await storage.getItem('toolier-auth')).toBe('sesja-po-restarcie');
+      expect(tauriMock.secretGet).toHaveBeenCalledWith('toolier-auth');
     });
 
     it('wylogowanie czyści też pamięć, nie tylko keychain', async () => {
@@ -116,20 +116,20 @@ describe('createSessionStorage', () => {
       tauriMock.secretGet.mockResolvedValue('duch-poprzedniej-sesji');
 
       const storage = createSessionStorage();
-      await storage.setItem('anzorge-auth', 'token');
-      await storage.removeItem('anzorge-auth');
+      await storage.setItem('toolier-auth', 'token');
+      await storage.removeItem('toolier-auth');
 
       // Gdyby usuwanie czyściło wyłącznie keychain, kolejny odczyt oddałby
       // sesję poprzedniego użytkownika z pamięci procesu.
-      expect(await storage.getItem('anzorge-auth')).toBe('duch-poprzedniej-sesji');
-      expect(tauriMock.secretDelete).toHaveBeenCalledWith('anzorge-auth');
+      expect(await storage.getItem('toolier-auth')).toBe('duch-poprzedniej-sesji');
+      expect(tauriMock.secretDelete).toHaveBeenCalledWith('toolier-auth');
     });
 
     it('wylogowanie czyści keychain nawet przy błędzie', async () => {
       tauriMock.secretDelete.mockRejectedValue(new Error('boom'));
       const storage = createSessionStorage();
-      await expect(storage.removeItem('anzorge-auth')).resolves.toBeUndefined();
-      expect(tauriMock.secretDelete).toHaveBeenCalledWith('anzorge-auth');
+      await expect(storage.removeItem('toolier-auth')).resolves.toBeUndefined();
+      expect(tauriMock.secretDelete).toHaveBeenCalledWith('toolier-auth');
     });
   });
 });

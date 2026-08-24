@@ -1,6 +1,6 @@
 # Toolier — CLAUDE.md
 
-> **Nazwa produktu: Toolier** (do 2026-08-24 „Anzorge" — nazwa repo/katalogu zostaje, w kodzie i UI obowiązuje Toolier; podmiana to zadanie T-65). Historyczne notatki w `06-TASKS.md` i `CHANGELOG.md` mogą mówić „Anzorge" — to ten sam produkt.
+> **Nazwa produktu: Toolier** (do 2026-08-24 „Anzorge"; podmiana zrobiona w T-65 — nazwa repo/katalogu zostaje). Historyczne notatki w `06-TASKS.md`, `CHANGELOG.md`, `00-PRD.md` i `FEATURES-Z-KONCEPCJI.md` mogą mówić „Anzorge" — to ten sam produkt. Podpis „Developed by AnzorgeDesign & Moodevlabs" zostaje: to nazwa studia, nie produktu.
 
 Desktopowa aplikacja (Tauri 2) — **workspace / back office studia projektowania wnętrz**: klienci → projekty → wyceny, termin, dokumenty, pliki. Rdzeń to interaktywna wycena TAK/NIE z brandowanym PDF. Model SaaS: subskrypcja **98,99 zł/mies. lub 999,99 zł/rok** przez Stripe (bez darmowego planu, trial 14 dni), konta i dane w Supabase.
 

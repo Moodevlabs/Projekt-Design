@@ -1,10 +1,10 @@
 /**
- * Rejestracja obsługi `anzorge://…`. Wołane raz, przy starcie aplikacji.
+ * Rejestracja obsługi `toolier://…`. Wołane raz, przy starcie aplikacji.
  *
  * Ścieżki:
- *  - `anzorge://auth/callback?code=…`   → wymiana kodu OAuth na sesję
- *  - `anzorge://auth/recovery?code=…`   → powrót z maila „reset hasła"
- *  - `anzorge://billing/success|cancel` → obsługa w T-15
+ *  - `toolier://auth/callback?code=…`   → wymiana kodu OAuth na sesję
+ *  - `toolier://auth/recovery?code=…`   → powrót z maila „reset hasła"
+ *  - `toolier://billing/success|cancel` → obsługa w T-15
  */
 import { onOpenUrl } from '@tauri-apps/plugin-deep-link';
 import { completeOAuthFromUrl } from '@/features/auth/oauth';
@@ -46,7 +46,7 @@ async function handleUrl(raw: string, handlers: DeepLinkHandlers): Promise<void>
     return;
   }
 
-  // Dla `anzorge://auth/callback` host to „auth", a pathname „/callback".
+  // Dla `toolier://auth/callback` host to „auth", a pathname „/callback".
   if (url.host === 'auth') {
     try {
       const handled = await completeOAuthFromUrl(raw);

@@ -14,7 +14,7 @@ Repozytorium jest lokalne (bez remote'a). Albo załóż prywatne repo:
 
 ```bash
 # na Windowsie
-gh repo create anzorge --private --source=. --push
+gh repo create toolier --private --source=. --push
 ```
 
 albo skopiuj folder — **bez** `node_modules/`, `src-tauri/target/` i `dist/`.
@@ -119,8 +119,8 @@ czekania na odpowiedź Apple — to normalne, że build „stoi" na tym kroku.
 Wynik:
 
 ```
-src-tauri/target/release/bundle/dmg/Anzorge_0.1.0_aarch64.dmg
-src-tauri/target/release/bundle/macos/Anzorge.app
+src-tauri/target/release/bundle/dmg/Toolier_0.1.0_aarch64.dmg
+src-tauri/target/release/bundle/macos/Toolier.app
 ```
 
 Jeden plik dla Apple Silicon **i** Intela:
@@ -140,14 +140,14 @@ To jest krok, którego nie pomijaj — inaczej dowiesz się od wspólnika.
 cd src-tauri/target/release/bundle
 
 # podpis obecny i to ten właściwy
-codesign -dv --verbose=4 macos/Anzorge.app 2>&1 | grep Authority
+codesign -dv --verbose=4 macos/Toolier.app 2>&1 | grep Authority
 
 # Gatekeeper akceptuje
-spctl -a -vvv -t install macos/Anzorge.app
+spctl -a -vvv -t install macos/Toolier.app
 
 # poświadczenie przyklejone do pliku
-xcrun stapler validate macos/Anzorge.app
-xcrun stapler validate dmg/Anzorge_0.1.0_aarch64.dmg
+xcrun stapler validate macos/Toolier.app
+xcrun stapler validate dmg/Toolier_0.1.0_aarch64.dmg
 ```
 
 Chcesz zobaczyć `accepted` i `source=Notarized Developer ID`.
@@ -156,7 +156,7 @@ Chcesz zobaczyć `accepted` i `source=Notarized Developer ID`.
 a `.app` w środku jest w porządku — przyklej je ręcznie:
 
 ```bash
-xcrun stapler staple dmg/Anzorge_0.1.0_aarch64.dmg
+xcrun stapler staple dmg/Toolier_0.1.0_aarch64.dmg
 ```
 
 Bez tego wspólnik musi być online przy pierwszym uruchomieniu (Gatekeeper
@@ -189,7 +189,7 @@ Da się zbudować bez certyfikatu, ale plik otworzysz **wyłącznie na własnym
 Macu**: prawy klik → Otwórz, albo
 
 ```bash
-xattr -dr com.apple.quarantine /Applications/Anzorge.app
+xattr -dr com.apple.quarantine /Applications/Toolier.app
 ```
 
 Do wysłania komukolwiek to nie wystarczy — dlatego powyżej jest podpis.

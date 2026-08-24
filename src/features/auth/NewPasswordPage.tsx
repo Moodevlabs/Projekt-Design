@@ -22,7 +22,7 @@ import { pl } from '@/i18n/pl';
 
 /**
  * Ustawienie nowego hasła po powrocie z maila. Wchodzi się tu deep linkiem
- * `anzorge://auth/recovery?code=…`, który najpierw wymienia kod na sesję —
+ * `toolier://auth/recovery?code=…`, który najpierw wymienia kod na sesję —
  * więc w tym miejscu użytkownik jest już zalogowany.
  */
 export function NewPasswordPage() {

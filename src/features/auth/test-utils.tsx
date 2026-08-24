@@ -3,7 +3,7 @@ import type { Session } from '@supabase/supabase-js';
 import { AuthContext, type AuthContextValue, type AuthStatus } from './auth-context';
 
 /** Sesja-atrapa: tylko pola, których dotyka UI. */
-export function fakeSession(email = 'demo@anzorge.local'): Session {
+export function fakeSession(email = 'demo@toolier.local'): Session {
   return {
     access_token: 'access',
     refresh_token: 'refresh',

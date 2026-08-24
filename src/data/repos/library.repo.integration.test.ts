@@ -23,7 +23,7 @@ import {
 } from './library.repo';
 import { newItem } from '@/domain/quote';
 
-const DEMO_EMAIL = 'demo@anzorge.local';
+const DEMO_EMAIL = 'demo@toolier.local';
 const DEMO_PASSWORD = 'demo1234';
 
 /** Własna kategoria testowa — żeby nie mieszać się z pozycjami z seeda. */

@@ -97,12 +97,12 @@ export async function exportWorkspaceData(
   };
 }
 
-/** Nazwa pliku zrzutu: `anzorge-dane-2026-08-23.json`. */
+/** Nazwa pliku zrzutu: `toolier-dane-2026-08-23.json`. */
 export function exportFileName(now: Date = new Date()): string {
   const date = [
     now.getFullYear(),
     String(now.getMonth() + 1).padStart(2, '0'),
     String(now.getDate()).padStart(2, '0'),
   ].join('-');
-  return `anzorge-dane-${date}.json`;
+  return `toolier-dane-${date}.json`;
 }

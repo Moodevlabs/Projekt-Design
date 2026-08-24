@@ -7,7 +7,7 @@ import { getSupabase } from '@/data/supabase';
 import { getCurrentWorkspace } from './workspace.repo';
 import { getBrandKit, updateBrandKit } from './brand.repo';
 
-const DEMO_EMAIL = 'demo@anzorge.local';
+const DEMO_EMAIL = 'demo@toolier.local';
 const DEMO_PASSWORD = 'demo1234';
 
 let workspaceId: string;
@@ -40,20 +40,20 @@ describe('brand.repo — godziny otwarcia i wystawiajacy (F7.2)', () => {
         { label: 'poniedziałek – piątek', hours: '8.00 – 16.00' },
         { label: 'sobota (tylko spotkania)', hours: '10.00 – 13.00' },
       ],
-      signerName: 'Anna Anzorge',
+      signerName: 'Anna Kowalska',
       signerTitle: 'projektant wnętrz',
     });
 
     const kit = await getBrandKit(workspaceId);
     expect(kit.openingHours).toHaveLength(2);
     expect(kit.openingHours[1]?.label).toBe('sobota (tylko spotkania)');
-    expect(kit.signerName).toBe('Anna Anzorge');
+    expect(kit.signerName).toBe('Anna Kowalska');
     expect(kit.signerTitle).toBe('projektant wnętrz');
   });
 
   it('czesciowy patch nie kasuje pozostalych pol', async () => {
     await updateBrandKit(workspaceId, {
-      signerName: 'Anna Anzorge',
+      signerName: 'Anna Kowalska',
       signerTitle: 'projektant wnętrz',
     });
 
@@ -62,7 +62,7 @@ describe('brand.repo — godziny otwarcia i wystawiajacy (F7.2)', () => {
     const kit = await getBrandKit(workspaceId);
     expect(kit.signerTitle).toBe('architekt wnętrz');
     // `undefined` w patchu nie moze wyzerowac kolumny, ktorej nikt nie ruszal.
-    expect(kit.signerName).toBe('Anna Anzorge');
+    expect(kit.signerName).toBe('Anna Kowalska');
   });
 
   it('czysci pola przez jawny null', async () => {

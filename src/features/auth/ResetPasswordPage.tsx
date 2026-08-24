@@ -22,7 +22,7 @@ import { routes } from '@/app/routes';
 import { pl } from '@/i18n/pl';
 
 /** Deep link, na który Supabase odsyła z maila „reset hasła". */
-export const RECOVERY_CALLBACK_URL = 'anzorge://auth/recovery';
+export const RECOVERY_CALLBACK_URL = 'toolier://auth/recovery';
 
 export function ResetPasswordPage() {
   const [formError, setFormError] = useState<string | null>(null);

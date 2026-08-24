@@ -1,4 +1,4 @@
-Wykonaj kolejne zadanie z projektu Anzorge.
+Wykonaj kolejne zadanie z projektu Toolier.
 
 1. Przeczytaj `CLAUDE.md`.
 2. Otwórz `docs/06-TASKS.md` i wybierz pierwsze niezaznaczone zadanie ($ARGUMENTS jeśli podano numer, np. `T-08`).

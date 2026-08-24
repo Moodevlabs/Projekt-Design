@@ -14,12 +14,12 @@
 | PDF | @react-pdf/renderer w webview | Deklaratywne layouty, łatwy branding, embed fontów, paginacja za darmo. Rust/`printpdf` = za dużo pracy; `window.print()` = brak kontroli. |
 | Płatności | Stripe Checkout + Portal + webhook → Supabase | Zero PCI, subskrypcje, faktury, dunning – wszystko u Stripe. Aplikacja czyta tylko tabelę `subscriptions`. |
 | Sesja | `tauri-plugin-stronghold` (lub `keyring`) | Refresh token nie w localStorage webview. |
-| Linki zewnętrzne | `tauri-plugin-opener` + `tauri-plugin-deep-link` (`anzorge://`; od T-65 `toolier://`) | Checkout/OAuth w przeglądarce systemowej, powrót do aplikacji. |
+| Linki zewnętrzne | `tauri-plugin-opener` + `tauri-plugin-deep-link` (`toolier://`) | Checkout/OAuth w przeglądarce systemowej, powrót do aplikacji. |
 
 ## 2. Struktura repo
 
 ```
-anzorge/
+toolier/
 ├── CLAUDE.md
 ├── docs/
 ├── .claude/commands/          # /task, /review, /migration
@@ -159,7 +159,7 @@ const QuoteBody = z.object({
 Komendy:
 - `save_file(bytes, suggested_name) -> path` (dialog + zapis)
 - `open_path(path)` (po zapisie PDF)
-- deep link handler `toolier://auth/callback?...` i `toolier://billing/success` (do T-65 jeszcze `anzorge://`)
+- deep link handler `toolier://auth/callback?...` i `toolier://billing/success`
 - updater (faza 2)
 
 Capabilities (`capabilities/default.json`): tylko `dialog:allow-save`, `fs:allow-write` w zakresie wybranym przez użytkownika, `opener:allow-open-url` dla whitelisty (`https://checkout.stripe.com`, `https://billing.stripe.com`, Supabase auth URL), `deep-link`.

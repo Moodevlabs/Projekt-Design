@@ -19,11 +19,11 @@ import {
 } from './library.repo';
 import { listLibraryCategoryRows } from './library-categories.repo';
 
-const DEMO_EMAIL = 'demo@anzorge.local';
+const DEMO_EMAIL = 'demo@toolier.local';
 const DEMO_PASSWORD = 'demo1234';
 
 /** Świeże konto na każdy przebieg — inaczej drugi wywaliłby się na duplikacie. */
-const NEW_EMAIL = `sample-${Date.now()}@anzorge.local`;
+const NEW_EMAIL = `sample-${Date.now()}@toolier.local`;
 const NEW_PASSWORD = 'demo1234';
 
 let workspaceId: string;

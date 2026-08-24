@@ -17,7 +17,7 @@ import {
 import { CURRENT_BODY_VERSION, newGroup, newItem, newQuoteBody, newSection } from '@/domain/quote';
 import { newScheduleBody } from '@/domain/schedule';
 
-const DEMO_EMAIL = 'demo@anzorge.local';
+const DEMO_EMAIL = 'demo@toolier.local';
 const DEMO_PASSWORD = 'demo1234';
 
 let workspaceId: string;

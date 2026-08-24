@@ -186,8 +186,8 @@ describe('preparedByLine', () => {
   });
 
   it('bez niego bierze wystawiajacego z brand kitu', () => {
-    expect(preparedByLine(newQuoteBody(), 'Anna Anzorge', 'projektant wnętrz')).toBe(
-      'Anna Anzorge, projektant wnętrz',
+    expect(preparedByLine(newQuoteBody(), 'Anna Kowalska', 'projektant wnętrz')).toBe(
+      'Anna Kowalska, projektant wnętrz',
     );
   });
 

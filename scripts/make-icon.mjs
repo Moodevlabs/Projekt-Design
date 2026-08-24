@@ -1,5 +1,5 @@
 /**
- * Generuje źródłową ikonę 1024×1024 (czarne kółko z białą literą „A") do `pnpm tauri icon`.
+ * Generuje źródłową ikonę 1024×1024 (czarne kółko z białą literą „T") do `pnpm tauri icon`.
  * Bez zależności — ręczny enkoder PNG (RGBA, zlib z Node).
  * Uruchom: node scripts/make-icon.mjs
  */
@@ -37,7 +37,7 @@ const cx = S / 2;
 const cy = S / 2;
 const R = S * 0.47;
 
-// Litera „A": dwie ukośne belki + poprzeczka.
+// Litera „T": pozioma belka u góry + pionowy trzon (T-65, Toolier).
 const strokeW = S * 0.085;
 const apexY = cy - S * 0.235;
 const baseY = cy + S * 0.235;
@@ -56,11 +56,10 @@ const distToSeg = (px_, py_, x1, y1, x2, y2) => {
 
 const inLetter = (x, y) => {
   const half = strokeW / 2;
-  if (distToSeg(x, y, cx, apexY, cx - halfSpan, baseY) <= half) return true;
-  if (distToSeg(x, y, cx, apexY, cx + halfSpan, baseY) <= half) return true;
-  const barY = cy + S * 0.085;
-  const barHalf = halfSpan * 0.62;
-  if (distToSeg(x, y, cx - barHalf, barY, cx + barHalf, barY) <= half * 0.85) return true;
+  // Belka pozioma na wysokości wierzchołka.
+  if (distToSeg(x, y, cx - halfSpan, apexY, cx + halfSpan, apexY) <= half) return true;
+  // Trzon od belki do podstawy.
+  if (distToSeg(x, y, cx, apexY, cx, baseY) <= half) return true;
   return false;
 };
 

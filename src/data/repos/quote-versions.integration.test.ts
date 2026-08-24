@@ -24,7 +24,7 @@ import { emptyClientDraft } from '@/domain/client/schema';
 import { emptyProjectDraft } from '@/domain/project/schema';
 import { newItem, newQuoteBody, newSection } from '@/domain/quote';
 
-const DEMO_EMAIL = 'demo@anzorge.local';
+const DEMO_EMAIL = 'demo@toolier.local';
 const DEMO_PASSWORD = 'demo1234';
 
 let workspaceId: string;

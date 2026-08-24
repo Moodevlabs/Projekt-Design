@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-const STORAGE_KEY = 'anzorge:sidebar-expanded';
+const STORAGE_KEY = 'toolier:sidebar-expanded';
 
 function read(): boolean {
   try {
