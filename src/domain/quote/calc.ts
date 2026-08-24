@@ -351,6 +351,14 @@ export function calcItemUnits(item: Item, rooms: Room[] = []): number {
     return roundCents(item.qty * (room?.qty ?? 1) * (roomCents + pricing.baseCents * frames));
   }
 
+  /*
+   * Cena `null` = „wycena indywidualna" (T-60): pozycja jest w ofercie, ale
+   * NIE wchodzi do sumy. Zwracamy zero, bo suma musi być liczbą — natomiast
+   * podsumowanie i wiersz mówią o niej wprost („+ N pozycji wycenianych
+   * indywidualnie"), zamiast udawać, że kosztuje 0 zł.
+   */
+  if (item.unitPriceCents === null) return 0;
+
   // qty może być ułamkowe (np. 2,5 h) — zaokrąglamy dopiero wartość pozycji.
   return roundCents(item.qty * item.unitPriceCents);
 }

@@ -682,6 +682,13 @@ export const pl = {
     projectNeedsClient: 'Najpierw wybierz klienta — projekty należą do niego.',
     projectOpen: 'Otwórz projekt',
 
+    individualPrice: 'wycena indywidualna',
+    individualNote: (count: number) =>
+      count === 1
+        ? '+ 1 pozycja wyceniana indywidualnie'
+        : count >= 2 && count <= 4
+          ? `+ ${count} pozycje wyceniane indywidualnie`
+          : `+ ${count} pozycji wycenianych indywidualnie`,
     investor: 'Inwestor',
     date: 'Data',
     phone: 'Telefon',
@@ -1070,6 +1077,7 @@ export const pl = {
   },
   /** Teksty widoczne wyłącznie w wygenerowanych dokumentach. */
   pdf: {
+    individualPrice: 'wycena indywidualna',
     validUntil: 'Ważny do',
     scheduleStart: 'Start',
     scheduleNoStart: 'Termin policzymy po ustaleniu daty rozpoczęcia.',

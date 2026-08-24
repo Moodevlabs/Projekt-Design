@@ -15,6 +15,7 @@ import {
   type Room,
 } from '@/domain/quote';
 import { formatMoney } from '@/domain/money';
+import { formatQty, unitLabel } from '@/domain/library/units';
 import { addDays, formatDate } from '@/lib/dates';
 import type { BrandKit } from '@/domain/brand/schema';
 import type { PdfTheme } from './theme';
@@ -433,9 +434,11 @@ function ItemLine({
         ) : null}
       </View>
 
-      {item.qty !== 1 ? (
+      {/* Ilość z JEDNOSTKĄ (T-60): „80 m² ×" zamiast samego „80 ×". Ryczałt
+          nie ma etykiety, więc przy qty = 1 dalej nic nie drukujemy. */}
+      {item.qty !== 1 || unitLabel(item.unit, item.unitLabel) ? (
         <Text style={{ fontSize: theme.sizes.small, color: theme.inkSoft, marginRight: 8 }}>
-          {`${item.qty} x`}
+          {`${formatQty(item.qty, item.unit, item.unitLabel)} x`}
         </Text>
       ) : null}
 
@@ -445,7 +448,9 @@ function ItemLine({
           { fontSize: theme.sizes.body, color: off ? theme.inkSoft : theme.ink },
         ]}
       >
-        {money(valueCents)}
+        {/* „Wycena indywidualna" zamiast kwoty (T-60) — pozycja jest w ofercie,
+            ale ceny nie ma. Zero drukowałoby „0,00 zł", czyli „gratis". */}
+        {item.unitPriceCents === null ? pl.pdf.individualPrice : money(valueCents)}
       </Text>
     </View>
   );

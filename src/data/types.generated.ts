@@ -351,52 +351,67 @@ export type Database = {
       }
       library_items: {
         Row: {
+          active: boolean
           category: string
           category_id: string | null
           created_at: string
           deleted_at: string | null
           description: string
           id: string
+          is_sample: boolean
           kind: string
+          min_price_cents: number | null
           name: string
           pricing: Json
           pricing_basis: string
           sort_order: number
-          unit_price_cents: number
+          unit: string
+          unit_label: string | null
+          unit_price_cents: number | null
           updated_at: string
           variant_of: string | null
           workspace_id: string
         }
         Insert: {
+          active?: boolean
           category?: string
           category_id?: string | null
           created_at?: string
           deleted_at?: string | null
           description?: string
           id?: string
+          is_sample?: boolean
           kind?: string
+          min_price_cents?: number | null
           name: string
           pricing?: Json
           pricing_basis?: string
           sort_order?: number
-          unit_price_cents?: number
+          unit?: string
+          unit_label?: string | null
+          unit_price_cents?: number | null
           updated_at?: string
           variant_of?: string | null
           workspace_id: string
         }
         Update: {
+          active?: boolean
           category?: string
           category_id?: string | null
           created_at?: string
           deleted_at?: string | null
           description?: string
           id?: string
+          is_sample?: boolean
           kind?: string
+          min_price_cents?: number | null
           name?: string
           pricing?: Json
           pricing_basis?: string
           sort_order?: number
-          unit_price_cents?: number
+          unit?: string
+          unit_label?: string | null
+          unit_price_cents?: number | null
           updated_at?: string
           variant_of?: string | null
           workspace_id?: string

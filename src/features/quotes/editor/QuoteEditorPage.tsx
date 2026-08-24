@@ -381,7 +381,9 @@ function EditorSurface({
           name: rabat.name,
           description: rabat.description,
           type: 'fixed',
-          valueCents: rabat.unitPriceCents,
+          // Rabat bez kwoty nie ma sensu — „wycena indywidualna" dotyczy
+          // usług, nie obniżek. Zero to tu jedyna uczciwa wartość domyślna.
+          valueCents: rabat.unitPriceCents ?? 0,
         });
       }
     },

@@ -76,6 +76,26 @@ export type Room = z.infer<typeof RoomSchema>;
  *
  * Wszystkie kwoty w groszach — zaokrąglenie dopiero przy wartości pozycji.
  */
+/**
+ * Jednostka ilości pozycji (T-60).
+ *
+ * Mieszka TUTAJ, a nie w `domain/library`, bo jest częścią `Item` — a `Item`
+ * jest w tym pliku. Odwrotny układ dawał cykl importów (`quote/schema` ↔
+ * `library/units`) i dwa różne typy o tej samej nazwie.
+ */
+export const UnitSchema = z.enum([
+  'lump',
+  'piece',
+  'm2',
+  'mb',
+  'hour',
+  'visit',
+  'element',
+  'frame',
+  'custom',
+]);
+export type Unit = z.infer<typeof UnitSchema>;
+
 export const PricingRuleSchema = z.discriminatedUnion('mode', [
   z.object({ mode: z.literal('flat') }),
   z.object({
@@ -115,8 +135,25 @@ export const ItemSchema = z.object({
   name: z.string().default(''),
   description: z.string().default(''),
   qty: z.number().positive().default(1),
-  /** Cena jednostkowa w groszach. Dla `discount` wartość jest dodatnia — calc ją odejmuje. */
-  unitPriceCents: z.number().int(),
+  /**
+   * Cena jednostkowa w groszach. Dla `discount` wartość jest dodatnia — calc
+   * ją odejmuje.
+   *
+   * **`null` = „wycena indywidualna"** (T-60): pozycja jest w ofercie, ale nie
+   * ma ceny i **nie wchodzi do sumy**. To nie to samo co zero — zero mówi
+   * „gratis", `null` mówi „ustalimy osobno". Podsumowanie nie ma prawa udawać,
+   * że taka pozycja kosztuje 0.
+   *
+   * Ta zmiana kształtu podniosła `bodyVersion` do 5.
+   */
+  unitPriceCents: z.number().int().nullable(),
+  /**
+   * Jednostka ilości — snapshot z biblioteki (T-60). Kaskaduje jak nazwa
+   * i cena. `lump` (ryczałt) to domyślny przypadek i nie drukuje etykiety.
+   */
+  unit: UnitSchema.default('lump'),
+  /** Własna nazwa jednostki — tylko dla `unit: 'custom'`. */
+  unitLabel: z.string().optional(),
   enabled: z.boolean().default(true),
   libraryItemId: z.string().uuid().nullable().default(null),
   /** Reguła wyceny. Brak = `flat`, czyli zachowanie sprzed cennika parametrycznego. */

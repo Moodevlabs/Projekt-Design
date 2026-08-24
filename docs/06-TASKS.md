@@ -542,10 +542,22 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > **Świadomie pominięte z opisu zadania:** „import CSV dopasowuje `grupa` do słownika" — **istniejący import CSV (T-50) to macierz cennika** (nazwa + slugi pomieszczeń), nie ma w nim kolumny `grupa` ani importu usług. Dopisanie takiego importera to osobna funkcja, nie mapowanie w istniejącej; zapisane w `docs/IDEAS.md`. Tak samo „lista–siatka", „Pokaż więcej po 50" i split-button „Dodaj ▾": lista usług to dziś karty w siatce i przebudowa jej na tabelę należy do T-61, który i tak przepisuje wygląd usługi.
   > **Zweryfikowane na żywo:** `supabase db reset` + `pnpm test:db` — 118 zielonych, w tym „usunięcie grupy nie kasuje usług" i kolejność grup w demo.
 
-- [ ] **T-60 Biblioteka: jednostki, cena „od", „indywidualnie", aktywna** (FEATURES-Z-KONCEPCJI §5 B2)
+- [x] **T-60 Biblioteka: jednostki, cena „od", „indywidualnie", aktywna** (FEATURES-Z-KONCEPCJI §5 B2)
   Migracja kolumn (`unit`, `unit_label`, `min_price_cents`, `active`, `is_sample`; `unit_price_cents` nullable); `Unit` w domenie, `formatUnit`, `minRuleCents`; **`bodyVersion + 1`** (cena `null` = wycena indywidualna, krok migracji bez przekształceń); kaskada `unit`; jedna kontrolka „Sposób wyceny" (8 opcji → para `mode+unit`) na karcie; „Aktywna" chowa z pickera i „Rozpisz na pomieszczenia"; wiersz edytora: „× 14 m²", „wycena indywidualna"; `TotalsCard` dopisek; PDF: ilość z jednostką, pozycje indywidualne.
   ✅ „Pomiar wnętrza 12 zł/m², qty 80" → 960 zł i „80 m² × 12,00 zł" w PDF; pozycja indywidualna nie zmienia sumy i jest w PDF; nieaktywna znika z pickera, kaskada działa.
   ⚠️ Cena `null` dotyka ~20 miejsc (§9.4) — jedno przejście jak w T-36, ze snapshotami zestawów, CSV (pusta = null) i `convertUnits` (null → null).
+
+  > **Zrobione.** Migracja `0020_library_units.sql`, `domain/library/units.ts` (`Unit`, `formatQty`, `priceSuffix`, `pricingChoiceFor`, `minRuleCents`), `bodyVersion 4 → 5` z krokiem bez przekształceń, `countIndividualItems`, kaskada `unit` przy wstawianiu z biblioteki, wiersz edytora („80 m² ×", „wycena indywidualna"), dopisek w `TotalsCard`, PDF z jednostką i pozycjami indywidualnymi. 18 nowych testów; 1181 + 118 zielone.
+  > **Na co uważać:**
+  > - **`UnitSchema` mieszka w `domain/quote/schema.ts`, nie w `domain/library`.** Pierwsze podejście dało cykl importów (`quote/schema` ↔ `library/units`) i TypeScript zaczął widzieć **dwa różne typy o tej samej nazwie** — błąd, który czyta się jak bzdura, dopóki nie zobaczy się cyklu. `library/units.ts` tylko go re-eksportuje.
+  > - **`libraryItemToQuoteItem` i `libraryItemToSnapshot` biorą PODZBIÓR strukturalny**, a nie `LibraryItem`. Ten sam byt ma dwa opisy (zodowy i interfejs z repo) i wymaganie konkretnie jednego zmuszałoby wołających do konwersji w kółko.
+  > - **`null` a zero to dwie różne rzeczy i kod musi je rozróżniać.** Zero znaczy „gratis", `null` — „ustalimy osobno". W `calcItemCents` oba dają 0 zł, ale `countIndividualItems` liczy tylko drugie, a suma dostaje dopisek. Bez tego klient widzi kwotę, która nie obejmuje wszystkiego z listy.
+  > - **`convertUnits` przepuszcza `null` jako `null`** (§9.4) — przeliczenie „czegoś, czego nie ma" na minuty pracy dałoby pozycję za 0 zł, czyli „gratis".
+  > - **Rabat z ceną `null` dostaje zero.** „Wycena indywidualna" dotyczy usług; obniżka bez kwoty nie ma sensu.
+  > - **Ilość z jednostką pokazuje się też przy `qty = 1`**, jeśli jednostka ma etykietę: „1 ×" to szum, ale „1 wizyta ×" już coś mówi. Ryczałt nadal nie drukuje nic.
+  > - **`formatQty` zwraca ułamek z przecinkiem** („2,5 h") — test `ItemRow` sprzed T-60 oczekiwał kropki.
+  > **Świadomie odłożone do T-61:** kontrolka „Sposób wyceny" (8 kafelków), pole „własna jednostka", przełącznik „Aktywna" i cena „od" **w interfejsie**. Model, domena i wyświetlanie są gotowe (`pricingChoiceFor` mapuje osiem opcji na parę `mode+unit`), ale sama kontrolka należy do pełnoekranowego edytora usługi, który T-61 i tak buduje od zera — wciskanie jej teraz w kartę w siatce znaczyłoby napisać ją dwa razy. Filtr „Aktywna" w pickerze wchodzi razem z nią.
+  > **Zweryfikowane na żywo:** `supabase db reset` + `pnpm test:db` — 118 zielonych.
 
 - [ ] **T-61 Biblioteka: pełnoekranowy edytor usługi z podglądem + statystyki użycia** (FEATURES-Z-KONCEPCJI §5 B3, 05-UI §3 „Edytor usługi")
   Trasy `/biblioteka/uslugi/:id` i `/nowa`; sekcje 1–6; prawa kolumna: „Podgląd w ofercie" (`ItemRow` w podglądzie + stawki dla `per_room`), „Jak to działa?" (4 warianty w i18n), „Statystyki użycia" (RPC `library_item_usage`, cache 5 min), „Wskazówka" z linkiem do Pomieszczeń; zapis jawny; inline-edit na karcie zostaje dla nazwy/ceny.

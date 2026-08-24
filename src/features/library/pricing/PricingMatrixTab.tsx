@@ -46,7 +46,8 @@ export function PricingMatrixTab() {
       ? item.pricing
       : {
           mode: 'per_room',
-          baseCents: item.unitPriceCents,
+          // `null` (wycena indywidualna) nie ma czego wniesc do macierzy.
+          baseCents: item.unitPriceCents ?? 0,
           perRoomCents: {},
           defaultPerRoomCents: 0,
           roomScope: 'all',
@@ -111,7 +112,7 @@ export function PricingMatrixTab() {
 
                     <TableCell className="text-right">
                       <MoneyInput
-                        cents={pricing?.baseCents ?? item.unitPriceCents}
+                        cents={pricing?.baseCents ?? item.unitPriceCents ?? 0}
                         onChange={(baseCents) =>
                           patchPricing(item, (current) => ({ ...current, baseCents }))
                         }

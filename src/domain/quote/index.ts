@@ -10,3 +10,4 @@ export * from './convert-units';
 export * from './from-settings';
 export * from './room-label';
 export * from './versions';
+export * from './individual';

@@ -25,6 +25,12 @@ describe('LibraryItemSchema', () => {
       name: 'Projekt koncepcyjny',
       description: '',
       unitPriceCents: 0,
+      // Domyślne z T-60: ryczałt, bez ceny „od", aktywna, nie przykładowa.
+      unit: 'lump',
+      minPriceCents: null,
+      active: true,
+      isSample: false,
+      categoryId: null,
       sortOrder: 0,
       // Wpis bez reguły liczy się jak przed cennikiem parametrycznym.
       pricing: { mode: 'flat' },

@@ -14,6 +14,7 @@ export function newItem(partial: Partial<Item> = {}): Item {
     description: '',
     qty: 1,
     unitPriceCents: 0,
+    unit: 'lump',
     enabled: true,
     libraryItemId: null,
     // Domyślnie `flat`, czyli zachowanie sprzed cennika parametrycznego.

@@ -65,7 +65,9 @@ export function GroupItemPicker({ groupName, onPick }: GroupItemPickerProps) {
               >
                 <span className="min-w-0 flex-1 truncate">{item.name}</span>
                 <span className="tabular text-ink-soft shrink-0 text-xs">
-                  {formatMoney(item.unitPriceCents)}
+                  {item.unitPriceCents === null
+                    ? pl.editor.individualPrice
+                    : formatMoney(item.unitPriceCents)}
                 </span>
               </CommandItem>
             ))}

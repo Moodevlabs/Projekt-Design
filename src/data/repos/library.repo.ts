@@ -9,9 +9,11 @@ import {
   ItemKindSchema,
   PricingBasisSchema,
   PricingRuleSchema,
+  UnitSchema,
   type ItemKind,
   type PricingBasis,
   type PricingRule,
+  type Unit,
 } from '@/domain/quote';
 import { getSupabase } from '@/data/supabase';
 import type { Tables, TablesUpdate } from '@/data/types.generated';
@@ -40,7 +42,16 @@ export interface LibraryItem {
   kind: ItemKind;
   name: string;
   description: string;
-  unitPriceCents: number;
+  /** `null` = wycena indywidualna (T-60). Nie myl z zerem („gratis"). */
+  unitPriceCents: number | null;
+  /** Jednostka ilosci — snapshot kaskadujacy do wyceny. */
+  unit: Unit;
+  unitLabel: string | null;
+  /** Cena „od" na liscie. INFORMACJA, nie regula liczenia. */
+  minPriceCents: number | null;
+  /** `false` chowa usluge z pickera, ale nie z wycen, ktore ja maja. */
+  active: boolean;
+  isSample: boolean;
   sortOrder: number;
   pricing: PricingRule;
   /**
@@ -92,7 +103,13 @@ function mapItem(row: ItemRow): LibraryItem {
     kind: ItemKindSchema.catch('item').parse(row.kind),
     name: row.name,
     description: row.description ?? '',
-    unitPriceCents: Number(row.unit_price_cents ?? 0),
+    // `?? null`, a nie `?? 0` — brak ceny to „indywidualnie", nie „gratis".
+    unitPriceCents: row.unit_price_cents === null ? null : Number(row.unit_price_cents),
+    unit: UnitSchema.catch('lump').parse(row.unit),
+    unitLabel: row.unit_label ?? null,
+    minPriceCents: row.min_price_cents === null ? null : Number(row.min_price_cents),
+    active: row.active ?? true,
+    isSample: row.is_sample ?? false,
     sortOrder: Number(row.sort_order ?? 0),
     pricing: parsePricing(row.pricing, row.id),
     variantOf: row.variant_of ?? null,
@@ -196,7 +213,11 @@ export interface CreateLibraryItemInput {
   categoryId?: string | null;
   kind?: ItemKind;
   description?: string;
-  unitPriceCents?: number;
+  unitPriceCents?: number | null;
+  unit?: Unit;
+  unitLabel?: string | null;
+  minPriceCents?: number | null;
+  active?: boolean;
   sortOrder?: number;
   pricing?: PricingRule;
   variantOf?: string | null;
@@ -214,7 +235,11 @@ export async function createLibraryItem(input: CreateLibraryItemInput): Promise<
         kind: input.kind ?? 'item',
         name: input.name,
         description: input.description ?? '',
-        unit_price_cents: input.unitPriceCents ?? 0,
+        unit_price_cents: input.unitPriceCents === undefined ? 0 : input.unitPriceCents,
+        unit: input.unit ?? 'lump',
+        unit_label: input.unitLabel ?? null,
+        min_price_cents: input.minPriceCents ?? null,
+        active: input.active ?? true,
         sort_order: input.sortOrder ?? 0,
         pricing: input.pricing ?? { mode: 'flat' },
         variant_of: input.variantOf ?? null,
@@ -241,6 +266,10 @@ export async function updateLibraryItem(id: string, patch: LibraryItemPatch): Pr
   if (patch.name !== undefined) update.name = patch.name;
   if (patch.description !== undefined) update.description = patch.description;
   if (patch.unitPriceCents !== undefined) update.unit_price_cents = patch.unitPriceCents;
+  if (patch.unit !== undefined) update.unit = patch.unit;
+  if (patch.unitLabel !== undefined) update.unit_label = patch.unitLabel;
+  if (patch.minPriceCents !== undefined) update.min_price_cents = patch.minPriceCents;
+  if (patch.active !== undefined) update.active = patch.active;
   if (patch.sortOrder !== undefined) update.sort_order = patch.sortOrder;
   if (patch.pricing !== undefined) update.pricing = patch.pricing;
   // `null` jest tu znaczace („odepnij od grupy"), wiec sprawdzamy `undefined`.
@@ -353,7 +382,8 @@ export interface SaveToLibraryInput {
   name: string;
   description?: string;
   kind?: ItemKind;
-  unitPriceCents: number;
+  /** `null` = wycena indywidualna (T-60). */
+  unitPriceCents: number | null;
   category?: string;
 }
 

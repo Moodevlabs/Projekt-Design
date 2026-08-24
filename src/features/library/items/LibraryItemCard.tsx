@@ -127,7 +127,9 @@ export function LibraryItemCard({
           className="text-ink-soft h-8 flex-1 px-2 text-xs"
         />
         <MoneyInput
-          cents={draft.unitPriceCents}
+          // Inline-edit ceny operuje liczbami; „wycena indywidualna" ustawia
+          // się na pełnej stronie usługi (T-61), nie w szybkiej poprawce.
+          cents={draft.unitPriceCents ?? 0}
           onChange={(unitPriceCents) => patch({ unitPriceCents })}
           discount={draft.kind === 'discount'}
           ariaLabel={`${pl.library.itemPriceLabel}: ${label}`}

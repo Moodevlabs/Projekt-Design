@@ -42,7 +42,7 @@ export function GroupItemsList({ groupName, items, onChange }: GroupItemsListPro
               />
 
               <Money
-                cents={item.unitPriceCents}
+                cents={item.unitPriceCents ?? 0}
                 variant={item.kind === 'discount' ? 'discount' : 'default'}
                 className="shrink-0 text-sm"
               />

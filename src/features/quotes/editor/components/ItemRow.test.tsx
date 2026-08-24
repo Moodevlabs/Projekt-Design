@@ -135,7 +135,8 @@ describe('ItemRow', () => {
         />
       </Dnd>,
     );
-    expect(screen.getByText('2.5 ×')).toBeInTheDocument();
+    // Od T-60 ilosc idzie przez `formatQty` — ulamek z przecinkiem, jak w PL.
+    expect(screen.getByText('2,5 ×')).toBeInTheDocument();
   });
 
   it('w podgladzie pokazuje wartosc pozycji, czyli ilosc razy cena', () => {

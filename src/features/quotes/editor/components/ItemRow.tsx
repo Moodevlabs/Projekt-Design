@@ -22,6 +22,7 @@ import {
   type Item,
   type Room,
 } from '@/domain/quote';
+import { formatQty, unitLabel } from '@/domain/library/units';
 import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
 
@@ -222,10 +223,15 @@ export const ItemRow = memo(function ItemRow({
           }}
           className="inline-field price-field amount w-14 px-1 py-[2px] text-right text-[14.5px]"
         />
-      ) : item.qty !== 1 ? (
-        // W podgladzie ilosc pokazujemy tylko wtedy, gdy wnosi informacje —
-        // "1 ×" przy kazdej pozycji tylko zasmiecaloby wiersz.
-        <span className="amount text-[13px] text-[var(--doc-ink-soft)]">{item.qty} ×</span>
+      ) : item.qty !== 1 || unitLabel(item.unit, item.unitLabel) ? (
+        /*
+         * W podgladzie ilosc pokazujemy, gdy wnosi informacje: albo jest inna
+         * niz 1, albo ma jednostke („80 m²"). „1 ×" przy kazdej pozycji tylko
+         * zasmiecaloby wiersz, ale „1 wizyta ×" juz cos mowi.
+         */
+        <span className="amount text-[13px] text-[var(--doc-ink-soft)]">
+          {formatQty(item.qty, item.unit, item.unitLabel)} ×
+        </span>
       ) : null}
 
       <div className="flex min-w-[86px] flex-col items-end">
@@ -254,7 +260,7 @@ export const ItemRow = memo(function ItemRow({
               type="number"
               min={0}
               step={5}
-              value={item.unitPriceCents}
+              value={item.unitPriceCents ?? 0}
               aria-label={pl.editor.itemMinutesLabel}
               onChange={(event) => {
                 const next = Number.parseInt(event.target.value, 10);
@@ -267,6 +273,15 @@ export const ItemRow = memo(function ItemRow({
               →
             </span>
             <span className="amount">{formatMoney(valueCents, currency)}</span>
+          </span>
+        ) : item.unitPriceCents === null ? (
+          /*
+           * „Wycena indywidualna" (T-60) — pozycja jest w ofercie, ale ceny
+           * nie ma i NIE wchodzi do sumy. Zero w tym miejscu znaczyłoby
+           * „gratis", a to zupełnie co innego niż „ustalimy osobno".
+           */
+          <span className="text-[13px] text-[var(--doc-ink-soft)] italic">
+            {pl.editor.individualPrice}
           </span>
         ) : editing && parametric === null ? (
           <InlineMoney

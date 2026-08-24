@@ -7,7 +7,8 @@ export interface ItemDraft {
   description: string;
   category: string;
   kind: ItemKind;
-  unitPriceCents: number;
+  /** `null` = wycena indywidualna (T-60). Nie myl z zerem. */
+  unitPriceCents: number | null;
   pricing: PricingRule;
   /** Lider grupy wariantow (`null` = pozycja samodzielna). */
   variantOf: string | null;
@@ -56,7 +57,7 @@ export function itemSignature(item: LibraryItem): string {
 export interface CascadeFields {
   name?: string;
   description?: string;
-  unitPriceCents?: number;
+  unitPriceCents?: number | null;
   pricing?: PricingRule;
 }
 

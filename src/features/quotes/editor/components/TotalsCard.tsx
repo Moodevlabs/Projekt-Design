@@ -5,6 +5,7 @@ import { formatMoney } from '@/domain/money';
 import { formatMinutes } from '@/domain/time';
 import { WorkloadPopover } from './WorkloadPopover';
 import { addDays, formatDate } from '@/lib/dates';
+import { countIndividualItems } from '@/domain/quote';
 import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
 
@@ -54,6 +55,7 @@ export function TotalsCard({
   hourlyRateCents?: number | null;
 }) {
   const totals = calcQuoteTotals(body);
+  const individualCount = countIndividualItems(body);
   // Podzial na etapy zwiniety domyslnie — to narzedzie do sprawdzania,
   // a nie glowna liczba, ktora ma rzucac sie w oczy.
   const [sectionsOpen, setSectionsOpen] = useState(false);
@@ -88,6 +90,16 @@ export function TotalsCard({
         <p className="amount mt-1 text-[28px] leading-none font-black">
           {formatMoney(totals.netCents, currency)}
         </p>
+        {/*
+          Suma NIE obejmuje pozycji „indywidualnych" (T-60) i musi to powiedzieć.
+          Bez tego dopisku klient dostaje kwotę, która nie pokrywa wszystkiego,
+          co widzi na liście — i nikt go o tym nie uprzedza.
+        */}
+        {individualCount > 0 ? (
+          <p className="mt-1.5 text-[12px] text-[var(--ink-soft)]">
+            {pl.editor.individualNote(individualCount)}
+          </p>
+        ) : null}
       </div>
 
       {/*

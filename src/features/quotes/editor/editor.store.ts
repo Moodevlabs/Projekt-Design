@@ -64,7 +64,8 @@ export interface ItemVariant {
   libraryItemId: string;
   name: string;
   description: string;
-  unitPriceCents: number;
+  /** `null` = wycena indywidualna (T-60). */
+  unitPriceCents: number | null;
   pricing: PricingRule;
 }
 

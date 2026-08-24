@@ -88,9 +88,18 @@ export function convertItemUnits(
 ): Item | null {
   if (from === to) return item;
 
-  const unitPriceCents = convertUnits(item.unitPriceCents, from, to, hourlyRateCents);
+  /*
+   * Cena „indywidualna" (`null`) przechodzi jako `null`, a NIE jako zero
+   * (§9.4). Przeliczanie czegoś, czego nie ma, na minuty pracy dałoby pozycję
+   * za 0 zł — czyli „gratis" zamiast „ustalimy osobno".
+   */
   const pricing = convertPricingRule(item.pricing, from, to, hourlyRateCents);
-  if (unitPriceCents === null || pricing === null) return null;
+  if (pricing === null) return null;
+
+  if (item.unitPriceCents === null) return { ...item, pricing };
+
+  const unitPriceCents = convertUnits(item.unitPriceCents, from, to, hourlyRateCents);
+  if (unitPriceCents === null) return null;
 
   return { ...item, unitPriceCents, pricing };
 }

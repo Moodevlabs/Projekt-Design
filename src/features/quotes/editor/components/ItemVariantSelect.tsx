@@ -35,6 +35,8 @@ export function ItemVariantSelect({ variants, currentId, onChange }: ItemVariant
       libraryItemId: variant.id,
       name: variant.name,
       description: variant.description,
+      // Wariant bez ceny to „wycena indywidualna" — przenosimy `null`, bo
+      // podmiana na zero zamieniłaby „ustalimy osobno" w „gratis".
       unitPriceCents: variant.unitPriceCents,
       pricing: variant.pricing,
     });

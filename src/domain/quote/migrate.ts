@@ -15,7 +15,7 @@
  */
 
 /** Wersja, w której zapisujemy dokumenty. Podnieś ją razem z dopisaniem kroku. */
-export const CURRENT_BODY_VERSION = 4;
+export const CURRENT_BODY_VERSION = 5;
 
 export type BodyRecord = Record<string, unknown>;
 
@@ -108,6 +108,18 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
       discounts: [...asList(body.discounts), ...przeniesione],
     };
   },
+
+  /**
+   * v5 = cena „indywidualna" (T-60). Kształt `Item.unitPriceCents` zmienia się
+   * z `int` na `int | null`, a pozycje dostają `unit`.
+   *
+   * Krok **niczego nie przekształca** — stare dokumenty mają liczby, a `unit`
+   * nadaje schemat (`default('lump')`, czyli dotychczasowe zachowanie bez
+   * etykiety). Istnieje tylko po to, żeby literał wersji się zgadzał: bez
+   * niego dokument w wersji 4 nie miałby jak dojść do 5 i wyglądałby na
+   * uszkodzony (zasada z T-30).
+   */
+  4: (body) => body,
 };
 
 export type MigrateResult = { ok: true; body: unknown } | { ok: false; error: string };

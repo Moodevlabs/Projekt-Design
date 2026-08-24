@@ -20,6 +20,8 @@ describe('ItemSchema', () => {
       description: '',
       qty: 1,
       unitPriceCents: 15000,
+      // Ryczałt (T-60) — domyślnie bez etykiety jednostki przy ilości.
+      unit: 'lump',
       enabled: true,
       libraryItemId: null,
       // Pozycja bez reguły cenowej liczy się jak przed cennikiem

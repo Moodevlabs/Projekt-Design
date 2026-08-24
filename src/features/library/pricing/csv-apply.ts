@@ -84,7 +84,9 @@ export function buildPricingFromCsv(
     if (roomTypeId) perRoomCents[roomTypeId] = cents;
   }
 
-  const baseCents = row.baseCents ?? current.baseCents;
+  // Cena „indywidualna" (`null`) nie jest baza — macierz operuje liczbami,
+  // wiec brak ceny znaczy tu zero, a nie „przepisz null do reguly".
+  const baseCents = row.baseCents ?? current.baseCents ?? 0;
   const defaultPerRoomCents = row.defaultPerRoomCents ?? current.defaultPerRoomCents;
 
   if (item.pricing.mode === 'per_frame') {

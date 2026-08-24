@@ -1,6 +1,12 @@
 import { z } from 'zod';
 import { newId } from '../id';
-import { ItemKindSchema, PricingRuleSchema, type Item } from '../quote/schema';
+import {
+  ItemKindSchema,
+  PricingRuleSchema,
+  UnitSchema,
+  type Item,
+  type Unit,
+} from '../quote/schema';
 
 /**
  * Biblioteka pozycji i zestawów — parytet z tabelami `library_items`
@@ -14,7 +20,17 @@ export const LibraryItemSchema = z.object({
   kind: ItemKindSchema.default('item'),
   name: z.string().min(1),
   description: z.string().default(''),
-  unitPriceCents: z.number().int().default(0),
+  /** `null` = wycena indywidualna (T-60). Nie myl z zerem („gratis"). */
+  unitPriceCents: z.number().int().nullable().default(0),
+  /** Jednostka ilości — kaskaduje do wyceny jak nazwa i cena. */
+  unit: UnitSchema.default('lump'),
+  unitLabel: z.string().optional(),
+  /** Cena „od" na liście. INFORMACJA, nie reguła liczenia (§5 reguła 4). */
+  minPriceCents: z.number().int().nullable().default(null),
+  /** `false` chowa usługę z pickera, ale nie z wycen, które ją mają. */
+  active: z.boolean().default(true),
+  isSample: z.boolean().default(false),
+  categoryId: z.string().uuid().nullable().default(null),
   sortOrder: z.number().int().default(0),
   /**
    * Reguła wyceny wpisu. Brak = `flat`, czyli zachowanie sprzed cennika
@@ -40,7 +56,12 @@ export const LibraryItemSnapshotSchema = z.object({
    * wpisami w jsonb.
    */
   qty: z.number().positive().default(1),
-  unitPriceCents: z.number().int().default(0),
+  /**
+   * `null` = pozycja „indywidualna" (T-60). Snapshot ma własny `default`
+   * i **nie przechodzi przez `migrateBody`** — zestawy to osobna ścieżka
+   * zgodności (§9.4).
+   */
+  unitPriceCents: z.number().int().nullable().default(0),
   libraryItemId: z.string().uuid().nullable().default(null),
 });
 export type LibraryItemSnapshot = z.infer<typeof LibraryItemSnapshotSchema>;
@@ -59,7 +80,18 @@ export type LibraryGroup = z.infer<typeof LibraryGroupSchema>;
  * dzięki czemu edycja w bibliotece może kaskadować do otwartej wyceny.
  */
 export function libraryItemToQuoteItem(
-  libraryItem: LibraryItem,
+  /*
+   * Bierzemy STRUKTURALNY podzbiór, a nie `LibraryItem`.
+   *
+   * Ten sam byt ma dwa opisy: zodowy `LibraryItem` (walidacja, pola
+   * opcjonalne na wejściu) i interfejs z `library.repo` (zawsze komplet).
+   * Wymaganie konkretnie jednego z nich zmuszałoby wołających do konwersji
+   * w kółko — a funkcji potrzeba tylko tych kilku pól.
+   */
+  libraryItem: Pick<
+    LibraryItem,
+    'id' | 'kind' | 'name' | 'description' | 'unitPriceCents' | 'pricing'
+  > & { unit?: Unit; unitLabel?: string | null },
   overrides: Partial<Item> = {},
 ): Item {
   return {
@@ -69,6 +101,10 @@ export function libraryItemToQuoteItem(
     description: libraryItem.description,
     qty: 1,
     unitPriceCents: libraryItem.unitPriceCents,
+    // Jednostka jest SNAPSHOTEM z biblioteki i kaskaduje jak nazwa i cena
+    // (§5 reguła 3) — bez niej wiersz „80 × 12 zł" gubi „m²".
+    unit: libraryItem.unit ?? 'lump',
+    ...(libraryItem.unitLabel ? { unitLabel: libraryItem.unitLabel } : {}),
     enabled: true,
     libraryItemId: libraryItem.id,
     // Reguła jedzie z biblioteki — pozycja wstawiona do wyceny liczy się tak,
@@ -89,6 +125,9 @@ export function librarySnapshotToQuoteItem(snapshot: LibraryItemSnapshot): Item 
     description: snapshot.description,
     qty: snapshot.qty,
     unitPriceCents: snapshot.unitPriceCents,
+    // Zestaw nie niesie jednostki — snapshot powstał przed T-60 i dokładanie
+    // jej teraz znaczyłoby zgadywanie. `lump` to zachowanie dotychczasowe.
+    unit: 'lump',
     enabled: true,
     libraryItemId: snapshot.libraryItemId,
     pricing: { mode: 'flat' },
@@ -121,7 +160,11 @@ export function quoteItemToLibrarySnapshot(item: Item): LibraryItemSnapshot {
  * Snapshot z pozycji bibliotecznej — na potrzeby „dodaj pozycję do zestawu”
  * w bibliotece. Ilość startowa to 1; użytkownik poprawia ją na karcie zestawu.
  */
-export function libraryItemToSnapshot(libraryItem: LibraryItem): LibraryItemSnapshot {
+export function libraryItemToSnapshot(
+  // Ten sam powód co przy `libraryItemToQuoteItem`: podzbiór strukturalny,
+  // żeby oba opisy pozycji bibliotecznej pasowały bez konwersji.
+  libraryItem: Pick<LibraryItem, 'id' | 'kind' | 'name' | 'description' | 'unitPriceCents'>,
+): LibraryItemSnapshot {
   return {
     name: libraryItem.name,
     description: libraryItem.description,
