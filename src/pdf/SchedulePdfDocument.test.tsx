@@ -13,7 +13,12 @@ import {
 import { scheduleFileName } from './file-name';
 import { buildPdfTheme } from './theme';
 import { defaultBrandKit } from '@/domain/brand/schema';
-import { newScheduleBody, ScheduleStageSchema, type ScheduleStage } from '@/domain/schedule';
+import {
+  newScheduleBody,
+  ScheduleStageSchema,
+  withExtra,
+  type ScheduleStage,
+} from '@/domain/schedule';
 import type { Room } from '@/domain/quote';
 
 function stage(partial: Partial<ScheduleStage> & { name: string }): ScheduleStage {
@@ -66,6 +71,18 @@ describe('schedule-content — co wchodzi do dokumentu', () => {
      */
     expect(roomStages(schedule, rooms).map((s) => s.name)).toEqual(['Wizualizacje']);
     expect(projectStages(schedule, rooms).map((s) => s.name)).toEqual(['Teczka']);
+  });
+
+  it('etap „Usługi dodatkowe" trafia do dokumentu jak każdy inny (T-64)', () => {
+    // Klient ma zobaczyc, ze +3 dni sa czescia terminu, a nie doliczonym
+    // gdzies z boku narzutem.
+    const zUsluga = withExtra(
+      newScheduleBody({ stages: [] }),
+      { name: 'Panorama 360', days: 3 },
+      'Usługi dodatkowe',
+    );
+
+    expect(projectStages(zUsluga, []).map((s) => s.name)).toEqual(['Usługi dodatkowe']);
   });
 
   it('pomieszczenie odznaczone w OBU częściach nie trafia do dokumentu', () => {

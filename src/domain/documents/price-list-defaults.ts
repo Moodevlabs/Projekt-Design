@@ -32,6 +32,9 @@ function pozycja(
     priceMaxCents: null,
     unit: '',
     leadTime: '',
+    // `null`, nie 0: „nie wiadomo, ile to dołoży do terminu" to inna
+    // informacja niż „niczego nie wydłuża" (T-64).
+    addedDays: null,
     sectionLabel,
     ...extra,
   };
@@ -43,25 +46,26 @@ const SZABLON: PriceListTemplateItem[] = [
     'Dodatkowy rzut techniczny',
     'Rysunek wykonawczy pomieszczenia spoza zakresu oferty.',
     30000,
-    { priceMaxCents: 120000, leadTime: '4–7 dni roboczych' },
+    { priceMaxCents: 120000, leadTime: '4–7 dni roboczych', addedDays: 4 },
   ),
   pozycja(TECHNICZNE, 'Kład ściany', 'Widok ściany z wymiarami i rozrysem okładzin.', 15000, {
     priceMaxCents: 40000,
     leadTime: '3–5 dni roboczych',
+    addedDays: 3,
   }),
   pozycja(
     TECHNICZNE,
     'Projekt zabudowy meblowej',
     'Detal stolarski do wyceny u wykonawcy.',
     40000,
-    { priceMaxCents: 150000, leadTime: '5–10 dni roboczych' },
+    { priceMaxCents: 150000, leadTime: '5–10 dni roboczych', addedDays: 5 },
   ),
   pozycja(
     TECHNICZNE,
     'Aktualizacja dokumentacji',
     'Naniesienie zmian po decyzjach inwestora lub zmianie wykonawcy.',
     25000,
-    { unit: 'h', priceMaxCents: null, leadTime: 'do 5 dni roboczych' },
+    { unit: 'h', priceMaxCents: null, leadTime: 'do 5 dni roboczych', addedDays: 5 },
   ),
 
   pozycja(
@@ -72,6 +76,7 @@ const SZABLON: PriceListTemplateItem[] = [
     {
       priceMaxCents: 45000,
       leadTime: '3–5 dni roboczych',
+      addedDays: 3,
     },
   ),
   pozycja(
@@ -82,6 +87,7 @@ const SZABLON: PriceListTemplateItem[] = [
     {
       priceMaxCents: 90000,
       leadTime: '5–7 dni roboczych',
+      addedDays: 5,
     },
   ),
   pozycja(
@@ -89,7 +95,7 @@ const SZABLON: PriceListTemplateItem[] = [
     'Korekta wizualizacji poza turą',
     'Zmiany zgłoszone po zatwierdzeniu wizualizacji.',
     15000,
-    { priceMaxCents: 60000, leadTime: '2–4 dni robocze' },
+    { priceMaxCents: 60000, leadTime: '2–4 dni robocze', addedDays: 2 },
   ),
 
   pozycja(SPOTKANIA, 'Spotkanie dodatkowe', 'Spotkanie poza liczbą zawartą w ofercie.', 20000, {
@@ -109,7 +115,7 @@ const SZABLON: PriceListTemplateItem[] = [
     'Konsultacja online',
     'Rozmowa z omówieniem dokumentacji, bez wizyty na miejscu.',
     15000,
-    { unit: 'h', leadTime: 'w ciągu 3 dni roboczych' },
+    { unit: 'h', leadTime: 'w ciągu 3 dni roboczych', addedDays: 3 },
   ),
 ];
 

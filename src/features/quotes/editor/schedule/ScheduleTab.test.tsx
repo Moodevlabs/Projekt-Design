@@ -204,3 +204,43 @@ describe('ScheduleTab — podpowiedź po etykietach pozycji', () => {
     expect(harmonogram()?.stages.find((s) => s.id === komunikacja.id)?.enabled).toBe(false);
   });
 });
+
+describe('ScheduleTab — etap zbiorczy „Usługi dodatkowe" (T-64)', () => {
+  function zUsluga(days = 3) {
+    zaladuj();
+    useEditorStore
+      .getState()
+      .addScheduleExtra({ name: 'Panorama 360', days }, pl.editor.extrasStageName);
+  }
+
+  it('pokazuje skladniki etapu, a nie sama sume', () => {
+    // Uzytkownik ma widziec, SKAD wzielo sie "+3 dni".
+    zUsluga();
+    render(<ScheduleTab editing />);
+
+    expect(screen.getByText('Panorama 360')).toBeInTheDocument();
+    expect(screen.getByText(pl.editor.extrasStageHint)).toBeInTheDocument();
+  });
+
+  it('etap zbiorczy nie ma pola „Dni bazowe" do recznej edycji', () => {
+    // Liczba jest suma skladnikow — pole do wpisania byloby pulapka.
+    zUsluga();
+    render(<ScheduleTab editing />);
+
+    expect(
+      screen.queryByLabelText(pl.editor.stageBaseDaysLabel(pl.editor.extrasStageName)),
+    ).not.toBeInTheDocument();
+  });
+
+  it('usuniecie skladnika skraca termin', async () => {
+    const user = userEvent.setup();
+    zUsluga();
+    render(<ScheduleTab editing />);
+
+    await user.click(
+      screen.getByRole('button', { name: pl.editor.removeExtrasEntry('Panorama 360') }),
+    );
+
+    expect(harmonogram()?.stages.some((stage) => stage.kind === 'extras')).toBe(false);
+  });
+});

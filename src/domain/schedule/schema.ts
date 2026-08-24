@@ -16,9 +16,30 @@ import { RoomScopeSchema } from '../quote/schema';
 export const StageOwnerSchema = z.enum(['provider', 'client']);
 export type StageOwner = z.infer<typeof StageOwnerSchema>;
 
+/**
+ * Jedna usługa dodatkowa doliczona do terminu (T-64).
+ *
+ * Etap `extras` trzyma **listę**, a nie samą sumę, bo użytkownik ma widzieć,
+ * skąd wzięło się „+5 dni". Sama liczba w polu `baseDays` byłaby prawdziwa
+ * i zupełnie nieczytelna miesiąc później.
+ */
+export const ScheduleExtraSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().default(''),
+  days: z.number().int().min(0).default(0),
+});
+export type ScheduleExtra = z.infer<typeof ScheduleExtraSchema>;
+
 export const ScheduleStageSchema = z.object({
   id: z.string().uuid(),
   name: z.string().min(1),
+  /**
+   * `extras` to etap zbiorczy na usługi dodatkowe z cennika (T-64) — jeden na
+   * wycenę. Wyróżniamy go polem, a nie nazwą, bo nazwę wolno zmienić.
+   */
+  kind: z.enum(['normal', 'extras']).default('normal'),
+  /** Składniki etapu `extras`. Dla zwykłego etapu zawsze pusta. */
+  extras: z.array(ScheduleExtraSchema).default([]),
   /**
    * Inwestor też „zużywa" czas: decyzje, zbieranie inspiracji, spotkania.
    * Bez tego rozróżnienia termin wychodzi optymistyczny w sposób, który

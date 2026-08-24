@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ChevronDown, Trash2 } from 'lucide-react';
 import { InlineText } from '../components/InlineText';
 import { NumberField } from '../components/NumberField';
+import { StageExtrasList } from './StageExtrasList';
 import type { RoomType } from '@/data/repos/room-types.repo';
 import type { ScheduleStage, StageOwner } from '@/domain/schedule';
 import { pl } from '@/i18n/pl';
@@ -22,6 +23,8 @@ export function StageRow({
   editing,
   onPatch,
   onRemove,
+  onRemoveExtra,
+  onExtraDays,
 }: {
   stage: ScheduleStage;
   roomTypes: RoomType[];
@@ -30,10 +33,19 @@ export function StageRow({
   editing: boolean;
   onPatch: (patch: Partial<ScheduleStage>) => void;
   onRemove: () => void;
+  /** Tylko dla etapu `extras` (T-64) — usuwanie i edycja pojedynczej usługi. */
+  onRemoveExtra?: (extraId: string) => void;
+  onExtraDays?: (extraId: string, days: number) => void;
 }) {
   const [matrixOpen, setMatrixOpen] = useState(false);
   const label = stage.name || pl.editor.newStageName;
   const zalezyOdPomieszczen = stage.roomScope !== 'none';
+  /*
+   * Etap zbiorczy nie ma własnych „dni bazowych" do edycji — jego liczba jest
+   * sumą składników. Pole do ręcznego wpisania byłoby pułapką: przy następnym
+   * dodaniu usługi i tak zostałoby przeliczone.
+   */
+  const zbiorczy = stage.kind === 'extras';
 
   return (
     <li
@@ -86,7 +98,7 @@ export function StageRow({
         ) : null}
       </div>
 
-      {editing ? (
+      {editing && !zbiorczy ? (
         <div className="flex flex-wrap items-center gap-2 pl-6">
           <label className="text-ink-soft flex items-center gap-1.5 text-xs">
             {pl.editor.stageBaseDays}
@@ -134,8 +146,17 @@ export function StageRow({
         </div>
       ) : null}
 
-      {editing && zalezyOdPomieszczen && matrixOpen ? (
+      {editing && !zbiorczy && zalezyOdPomieszczen && matrixOpen ? (
         <PerRoomMatrix stage={stage} roomTypes={roomTypes} label={label} onPatch={onPatch} />
+      ) : null}
+
+      {zbiorczy ? (
+        <StageExtrasList
+          extras={stage.extras}
+          editing={editing}
+          onRemove={(extraId) => onRemoveExtra?.(extraId)}
+          onDays={(extraId, dni) => onExtraDays?.(extraId, dni)}
+        />
       ) : null}
     </li>
   );

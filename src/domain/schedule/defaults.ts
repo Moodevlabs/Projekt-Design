@@ -18,7 +18,12 @@ import {
  * `id` powstają przy każdym wywołaniu, bo etap jest bytem konkretnej wyceny —
  * dwa dokumenty nie mogą dzielić identyfikatora.
  */
-export type StageTemplate = Omit<ScheduleStage, 'id'>;
+/**
+ * Szablon etapu — bez `id` i bez pól etapu zbiorczego. Szablon nigdy nie
+ * opisuje `extras` (T-64): ten etap zakłada most z cennika, a nie ustawienia
+ * studia.
+ */
+export type StageTemplate = Omit<ScheduleStage, 'id' | 'kind' | 'extras'>;
 
 const SZABLON: StageTemplate[] = [
   {
@@ -150,7 +155,12 @@ const SZABLON: StageTemplate[] = [
  * (`settings.scheduleTemplate`); `null` znaczy „użyj wbudowanego".
  */
 export function defaultScheduleStages(template: StageTemplate[] | null = null): ScheduleStage[] {
-  return (template ?? SZABLON).map((stage) => ({ ...stage, id: newId() }));
+  return (template ?? SZABLON).map((stage) => ({
+    ...stage,
+    id: newId(),
+    kind: 'normal' as const,
+    extras: [],
+  }));
 }
 
 /**
@@ -171,6 +181,8 @@ export function newStage(partial: Partial<ScheduleStage> = {}): ScheduleStage {
     roomScope: 'none',
     enabled: true,
     linkedItemTags: [],
+    kind: 'normal',
+    extras: [],
   };
 
   const kandydat: ScheduleStage = {
@@ -186,6 +198,8 @@ export function newStage(partial: Partial<ScheduleStage> = {}): ScheduleStage {
     ...(partial.roomScope === undefined ? {} : { roomScope: partial.roomScope }),
     ...(partial.enabled === undefined ? {} : { enabled: partial.enabled }),
     ...(partial.linkedItemTags === undefined ? {} : { linkedItemTags: partial.linkedItemTags }),
+    ...(partial.kind === undefined ? {} : { kind: partial.kind }),
+    ...(partial.extras === undefined ? {} : { extras: partial.extras }),
   };
 
   return ScheduleStageSchema.safeParse(kandydat).data ?? domyslny;

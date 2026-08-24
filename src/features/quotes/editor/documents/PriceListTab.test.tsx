@@ -99,6 +99,103 @@ describe('PriceListTab — przedział cen', () => {
   });
 });
 
+describe('PriceListTab — most z dwoma efektami (T-64)', () => {
+  function zUslugaNaDni(addedDays: number | null = 3) {
+    zaladuj();
+    useEditorStore.getState().ensurePriceListDoc(null);
+    useEditorStore.getState().patchPriceListDoc({ items: [] });
+    useEditorStore.getState().addPriceListItem({
+      name: 'Panorama 360',
+      priceMinCents: 45_000,
+      addedDays,
+    });
+  }
+
+  function harmonogram() {
+    return useEditorStore.getState().schedule;
+  }
+
+  async function otworzMost(user: ReturnType<typeof userEvent.setup>) {
+    await user.click(screen.getByText(pl.editor.addPriceListItemToQuote));
+  }
+
+  it('pozycja BEZ `addedDays` zostaje zwyklym linkiem, bez pytania', async () => {
+    // Jeden efekt nie potrzebuje wyboru — pytanie byloby ceremonia bez tresci.
+    const user = userEvent.setup();
+    zUslugaNaDni(null);
+    render(<PriceListTab editing />);
+
+    await user.click(screen.getByText(pl.editor.addPriceListItemToQuote));
+
+    expect(wycena()?.sections[0]?.items).toHaveLength(1);
+    expect(harmonogram()).toBeNull();
+  });
+
+  it('oba efekty naraz: pozycja w wycenie i dni w terminie', async () => {
+    const user = userEvent.setup();
+    zUslugaNaDni(3);
+    render(<PriceListTab editing />);
+
+    await otworzMost(user);
+    await user.click(screen.getByRole('button', { name: pl.editor.addToQuoteConfirm }));
+
+    expect(wycena()?.sections[0]?.items).toHaveLength(1);
+    const etap = harmonogram()?.stages.find((stage) => stage.kind === 'extras');
+    expect(etap?.baseDays).toBe(3);
+    expect(etap?.extras[0]?.name).toBe('Panorama 360');
+  });
+
+  it('odznaczony koszt dodaje TYLKO dni', async () => {
+    const user = userEvent.setup();
+    zUslugaNaDni(3);
+    render(<PriceListTab editing />);
+
+    await otworzMost(user);
+    await user.click(screen.getByRole('switch', { name: pl.editor.addToQuoteCost }));
+    await user.click(screen.getByRole('button', { name: pl.editor.addToQuoteConfirm }));
+
+    expect(wycena()?.sections[0]?.items ?? []).toHaveLength(0);
+    expect(harmonogram()?.stages.find((stage) => stage.kind === 'extras')?.baseDays).toBe(3);
+  });
+
+  it('odznaczony termin dodaje TYLKO pozycje', async () => {
+    const user = userEvent.setup();
+    zUslugaNaDni(3);
+    render(<PriceListTab editing />);
+
+    await otworzMost(user);
+    await user.click(screen.getByRole('switch', { name: pl.editor.addToQuoteSchedule(3) }));
+    await user.click(screen.getByRole('button', { name: pl.editor.addToQuoteConfirm }));
+
+    expect(wycena()?.sections[0]?.items).toHaveLength(1);
+    expect(harmonogram()).toBeNull();
+  });
+
+  it('bez harmonogramu uprzedza, ze go zalozy — i zaklada', async () => {
+    const user = userEvent.setup();
+    zUslugaNaDni(3);
+    render(<PriceListTab editing />);
+
+    await otworzMost(user);
+    expect(screen.getByText(pl.editor.addToQuoteScheduleNew)).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: pl.editor.addToQuoteConfirm }));
+    expect(harmonogram()).not.toBeNull();
+  });
+
+  it('oba przelaczniki odznaczone blokuja potwierdzenie', async () => {
+    const user = userEvent.setup();
+    zUslugaNaDni(3);
+    render(<PriceListTab editing />);
+
+    await otworzMost(user);
+    await user.click(screen.getByRole('switch', { name: pl.editor.addToQuoteCost }));
+    await user.click(screen.getByRole('switch', { name: pl.editor.addToQuoteSchedule(3) }));
+
+    expect(screen.getByRole('button', { name: pl.editor.addToQuoteConfirm })).toBeDisabled();
+  });
+});
+
 describe('PriceListTab — most do wyceny (F6.2)', () => {
   function zPozycja() {
     zaladuj();

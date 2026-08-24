@@ -513,6 +513,27 @@ export const pl = {
     priceListAddedToQuote: (name: string) => `Dodano do wyceny: ${name}`,
     priceListAddedToQuoteHint: (section: string) =>
       `Trafiło do sekcji „${section}” z dolną granicą przedziału — sprawdź kwotę.`,
+
+    // Most z dwoma efektami: koszt i termin (T-64).
+    priceListAddedDays: '+dni',
+    priceListAddedDaysLabel: (name: string) => `Dni doliczane do terminu: ${name}`,
+    priceListAddedDaysPlaceholder: 'dni',
+    priceListAddedDaysHint: 'Dni robocze wykonawcy doliczane po dodaniu usługi do wyceny.',
+    addToQuoteTitle: 'Co ma się zmienić?',
+    addToQuoteCost: 'Wycena — pozycja z kwotą',
+    addToQuoteSchedule: (days: number) =>
+      days === 1 ? 'Termin — +1 dzień roboczy' : `Termin — +${days} dni roboczych`,
+    addToQuoteScheduleNew: 'Wycena nie ma jeszcze terminu — założymy go.',
+    addToQuoteConfirm: 'Dodaj',
+    priceListAddedToSchedule: (name: string, days: number) =>
+      days === 1 ? `Termin dłuższy o 1 dzień: ${name}` : `Termin dłuższy o ${days} dni: ${name}`,
+    priceListNothingSelected: 'Zaznacz przynajmniej jeden efekt.',
+
+    // Etap zbiorczy „Usługi dodatkowe" w zakładce Termin.
+    extrasStageName: 'Usługi dodatkowe',
+    extrasStageHint: 'Dni z cennika dodatkowego. Suma składników poniżej.',
+    extrasEntryDaysLabel: (name: string) => `Dni usługi: ${name}`,
+    removeExtrasEntry: (name: string) => `Usuń z terminu: ${name}`,
     scheduleTitle: 'Szacowany termin',
     scheduleIntro:
       'Etapy z dniami po stronie wykonawcy i inwestora. Etapy zależne od pomieszczeń liczą się z tych samych pomieszczeń co wycena.',

@@ -29,6 +29,18 @@ export const PriceListItemSchema = z.object({
   unit: z.string().default(''),
   /** Termin realizacji, wolny tekst („4–7 dni roboczych"). */
   leadTime: z.string().default(''),
+  /**
+   * Ile dni roboczych **wykonawcy** dokłada ta usługa do terminu (T-64).
+   *
+   * Osobne pole obok `leadTime`, bo to dwie różne rzeczy: `leadTime` jest
+   * tekstem dla klienta w PDF („4–7 dni roboczych"), a `addedDays` liczbą,
+   * którą umie policzyć harmonogram. Próba wyciągnięcia liczby z tekstu
+   * dawałaby ciche pomyłki przy każdym „ok. 2 tygodnie".
+   *
+   * `null` = „nie wiadomo / nie dotyczy" i wtedy most nie proponuje terminu.
+   * Zero znaczyłoby „ta usługa niczego nie wydłuża" — to inna informacja.
+   */
+  addedDays: z.number().int().min(0).nullable().default(null),
   /** Nagłówek grupy, np. „Opracowania techniczne". Pusty = pozycja luźna. */
   sectionLabel: z.string().default(''),
 });
@@ -58,6 +70,7 @@ export function newPriceListItem(partial: Partial<PriceListItem> = {}): PriceLis
     priceMaxCents: null,
     unit: '',
     leadTime: '',
+    addedDays: null,
     sectionLabel: '',
   };
 
@@ -70,6 +83,7 @@ export function newPriceListItem(partial: Partial<PriceListItem> = {}): PriceLis
     ...(partial.priceMaxCents === undefined ? {} : { priceMaxCents: partial.priceMaxCents }),
     ...(partial.unit === undefined ? {} : { unit: partial.unit }),
     ...(partial.leadTime === undefined ? {} : { leadTime: partial.leadTime }),
+    ...(partial.addedDays === undefined ? {} : { addedDays: partial.addedDays }),
     ...(partial.sectionLabel === undefined ? {} : { sectionLabel: partial.sectionLabel }),
   };
 

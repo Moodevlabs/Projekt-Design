@@ -41,6 +41,7 @@ describe('szablon cennika usług dodatkowych', () => {
         priceMaxCents: null,
         unit: '',
         leadTime: '',
+        addedDays: null,
         sectionLabel: '',
       },
     ]);
@@ -62,6 +63,7 @@ describe('newPriceListItem', () => {
     expect(() => JSON.stringify(item)).not.toThrow();
     expect(Object.keys(item).sort()).toEqual(
       [
+        'addedDays',
         'description',
         'id',
         'leadTime',

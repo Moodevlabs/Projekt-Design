@@ -27,6 +27,9 @@ import {
 import {
   newScheduleBody,
   newStage,
+  withExtra,
+  withExtraDays,
+  withoutExtra,
   type ScheduleBody,
   type ScheduleStage,
   type StageTemplate,
@@ -155,6 +158,18 @@ export interface EditorState {
   updateStage: (stageId: string, patch: Partial<ScheduleStage>) => void;
   addStage: (partial?: Partial<ScheduleStage>) => void;
   removeStage: (stageId: string) => void;
+  /**
+   * Dni z usługi dodatkowej (T-64). Zakłada harmonogram, jeśli go nie ma —
+   * `stageName` i `template` przychodzą z UI, bo store nie zna i18n ani
+   * ustawień workspace.
+   */
+  addScheduleExtra: (
+    extra: { name: string; days: number },
+    stageName: string,
+    template?: StageTemplate[] | null,
+  ) => void;
+  removeScheduleExtra: (extraId: string) => void;
+  updateScheduleExtraDays: (extraId: string, days: number) => void;
 
   // --- dokumenty towarzyszące (F6.1) ---
   /** Zakłada dokument „Etapy współpracy", jeśli wycena go nie ma. */
@@ -430,6 +445,29 @@ export const useEditorStore = create<EditorState>()(
       set((state) => {
         if (!state.schedule) return;
         state.schedule.stages = state.schedule.stages.filter((stage) => stage.id !== stageId);
+        state.saveState = 'dirty';
+      }),
+
+    addScheduleExtra: (extra, stageName, template = null) =>
+      set((state) => {
+        // Bez harmonogramu nie ma gdzie dopisać dni — zakładamy go, zamiast po
+        // cichu nic nie zrobić. Most i tak pyta o zgodę przełącznikiem.
+        if (!state.schedule) state.schedule = newScheduleBody({}, template ?? null);
+        state.schedule = withExtra(state.schedule, extra, stageName);
+        state.saveState = 'dirty';
+      }),
+
+    removeScheduleExtra: (extraId) =>
+      set((state) => {
+        if (!state.schedule) return;
+        state.schedule = withoutExtra(state.schedule, extraId);
+        state.saveState = 'dirty';
+      }),
+
+    updateScheduleExtraDays: (extraId, days) =>
+      set((state) => {
+        if (!state.schedule) return;
+        state.schedule = withExtraDays(state.schedule, extraId, days);
         state.saveState = 'dirty';
       }),
 

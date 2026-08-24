@@ -1,15 +1,14 @@
 import { useEffect } from 'react';
-import { ArrowRight, Plus, Trash2 } from 'lucide-react';
-import { toast } from 'sonner';
+import { Plus, Trash2 } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
 import { InlineText } from '../components/InlineText';
 import { InlineMoney } from '../components/InlineMoney';
 import { NumberField } from '../components/NumberField';
 import { AddLink } from '../components/AddLink';
+import { AddToQuoteBridge } from './AddToQuoteBridge';
 import { useEditorStore } from '../editor.store';
 import { useWorkspace } from '@/data/queries/useWorkspace';
 import { groupPriceListItems, type PriceListItem } from '@/domain/documents';
-import { convertUnits, newItem } from '@/domain/quote';
 import { formatMoneyRange } from '@/domain/money';
 import { pl } from '@/i18n/pl';
 
@@ -32,7 +31,6 @@ export function PriceListTab({ editing }: { editing: boolean }) {
   const removeItem = useEditorStore((state) => state.removePriceListItem);
 
   const template = useWorkspace().data?.settings.priceListTemplate ?? null;
-  const addToQuote = useAddToQuote();
 
   useEffect(() => {
     // Jak przy etapach: zakładamy przy pierwszym wejściu i tylko w edycji.
@@ -80,7 +78,6 @@ export function PriceListTab({ editing }: { editing: boolean }) {
                   editing={editing}
                   onPatch={(patch) => updateItem(item.id, patch)}
                   onRemove={() => removeItem(item.id)}
-                  onAddToQuote={() => addToQuote(item)}
                 />
               ))}
             </ul>
@@ -116,13 +113,11 @@ function PriceListRow({
   editing,
   onPatch,
   onRemove,
-  onAddToQuote,
 }: {
   item: PriceListItem;
   editing: boolean;
   onPatch: (patch: Partial<PriceListItem>) => void;
   onRemove: () => void;
-  onAddToQuote: () => void;
 }) {
   const label = item.name || pl.editor.newPriceListItemName;
 
@@ -169,6 +164,22 @@ function PriceListRow({
               className="inline-field mt-1 text-right text-[12px] text-[var(--doc-ink-soft)]"
             />
           ) : null}
+          {/*
+            `addedDays` widac tylko w edycji — to liczba dla harmonogramu,
+            a nie tresc dla klienta. Klient czyta `leadTime` (T-64).
+          */}
+          {editing ? (
+            <label className="mt-1 flex items-center justify-end gap-1 text-[12px] text-[var(--doc-ink-soft)]">
+              {pl.editor.priceListAddedDays}
+              <NumberField
+                value={item.addedDays ?? 0}
+                onCommit={(addedDays) => onPatch({ addedDays: addedDays > 0 ? addedDays : null })}
+                min={0}
+                ariaLabel={pl.editor.priceListAddedDaysLabel(label)}
+                className="w-12 text-right"
+              />
+            </label>
+          ) : null}
         </div>
 
         {editing ? (
@@ -183,16 +194,7 @@ function PriceListRow({
         ) : null}
       </div>
 
-      {editing ? (
-        <AddLink
-          icon={ArrowRight}
-          onClick={() => onAddToQuote()}
-          className="mt-1.5 text-[12px]"
-          aria-label={pl.editor.addPriceListItemToQuoteLabel(label)}
-        >
-          {pl.editor.addPriceListItemToQuote}
-        </AddLink>
-      ) : null}
+      {editing ? <AddToQuoteBridge item={item} /> : null}
     </li>
   );
 }
@@ -239,55 +241,4 @@ function PriceRangeFields({
       />
     </div>
   );
-}
-
-/**
- * Most do wyceny (F6.2): „Dodaj do wyceny jako pozycję".
- *
- * Bierze **dolną granicę** przedziału — z widełek trzeba wybrać jedną liczbę,
- * a wpisanie górnej zawyżyłoby ofertę bez pytania. Mówimy o tym w komunikacie,
- * bo to jest decyzja, nie oczywistość.
- *
- * W wycenie godzinowej kwota jest przeliczana po stawce dokumentu — ta sama
- * zasada co przy bibliotece. Bez stawki odmawiamy: 300 zł wstawione jako
- * 300 minut to błąd, którego nikt by nie zauważył.
- */
-function useAddToQuote() {
-  const insertItems = useEditorStore((state) => state.insertItems);
-  const addSection = useEditorStore((state) => state.addSection);
-
-  return (item: PriceListItem) => {
-    const body = useEditorStore.getState().body;
-    if (!body) return;
-
-    const kwota = convertUnits(
-      item.priceMinCents,
-      'amount',
-      body.pricingBasis,
-      body.hourlyRateCents,
-    );
-    if (kwota === null) {
-      toast.error(pl.editor.libraryBasisMismatch);
-      return;
-    }
-
-    // Bez sekcji nie ma gdzie wstawic pozycji — zakladamy jedna, zamiast
-    // po cichu nic nie zrobic.
-    if (body.sections.length === 0) addSection();
-
-    const sekcja = useEditorStore.getState().body?.sections.at(-1);
-    if (!sekcja) return;
-
-    insertItems(sekcja.id, null, [
-      newItem({
-        name: item.name,
-        description: item.description,
-        unitPriceCents: kwota,
-      }),
-    ]);
-
-    toast.success(pl.editor.priceListAddedToQuote(item.name || pl.editor.newPriceListItemName), {
-      description: pl.editor.priceListAddedToQuoteHint(sekcja.title),
-    });
-  };
 }

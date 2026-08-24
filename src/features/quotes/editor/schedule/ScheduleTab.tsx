@@ -31,6 +31,8 @@ export function ScheduleTab({ editing }: { editing: boolean }) {
   );
 
   const ensureSchedule = useEditorStore((state) => state.ensureSchedule);
+  const removeExtra = useEditorStore((state) => state.removeScheduleExtra);
+  const updateExtraDays = useEditorStore((state) => state.updateScheduleExtraDays);
   const patchSchedule = useEditorStore((state) => state.patchSchedule);
   const updateStage = useEditorStore((state) => state.updateStage);
   const addStage = useEditorStore((state) => state.addStage);
@@ -116,6 +118,8 @@ export function ScheduleTab({ editing }: { editing: boolean }) {
               editing={editing}
               onPatch={(patch) => updateStage(stage.id, patch)}
               onRemove={() => removeStage(stage.id)}
+              onRemoveExtra={removeExtra}
+              onExtraDays={updateExtraDays}
             />
           ))}
         </ul>
