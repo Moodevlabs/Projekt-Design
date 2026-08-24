@@ -9,8 +9,10 @@ export const routes = {
   project: (clientId: string, projectId: string) => `/klienci/${clientId}/projekty/${projectId}`,
   library: '/biblioteka',
   templates: '/szablony',
+  /** Alias sprzed T-58 — Branding jest teraz sekcja Ustawien. */
   brand: '/branding',
   settings: '/ustawienia',
+  settingsBranding: '/ustawienia/branding',
   subscription: '/subskrypcja',
   login: '/logowanie',
   register: '/rejestracja',

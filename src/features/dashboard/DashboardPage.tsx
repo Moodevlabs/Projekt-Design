@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { ActiveProjects } from './ActiveProjects';
 import { RecentQuotes } from './RecentQuotes';
 import { MonthLedger } from './MonthLedger';
 import { DashboardEmptyState } from './DashboardEmptyState';
@@ -33,6 +34,10 @@ export function DashboardPage() {
           pulpit ma juz co pokazac, a dwa kroki moga byc wciaz do zrobienia.
         */}
         {!loading && !error ? <OnboardingChecklist hasQuotes={rows.length > 0} /> : null}
+
+        {/* Od T-58 pulpit prowadzi do KLIENTOW, nie do wycen — blok teczek
+            w toku stoi nad lista ostatnich ofert (05-UI §3). */}
+        <ActiveProjects />
 
         {empty ? (
           <DashboardEmptyState />

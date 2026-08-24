@@ -54,6 +54,8 @@ export const pl = {
   quotes: {
     title: 'Wyceny',
     new: 'Nowa wycena',
+    newDialogHint: 'Wybierz klienta i projekt — dane inwestora wypełnią się same.',
+    withoutClient: 'Bez klienta',
     number: 'Numer',
     client: 'Klient',
     quoteTitle: 'Tytuł',
@@ -135,6 +137,14 @@ export const pl = {
     duplicated: 'Utworzono kopię wyceny',
     archivedToast: 'Wycena usunięta',
     loadError: 'Nie udało się wczytać wycen.',
+  },
+  search: {
+    title: 'Szukaj',
+    description: 'Znajdź klienta, projekt, wycenę albo usługę.',
+    placeholder: 'Szukaj klienta, projektu, wyceny…',
+    empty: 'Nic nie znaleziono.',
+    actions: 'Akcje',
+    open: 'Otwórz wyszukiwarkę',
   },
   clients: {
     title: 'Klienci',
@@ -729,6 +739,8 @@ export const pl = {
     itemsCount: (count: number) => `${count} poz.`,
   },
   dashboard: {
+    activeProjects: 'Aktywni klienci i projekty',
+    activeProjectsEmpty: 'Brak projektów w toku. Zacznij od dodania klienta.',
     title: 'Pulpit',
     quotesThisMonth: 'Wyceny w tym miesiącu',
     sentValue: 'Wartość wysłanych',
@@ -1067,6 +1079,7 @@ export const pl = {
   },
 
   settings: {
+    general: 'Ogólne',
     title: 'Ustawienia',
     sectionQuotes: 'Domyślne dla wycen',
     currency: 'Waluta',

@@ -115,3 +115,40 @@ describe('Sidebar — rozwijanie', () => {
     expect(screen.getByRole('navigation')).toHaveAttribute('data-expanded', 'true');
   });
 });
+
+describe('Sidebar — kolejnosc i zakres (T-58)', () => {
+  it('kolejnosc z 05-UI §2: Pulpit · Klienci · Wyceny · Biblioteka · Szablony · Ustawienia', () => {
+    // Klienci PRZED wycenami: od T-53 to oni sa osia aplikacji.
+    expect(NAV_ITEMS.map((item) => item.label)).toEqual([
+      pl.nav.dashboard,
+      pl.nav.clients,
+      pl.nav.quotes,
+      pl.nav.library,
+      pl.nav.templates,
+      pl.nav.settings,
+    ]);
+  });
+
+  it('Branding zniknal z sidebara — wszedl do Ustawien', () => {
+    renderAt('/');
+    expect(screen.queryByRole('link', { name: pl.nav.brand })).not.toBeInTheDocument();
+  });
+
+  it('trasa /branding dalej podswietla Ustawienia — alias nie moze gubic kontekstu', () => {
+    // Zapisane linki sprzed T-58 maja dzialac, ale to juz sekcja Ustawien.
+    renderAt('/ustawienia/branding');
+    expect(screen.getByRole('link', { name: pl.nav.settings })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+  });
+
+  it('zaznacza klientow na trasie projektu', () => {
+    // `/klienci/:id/projekty/:pid` — dwa poziomy zagniezdzenia (§9.8).
+    renderAt('/klienci/abc/projekty/xyz');
+    expect(screen.getByRole('link', { name: pl.nav.clients })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+  });
+});

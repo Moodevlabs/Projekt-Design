@@ -16,6 +16,16 @@ vi.mock('@/data/queries/useSubscription', () => ({ useSubscription }));
 vi.mock('@/data/queries/useBrandKit', () => ({ useBrandKit }));
 vi.mock('@/data/queries/useLibrary', () => ({ useAllLibraryItems }));
 
+// Blok „Aktywni klienci i projekty" (T-58) pyta o teczki.
+vi.mock('@/data/queries/useProjects', () => ({
+  useProjects: () => ({ data: [], isLoading: false, isError: false }),
+}));
+
+vi.mock('@/data/queries/useClients', () => ({
+  useCreateClient: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useUpdateClient: () => ({ mutateAsync: vi.fn(), isPending: false }),
+}));
+
 const { DashboardPage } = await import('./DashboardPage');
 
 /** Wycena utworzona w bieżącym miesiącu — statystyki liczą po `createdAt`. */

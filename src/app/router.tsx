@@ -18,6 +18,7 @@ import { LibraryPage } from '@/features/library/LibraryPage';
 import { TemplatesPage } from '@/features/templates/TemplatesPage';
 import { BrandSettingsPage } from '@/features/brand/BrandSettingsPage';
 import { SettingsPage } from '@/features/settings/SettingsPage';
+import { SettingsLayout } from '@/features/settings/SettingsLayout';
 import { SubscriptionPage } from '@/features/billing/SubscriptionPage';
 import { pl } from '@/i18n/pl';
 
@@ -63,8 +64,25 @@ const routeTree = [
               },
               { path: 'biblioteka', element: <LibraryPage />, handle: { title: pl.library.title } },
               { path: 'szablony', element: <TemplatesPage />, handle: { title: pl.templates.title } },
-              { path: 'branding', element: <BrandSettingsPage />, handle: { title: pl.brand.title } },
-              { path: 'ustawienia', element: <SettingsPage />, handle: { title: pl.settings.title } },
+              {
+                /*
+                 * Alias sprzed T-58: Branding byl osobna pozycja sidebara.
+                 * Zostaje, zeby zapisane linki i stare testy dalej dzialaly.
+                 */
+                path: 'branding',
+                element: <SettingsLayout />,
+                handle: { title: pl.settings.title },
+                children: [{ index: true, element: <BrandSettingsPage /> }],
+              },
+              {
+                path: 'ustawienia',
+                element: <SettingsLayout />,
+                handle: { title: pl.settings.title },
+                children: [
+                  { index: true, element: <SettingsPage /> },
+                  { path: 'branding', element: <BrandSettingsPage /> },
+                ],
+              },
               {
                 path: 'subskrypcja',
                 element: <SubscriptionPage />,

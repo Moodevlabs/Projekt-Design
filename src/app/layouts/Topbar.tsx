@@ -1,11 +1,31 @@
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { Plus, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { routes } from '@/app/routes';
+import { CommandPalette } from '@/features/search/CommandPalette';
+import { NewQuoteDialog } from '@/features/quotes/list/NewQuoteDialog';
 import { pl } from '@/i18n/pl';
 
 export function Topbar({ title }: { title: string }) {
-  const navigate = useNavigate();
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [newQuoteOpen, setNewQuoteOpen] = useState(false);
+
+  /*
+   * `⌘/Ctrl+K` otwiera paletę (05-UI §5).
+   *
+   * Przechwytujemy na `window`, a nie na przycisku: skrót ma działać
+   * z dowolnego miejsca strony, a nie tylko wtedy, gdy fokus stoi akurat
+   * na wyszukiwarce.
+   */
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        setSearchOpen((open) => !open);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
 
   return (
     <header className="glass sticky top-0 z-10 flex h-[68px] shrink-0 items-center gap-4 px-7">
@@ -16,9 +36,9 @@ export function Topbar({ title }: { title: string }) {
       <div className="ml-auto flex items-center gap-2.5">
         <button
           type="button"
-          disabled
-          aria-label={`${pl.common.search} (${pl.common.soon})`}
-          className="text-ink-soft flex h-9 w-64 cursor-not-allowed items-center gap-2 rounded-[var(--radius-pill)] border border-white/60 bg-white/45 px-3.5 text-sm"
+          onClick={() => setSearchOpen(true)}
+          aria-label={pl.search.open}
+          className="text-ink-soft hover:text-ink flex h-9 w-64 items-center gap-2 rounded-[var(--radius-pill)] border border-white/60 bg-white/45 px-3.5 text-sm transition-colors"
         >
           <Search className="size-4 shrink-0" aria-hidden />
           <span>{pl.common.search}</span>
@@ -27,14 +47,22 @@ export function Topbar({ title }: { title: string }) {
           </kbd>
         </button>
 
+        {/*
+          „Nowa wycena" pyta o klienta i projekt (koncepcja §2 K3), zamiast
+          zakładać dokument bez przypisania. Bez klienta też można — ale to
+          teraz decyzja, a nie domyślny efekt kliknięcia.
+        */}
         <Button
-          onClick={() => void navigate(routes.quoteNew)}
+          onClick={() => setNewQuoteOpen(true)}
           className="h-9 rounded-[var(--radius-pill)] px-4 shadow-[0_4px_14px_-4px_rgba(20,22,28,0.5)]"
         >
           <Plus className="size-4" aria-hidden />
           {pl.quotes.new}
         </Button>
       </div>
+
+      <CommandPalette open={searchOpen} onOpenChange={setSearchOpen} />
+      <NewQuoteDialog open={newQuoteOpen} onOpenChange={setNewQuoteOpen} />
     </header>
   );
 }

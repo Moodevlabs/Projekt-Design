@@ -11,6 +11,30 @@ vi.mock('@/data/queries/useWorkspace', () => ({
 
 // Licznik okresu próbnego w panelu bocznym pyta o subskrypcję. Powłoka nie ma
 // o tym nic do powiedzenia — `TrialBar` ma własne testy.
+/*
+ * Od T-58 `Topbar` montuje paletę ⌘K i dialog „Nowa wycena", a te pytają
+ * o klientów, projekty i wyceny. Powłokę testujemy w izolacji od danych —
+ * same zapytania mają własne testy.
+ */
+vi.mock('@/data/queries/useClients', () => ({
+  useClients: () => ({ data: [] }),
+  useCreateClient: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useUpdateClient: () => ({ mutateAsync: vi.fn(), isPending: false }),
+}));
+
+vi.mock('@/data/queries/useProjects', () => ({
+  useProjects: () => ({ data: [] }),
+}));
+
+vi.mock('@/data/queries/useQuotes', () => ({
+  useQuotesList: () => ({ data: [] }),
+  useCreateQuote: () => ({ mutateAsync: vi.fn(), isPending: false }),
+}));
+
+vi.mock('@/data/queries/useLibrary', () => ({
+  useLibraryItems: () => ({ data: [] }),
+}));
+
 vi.mock('@/features/billing/useEntitlement', () => ({
   useEntitlement: () => ({ canWrite: true, reason: 'active', loading: true }),
 }));

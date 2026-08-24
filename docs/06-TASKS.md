@@ -510,10 +510,21 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > **Zweryfikowane na żywo:** `supabase db reset` przepuścił `0018` razem z seedem; `pnpm test:db` — 111 zielonych, w tym pełny przepływ z koncepcji §11 (v1 → v2 → akceptacja z zastąpieniem → jeden `accepted` w projekcie) i odbicie drugiej akceptacji przez indeks.
   > **Nie zweryfikowane na żywo:** grupowanie wersji w rejestrze `/wyceny` — `QuotesByLineage` wpięte jest na razie **tylko w zakładce projektu**. W rejestrze wyceny różnych klientów mieszają się ze sobą i zwijanie linii wymaga decyzji, czy grupować ponad klientami; zostawione świadomie do T-58, które i tak przebudowuje nawigację i listy.
 
-- [ ] **T-58 Pulpit i nawigacja pod klienta + paleta ⌘K** (FEATURES-Z-KONCEPCJI §2 K3, 05-UI §2–3)
+- [x] **T-58 Pulpit i nawigacja pod klienta + paleta ⌘K** (FEATURES-Z-KONCEPCJI §2 K3, 05-UI §2–3)
   Sidebar: Pulpit · Klienci · Wyceny · Biblioteka · Szablony · Ustawienia (Branding jako sekcja Ustawień, `/branding` alias); blok „Aktywni klienci i projekty" + „Nowy klient" na pulpicie; „Nowa wycena" pyta o klienta/projekt; paleta ⌘K (`command` z shadcn — bez nowej zależności): klienci, projekty, wyceny, usługi, akcje; `useMatch` z `end: false` dla tras zagnieżdżonych.
   ✅ Po zalogowaniu pierwszy ekran prowadzi do klientów; ⌘K znajduje klienta po fragmencie nazwy i otwiera kartę; testy `Sidebar`/`AppShell` zaktualizowane (mockują `useEntitlement`).
   ⚠️ Zabiera część **T-21** (paleta) — tryb ciemny i skróty zostają w fazie 2.
+
+  > **Zrobione.** Sidebar w kolejności z 05-UI §2 (Klienci przed Wycenami, bez Brandingu), `SettingsLayout` z sekcjami i `/branding` jako alias, blok „Aktywni klienci i projekty" na pulpicie, `NewQuoteDialog` (klient + projekt, „bez klienta" zostaje), `CommandPalette` pod ⌘K. 16 nowych testów; 1162 zielone.
+  > **Na co uważać:**
+  > - **`CommandDialog` z shadcn NIE przepuszcza `shouldFilter` do `cmdk`** — spread leci do `Dialog`, więc flaga po cichu nic nie robi. Paleta składa `Dialog` + `Command` sama. To nie kosmetyka: filtruje Postgres, a drugie sito po `value` (u nas `client-<id>`) ukryłoby wszystko, co serwer właśnie znalazł.
+  > - **Zapytania palety ruszają dopiero po otwarciu.** Komponent wisi zamontowany w powłoce przez całe życie aplikacji — bez `enabled` cztery zapytania chodziłyby przy każdym wejściu na dowolny ekran.
+  > - **Branding jest osobną TRASĄ, nie zakładką w stanie.** To pełnoekranowy formularz z podglądem PDF-a; wciśnięcie go w kolumnę `max-w-2xl` reszty ustawień zjadłoby ten podgląd. `/branding` renderuje `SettingsLayout`, więc alias nie gubi kontekstu nawigacji — jest na to test.
+  > - **`activeNavIndex` (startsWith) zostaje zamiast `useMatch`.** Zadanie sugerowało `useMatch({ end: false })`, ale istniejący helper robi dokładnie to samo, jest czysty i ma testy — wymiana byłaby zmianą dla zmiany. Trasy dwupoziomowe (`/klienci/:id/projekty/:pid`) pokryte testem.
+  > - **„Nowa wycena" pyta, ale „bez klienta" ZOSTAJE** (koncepcja §2 reguła 2). Szybka wycena „na już" to prawdziwy przypadek; różnica jest taka, że to teraz świadomy wybór, a nie domyślny efekt kliknięcia. Wybór klienta od razu przepisuje jego dane do dokumentu (snapshot).
+  > - **Zmiana klienta w dialogu zeruje projekt** — teczki należą do konkretnego klienta, ta sama zasada co w `setClient` w edytorze.
+  > - Blok pulpitu pokazuje **projekty**, nie klientów: klient bez inwestycji to kontakt, a nie praca. `done`/`canceled` odsiewamy — to historia, a nie to, do czego się wraca rano.
+  > **Nie zweryfikowane na żywo:** sam skrót ⌘K w zbudowanej aplikacji (testy klikają w przycisk, nie w klawiaturę) i wygląd nowego układu Ustawień — do przeklikania przy `pnpm tauri dev`.
 
 - [ ] **T-59 Biblioteka: grupy (słownik), zestawy, zakładki, Pomieszczenia** (FEATURES-Z-KONCEPCJI §5 B1, 05-UI §3)
   Migracja `library_categories` + `library_items.category_id` + migracja danych z tekstowej `category` (kolumna zostaje jedną wersję); zakładki **Usługi | Grupy | Zestawy | Pomieszczenia | Stawki**; zakładka Grupy (drag, kod, kolor z palety, licznik, soft delete → usługi do „Bez grupy"); „Grupy → Zestawy" w i18n; `RoomTypesSection` w bibliotece (ten sam komponent, link z Ustawień); lista usług: pigułki grup, licznik, kolumny, lista–siatka, „Pokaż więcej" po 50, split-button „Dodaj ▾"; import CSV dopasowuje `grupa` do słownika (nieznana → tworzy).
