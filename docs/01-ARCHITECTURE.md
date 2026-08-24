@@ -14,7 +14,7 @@
 | PDF | @react-pdf/renderer w webview | Deklaratywne layouty, łatwy branding, embed fontów, paginacja za darmo. Rust/`printpdf` = za dużo pracy; `window.print()` = brak kontroli. |
 | Płatności | Stripe Checkout + Portal + webhook → Supabase | Zero PCI, subskrypcje, faktury, dunning – wszystko u Stripe. Aplikacja czyta tylko tabelę `subscriptions`. |
 | Sesja | `tauri-plugin-stronghold` (lub `keyring`) | Refresh token nie w localStorage webview. |
-| Linki zewnętrzne | `tauri-plugin-opener` + `tauri-plugin-deep-link` (`anzorge://`) | Checkout/OAuth w przeglądarce systemowej, powrót do aplikacji. |
+| Linki zewnętrzne | `tauri-plugin-opener` + `tauri-plugin-deep-link` (`anzorge://`; od T-65 `toolier://`) | Checkout/OAuth w przeglądarce systemowej, powrót do aplikacji. |
 
 ## 2. Struktura repo
 
@@ -40,7 +40,9 @@ anzorge/
 │   │   │   ├── factory.ts      # newQuote(), newItem(), fromTemplate()
 │   │   │   ├── reorder.ts      # moveItem(), moveGroup()
 │   │   │   └── calc.test.ts
-│   │   ├── library/schema.ts
+│   │   ├── library/schema.ts   # + units.ts (jednostki), categories
+│   │   ├── client/schema.ts    # Client, Project, statusy (T-53/54)
+│   │   ├── files/schema.ts     # File, FileKind, DocType, isAllowedExtension (T-55)
 │   │   ├── brand/schema.ts
 │   │   ├── money.ts            # formatMoney(grosze, currency), parseMoney()
 │   │   └── numbering.ts        # generateQuoteNumber(pattern, seq, date)
@@ -50,6 +52,9 @@ anzorge/
 │   │   │   ├── quotes.repo.ts
 │   │   │   ├── library.repo.ts
 │   │   │   ├── templates.repo.ts
+│   │   │   ├── clients.repo.ts     # T-53
+│   │   │   ├── projects.repo.ts    # T-54
+│   │   │   ├── files.repo.ts       # Storage (bucket `files`) + tabela `files` w jednym repo (T-55)
 │   │   │   ├── workspace.repo.ts
 │   │   │   └── subscription.repo.ts
 │   │   ├── queries/            # hooki TanStack Query, 1 plik per repo
@@ -68,9 +73,13 @@ anzorge/
 │   │   │       ├── useAutosave.ts
 │   │   │       ├── components/ (QuoteHeader, SectionBlock, GroupBlock, ItemRow, TotalsCard, LibraryPicker, ...)
 │   │   │       └── dnd/                # @dnd-kit
-│   │   ├── library/
+│   │   ├── clients/            # ClientsPage, ClientPage (zakładki), ClientForm, ClientPicker (T-53)
+│   │   ├── projects/           # ProjectPage (zakładki Wyceny/Dokumenty/Pliki/Notatki), ProjectForm (T-54)
+│   │   ├── files/              # FilesTab (drag&drop, lista), DocumentsTab (archiwum PDF), useUpload (T-55/56)
+│   │   ├── library/            # items/ groups(=Zestawy)/ categories/ pricing/ rooms/ service-editor/ (T-59…62)
 │   │   ├── templates/
-│   │   ├── brand/              # BrandSettingsPage + LivePdfPreview
+│   │   ├── brand/              # BrandSettingsPage + LivePdfPreview (sekcja Ustawień od T-58)
+│   │   ├── command/            # paleta ⌘K (T-58)
 │   │   └── settings/
 │   ├── pdf/
 │   │   ├── QuotePdfDocument.tsx        # @react-pdf/renderer
@@ -111,6 +120,9 @@ UI (features/*) ──► queries (TanStack) ──► repos ──► supabase-
        └── domain/* (calc, schema) — używane wszędzie, nie zależy od niczego
 ```
 
+- **Pliki** (T-55): `features/files` → `useFiles` → `files.repo` → **Storage (bajty) + tabela `files` (metadane)**. Kolejność uploadu: obiekt → wiersz; nieudany wiersz kasuje obiekt. Lista zawsze z tabeli, nigdy z listowania bucketa. Pobieranie: signed URL (60 s) → w Tauri `save_file`, w przeglądarce `<a download>`. Upload: w Tauri `dialog.open` / `onDragDropEvent` (ścieżki), w przeglądarce `<input type=file>` / `File` — obie ścieżki za wspólnym adapterem w `lib/tauri.ts`, jak przy zapisie PDF.
+- **Archiwum dokumentów** (T-56): jedno wejście w `pdf/export.ts` po udanym renderze woła `files.repo.archiveGeneratedPdf` — nie pięć osobnych hooków eksportu.
+- **Klient w wycenie to snapshot** (`body.client`) kopiowany z `clients` przy tworzeniu wyceny w projekcie; kolumny `quotes.client_name`/`city` są kopią z `body` (jak dotąd) i zapisują się w `saveQuote`.
 - Edytor trzyma **cały dokument wyceny** w Zustand. Każda zmiana → `calcQuoteTotals()` → derived selectors. Autosave wysyła cały `body` JSONB + zdenormalizowane `total_cents`, `status`, `client_name`.
 - Konflikt zapisu: `quotes.updated_at` porównywane optymistycznie (`.eq('updated_at', lastSeen)`); przy konflikcie toast „Wycena zmieniona w innym miejscu — przeładuj".
 
@@ -147,7 +159,7 @@ const QuoteBody = z.object({
 Komendy:
 - `save_file(bytes, suggested_name) -> path` (dialog + zapis)
 - `open_path(path)` (po zapisie PDF)
-- deep link handler `anzorge://auth/callback?...` i `anzorge://billing/success`
+- deep link handler `toolier://auth/callback?...` i `toolier://billing/success` (do T-65 jeszcze `anzorge://`)
 - updater (faza 2)
 
 Capabilities (`capabilities/default.json`): tylko `dialog:allow-save`, `fs:allow-write` w zakresie wybranym przez użytkownika, `opener:allow-open-url` dla whitelisty (`https://checkout.stripe.com`, `https://billing.stripe.com`, Supabase auth URL), `deep-link`.

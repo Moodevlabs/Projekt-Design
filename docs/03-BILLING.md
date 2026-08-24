@@ -1,7 +1,8 @@
 # 03 — Subskrypcja i Stripe
 
 ## 1. Produkty w Stripe
-- Product „Anzorge": price `monthly` 19,99 PLN/mies., `yearly` 199 PLN/rok.
+- Product „Toolier": price `monthly` **98,99 PLN/mies.**, `yearly` **999,99 PLN/rok** (roczna = ~10 miesięcy w cenie 12; ekran subskrypcji pokazuje oszczędność).
+  **Zmiana ceny 2026-08-24** (wcześniej 19,99 / 199 pod nazwą „Anzorge"). Stripe nie pozwala edytować kwoty istniejącego `price` — tworzymy **nowe** ceny z `lookup_key` `toolier_monthly` / `toolier_yearly`, stare archiwizujemy (nie kasujemy: mogą być na nich istniejące subskrypcje testowe). Kwoty w UI tylko z `pl.billing.prices` (i18n) — jedno miejsce. Zadanie: T-66.
   **Nazwa produktu jest widoczna dla klienta na stronie płatności** — nie ma tu żadnego „Pro”, bo nie ma wersji darmowej. Płaci się za korzystanie z aplikacji; miesięcznie albo rocznie. Tax: ceny brutto (`tax_behavior: inclusive`), włączony Stripe Tax (VAT PL / OSS).
 - Trial nie jest w Stripe — trial jest **nasz** (`subscriptions.trial_ends_at` nadawany przy signup). Dzięki temu nie wymagamy karty i Stripe customer powstaje dopiero przy pierwszym checkout.
 - Customer Portal: włączone zmiana planu, anulowanie na koniec okresu, faktury.
@@ -12,7 +13,7 @@
 [App] "Aktywuj dostęp" ──invoke──► Edge fn stripe-create-checkout (JWT usera)
    └─ tworzy/odnajduje customer (metadata.workspace_id), session.url
 [App] opener.openUrl(session.url)  ──► przeglądarka systemowa, Stripe Checkout
-   success_url = anzorge://billing/success   cancel_url = anzorge://billing/cancel
+   success_url = toolier://billing/success   cancel_url = toolier://billing/cancel
 [Stripe] webhook ──► Edge fn stripe-webhook ──► upsert subscriptions (service role)
 [App] deep link success ──► invalidate query 'subscription' + polling co 2 s przez max 30 s aż status=active
 ```
@@ -27,7 +28,7 @@ Dlaczego polling po powrocie: webhook może dojść po deep linku. Alternatywa: 
 - `checkout.sessions.create({ mode:'subscription', customer, line_items:[{price}], success_url, cancel_url, allow_promotion_codes:true, automatic_tax:{enabled:true}, metadata:{workspace_id} })`.
 - Zwróć `{ url }`.
 
-`stripe-create-portal` → `billingPortal.sessions.create({ customer, return_url: 'anzorge://billing/return' })`.
+`stripe-create-portal` → `billingPortal.sessions.create({ customer, return_url: 'toolier://billing/return' })`.
 
 `stripe-webhook`
 - Weryfikacja podpisu (`stripe.webhooks.constructEventAsync`, `STRIPE_WEBHOOK_SECRET`).
