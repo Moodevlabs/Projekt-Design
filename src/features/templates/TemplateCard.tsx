@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { FilePlus2, Trash2 } from 'lucide-react';
+import { CalendarClock, FilePlus2, FileText, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Money } from '@/components/shared';
@@ -69,6 +69,24 @@ export function TemplateCard({
           <Money cents={template.totalNetCents} className="text-ink text-sm font-medium" />
         </div>
       )}
+
+      {/* Co jeszcze niesie pakiet (T-63) — bez tego „szablon” wygląda na samą listę pozycji. */}
+      {template.schedule || template.documents ? (
+        <div className="text-ink-soft flex items-center gap-3 text-xs">
+          {template.schedule ? (
+            <span className="inline-flex items-center gap-1">
+              <CalendarClock className="size-3.5" aria-hidden />
+              {pl.templates.packageSchedule}
+            </span>
+          ) : null}
+          {template.documents ? (
+            <span className="inline-flex items-center gap-1">
+              <FileText className="size-3.5" aria-hidden />
+              {pl.templates.packageDocuments}
+            </span>
+          ) : null}
+        </div>
+      ) : null}
 
       <p className="text-ink-soft text-xs">{formatDate(new Date(template.updatedAt))}</p>
 

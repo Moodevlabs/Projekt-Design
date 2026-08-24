@@ -5,6 +5,7 @@ import {
   getTemplate,
   listTemplates,
   overwriteTemplate,
+  type TemplateContents,
   renameTemplate,
   type CreateTemplateInput,
   type Template,
@@ -51,7 +52,8 @@ export function useOverwriteTemplate() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, body }: { id: string; body: QuoteBody }) => overwriteTemplate(id, body),
+    mutationFn: ({ id, body, ...contents }: { id: string; body: QuoteBody } & TemplateContents) =>
+      overwriteTemplate(id, body, contents),
     onSuccess: (template) => {
       queryClient.setQueryData<Template>(queryKeys.template(template.id), template);
       void queryClient.invalidateQueries({ queryKey: queryKeys.templates() });

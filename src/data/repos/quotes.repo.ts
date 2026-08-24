@@ -303,6 +303,12 @@ export interface CreateQuoteInput {
   /** Linia wersji. Pominieta = nowa linia (trigger ustawi `lineage_id = id`). */
   lineageId?: string | null;
   version?: number;
+  /**
+   * Termin i dokumenty z szablonu (T-63). Pominiete = wycena startuje bez nich,
+   * czyli tak jak przed pakietami.
+   */
+  schedule?: ScheduleBody | null;
+  documents?: QuoteDocuments | null;
 }
 
 export async function createQuote(input: CreateQuoteInput): Promise<Quote> {
@@ -337,6 +343,10 @@ export async function createQuote(input: CreateQuoteInput): Promise<Quote> {
         total_net_cents: totals.netCents,
         total_gross_cents: totals.grossCents,
         currency: input.currency ?? 'PLN',
+        // Pakiet z szablonu (T-63). `undefined` nie trafia do insertu, wiec
+        // zwykla wycena dostaje NULL-e z definicji kolumn.
+        ...(input.schedule === undefined ? {} : { schedule: input.schedule }),
+        ...(input.documents === undefined ? {} : { documents: input.documents }),
         client_name: body.client.name || null,
         // Jak w `saveQuote`: kolumny listowe to kopia snapshotu. Bez tego
         // wycena zalozona z karty klienta wpadalaby do rejestru bez miasta

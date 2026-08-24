@@ -593,6 +593,7 @@ function EditorSurface({
           onOpenChange={setSaveTemplateOpen}
           defaultName={body.title}
           saving={templates.saving}
+          available={templates.available}
           onSave={templates.saveAs}
         />
 
@@ -601,6 +602,7 @@ function EditorSurface({
           onOpenChange={setOverwriteTemplateOpen}
           templates={templates.templates}
           saving={templates.saving}
+          available={templates.available}
           onOverwrite={templates.overwrite}
         />
 

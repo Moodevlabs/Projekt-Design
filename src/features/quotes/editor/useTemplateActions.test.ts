@@ -1,8 +1,10 @@
-import { renderHook } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { newItem, newQuoteBody, newSection, type QuoteBody } from '@/domain/quote';
 import type { Quote } from '@/data/repos/quotes.repo';
 import type { Template } from '@/data/repos/templates.repo';
+import { newScheduleBody, type ScheduleBody } from '@/domain/schedule';
+import type { QuoteDocuments } from '@/domain/documents';
 import { useEditorStore } from './editor.store';
 
 const createMutate = vi.hoisted(() => vi.fn());
@@ -18,6 +20,9 @@ vi.mock('@/data/queries/useTemplates', () => ({
 vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
 const { useTemplateActions } = await import('./useTemplateActions');
+
+/** Domyslny wybor z dialogu: pakiet niesie wszystko, co wycena ma. */
+const WSZYSTKO = { schedule: true, documents: true };
 
 function makeBody(): QuoteBody {
   return newQuoteBody({
@@ -64,6 +69,8 @@ const template: Template = {
   name: 'Mieszkanie pod klucz',
   body: newQuoteBody(),
   bodyError: null,
+  schedule: null,
+  documents: null,
   itemCount: 3,
   totalNetCents: 100_000,
   createdAt: '2026-08-01T10:00:00Z',
@@ -80,7 +87,7 @@ beforeEach(() => {
 describe('useTemplateActions — zapis jako szablon', () => {
   it('zapisuje uklad i pozycje wyceny', () => {
     const { result } = renderHook(() => useTemplateActions());
-    result.current.saveAs('Mieszkanie pod klucz');
+    result.current.saveAs('Mieszkanie pod klucz', WSZYSTKO);
 
     const vars = createMutate.mock.calls[0]?.[0] as { name: string; body: QuoteBody };
     expect(vars.name).toBe('Mieszkanie pod klucz');
@@ -91,7 +98,7 @@ describe('useTemplateActions — zapis jako szablon', () => {
     // Inaczej nowa wycena z szablonu startowalaby z cudzym nazwiskiem
     // i telefonem — pomylka, ktora latwo wyslac do klienta.
     const { result } = renderHook(() => useTemplateActions());
-    result.current.saveAs('Szablon');
+    result.current.saveAs('Szablon', WSZYSTKO);
 
     const vars = createMutate.mock.calls[0]?.[0] as { body: QuoteBody };
     expect(vars.body.client).toEqual({ name: '', phone: '', email: '', city: '' });
@@ -100,14 +107,16 @@ describe('useTemplateActions — zapis jako szablon', () => {
 
   it('zapisuje KOPIE, nie referencje do dokumentu w edytorze', () => {
     const { result } = renderHook(() => useTemplateActions());
-    result.current.saveAs('Szablon');
+    result.current.saveAs('Szablon', WSZYSTKO);
 
     const vars = createMutate.mock.calls[0]?.[0] as { body: QuoteBody };
     const zapisanaNazwa = vars.body.sections[0]?.items[0]?.name;
 
     // Dalsza edycja wyceny nie moze zmieniac tresci wyslanej do zapisu.
     const itemId = useEditorStore.getState().body?.sections[0]?.items[0]?.id;
-    if (itemId) useEditorStore.getState().updateItem(itemId, { name: 'Zmienione po zapisie' });
+    if (itemId) {
+      act(() => useEditorStore.getState().updateItem(itemId, { name: 'Zmienione po zapisie' }));
+    }
 
     expect(vars.body.sections[0]?.items[0]?.name).toBe(zapisanaNazwa);
   });
@@ -115,7 +124,7 @@ describe('useTemplateActions — zapis jako szablon', () => {
   it('bez otwartej wyceny nie zapisuje niczego', () => {
     useEditorStore.getState().reset();
     const { result } = renderHook(() => useTemplateActions());
-    result.current.saveAs('Szablon');
+    result.current.saveAs('Szablon', WSZYSTKO);
 
     expect(createMutate).not.toHaveBeenCalled();
   });
@@ -124,7 +133,7 @@ describe('useTemplateActions — zapis jako szablon', () => {
 describe('useTemplateActions — nadpisanie', () => {
   it('nadpisuje wskazany szablon trescia biezacej wyceny', () => {
     const { result } = renderHook(() => useTemplateActions());
-    result.current.overwrite(template);
+    result.current.overwrite(template, WSZYSTKO);
 
     const vars = overwriteMutate.mock.calls[0]?.[0] as { id: string; body: QuoteBody };
     expect(vars.id).toBe('t1');
@@ -138,5 +147,77 @@ describe('useTemplateActions — nadpisanie', () => {
     const { result } = renderHook(() => useTemplateActions());
 
     expect(result.current.canOverwrite).toBe(false);
+  });
+});
+
+describe('useTemplateActions — pakiet (T-63)', () => {
+  function zHarmonogramem(): Quote {
+    const quote = makeQuote(makeBody());
+    return {
+      ...quote,
+      schedule: newScheduleBody({ startDate: '2026-03-01' }),
+      documents: { stages: null, priceList: null },
+    };
+  }
+
+  /**
+   * Wycene ladujemy PRZED renderem. Hook subskrybuje store, wiec zaladowanie
+   * jej w trakcie zycia komponentu wymagaloby `act` — a to szum, nie test.
+   */
+  function renderHookZWycena<T>(hook: () => T) {
+    useEditorStore.getState().load(zHarmonogramem());
+    return renderHook(hook);
+  }
+
+  it('zabiera termin i dokumenty razem z wycena', () => {
+    const { result } = renderHookZWycena(() => useTemplateActions());
+    result.current.saveAs('Projekt kompleksowy', WSZYSTKO);
+
+    const vars = createMutate.mock.calls[0]?.[0] as {
+      schedule: ScheduleBody | null;
+      documents: QuoteDocuments | null;
+    };
+    expect(vars.schedule?.stages.length).toBeGreaterThan(0);
+    expect(vars.documents).not.toBeNull();
+  });
+
+  it('NIE zabiera daty startu', () => {
+    // Data startu nalezy do projektu. Szablon zapisany w marcu z marcowa data
+    // bylby pulapka, ktorej nikt nie zauwazy przed wyslaniem oferty.
+    const { result } = renderHookZWycena(() => useTemplateActions());
+    result.current.saveAs('Projekt kompleksowy', WSZYSTKO);
+
+    const vars = createMutate.mock.calls[0]?.[0] as { schedule: ScheduleBody | null };
+    expect(vars.schedule?.startDate).toBeNull();
+  });
+
+  it('odznaczony checkbox zapisuje `null`, a nie kopie', () => {
+    const { result } = renderHookZWycena(() => useTemplateActions());
+    result.current.saveAs('Sama wycena', { schedule: false, documents: false });
+
+    const vars = createMutate.mock.calls[0]?.[0] as {
+      schedule: ScheduleBody | null;
+      documents: QuoteDocuments | null;
+    };
+    expect(vars.schedule).toBeNull();
+    expect(vars.documents).toBeNull();
+  });
+
+  it('`available` pokazuje tylko to, co wycena naprawde ma', () => {
+    const { result, rerender } = renderHook(() => useTemplateActions());
+    expect(result.current.available).toEqual({ schedule: false, documents: false });
+
+    act(() => useEditorStore.getState().load(zHarmonogramem()));
+    rerender();
+    expect(result.current.available).toEqual({ schedule: true, documents: true });
+  });
+
+  it('nadpisanie tez niesie pakiet', () => {
+    const { result } = renderHookZWycena(() => useTemplateActions());
+    result.current.overwrite(template, WSZYSTKO);
+
+    const vars = overwriteMutate.mock.calls[0]?.[0] as { schedule: ScheduleBody | null };
+    expect(vars.schedule).not.toBeNull();
+    expect(vars.schedule?.startDate).toBeNull();
   });
 });

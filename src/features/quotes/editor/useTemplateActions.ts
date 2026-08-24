@@ -5,11 +5,25 @@ import type { Template } from '@/data/repos/templates.repo';
 import { useEditorStore } from './editor.store';
 import { pl } from '@/i18n/pl';
 
+/** Co wycena ma do zaoferowania szablonowi — steruje checkboxami w dialogu. */
+export interface TemplateAvailable {
+  schedule: boolean;
+  documents: boolean;
+}
+
+/** Co użytkownik zaznaczył w dialogu. */
+export interface TemplateSelection {
+  schedule: boolean;
+  documents: boolean;
+}
+
 export interface TemplateActions {
   /** Szablony do wyboru przy nadpisywaniu. */
   templates: Template[];
-  saveAs: (name: string) => void;
-  overwrite: (template: Template) => void;
+  /** Czego wycena w ogóle ma — brak = checkbox ukryty (zasada z T-48). */
+  available: TemplateAvailable;
+  saveAs: (name: string, selection: TemplateSelection) => void;
+  overwrite: (template: Template, selection: TemplateSelection) => void;
   /** Czy jest cokolwiek do nadpisania — UI chowa wtedy pozycję menu. */
   canOverwrite: boolean;
   saving: boolean;
@@ -41,14 +55,32 @@ export function useTemplateActions(): TemplateActions {
     };
   };
 
+  /**
+   * Termin i dokumenty do szablonu — albo `null`, gdy checkbox odznaczony.
+   *
+   * `startDate` zerujemy **przy zapisie**, nie przy odczycie: data startu
+   * należy do konkretnego projektu, a szablon zapisany w marcu z marcową datą
+   * byłby pułapką, której nikt nie zauważy przed wysłaniem oferty.
+   */
+  const packageFor = (selection: TemplateSelection) => {
+    const state = useEditorStore.getState();
+    return {
+      schedule:
+        selection.schedule && state.schedule
+          ? { ...structuredClone(state.schedule), startDate: null }
+          : null,
+      documents: selection.documents && state.documents ? structuredClone(state.documents) : null,
+    };
+  };
+
   const saveAs = useCallback(
-    (name: string) => {
+    (name: string, selection: TemplateSelection) => {
       const body = bodyForTemplate();
       if (!body) return;
 
       setSaving(true);
       create.mutate(
-        { name, body },
+        { name, body, ...packageFor(selection) },
         {
           onSuccess: () => toast.success(pl.templates.saveAsTemplateDone(name)),
           onError: (error) => toast.error(error.message),
@@ -60,13 +92,13 @@ export function useTemplateActions(): TemplateActions {
   );
 
   const overwrite = useCallback(
-    (template: Template) => {
+    (template: Template, selection: TemplateSelection) => {
       const body = bodyForTemplate();
       if (!body) return;
 
       setSaving(true);
       overwriteTemplate.mutate(
-        { id: template.id, body },
+        { id: template.id, body, ...packageFor(selection) },
         {
           onSuccess: () => toast.success(pl.templates.overwriteDone(template.name)),
           onError: (error) => toast.error(error.message),
@@ -78,6 +110,21 @@ export function useTemplateActions(): TemplateActions {
   );
 
   const rows = templates.data ?? [];
+  /*
+   * Subskrypcja, nie `getState()`: checkbox ma się pojawić w tej samej chwili,
+   * w której użytkownik doda pierwszy etap w zakładce „Termin" — bez czekania
+   * na przypadkowe przerenderowanie strony.
+   */
+  const hasSchedule = useEditorStore((state) => state.schedule !== null);
+  const hasDocuments = useEditorStore((state) => state.documents !== null);
+  const available: TemplateAvailable = { schedule: hasSchedule, documents: hasDocuments };
 
-  return { templates: rows, saveAs, overwrite, canOverwrite: rows.length > 0, saving };
+  return {
+    templates: rows,
+    available,
+    saveAs,
+    overwrite,
+    canOverwrite: rows.length > 0,
+    saving,
+  };
 }

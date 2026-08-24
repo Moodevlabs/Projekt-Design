@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TemplateCard } from './TemplateCard';
 import { useCreateQuote } from '@/data/queries/useQuotes';
+import { scheduleFromTemplate } from '@/domain/schedule';
 import {
   useDeleteTemplate,
   useRenameTemplate,
@@ -39,6 +40,13 @@ export function TemplatesPage() {
         // osobno, a późniejsza zmiana szablonu nie rusza wystawionej oferty.
         body: structuredClone(template.body),
         title: template.body.title,
+        /*
+         * Szablon jest pakietem (T-63): wycena z „Projektu kompleksowego"
+         * ma od razu etapy i dokumenty, a nie samą listę pozycji. Data
+         * startu wypada — należy do projektu, nie do szablonu.
+         */
+        schedule: scheduleFromTemplate(template.schedule),
+        documents: template.documents ? structuredClone(template.documents) : null,
       },
       {
         onSuccess: (quote) => {

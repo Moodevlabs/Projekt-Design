@@ -198,3 +198,16 @@ export function newScheduleBody(
 ): ScheduleBody {
   return ScheduleBodySchema.parse({ stages: defaultScheduleStages(template), ...partial });
 }
+
+/**
+ * Harmonogram przeniesiony z szablonu do nowej wyceny (T-63).
+ *
+ * Data startu ZAWSZE wypada — należy do konkretnego projektu, nie do pakietu.
+ * Szablon zapisany w marcu z marcową datą byłby pułapką, której nikt nie
+ * zauważy przed wysłaniem oferty. Zerujemy i przy zapisie szablonu, i tutaj:
+ * szablony sprzed T-63 mogą nieść datę z importu.
+ */
+export function scheduleFromTemplate(schedule: ScheduleBody | null): ScheduleBody | null {
+  if (!schedule) return null;
+  return { ...structuredClone(schedule), startDate: null };
+}

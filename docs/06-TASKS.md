@@ -589,9 +589,11 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - Puste grupy przykładowe znikają przy sprzątaniu, ale grupa z edytowaną usługą **zostaje** — razem z tym, co ktoś w niej zatrzymał.
   > **Zweryfikowane na żywo:** `pnpm test:db` — 128 zielonych, w tym „nowe konto dostaje 8 grup i 38 usług bez cen", „edycja zdejmuje flagę", „usuń pozostałe kasuje 37 i zostawia edytowaną".
 
-- [ ] **T-63 Pakiety: szablon niesie termin i dokumenty** (FEATURES-Z-KONCEPCJI §6 S1)
+- [x] **T-63 Pakiety: szablon niesie termin i dokumenty** (FEATURES-Z-KONCEPCJI §6 S1)
   Migracja `quote_templates.schedule/documents`; `templates.repo` z miękkim parsowaniem obu kolumn; dialog „Zapisz jako szablon" z checkboxami zawartości (ukryte, gdy wycena czegoś nie ma); wycena z szablonu dostaje komplet, `startDate` zerowana; ikony zawartości na karcie szablonu.
   ✅ Szablon z harmonogramem → nowa wycena ma Termin bez daty startu; szablon bez dokumentów nie tworzy pustej zakładki.
+  **Zrobiono:** migracja `0023_template_package.sql` (dwie kolumny `jsonb`, `NULL` = „szablon nie niesie tego" i to normalny stan). `templates.repo`: `TemplateContents`, miękkie parsowanie przez `parseScheduleBody`/`parseQuoteDocuments`, `overwriteTemplate(id, body, contents)`. `useTemplateActions` dostał `available` (co wycena *ma*) i `selection` (co użytkownik zaznaczył); `packageFor()` zeruje `startDate` już przy zapisie. Nowa wycena z szablonu idzie przez `scheduleFromTemplate()` (`src/domain/schedule/defaults.ts`) — zerowanie w obu miejscach, bo szablony sprzed tej migracji mogą nieść datę.
+  **Na co uważać:** nadpisanie zapisuje `contents.schedule ?? null` — odznaczenie checkboxa **kasuje** pakiet, świadomie („nadpisz bieżącym" ≠ „dolej"). `available` czyta store przez selektor, nie `getState()`, żeby checkbox pojawił się od razu po dodaniu pierwszego etapu. Ikonki na karcie szablonu bez `startDate` — data nigdy tam nie trafia.
 
 - [ ] **T-64 Usługi dodatkowe → wpływ na termin** (FEATURES-Z-KONCEPCJI §7 U1)
   `PriceListEntry.addedDays`, pole w zakładce Cennik, most z dwoma przełącznikami (koszt / termin), etap `kind: 'extras'` w domenie harmonogramu i `ScheduleTab` (lista usług składowych, usuwanie pojedynczo), PDF terminu.

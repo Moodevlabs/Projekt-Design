@@ -635,24 +635,30 @@ export type Database = {
         Row: {
           body: Json
           created_at: string
+          documents: Json | null
           id: string
           name: string
+          schedule: Json | null
           updated_at: string
           workspace_id: string
         }
         Insert: {
           body: Json
           created_at?: string
+          documents?: Json | null
           id?: string
           name: string
+          schedule?: Json | null
           updated_at?: string
           workspace_id: string
         }
         Update: {
           body?: Json
           created_at?: string
+          documents?: Json | null
           id?: string
           name?: string
+          schedule?: Json | null
           updated_at?: string
           workspace_id?: string
         }

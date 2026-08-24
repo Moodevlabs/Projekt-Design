@@ -15,6 +15,7 @@ import {
   templateSummary,
 } from './templates.repo';
 import { CURRENT_BODY_VERSION, newGroup, newItem, newQuoteBody, newSection } from '@/domain/quote';
+import { newScheduleBody } from '@/domain/schedule';
 
 const DEMO_EMAIL = 'demo@anzorge.local';
 const DEMO_PASSWORD = 'demo1234';
@@ -189,6 +190,72 @@ describe('templates.repo — CRUD', () => {
     // bez pol, ktorych ta wersja nie rozumie.
     expect(zPrzyszlosci.body).toBeNull();
     expect(zPrzyszlosci.bodyError).toMatch(/nowsz/i);
+  });
+});
+
+describe('templates.repo — pakiet: termin i dokumenty (T-63)', () => {
+  const harmonogram = newScheduleBody({ startDate: null });
+  const dokumenty = { stages: null, priceList: null };
+
+  it('zapisuje i wczytuje termin razem z szablonem', async () => {
+    const template = await createTemplate({
+      workspaceId,
+      name: 'Projekt kompleksowy',
+      body: sampleBody('Projekt kompleksowy'),
+      schedule: harmonogram,
+      documents: dokumenty,
+    });
+    created.push(template.id);
+
+    const wczytany = await getTemplate(template.id);
+    expect(wczytany.schedule?.stages.length).toBe(harmonogram.stages.length);
+    expect(wczytany.documents).toEqual(dokumenty);
+  });
+
+  it('szablon bez pakietu ma `null`, a nie pusty obiekt', async () => {
+    // `null` znaczy „ten szablon nie niesie terminu" i jest normalnym stanem —
+    // pusty harmonogram wygladalby w UI jak zapisany przez pomylke.
+    const template = await makeTemplate('Sama wycena');
+    const wczytany = await getTemplate(template.id);
+
+    expect(wczytany.schedule).toBeNull();
+    expect(wczytany.documents).toBeNull();
+  });
+
+  it('nadpisanie z odznaczonym checkboxem KASUJE pakiet', async () => {
+    // Odznaczenie ma znaczyc „ten szablon juz nie niesie terminu". Zostawienie
+    // starego harmonogramu byloby cicha niespodzianka przy nastepnej wycenie.
+    const template = await createTemplate({
+      workspaceId,
+      name: 'Do odchudzenia',
+      body: sampleBody('Do odchudzenia'),
+      schedule: harmonogram,
+      documents: dokumenty,
+    });
+    created.push(template.id);
+
+    await overwriteTemplate(template.id, sampleBody('Do odchudzenia'), {
+      schedule: null,
+      documents: null,
+    });
+
+    const wczytany = await getTemplate(template.id);
+    expect(wczytany.schedule).toBeNull();
+    expect(wczytany.documents).toBeNull();
+  });
+
+  it('uszkodzony harmonogram nie blokuje szablonu', async () => {
+    const template = await makeTemplate('Zepsuty termin');
+    await getSupabase()
+      .from('quote_templates')
+      .update({ schedule: { stages: 'nie tablica' } })
+      .eq('id', template.id);
+
+    const wczytany = await getTemplate(template.id);
+    // Miekkie parsowanie jak w `quotes`: wycena ma sie otworzyc mimo smiecia
+    // w kolumnie, ktora jest dodatkiem, a nie trescia dokumentu.
+    expect(wczytany.schedule).toBeNull();
+    expect(wczytany.body).not.toBeNull();
   });
 });
 

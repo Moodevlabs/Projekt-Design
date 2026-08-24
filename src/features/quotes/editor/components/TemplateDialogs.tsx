@@ -11,6 +11,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { Template } from '@/data/repos/templates.repo';
+import { Switch } from '@/components/ui/switch';
+import type { TemplateAvailable, TemplateSelection } from '../useTemplateActions';
 import { pl } from '@/i18n/pl';
 
 /** Zapis bieżącej wyceny jako nowy szablon — pyta wyłącznie o nazwę. */
@@ -19,15 +21,27 @@ export function SaveAsTemplateDialog({
   onOpenChange,
   defaultName,
   saving,
+  available,
   onSave,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   defaultName: string;
   saving: boolean;
-  onSave: (name: string) => void;
+  /** Czego wycena w ogóle ma (T-63) — brak = checkbox ukryty, zasada z T-48. */
+  available: TemplateAvailable;
+  onSave: (name: string, selection: TemplateSelection) => void;
 }) {
   const [name, setName] = useState(defaultName);
+  /*
+   * Zaznaczone domyślnie to, co wycena FAKTYCZNIE ma. Szablon jest pakietem
+   * właśnie dlatego, że niesie komplet — odznaczenie ma być decyzją, a nie
+   * warunkiem, żeby cokolwiek się zapisało.
+   */
+  const [selection, setSelection] = useState<TemplateSelection>({
+    schedule: true,
+    documents: true,
+  });
 
   return (
     <Dialog
@@ -53,12 +67,41 @@ export function SaveAsTemplateDialog({
             onChange={(event) => setName(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === 'Enter' && name.trim().length > 0) {
-                onSave(name.trim());
+                onSave(name.trim(), selection);
                 onOpenChange(false);
               }
             }}
           />
         </div>
+
+        {/* Zawartość pakietu — checkbox tylko dla tego, co wycena naprawdę ma. */}
+        {available.schedule || available.documents ? (
+          <div className="space-y-2">
+            <p className="text-ink text-sm font-medium">{pl.templates.contents}</p>
+            {available.schedule ? (
+              <label className="flex items-center gap-2 text-sm">
+                <Switch
+                  checked={selection.schedule}
+                  onCheckedChange={(schedule) =>
+                    setSelection((current) => ({ ...current, schedule }))
+                  }
+                />
+                {pl.templates.contentSchedule}
+              </label>
+            ) : null}
+            {available.documents ? (
+              <label className="flex items-center gap-2 text-sm">
+                <Switch
+                  checked={selection.documents}
+                  onCheckedChange={(documents) =>
+                    setSelection((current) => ({ ...current, documents }))
+                  }
+                />
+                {pl.templates.contentDocuments}
+              </label>
+            ) : null}
+          </div>
+        ) : null}
 
         <DialogFooter>
           <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
@@ -68,7 +111,7 @@ export function SaveAsTemplateDialog({
             type="button"
             disabled={saving || name.trim().length === 0}
             onClick={() => {
-              onSave(name.trim());
+              onSave(name.trim(), selection);
               onOpenChange(false);
             }}
           >
@@ -90,16 +133,22 @@ export function OverwriteTemplateDialog({
   onOpenChange,
   templates,
   saving,
+  available,
   onOverwrite,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   templates: Template[];
   saving: boolean;
-  onOverwrite: (template: Template) => void;
+  available: TemplateAvailable;
+  onOverwrite: (template: Template, selection: TemplateSelection) => void;
 }) {
   const [selectedId, setSelectedId] = useState<string>('');
   const selected = templates.find((template) => template.id === selectedId) ?? templates[0] ?? null;
+  const [selection, setSelection] = useState<TemplateSelection>({
+    schedule: true,
+    documents: true,
+  });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -129,6 +178,34 @@ export function OverwriteTemplateDialog({
           </div>
         ) : null}
 
+        {templates.length > 0 && (available.schedule || available.documents) ? (
+          <div className="space-y-2">
+            <p className="text-ink text-sm font-medium">{pl.templates.contents}</p>
+            {available.schedule ? (
+              <label className="flex items-center gap-2 text-sm">
+                <Switch
+                  checked={selection.schedule}
+                  onCheckedChange={(schedule) =>
+                    setSelection((current) => ({ ...current, schedule }))
+                  }
+                />
+                {pl.templates.contentSchedule}
+              </label>
+            ) : null}
+            {available.documents ? (
+              <label className="flex items-center gap-2 text-sm">
+                <Switch
+                  checked={selection.documents}
+                  onCheckedChange={(documents) =>
+                    setSelection((current) => ({ ...current, documents }))
+                  }
+                />
+                {pl.templates.contentDocuments}
+              </label>
+            ) : null}
+          </div>
+        ) : null}
+
         <DialogFooter>
           <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
             {pl.common.cancel}
@@ -138,7 +215,7 @@ export function OverwriteTemplateDialog({
             variant="destructive"
             disabled={saving || selected === null}
             onClick={() => {
-              if (selected) onOverwrite(selected);
+              if (selected) onOverwrite(selected, selection);
               onOpenChange(false);
             }}
           >

@@ -1070,6 +1070,13 @@ export const pl = {
       `Zawartość „${name}” zostanie zastąpiona bieżącą wyceną. Tej zmiany nie da się cofnąć.`,
     overwriteDone: (name: string) => `Nadpisano szablon „${name}”`,
     overwriteEmpty: 'Nie masz jeszcze żadnego szablonu do nadpisania.',
+
+    // Pakiet: szablon niesie też termin i dokumenty (T-63).
+    contents: 'Zapisz razem z wyceną',
+    contentSchedule: 'Etapy i termin realizacji',
+    contentDocuments: 'Dokumenty towarzyszące',
+    packageSchedule: 'z terminem',
+    packageDocuments: 'z dokumentami',
   },
   brand: {
     title: 'Branding',

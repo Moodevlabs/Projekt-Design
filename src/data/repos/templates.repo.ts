@@ -1,4 +1,6 @@
 import { calcQuoteTotals, parseQuoteBody, type QuoteBody } from '@/domain/quote';
+import { parseScheduleBody, type ScheduleBody } from '@/domain/schedule';
+import { parseQuoteDocuments, type QuoteDocuments } from '@/domain/documents';
 import { getSupabase } from '@/data/supabase';
 import type { Tables } from '@/data/types.generated';
 import { RepoError, unwrap } from './errors';
@@ -24,6 +26,13 @@ export interface Template extends TemplateSummary {
   body: QuoteBody | null;
   /** Opis problemu z walidacją. UI pokazuje „szablon uszkodzony" zamiast go otwierać. */
   bodyError: string | null;
+  /**
+   * Harmonogram niesiony przez szablon (T-63). `null` = szablon go nie ma —
+   * normalny stan, nie brak danych.
+   */
+  schedule: ScheduleBody | null;
+  /** Dokumenty towarzyszące niesione przez szablon. Ta sama zasada co `schedule`. */
+  documents: QuoteDocuments | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -59,6 +68,14 @@ function mapTemplate(row: TemplateRow): Template {
     name: row.name,
     body,
     bodyError: parsed.ok ? null : parsed.error,
+    /*
+     * Parsujemy MIĘKKO, osobno od `body`: uszkodzony harmonogram nie ma prawa
+     * zablokować użycia szablonu wyceny. `parseScheduleBody` zwraca wtedy
+     * `null`, czyli „ten szablon nie niesie terminu" — gorzej byłoby pokazać
+     * „szablon uszkodzony" komuś, kto chce tylko wstawić pozycje.
+     */
+    schedule: parseScheduleBody(row.schedule),
+    documents: parseQuoteDocuments(row.documents),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     ...templateSummary(body),
@@ -92,7 +109,13 @@ export async function getTemplate(id: string): Promise<Template> {
   return mapTemplate(row);
 }
 
-export interface CreateTemplateInput {
+export interface TemplateContents {
+  /** `null` = nie zapisuj tego w szablonie (checkbox odznaczony albo brak). */
+  schedule?: ScheduleBody | null;
+  documents?: QuoteDocuments | null;
+}
+
+export interface CreateTemplateInput extends TemplateContents {
   workspaceId: string;
   name: string;
   body: QuoteBody;
@@ -106,6 +129,8 @@ export async function createTemplate(input: CreateTemplateInput): Promise<Templa
         workspace_id: input.workspaceId,
         name: input.name,
         body: input.body,
+        schedule: input.schedule ?? null,
+        documents: input.documents ?? null,
       })
       .select('*'),
     'Zapis szablonu',
@@ -120,9 +145,24 @@ export async function createTemplate(input: CreateTemplateInput): Promise<Templa
  * „Nadpisz bieżącym" — podmienia treść, zostawia nazwę i datę utworzenia.
  * Bez blokady optymistycznej: szablon edytuje jedna osoba i świadomie go nadpisuje.
  */
-export async function overwriteTemplate(id: string, body: QuoteBody): Promise<Template> {
+export async function overwriteTemplate(
+  id: string,
+  body: QuoteBody,
+  contents: TemplateContents = {},
+): Promise<Template> {
   const rows = unwrap(
-    await getSupabase().from('quote_templates').update({ body }).eq('id', id).select('*'),
+    await getSupabase()
+      .from('quote_templates')
+      .update({
+        body,
+        // Nadpisanie zapisuje TO, CO WIDAC w dialogu — także pustkę.
+        // `undefined` nie ma tu sensu: „nadpisz bieżącym" znaczy „ten szablon
+        // ma odtąd wyglądać tak jak ta wycena", a nie „dolej do niego".
+        schedule: contents.schedule ?? null,
+        documents: contents.documents ?? null,
+      })
+      .eq('id', id)
+      .select('*'),
     'Nadpisanie szablonu',
   );
 
