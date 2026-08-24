@@ -33,7 +33,10 @@ type GroupRow = Tables<'library_groups'>;
 export interface LibraryItem {
   id: string;
   workspaceId: string;
+  /** DEPRECATED (T-69): kopia nazwy grupy. Zrodlem jest `categoryId`. */
   category: string;
+  /** Grupa ze slownika (T-59). `null` = „Bez grupy". */
+  categoryId: string | null;
   kind: ItemKind;
   name: string;
   description: string;
@@ -57,6 +60,8 @@ export interface LibraryItem {
 
 export interface LibraryItemFilters {
   category?: string;
+  /** Filtr po grupie ze slownika (T-59). `'none'` = uslugi bez grupy. */
+  categoryId?: string;
   search?: string;
 }
 
@@ -82,6 +87,7 @@ function mapItem(row: ItemRow): LibraryItem {
     id: row.id,
     workspaceId: row.workspace_id,
     category: row.category || DEFAULT_CATEGORY,
+    categoryId: row.category_id ?? null,
     // `kind` jest w bazie tekstem z CHECK-iem; `catch` chroni przed rozjazdem migracji.
     kind: ItemKindSchema.catch('item').parse(row.kind),
     name: row.name,
@@ -146,6 +152,10 @@ export async function listLibraryItems(
     .is('deleted_at', null);
 
   if (opts.category) query = query.eq('category', opts.category);
+  // `'none'` to nie id, tylko jawne pytanie o usługi bez grupy — te też
+  // muszą dać się odfiltrować, inaczej po usunięciu grupy znikałyby z widoku.
+  if (opts.categoryId === 'none') query = query.is('category_id', null);
+  else if (opts.categoryId) query = query.eq('category_id', opts.categoryId);
 
   const term = opts.search?.trim();
   if (term) {
@@ -183,6 +193,7 @@ export interface CreateLibraryItemInput {
   workspaceId: string;
   name: string;
   category?: string;
+  categoryId?: string | null;
   kind?: ItemKind;
   description?: string;
   unitPriceCents?: number;
@@ -199,6 +210,7 @@ export async function createLibraryItem(input: CreateLibraryItemInput): Promise<
       .insert({
         workspace_id: input.workspaceId,
         category: input.category ?? DEFAULT_CATEGORY,
+        category_id: input.categoryId ?? null,
         kind: input.kind ?? 'item',
         name: input.name,
         description: input.description ?? '',
@@ -224,6 +236,7 @@ export async function updateLibraryItem(id: string, patch: LibraryItemPatch): Pr
   // pole po polu, żeby `undefined` nie wyzerowało kolumny.
   const update: TablesUpdate<'library_items'> = {};
   if (patch.category !== undefined) update.category = patch.category;
+  if (patch.categoryId !== undefined) update.category_id = patch.categoryId;
   if (patch.kind !== undefined) update.kind = patch.kind;
   if (patch.name !== undefined) update.name = patch.name;
   if (patch.description !== undefined) update.description = patch.description;

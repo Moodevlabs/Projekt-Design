@@ -21,6 +21,7 @@ function libItem(partial: Partial<LibraryItem>): LibraryItem {
     id: 'lib-1',
     workspaceId: 'ws',
     category: 'Wizualizacje',
+    categoryId: null,
     kind: 'item',
     name: 'Wizualizacja 3D',
     description: 'Statyczne ujęcia',

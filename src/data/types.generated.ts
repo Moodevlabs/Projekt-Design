@@ -261,6 +261,53 @@ export type Database = {
           },
         ]
       }
+      library_categories: {
+        Row: {
+          code: string | null
+          color: string | null
+          created_at: string
+          deleted_at: string | null
+          id: string
+          is_sample: boolean
+          name: string
+          sort_order: number
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          code?: string | null
+          color?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          is_sample?: boolean
+          name: string
+          sort_order?: number
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          code?: string | null
+          color?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          is_sample?: boolean
+          name?: string
+          sort_order?: number
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_categories_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       library_groups: {
         Row: {
           created_at: string
@@ -305,6 +352,7 @@ export type Database = {
       library_items: {
         Row: {
           category: string
+          category_id: string | null
           created_at: string
           deleted_at: string | null
           description: string
@@ -321,6 +369,7 @@ export type Database = {
         }
         Insert: {
           category?: string
+          category_id?: string | null
           created_at?: string
           deleted_at?: string | null
           description?: string
@@ -337,6 +386,7 @@ export type Database = {
         }
         Update: {
           category?: string
+          category_id?: string | null
           created_at?: string
           deleted_at?: string | null
           description?: string
@@ -352,6 +402,13 @@ export type Database = {
           workspace_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "library_items_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "library_categories"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "library_items_variant_of_fkey"
             columns: ["variant_of"]

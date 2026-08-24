@@ -6,10 +6,10 @@ import {
   useAllLibraryItems,
   useCreateLibraryItem,
   useDeleteLibraryItem,
-  useLibraryCategories,
   useLibraryItems,
   useUpdateLibraryItem,
 } from '@/data/queries/useLibrary';
+import { useLibraryCategoryList } from '@/data/queries/useLibraryCategories';
 import type { LibraryItem } from '@/data/repos/library.repo';
 import { CardsSkeleton, LoadError } from '../components/LibraryStates';
 import { ItemsToolbar } from './ItemsToolbar';
@@ -25,13 +25,14 @@ const EMPTY_ITEMS: LibraryItem[] = [];
 
 export function LibraryItemsTab() {
   const [search, setSearch] = useState('');
-  const [category, setCategory] = useState<string | null>(null);
+  // `null` = wszystkie, `'none'` = bez grupy, inaczej id grupy ze slownika.
+  const [categoryId, setCategoryId] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<LibraryItem | null>(null);
 
   // Filtry idą do zapytania — szuka i filtruje baza, nie przeglądarka.
   const filters = useMemo(
-    () => ({ search: search.trim() || undefined, category: category ?? undefined }),
-    [search, category],
+    () => ({ search: search.trim() || undefined, categoryId: categoryId ?? undefined }),
+    [search, categoryId],
   );
 
   const items = useLibraryItems(filters);
@@ -39,14 +40,14 @@ export function LibraryItemsTab() {
   // akurat jest wpisane w szukajce. Ten sam klucz zapytania obsługuje panel
   // biblioteki w edytorze, więc cache jest wspólny.
   const allItems = useAllLibraryItems();
-  const categories = useLibraryCategories();
+  const categories = useLibraryCategoryList();
   const createItem = useCreateLibraryItem();
   const updateItem = useUpdateLibraryItem();
   const deleteItem = useDeleteLibraryItem();
   const cascade = useCascadePrompt();
 
   const rows = items.data ?? [];
-  const hasFilters = category !== null || search.trim().length > 0;
+  const hasFilters = categoryId !== null || search.trim().length > 0;
 
   /**
    * Nowa pozycja nazywa się „Nowa pozycja", więc przy wpisanej frazie nie
@@ -56,9 +57,14 @@ export function LibraryItemsTab() {
    */
   const handleAdd = () => {
     setSearch('');
+    // Nowa usluga trafia do grupy, na ktora czlowiek wlasnie patrzy —
+    // „Wszystkie" i „Bez grupy" to nie grupy, wiec tam zostaje bez przypisania.
+    const target = categoryId && categoryId !== 'none' ? categoryId : null;
+    const name = categories.data?.find((row) => row.id === target)?.name;
     createItem.mutate({
       name: pl.library.newItemName,
-      ...(category ? { category } : {}),
+      categoryId: target,
+      ...(name ? { category: name } : {}),
     });
   };
 
@@ -77,15 +83,16 @@ export function LibraryItemsTab() {
         search={search}
         onSearchChange={setSearch}
         categories={categories.data ?? []}
-        category={category}
-        onCategoryChange={setCategory}
+        categoryId={categoryId}
+        onCategoryChange={setCategoryId}
+        count={rows.length}
         adding={createItem.isPending}
         onAdd={handleAdd}
       />
 
       <datalist id={CATEGORY_LIST_ID}>
-        {(categories.data ?? []).map((name) => (
-          <option key={name} value={name} />
+        {(categories.data ?? []).map((row) => (
+          <option key={row.id} value={row.name} />
         ))}
       </datalist>
 
@@ -105,7 +112,7 @@ export function LibraryItemsTab() {
               <Button
                 variant="outline"
                 onClick={() => {
-                  setCategory(null);
+                  setCategoryId(null);
                   setSearch('');
                 }}
               >

@@ -28,6 +28,7 @@ function libraryEntry(partial: Partial<LibraryItem> = {}): LibraryItem {
     id: SAVED_ID,
     workspaceId: 'ws',
     category: 'Inne',
+    categoryId: null,
     kind: 'item',
     name: 'Blat kuchenny',
     description: '',

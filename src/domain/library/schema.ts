@@ -131,3 +131,42 @@ export function libraryItemToSnapshot(libraryItem: LibraryItem): LibraryItemSnap
     libraryItemId: libraryItem.id,
   };
 }
+
+/**
+ * Grupa biblioteczna — dział/etap porządkujący usługi („01 · Przygotowanie").
+ *
+ * **To nie to samo co „zestaw"** (tabela `library_groups`, snapshot pozycji
+ * do wstawienia na raz). Dwa pojęcia zlewały się dotąd w jedno słowo; od T-59
+ * rozchodzą się: grupa porządkuje, zestaw wstawia.
+ */
+export const LIBRARY_COLORS = [
+  'sand',
+  'sage',
+  'sky',
+  'clay',
+  'plum',
+  'moss',
+  'slate',
+] as const;
+export type LibraryColor = (typeof LIBRARY_COLORS)[number];
+
+export const LibraryCategorySchema = z.object({
+  id: z.string().uuid(),
+  workspaceId: z.string().uuid(),
+  name: z.string().min(1),
+  /** Prefiks na liście, np. „01". Puste = studio nie numeruje etapów. */
+  code: z.string().default(''),
+  /**
+   * Token z palety, nie dowolny hex (05-UI). Dowolny kolor pozwoliłby wybrać
+   * taki, który znika na tle karty — a pigułka grupy ma być czytelna.
+   */
+  color: z.enum(LIBRARY_COLORS).nullable().default(null),
+  sortOrder: z.number().int().default(0),
+  isSample: z.boolean().default(false),
+});
+export type LibraryCategory = z.infer<typeof LibraryCategorySchema>;
+
+/** Etykieta grupy na liście: „01 · Przygotowanie" albo sama nazwa. */
+export function categoryLabel(category: Pick<LibraryCategory, 'code' | 'name'>): string {
+  return category.code ? `${category.code} · ${category.name}` : category.name;
+}

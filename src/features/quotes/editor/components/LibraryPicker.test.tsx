@@ -17,6 +17,7 @@ function item(partial: Partial<LibraryItem> & { id: string; name: string }): Lib
   return {
     workspaceId: 'ws',
     category: 'Inne',
+    categoryId: null,
     kind: 'item',
     description: '',
     unitPriceCents: 10_000,

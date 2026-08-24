@@ -10,6 +10,8 @@
 - Kalkulator marży (koszt własny vs cena) widoczny tylko dla właściciela.
 - Przypomnienie o wygasającej ofercie (e-mail do klienta, faza 2+).
 - Integracja z fakturowaniem (Fakturownia/iFirma API) po akceptacji.
+- **Import usług z CSV** (nazwa, opis, grupa, cena, jednostka) z dopasowaniem grupy do słownika i tworzeniem nieznanych. T-59 zakładał, że wystarczy rozszerzyć istniejący import — ale ten (T-50) to macierz **cennika** (nazwa + slugi pomieszczeń), nie lista usług. To osobny importer, nie zmiana w istniejącym.
+- **Lista usług jako tabela** (Usługa · Grupa · Sposób wyceny · Cena · Aktywna), przełącznik lista–siatka, „Pokaż więcej" po 50, split-button „Dodaj ▾" — z 05-UI §3. Dziś usługi to karty w siatce.
 - **Do poprawki:** `listQuotes` (`quotes.repo`) skleja `or(...)` bez cudzysłowów wokół wartości, więc szukanie wyceny po frazie z przecinkiem („Kowalski, Jan") wraca błędem `failed to parse logic tree`. W `clients.repo` naprawione w T-53 (`ilikeFilter`) — ten sam zabieg trzeba przenieść do wycen i biblioteki. Poza zakresem T-53, bo dotyka ścieżki, której to zadanie nie zmieniało.
 
 ## Świadome uproszczenia względem prototypu `projekt.html` (zanotowane przy T-08)

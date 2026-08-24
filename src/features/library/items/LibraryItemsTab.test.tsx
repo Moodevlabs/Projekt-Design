@@ -33,6 +33,7 @@ function baseItem(partial: Partial<LibraryItem> = {}): LibraryItem {
     id: 'item-1',
     workspaceId: 'ws',
     category: 'Wykończenie',
+    categoryId: null,
     kind: 'item',
     name: 'Blat kuchenny',
     description: 'Dąb lity, 40 mm',
@@ -52,6 +53,21 @@ vi.mock('@/data/queries/useLibrary', () => ({
   useCreateLibraryItem: () => ({ mutate: createMutate, isPending: false }),
   useUpdateLibraryItem: () => ({ mutate: updateMutate, isPending: false }),
   useDeleteLibraryItem: () => ({ mutate: deleteMutate, isPending: false }),
+}));
+
+// Slownik grup (T-59) — pigulki filtrow ida z niego, nie z tekstowej kolumny.
+vi.mock('@/data/queries/useLibraryCategories', () => ({
+  useLibraryCategoryList: () => ({
+    data: [
+      { id: 'cat-1', workspaceId: 'ws', name: 'Wykończenie', code: '', color: null, sortOrder: 0, isSample: false },
+      { id: 'cat-2', workspaceId: 'ws', name: 'Instalacje', code: '', color: null, sortOrder: 1, isSample: false },
+    ],
+    isLoading: false,
+  }),
+  useCreateLibraryCategory: () => ({ mutate: vi.fn(), isPending: false }),
+  useUpdateLibraryCategory: () => ({ mutate: vi.fn(), isPending: false }),
+  useDeleteLibraryCategory: () => ({ mutate: vi.fn(), isPending: false }),
+  useReorderLibraryCategories: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
 vi.mock('@/features/quotes/editor/useLibraryCascade', () => ({
@@ -122,13 +138,23 @@ describe('LibraryItemsTab — filtry', () => {
     expect(lastFilters().search).toBeUndefined();
   });
 
-  it('przekazuje kategorie z pigulek do zapytania', async () => {
+  it('przekazuje grupe ze SLOWNIKA do zapytania, nie nazwe tekstowa', async () => {
     const user = userEvent.setup();
     render(<LibraryItemsTab />);
 
-    expect(lastFilters().category).toBeUndefined();
+    // Od T-59 filtrujemy po `category_id`: nazwa moze sie zmienic (literowka
+    // w „Instalacje"), a przypisanie uslug ma to przezyc.
+    expect(lastFilters().categoryId).toBeUndefined();
     await user.click(screen.getByRole('button', { name: 'Instalacje' }));
-    expect(lastFilters().category).toBe('Instalacje');
+    expect(lastFilters().categoryId).toBe('cat-2');
+  });
+
+  it('„Bez grupy" tez jest filtrem — uslugi po usunietej grupie nie znikaja', async () => {
+    const user = userEvent.setup();
+    render(<LibraryItemsTab />);
+
+    await user.click(screen.getByRole('button', { name: pl.library.withoutCategory }));
+    expect(lastFilters().categoryId).toBe('none');
   });
 
   it('rozroznia pusta biblioteke od pustego wyniku filtrowania', async () => {
@@ -152,12 +178,15 @@ describe('LibraryItemsTab — filtry', () => {
 
     // „Nowa pozycja" nie pasuje do frazy „blat" — bez czyszczenia przycisk
     // wygladalby na zepsuty: pozycja powstaje, ale nie ma jej na ekranie.
-    expect(createMutate).toHaveBeenCalledWith({ name: pl.library.newItemName });
+    expect(createMutate).toHaveBeenCalledWith({
+      name: pl.library.newItemName,
+      categoryId: null,
+    });
     expect(search).toHaveValue('');
     expect(lastFilters().search).toBeUndefined();
   });
 
-  it('dodanie pozycji zostawia kategorie i wklada w nia nowa pozycje', async () => {
+  it('dodanie pozycji zostawia grupe i wklada w nia nowa pozycje', async () => {
     const user = userEvent.setup();
     render(<LibraryItemsTab />);
 
@@ -166,9 +195,11 @@ describe('LibraryItemsTab — filtry', () => {
 
     expect(createMutate).toHaveBeenCalledWith({
       name: pl.library.newItemName,
+      categoryId: 'cat-2',
+      // Kolumna tekstowa zostaje jako kopia do czasu T-69.
       category: 'Instalacje',
     });
-    expect(lastFilters().category).toBe('Instalacje');
+    expect(lastFilters().categoryId).toBe('cat-2');
   });
 
   it('pokazuje blad wczytywania z mozliwoscia ponowienia', () => {

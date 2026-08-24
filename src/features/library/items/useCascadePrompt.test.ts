@@ -17,6 +17,7 @@ function libraryItem(overrides: Partial<LibraryItem> = {}): LibraryItem {
     id: LIB_ID,
     workspaceId: 'ws',
     category: 'Kuchnia',
+    categoryId: null,
     kind: 'item',
     name: 'Blat kuchenny',
     description: 'Kamienny',

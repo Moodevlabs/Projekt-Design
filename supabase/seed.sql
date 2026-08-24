@@ -525,3 +525,32 @@ update public.quotes
 update public.quotes
    set project_id = '1e000000-0000-4000-8000-000000000003'
  where id = '1d000000-0000-4000-8000-000000000002';
+
+-- -----------------------------------------------------------------------------
+-- 9. Grupy biblioteczne jako słownik (T-59).
+--
+-- Migracja `0019` przepisuje tekstową kolumnę `category` na wiersze
+-- `library_categories`, ale przy `db reset` chodzi PRZED seedem — czyli na
+-- pustej bibliotece. Demo musi więc założyć słownik samo, inaczej świeży
+-- stack pokazywałby usługi bez grup.
+--
+-- Kolejność jak w procesie projektowym, nie alfabetyczna: najpierw projekt,
+-- potem nadzór, na końcu dodatki.
+-- -----------------------------------------------------------------------------
+insert into public.library_categories (id, workspace_id, name, code, sort_order)
+select v.id, w.id, v.name, v.code, v.ord
+  from public.workspaces w
+ cross join (values
+   ('1c000000-0000-4000-8000-000000000001'::uuid, 'Projekt', '01', 0),
+   ('1c000000-0000-4000-8000-000000000002'::uuid, 'Nadzór',  '02', 1),
+   ('1c000000-0000-4000-8000-000000000003'::uuid, 'Dodatki', '03', 2)
+ ) as v(id, name, code, ord)
+ where w.owner_id = '11111111-1111-4111-8111-111111111111'
+on conflict (id) do nothing;
+
+update public.library_items i
+   set category_id = c.id
+  from public.library_categories c
+ where c.workspace_id = i.workspace_id
+   and c.name = i.category
+   and i.category_id is null;

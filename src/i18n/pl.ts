@@ -777,10 +777,45 @@ export const pl = {
     noSubscription: 'Brak aktywnej subskrypcji',
   },
   library: {
+    // Grupy (slownik) — T-59. „Zestawy" to dawne grupy snapshotow.
+    categories: 'Grupy',
+    sets: 'Zestawy',
+    rooms: 'Pomieszczenia',
+    rates: 'Stawki',
+    categoryNew: 'Nowa grupa',
+    categoryName: 'Nazwa grupy',
+    categoryNamePlaceholder: 'Przygotowanie projektu',
+    categoryCode: 'Kod',
+    categoryColor: 'Kolor grupy',
+    categoryNoColor: 'Bez koloru',
+    categoryAdded: 'Dodano grupę',
+    categoryDeleted: 'Usunięto grupę',
+    categoryHint:
+      'Grupy porządkują usługi w procesie projektowym. Kod („01") jest opcjonalny.',
+    categoriesEmptyTitle: 'Brak grup',
+    categoriesEmptyDescription:
+      'Grupa to dział albo etap: „Przygotowanie", „Projekt", „Nadzór". Usługi bez grupy dalej działają.',
+    categoryDeleteTitle: 'Usunąć grupę?',
+    categoryDeleteDescription: (items: number) =>
+      items > 0
+        ? `Grupa zniknie z listy. ${items === 1 ? 'Jej usługa trafi' : `Jej usługi (${items}) trafią`} do „Bez grupy" — nic nie zostanie skasowane.`
+        : 'Grupa zniknie z listy. Nie ma w niej żadnych usług.',
+    withoutCategory: 'Bez grupy',
+    withoutCategoryCount: (count: number) => `Bez grupy: ${count}`,
+    itemCount: (count: number) =>
+      count === 1 ? '1 usługa' : count >= 2 && count <= 4 ? `${count} usługi` : `${count} usług`,
+    moveUp: 'Przenieś wyżej',
+    moveDown: 'Przenieś niżej',
+
     title: 'Biblioteka',
     sheetHint: 'Zmiany cen i nazw możesz od razu przenieść na otwartą wycenę.',
     items: 'Pozycje',
-    groups: 'Grupy',
+    /*
+     * Klucz zostaje `groups` (tak nazywa się tabela `library_groups`, §9.3),
+     * ale ETYKIETA to od T-59 „Zestawy": grupa porządkuje usługi, zestaw je
+     * wstawia. Dwa pojęcia, jedno słowo — to była pułapka.
+     */
+    groups: 'Zestawy',
     category: 'Kategoria',
     emptyTitle: 'Biblioteka jest pusta',
     emptyDescription:
@@ -890,7 +925,7 @@ export const pl = {
     deleteGroupDescription: (name: string) =>
       `„${name}” zniknie z biblioteki. Wyceny zbudowane z tej grupy zostają nietknięte.`,
     groupTotal: 'Suma netto',
-    groupItemsEmpty: 'Ta grupa nie ma jeszcze pozycji.',
+    groupItemsEmpty: 'Ten zestaw nie ma jeszcze pozycji.',
 
     // Zawartość zestawu — dodawanie i usuwanie pozycji na karcie grupy.
     groupAddItem: 'Dodaj pozycję',
@@ -903,7 +938,7 @@ export const pl = {
     groupItemsHint: 'Zmiany zawartości zapisują się od razu.',
     showGroupItems: (name: string) => `Pokaż pozycje grupy: ${name}`,
     hideGroupItems: (name: string) => `Ukryj pozycje grupy: ${name}`,
-    groupsEmptyTitle: 'Nie masz jeszcze żadnej grupy',
+    groupsEmptyTitle: 'Nie masz jeszcze żadnego zestawu',
     groupsEmptyDescription:
       'Grupa to gotowy zestaw pozycji — wstawisz nim do wyceny cały etap prac naraz.',
     /** Mianownik liczby mnogiej: 1 pozycja / 2 pozycje / 5 pozycji. */
