@@ -270,6 +270,15 @@ export async function updateLibraryItem(id: string, patch: LibraryItemPatch): Pr
   if (patch.unitLabel !== undefined) update.unit_label = patch.unitLabel;
   if (patch.minPriceCents !== undefined) update.min_price_cents = patch.minPriceCents;
   if (patch.active !== undefined) update.active = patch.active;
+  /*
+   * Edycja ZDEJMUJE flage „Przykladowa" (koncepcja §5 regula 8).
+   *
+   * Uzytkownik, ktory poprawil nazwe albo wpisal cene, „wzial" ten wpis na
+   * wlasnosc — i „Usun pozostale przykladowe" nie ma prawa mu go skasowac.
+   * Robimy to w repozytorium, a nie w UI: kazde miejsce zapisu musialoby
+   * o tym pamietac, a jedno zapomniane znaczyloby utrate czyjejs pracy.
+   */
+  update.is_sample = false;
   if (patch.sortOrder !== undefined) update.sort_order = patch.sortOrder;
   if (patch.pricing !== undefined) update.pricing = patch.pricing;
   // `null` jest tu znaczace („odepnij od grupy"), wiec sprawdzamy `undefined`.
@@ -461,4 +470,68 @@ export async function fetchLibraryUsage(workspaceId: string): Promise<LibraryIte
     quotesCount: Number(row.quotes_count ?? 0),
     lastUsedAt: row.last_used_at,
   }));
+}
+
+/**
+ * Usuwa pozostale wpisy przykladowe (T-62).
+ *
+ * Kasuje TYLKO te z `is_sample` — czyli nietkniete. Wpis, ktory ktos
+ * edytowal, stracil te flage przy zapisie i zostaje.
+ *
+ * Twarde `delete`, nie soft: to dane demonstracyjne, ktorych nikt nie
+ * tworzyl, a `deleted_at` zostawialby je w eksporcie i licznikach.
+ * Puste grupy przykladowe znikaja razem z uslugami — grupa bez wpisow,
+ * ktorej nikt nie nazwal, jest smieciem.
+ */
+export async function deleteSampleLibrary(workspaceId: string): Promise<number> {
+  const supabase = getSupabase();
+
+  const removed = unwrap(
+    await supabase
+      .from('library_items')
+      .delete()
+      .eq('workspace_id', workspaceId)
+      .eq('is_sample', true)
+      .select('id'),
+    'Usuniecie pozycji przykladowych',
+  );
+
+  const categories = unwrap(
+    await supabase
+      .from('library_categories')
+      .select('id')
+      .eq('workspace_id', workspaceId)
+      .eq('is_sample', true),
+    'Grupy przykladowe',
+  );
+
+  for (const category of categories as { id: string }[]) {
+    const items = unwrap(
+      await supabase.from('library_items').select('id').eq('category_id', category.id).limit(1),
+      'Zawartosc grupy przykladowej',
+    );
+    // Grupa przykladowa, w ktorej cos zostalo (bo user to edytowal), zostaje.
+    if ((items as unknown[]).length === 0) {
+      unwrap(
+        await supabase.from('library_categories').delete().eq('id', category.id).select('id'),
+        'Usuniecie grupy przykladowej',
+      );
+    }
+  }
+
+  return (removed as unknown[]).length;
+}
+
+/** Ile wpisow przykladowych zostalo nietknietych — do etykiety przycisku. */
+export async function countSampleItems(workspaceId: string): Promise<number> {
+  const rows = unwrap(
+    await getSupabase()
+      .from('library_items')
+      .select('id')
+      .eq('workspace_id', workspaceId)
+      .eq('is_sample', true)
+      .is('deleted_at', null),
+    'Liczba pozycji przykladowych',
+  );
+  return (rows as unknown[]).length;
 }

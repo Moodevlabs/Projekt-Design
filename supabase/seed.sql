@@ -148,6 +148,29 @@ select v.id, w.id, v.client_id, v.name, v.address, v.city, v.area_m2, v.kind, v.
 on conflict (id) do nothing;
 
 -- -----------------------------------------------------------------------------
+-- 3b. Demo NIE ma biblioteki przykładowej (T-62).
+--
+-- `handle_new_user()` odpala się przy wstawieniu użytkownika testowego, czyli
+-- ZANIM ten plik dojdzie do sekcji 4 — świeży stack dostawał więc 38 pozycji
+-- przykładowych PLUS 15 własnych. Demo ma mieć swoje, z cenami: to na nich
+-- stoją testy parytetu kwot.
+--
+-- Kasujemy twardo, a nie soft delete: to dane demonstracyjne, nie praca
+-- użytkownika, a `deleted_at` zostawiłby je w eksporcie i w licznikach.
+-- -----------------------------------------------------------------------------
+delete from public.library_items
+ where is_sample
+   and workspace_id in (
+     select id from public.workspaces where owner_id = '11111111-1111-4111-8111-111111111111'
+   );
+
+delete from public.library_categories
+ where is_sample
+   and workspace_id in (
+     select id from public.workspaces where owner_id = '11111111-1111-4111-8111-111111111111'
+   );
+
+-- -----------------------------------------------------------------------------
 -- 4. Biblioteka — 15 pozycji w 3 kategoriach (Projekt / Nadzór / Dodatki)
 --    Ceny w groszach: 9000 = 90,00 zł.
 --

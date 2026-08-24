@@ -108,6 +108,14 @@ export function LibraryItemCard({
         </Button>
       </header>
 
+      {/* Badge „Przykładowa" (T-62) — znika, gdy ktoś wpis edytuje, bo wtedy
+          przestaje być nasz i „Usuń pozostałe" go nie ruszy. */}
+      {item.isSample ? (
+        <span className="bg-surface-2 text-ink-soft self-start rounded-[var(--radius-pill)] px-2 py-0.5 text-[11px]">
+          {pl.library.sampleBadge}
+        </span>
+      ) : null}
+
       <Input
         value={draft.name}
         aria-label={`${pl.library.itemNameLabel}: ${label}`}

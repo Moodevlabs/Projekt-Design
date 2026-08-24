@@ -40,6 +40,8 @@ export const queryKeys = {
       : (['library', 'categories'] as const),
   libraryUsage: (workspaceId?: string) =>
     workspaceId ? (['library', 'usage', workspaceId] as const) : (['library', 'usage'] as const),
+  librarySample: (workspaceId?: string) =>
+    workspaceId ? (['library', 'sample', workspaceId] as const) : (['library', 'sample'] as const),
   libraryGroups: (workspaceId?: string) =>
     workspaceId ? (['library', 'groups', workspaceId] as const) : (['library', 'groups'] as const),
   templates: (workspaceId?: string) =>

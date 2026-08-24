@@ -575,9 +575,19 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > **Świadomie inaczej niż w opisie:** sekcja 5 („Stawki wg pomieszczeń") **linkuje do zakładki Stawki**, zamiast powtarzać edytor macierzy. Drugi edytor tych samych liczb to dwa miejsca do poprawiania przy każdej zmianie modelu; macierz pokazuje przy tym całą siatkę naraz, czego pojedyncza karta i tak nie zrobi. „Wskazówka" z linkiem do Pomieszczeń wchodzi razem z tą sekcją, gdy stawki znajdą się na stronie usługi.
   > **Zweryfikowane na żywo:** RPC sprawdzone na seedzie (`library_item_usage` zwraca 3 wyceny dla pozycji `…0001`); `pnpm test:db` — 118 zielonych.
 
-- [ ] **T-62 Biblioteka przykładowa na start konta** (FEATURES-Z-KONCEPCJI §5 B4, `reference/bilbioteka.md`)
+- [x] **T-62 Biblioteka przykładowa na start konta** (FEATURES-Z-KONCEPCJI §5 B4, `reference/bilbioteka.md`)
   `seed_library_sample(ws)` (8 grup / 38 usług, nazwy i opisy **dosłownie** z `bilbioteka.md`, ceny `null`, `is_sample`), wpięcie w `handle_new_user()` (idempotentne, tylko pusta biblioteka; bez backfillu), badge „Przykładowa", zdejmowanie flagi przy edycji, „Usuń pozostałe przykładowe (N)" w Ustawieniach → Biblioteka, krok onboardingu „Przejrzyj bibliotekę" (rozstrzygnij §9.11).
   ✅ Nowe konto: 8 grup i 38 usług bez cen z badge; edycja jednej zdejmuje badge tylko z niej; „Usuń pozostałe" kasuje 37 i puste grupy przykładowe. `seed.sql` demo **bez** biblioteki przykładowej.
+
+  > **Zrobione.** Migracja `0022_library_sample.sql` (`seed_library_sample` + wpięcie w `handle_new_user`), badge „Przykładowa", zdejmowanie flagi przy edycji, sekcja „Usuń pozostałe (N)" w Ustawieniach, krok onboardingu poprawiony. 10 nowych testów integracyjnych; 1194 + 128 zielone.
+  > **Na co uważać:**
+  > - **Demo dostawało OBIE biblioteki i to nie było widać w kodzie.** `handle_new_user()` odpala się przy wstawieniu użytkownika testowego, czyli **zanim** `seed.sql` dojdzie do swojej sekcji biblioteki — świeży stack miał 38 pozycji przykładowych plus 15 własnych. Seed czyści teraz wpisy `is_sample` dla konta demo (sekcja 3b). Testy parytetu kwot stoją na tych 15 z cenami.
+  > - **`is_sample = false` ustawia REPOZYTORIUM przy każdej edycji**, nie UI. Gdyby pamiętać o tym w komponentach, jedno zapomniane miejsce znaczyłoby, że „Usuń pozostałe" kasuje czyjąś pracę.
+  > - **Test idzie prawdziwą ścieżką: rejestruje nowe konto.** Pierwsza wersja wołała `seed_library_sample` na koncie demo i wszystko było puste — bo funkcja słusznie odmawia workspace'owi, który ma już usługi. To nie był błąd testu do obejścia, tylko sama reguła idempotencji; test sprawdza teraz oba przypadki osobno.
+  > - **Krok onboardingu „biblioteka" liczy pozycje BEZ flagi** (rozstrzygnięcie §9.11). Warunek „istnieje jakakolwiek pozycja" byłby odhaczony w chwili rejestracji, a krok ma znaczyć „masz swoją bibliotekę", nie „dostałeś naszą". Pierwsza edycja usługi przykładowej zalicza go — i to jest dokładnie ten moment, w którym biblioteka staje się czyjaś.
+  > - **„za panoramę" i „za rysunek" nie mają swojego kodu w enumie jednostek** — idą jako `custom` z etykietą. Dokładanie ich do `Unit` znaczyłoby migrację przy każdej nowej nazwie z arkusza.
+  > - Puste grupy przykładowe znikają przy sprzątaniu, ale grupa z edytowaną usługą **zostaje** — razem z tym, co ktoś w niej zatrzymał.
+  > **Zweryfikowane na żywo:** `pnpm test:db` — 128 zielonych, w tym „nowe konto dostaje 8 grup i 38 usług bez cen", „edycja zdejmuje flagę", „usuń pozostałe kasuje 37 i zostawia edytowaną".
 
 - [ ] **T-63 Pakiety: szablon niesie termin i dokumenty** (FEATURES-Z-KONCEPCJI §6 S1)
   Migracja `quote_templates.schedule/documents`; `templates.repo` z miękkim parsowaniem obu kolumn; dialog „Zapisz jako szablon" z checkboxami zawartości (ukryte, gdy wycena czegoś nie ma); wycena z szablonu dostaje komplet, `startDate` zerowana; ikony zawartości na karcie szablonu.

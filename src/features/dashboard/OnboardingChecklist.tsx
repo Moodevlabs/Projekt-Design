@@ -40,7 +40,21 @@ export function OnboardingChecklist({ hasQuotes }: { hasQuotes: boolean }) {
       done: Boolean(kit?.logoLightPath ?? kit?.logoDarkPath),
       to: routes.brand,
     },
-    { key: 'library', done: (library.data?.length ?? 0) > 0, to: routes.library },
+    {
+      key: 'library',
+      /*
+       * Liczą się pozycje BEZ flagi „Przykładowa" (§9.11, rozstrzygnięcie
+       * T-62). Od kiedy nowe konto dostaje 38 usług demo, warunek „istnieje
+       * jakakolwiek pozycja" byłby odhaczony w chwili rejestracji — a krok ma
+       * mówić „masz swoją bibliotekę", nie „dostałeś naszą".
+       *
+       * Edycja dowolnej usługi przykładowej zdejmuje jej flagę, więc pierwsza
+       * poprawiona cena zalicza ten krok — i to jest dokładnie ten moment,
+       * w którym biblioteka staje się czyjaś.
+       */
+      done: (library.data ?? []).some((item) => !item.isSample),
+      to: routes.library,
+    },
     { key: 'quote', done: hasQuotes, to: routes.quoteNew },
   ];
 

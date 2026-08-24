@@ -6,6 +6,7 @@ import { WorkspaceSettingsSection } from './WorkspaceSettingsSection';
 import { RoomTypesSection } from './RoomTypesSection';
 import { AccountSection } from './AccountSection';
 import { StorageUsageSection } from '@/features/files/StorageUsageSection';
+import { SampleLibrarySection } from './SampleLibrarySection';
 import { pl } from '@/i18n/pl';
 
 /**
@@ -47,6 +48,7 @@ export function SettingsPage() {
 
       <WorkspaceSettingsSection canWrite={canWrite} />
       <RoomTypesSection canWrite={canWrite} />
+      <SampleLibrarySection />
       <StorageUsageSection />
       <AccountSection />
     </div>

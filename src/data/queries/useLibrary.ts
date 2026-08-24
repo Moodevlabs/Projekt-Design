@@ -3,7 +3,9 @@ import {
   createLibraryGroup,
   createLibraryItem,
   deleteLibraryGroup,
+  countSampleItems,
   deleteLibraryItem,
+  deleteSampleLibrary,
   fetchLibraryUsage,
   listLibraryCategories,
   listLibraryGroups,
@@ -172,5 +174,30 @@ export function useLibraryUsage() {
     queryFn: () => fetchLibraryUsage(requireWorkspaceId(workspaceId)),
     enabled: Boolean(workspaceId),
     staleTime: 5 * 60 * 1000,
+  });
+}
+
+/** Ile wpisow przykladowych zostalo — do etykiety „Usun pozostale (N)" (T-62). */
+export function useSampleCount() {
+  const workspaceId = useWorkspaceId();
+
+  return useQuery({
+    queryKey: queryKeys.librarySample(workspaceId),
+    queryFn: () => countSampleItems(requireWorkspaceId(workspaceId)),
+    enabled: Boolean(workspaceId),
+  });
+}
+
+export function useDeleteSampleLibrary() {
+  const workspaceId = useWorkspaceId();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => deleteSampleLibrary(requireWorkspaceId(workspaceId)),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.libraryItems() });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.libraryCategories() });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.librarySample() });
+    },
   });
 }

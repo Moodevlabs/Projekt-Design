@@ -29,6 +29,12 @@ vi.mock('@/data/queries/useRoomTypes', () => ({
 }));
 
 // Sekcja „Pliki" (T-55) pyta o zuzycie miejsca — ustawienia testuja sie bez niej.
+// Sekcja „Biblioteka przykladowa" (T-62) pyta, ile wpisow zostalo.
+vi.mock('@/data/queries/useLibrary', () => ({
+  useSampleCount: () => ({ data: 0, isLoading: false }),
+  useDeleteSampleLibrary: () => ({ mutate: vi.fn(), isPending: false }),
+}));
+
 vi.mock('@/data/queries/useFiles', () => ({
   useStorageUsage: () => ({ data: { usedBytes: 0, quotaBytes: 2147483648 }, isLoading: false }),
 }));

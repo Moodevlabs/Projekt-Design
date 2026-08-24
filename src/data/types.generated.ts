@@ -1057,6 +1057,7 @@ export type Database = {
       }
       next_quote_number: { Args: { ws: string }; Returns: string }
       quote_can_write: { Args: { q: string }; Returns: boolean }
+      seed_library_sample: { Args: { ws: string }; Returns: undefined }
       seed_room_types: { Args: { ws: string }; Returns: undefined }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }

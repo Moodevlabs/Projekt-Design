@@ -789,6 +789,16 @@ export const pl = {
     sets: 'Zestawy',
     rooms: 'Pomieszczenia',
     rates: 'Stawki',
+    // Biblioteka przykladowa (T-62).
+    sampleBadge: 'Przykładowa',
+    sampleSectionHint:
+      'Biblioteka przykładowa dostaje każde nowe konto. Edytowane pozycje przestają być przykładowe i zostaną.',
+    deleteSample: (count: number) => `Usuń pozostałe przykładowe (${count})`,
+    deleteSampleTitle: 'Usunąć pozycje przykładowe?',
+    deleteSampleDescription: (count: number) =>
+      `Zniknie ${count} nietkniętych pozycji i puste grupy przykładowe. To, co edytowałeś, zostaje.`,
+    sampleDeleted: (count: number) => `Usunięto ${count} pozycji przykładowych`,
+
     // Pelnoekranowy edytor uslugi (T-61).
     pricingChoice: 'Sposób wyceny',
     pricingChoices: {
