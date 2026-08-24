@@ -26,14 +26,30 @@ function slug(value: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
-export function quoteFileName(number: string | null, clientName: string): string {
+/**
+ * Przyrostek wersji w nazwie pliku (T-57).
+ *
+ * W nazwie wersja jest **zawsze**, nawet gdy świadomie nie trafia na sam
+ * dokument (`showVersionOnPdf`): dwa pliki tej samej oferty nie mogą się
+ * nadpisać w folderze Pobrane — zasada z T-45. v1 pomijamy, bo to domyślny
+ * przypadek i „-v1" w każdej nazwie byłoby szumem.
+ */
+function versionPart(version: number | undefined): string {
+  return version && version > 1 ? `-v${version}` : '';
+}
+
+export function quoteFileName(
+  number: string | null,
+  clientName: string,
+  version?: number,
+): string {
   // Ukośniki z numeru zamieniamy na myślniki — inaczej system uznałby je za
   // ścieżkę i zapis padłby (albo, co gorsza, trafił w inny katalog).
   const numberPart = number ? slug(number) : 'wycena';
   const clientPart = slug(clientName);
 
   const base = clientPart ? `${numberPart}-${clientPart}` : numberPart;
-  return `${base}.pdf`;
+  return `${base}${versionPart(version)}.pdf`;
 }
 
 /**
@@ -42,9 +58,9 @@ export function quoteFileName(number: string | null, clientName: string): string
  * Osobny przyrostek, bo pakiet dla jednego inwestora to kilka plików o tym
  * samym numerze — bez rozróżnienia drugi zapis nadpisałby pierwszy.
  */
-export function scheduleFileName(number: string | null): string {
+export function scheduleFileName(number: string | null, version?: number): string {
   const numberPart = number ? slug(number) : 'wycena';
-  return `${numberPart}-termin.pdf`;
+  return `${numberPart}${versionPart(version)}-termin.pdf`;
 }
 
 /**
@@ -53,13 +69,13 @@ export function scheduleFileName(number: string | null): string {
  * Ta sama zasada co przy terminie: przyrostek odróżnia plik w pakiecie,
  * w którym wszystkie dokumenty niosą ten sam numer wyceny.
  */
-export function stagesFileName(number: string | null): string {
+export function stagesFileName(number: string | null, version?: number): string {
   const numberPart = number ? slug(number) : 'wycena';
-  return `${numberPart}-etapy.pdf`;
+  return `${numberPart}${versionPart(version)}-etapy.pdf`;
 }
 
 /** Nazwa pliku dokumentu „Cennik usług dodatkowych" (F6.2). */
-export function priceListFileName(number: string | null): string {
+export function priceListFileName(number: string | null, version?: number): string {
   const numberPart = number ? slug(number) : 'wycena';
-  return `${numberPart}-cennik.pdf`;
+  return `${numberPart}${versionPart(version)}-cennik.pdf`;
 }

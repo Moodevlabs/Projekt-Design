@@ -52,6 +52,8 @@ function loadQuote(clientId: string | null = null) {
     workspaceId: 'ws',
     clientId,
     projectId: null,
+    lineageId: 'line-1',
+    version: 1,
     number: 'WYC/2026/08/0001',
     title: 'Wycena',
     status: 'draft',

@@ -32,6 +32,8 @@ export interface QuotePdfProps {
   theme: PdfTheme;
   brandKit: BrandKit;
   number: string | null;
+  /** Etykieta wersji przy numerze (np. „v2"). `null` = nie pokazuj (T-57). */
+  versionLabel?: string | null;
   issueDate: string;
   currency: string;
   /** Data URL logo w wariancie wskazanym przez `theme.headerLogo`. */
@@ -88,6 +90,7 @@ export function QuotePdfDocument({
   theme,
   brandKit,
   number,
+  versionLabel = null,
   issueDate,
   currency,
   logoDataUrl,
@@ -122,7 +125,9 @@ export function QuotePdfDocument({
           )}
           <View style={{ alignItems: 'flex-end' }}>
             {number ? (
-              <Text style={{ color: theme.onAccent, fontSize: 11 }}>{number}</Text>
+              <Text style={{ color: theme.onAccent, fontSize: 11 }}>
+                {versionLabel ? `${number} · ${versionLabel}` : number}
+              </Text>
             ) : null}
             <Text style={{ color: theme.onAccent, fontSize: theme.sizes.small }}>
               {formatDate(new Date(issueDate))}

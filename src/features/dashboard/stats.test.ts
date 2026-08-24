@@ -10,6 +10,8 @@ function quote(partial: Partial<QuoteSummary> & { createdAt: string }): QuoteSum
     workspaceId: 'ws',
     clientId: null,
     projectId: null,
+    lineageId: 'line-1',
+    version: 1,
     number: null,
     title: 'Wycena',
     status: partial.status ?? 'draft',

@@ -30,6 +30,8 @@ vi.mock('@/data/queries/useQuotes', () => ({
   }),
   useSaveQuote: () => ({ mutateAsync: vi.fn() }),
   useSetQuoteStatus: () => ({ mutate: vi.fn(), isPending: false }),
+  useCreateQuoteVersion: () => ({ mutate: vi.fn(), isPending: false }),
+  useAcceptReplacing: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
 vi.mock('@/data/queries/useWorkspace', () => ({
@@ -117,6 +119,8 @@ function quote(): Quote {
     updatedAt: '2026-08-01T10:00:00Z',
     clientId: null,
     projectId: null,
+    lineageId: 'line-1',
+    version: 1,
     body: newQuoteBody({
       title: 'Wycena testowa',
       sections: [newSection({ title: 'Sekcja', items: [newItem({ name: 'Pozycja' })] })],

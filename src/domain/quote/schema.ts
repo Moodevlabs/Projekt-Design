@@ -8,7 +8,22 @@ import { CURRENT_BODY_VERSION, migrateBody } from './migrate';
  */
 
 /** Status wyceny — parytet z `quotes.status` w bazie. */
-export const QuoteStatusSchema = z.enum(['draft', 'sent', 'accepted', 'rejected', 'expired']);
+/**
+ * Statusy wyceny.
+ *
+ * `archived` (T-57) to **status**, a nie kosz: wersja przestała być aktualną
+ * propozycją, ale dalej jest na liście projektu i w rejestrze. Kosz to
+ * `deleted_at` i ma w UI własną nazwę („Usuń") — dwa różne „archiwa" byłyby
+ * pułapką.
+ */
+export const QuoteStatusSchema = z.enum([
+  'draft',
+  'sent',
+  'accepted',
+  'rejected',
+  'expired',
+  'archived',
+]);
 export type QuoteStatus = z.infer<typeof QuoteStatusSchema>;
 
 /**

@@ -40,6 +40,8 @@ vi.mock('@/data/queries/useQuotes', () => ({
   useDuplicateQuote: mutationStub,
   useArchiveQuote: mutationStub,
   useSetQuoteStatus: mutationStub,
+  useCreateQuoteVersion: mutationStub,
+  useAcceptReplacing: mutationStub,
 }));
 
 const { QuotesListPage } = await import('./QuotesListPage');
@@ -50,6 +52,8 @@ function summary(partial: Partial<QuoteSummary> = {}): QuoteSummary {
     workspaceId: 'ws',
     clientId: null,
     projectId: null,
+    lineageId: 'line-1',
+    version: 1,
     number: 'WYC/2026/08/0001',
     title: 'Remont kuchni',
     status: 'draft',

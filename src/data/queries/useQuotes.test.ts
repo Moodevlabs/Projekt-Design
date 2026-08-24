@@ -31,6 +31,8 @@ function makeSummary(): QuoteSummary {
     workspaceId: 'ws-1',
     clientId: null,
     projectId: null,
+    lineageId: 'line-1',
+    version: 1,
     number: 'WYC/2026/08/0001',
     title: 'Wycena testowa',
     status: 'draft',

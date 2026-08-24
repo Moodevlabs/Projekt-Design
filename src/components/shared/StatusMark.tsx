@@ -50,6 +50,16 @@ const VISUALS: Record<QuoteStatus, StatusVisual> = {
     color: 'var(--status-expired)',
     muted: true,
   },
+  /*
+   * Archiwalna NIE jest etapem w ciągu szkic → wysłana → rozstrzygnięcie
+   * (§9.10). To wersja, którą zastąpiła nowsza — postęp nic tu nie znaczy,
+   * więc tor zostaje pusty i wygaszony, a informację niesie sama etykieta.
+   */
+  archived: {
+    segments: ['empty', 'empty', 'empty'],
+    color: 'var(--status-expired)',
+    muted: true,
+  },
 };
 
 export function StatusMark({

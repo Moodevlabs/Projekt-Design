@@ -99,6 +99,9 @@ export interface EditorState {
   clientId: string | null;
   /** Projekt-teczka (T-54). Kolumna, nie `body` — jak `clientId`. */
   projectId: string | null;
+  /** Linia wersji i numer wersji (T-57) — do badge'a i nazwy pliku PDF. */
+  lineageId: string | null;
+  version: number;
   number: string | null;
   status: QuoteStatus;
   body: QuoteBody | null;
@@ -287,6 +290,8 @@ const INITIAL = {
   quoteId: null,
   clientId: null as string | null,
   projectId: null as string | null,
+  lineageId: null as string | null,
+  version: 1,
   number: null,
   status: 'draft' as QuoteStatus,
   body: null,
@@ -363,6 +368,8 @@ export const useEditorStore = create<EditorState>()(
         state.quoteId = quote.id;
         state.clientId = quote.clientId;
         state.projectId = quote.projectId;
+        state.lineageId = quote.lineageId;
+        state.version = quote.version;
         state.number = quote.number;
         state.status = quote.status;
         state.body = quote.body;

@@ -14,13 +14,14 @@ import { parseQuoteDocuments, type QuoteDocuments } from '@/domain/documents';
 import { getSupabase } from '@/data/supabase';
 import type { TablesUpdate } from '@/data/types.generated';
 import { ConflictError, RepoError, unwrap } from './errors';
+import { nextVersion, statusAfterSuperseding } from '@/domain/quote/versions';
 import { createLogger } from '@/lib/logger';
 
 const log = createLogger('quotes.repo');
 
 /** Kolumny listy — bez `body`, zeby nie ciagnac calych dokumentow do tabeli. */
 const LIST_COLUMNS =
-  'id, workspace_id, client_id, project_id, number, title, status, total_net_cents, total_gross_cents, currency, client_name, city, internal_notes, doc_kind, valid_until, sent_at, accepted_at, created_at, updated_at';
+  'id, workspace_id, client_id, project_id, lineage_id, version, number, title, status, total_net_cents, total_gross_cents, currency, client_name, city, internal_notes, doc_kind, valid_until, sent_at, accepted_at, created_at, updated_at';
 
 export interface QuoteSummary {
   id: string;
@@ -29,6 +30,10 @@ export interface QuoteSummary {
   clientId: string | null;
   /** Projekt-teczka (T-54). `null` = „szybka wycena" — tez dopuszczalny stan. */
   projectId: string | null;
+  /** Linia wersji (T-57). Wspolna dla v1, v2… tej samej oferty. */
+  lineageId: string;
+  /** Numer wersji w linii. v1 to zwykla wycena, ktorej nikt nie wersjonowal. */
+  version: number;
   number: string | null;
   title: string;
   status: QuoteStatus;
@@ -78,6 +83,8 @@ export interface QuoteFilters {
   clientId?: string;
   /** Wyceny jednego projektu — zakladka „Wyceny" w teczce (T-54). */
   projectId?: string;
+  /** Wszystkie wersje jednej linii (T-57). */
+  lineageId?: string;
   includeArchived?: boolean;
   sort?: QuoteSort;
 }
@@ -97,6 +104,8 @@ function mapSummary(row: Row): QuoteSummary {
     workspaceId: row.workspace_id as string,
     clientId: (row.client_id as string | null) ?? null,
     projectId: (row.project_id as string | null) ?? null,
+    lineageId: (row.lineage_id as string | null) ?? (row.id as string),
+    version: Number(row.version ?? 1),
     number: (row.number as string | null) ?? null,
     title: row.title as string,
     status: QuoteStatusSchema.catch('draft').parse(row.status),
@@ -132,6 +141,34 @@ function mapQuote(row: Row): Quote {
   };
 }
 
+/**
+ * Projekt ma juz zaakceptowana wycene.
+ *
+ * Odbija to unikalny indeks czesciowy `quotes_one_accepted_per_project`
+ * (migracja 0018) — czyli BAZA, a nie sprawdzenie w przegladarce. Dwie
+ * rownolegle akceptacje policzylyby ten sam stan i obie by przeszly.
+ *
+ * Rozpoznajemy po nazwie indeksu, a nie po samym `23505`: ten kod dostajemy
+ * tez przy duplikacie numeru wyceny i pokazanie wtedy „zastapic zaakceptowana?"
+ * byloby mylace.
+ */
+export class AcceptedConflictError extends RepoError {
+  constructor() {
+    super('W tym projekcie jest juz zaakceptowana wycena.');
+    this.name = 'AcceptedConflictError';
+  }
+}
+
+function isAcceptedConflict(error: unknown): boolean {
+  const kod = (error as { code?: unknown } | null)?.code;
+  const message = (error as { message?: unknown } | null)?.message;
+  return (
+    kod === '23505' &&
+    typeof message === 'string' &&
+    message.includes('quotes_one_accepted_per_project')
+  );
+}
+
 export async function listQuotes(filters: QuoteFilters): Promise<QuoteSummary[]> {
   const sort = SORTS[filters.sort ?? 'updated_desc'];
 
@@ -145,6 +182,7 @@ export async function listQuotes(filters: QuoteFilters): Promise<QuoteSummary[]>
   if (filters.city) query = query.eq('city', filters.city);
   if (filters.clientId) query = query.eq('client_id', filters.clientId);
   if (filters.projectId) query = query.eq('project_id', filters.projectId);
+  if (filters.lineageId) query = query.eq('lineage_id', filters.lineageId);
 
   const term = filters.search?.trim();
   if (term) {
@@ -262,6 +300,9 @@ export interface CreateQuoteInput {
   clientId?: string | null;
   projectId?: string | null;
   currency?: string;
+  /** Linia wersji. Pominieta = nowa linia (trigger ustawi `lineage_id = id`). */
+  lineageId?: string | null;
+  version?: number;
 }
 
 export async function createQuote(input: CreateQuoteInput): Promise<Quote> {
@@ -269,13 +310,26 @@ export async function createQuote(input: CreateQuoteInput): Promise<Quote> {
   const totals = calcQuoteTotals(body);
   const number = await nextQuoteNumber(input.workspaceId);
 
+  /*
+   * Identyfikator nadajemy TUTAJ, a nie zostawiamy bazie.
+   *
+   * Wycena bez podanej linii zaklada wlasna: `lineage_id = id`. Zeby to
+   * zapisac jednym insertem, musimy znac `id` wczesniej. Trigger
+   * `quotes_lineage_default` (0018) zostaje jako zabezpieczenie dla seedow
+   * i migracji, ktore id nie podaja.
+   */
+  const id = crypto.randomUUID();
+
   const rows = unwrap(
     await getSupabase()
       .from('quotes')
       .insert({
+        id,
         workspace_id: input.workspaceId,
         client_id: input.clientId ?? null,
         project_id: input.projectId ?? null,
+        lineage_id: input.lineageId ?? id,
+        ...(input.version ? { version: input.version } : {}),
         number,
         title: body.title,
         status: 'draft',
@@ -401,14 +455,86 @@ export async function setQuoteStatus(id: string, status: QuoteStatus): Promise<Q
   if (status === 'sent') patch.sent_at = new Date().toISOString();
   if (status === 'accepted') patch.accepted_at = new Date().toISOString();
 
-  const rows = unwrap(
-    await getSupabase().from('quotes').update(patch).eq('id', id).select(LIST_COLUMNS),
-    'Zmiana statusu wyceny',
-  );
+  const result = await getSupabase().from('quotes').update(patch).eq('id', id).select(LIST_COLUMNS);
 
-  const row = rows[0];
+  if (result.error) {
+    // Jedna zaakceptowana na projekt — UI ma zapytac „zastapic?", a nie
+    // pokazac surowy blad zapisu (koncepcja §4 regula 3).
+    if (isAcceptedConflict(result.error)) throw new AcceptedConflictError();
+    throw new RepoError(`Zmiana statusu wyceny: ${result.error.message}`, result.error);
+  }
+
+  const row = result.data?.[0];
   if (!row) throw new RepoError('Nie udalo sie zmienic statusu.');
   return mapSummary(row);
+}
+
+/**
+ * Akceptacja z zastapieniem poprzedniej zaakceptowanej wyceny w projekcie.
+ *
+ * Kolejnosc jest istotna: **najpierw zwalniamy miejsce** (poprzednia idzie na
+ * `archived`), dopiero potem akceptujemy nowa. Odwrotnie odbilby nas indeks.
+ * Gdyby druga operacja padla, projekt zostaje bez zaakceptowanej wyceny —
+ * stan niepelny, ale prawdziwy; dwie zaakceptowane naraz bylyby klamstwem
+ * o tym, na co klient sie zgodzil.
+ */
+export async function acceptReplacing(id: string, projectId: string): Promise<QuoteSummary> {
+  const supabase = getSupabase();
+
+  unwrap(
+    await supabase
+      .from('quotes')
+      .update({ status: 'archived' })
+      .eq('project_id', projectId)
+      .eq('status', 'accepted')
+      .is('deleted_at', null)
+      .neq('id', id)
+      .select('id'),
+    'Archiwizacja poprzedniej zaakceptowanej wyceny',
+  );
+
+  return setQuoteStatus(id, 'accepted');
+}
+
+/**
+ * Nowa wersja wyceny — duplikat W TEJ SAMEJ linii (koncepcja §4 regula 1).
+ *
+ * Rozni sie od `duplicateQuote` jednym, ale zasadniczym szczegolem:
+ * `lineage_id` zostaje. „Duplikuj" zaklada NOWA linie („ta sama oferta dla
+ * innego klienta"), „Nowa wersja" kontynuuje te sama („kolejna propozycja dla
+ * tej samej inwestycji").
+ *
+ * Nowa wersja dostaje **nowy numer**: numer identyfikuje dokument u klienta,
+ * a v2 to inny dokument niz v1.
+ */
+export async function createQuoteVersion(id: string): Promise<Quote> {
+  const source = await getQuote(id);
+  if (!source.body) throw new RepoError('Nie mozna wersjonowac uszkodzonej wyceny.');
+
+  const rodzenstwo = await listQuotes({
+    workspaceId: source.workspaceId,
+    lineageId: source.lineageId,
+    status: 'all',
+    includeArchived: true,
+  });
+
+  const kopia = await createQuote({
+    workspaceId: source.workspaceId,
+    body: duplicateQuoteBody(source.body),
+    clientId: source.clientId,
+    projectId: source.projectId,
+    currency: source.currency,
+    lineageId: source.lineageId,
+    version: nextVersion(rodzenstwo.map((row) => row.version)),
+  });
+
+  // Poprzedni SZKIC idzie do archiwum — byl robocza propozycja, ktora wlasnie
+  // zastapiono. `sent`/`accepted`/`rejected` zostaja: to fakty o tym, co
+  // poszlo do inwestora, a nie robocze kopie.
+  const nastepny = statusAfterSuperseding(source.status);
+  if (nastepny) await setQuoteStatus(source.id, nastepny);
+
+  return kopia;
 }
 
 export async function duplicateQuote(id: string): Promise<Quote> {

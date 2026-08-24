@@ -68,6 +68,8 @@ function makeQuote(): Quote {
     updatedAt: '2026-08-01T10:00:00Z',
     clientId: null,
     projectId: null,
+    lineageId: 'line-1',
+    version: 1,
     body,
     bodyError: null,
     schedule: null,

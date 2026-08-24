@@ -81,6 +81,8 @@ describe('WorkspaceSettingsSchema', () => {
       vatRate: 23,
       numberPattern: DEFAULT_NUMBER_PATTERN,
       showDisabledItems: true,
+      // Wersja na dokumencie klienta — domyslnie NIE (T-57).
+      showVersionOnPdf: false,
       pricesInclude: 'net',
       // Tryb godzinowy (F2.1) włącza się świadomie; bez stawki nie ma z czego
       // liczyć, więc domyślnie jej nie ma.

@@ -70,10 +70,16 @@ describe('SectionSchema', () => {
 
 describe('QuoteStatusSchema', () => {
   it('akceptuje statusy z bazy', () => {
-    for (const status of ['draft', 'sent', 'accepted', 'rejected', 'expired']) {
+    for (const status of ['draft', 'sent', 'accepted', 'rejected', 'expired', 'archived']) {
       expect(QuoteStatusSchema.parse(status)).toBe(status);
     }
-    expect(QuoteStatusSchema.safeParse('archived').success).toBe(false);
+    expect(QuoteStatusSchema.safeParse('nieistniejacy').success).toBe(false);
+  });
+
+  it('`archived` to STATUS wersji, a nie kosz', () => {
+    // Kosz to `deleted_at` i ma w UI wlasna nazwe („Usun"). Dwa rozne
+    // „archiwa" w jednym interfejsie byloby pulapka (T-57).
+    expect(QuoteStatusSchema.parse('archived')).toBe('archived');
   });
 });
 

@@ -22,9 +22,9 @@ import { DiscountsSection } from './components/DiscountsSection';
 import { AddLink } from './components/AddLink';
 import { LibrarySheet } from './components/LibrarySheet';
 import { OverwriteTemplateDialog, SaveAsTemplateDialog } from './components/TemplateDialogs';
-import { useCreateQuote, useQuote } from '@/data/queries/useQuotes';
+import { useCreateQuote, useCreateQuoteVersion, useQuote } from '@/data/queries/useQuotes';
 import { useWorkspace } from '@/data/queries/useWorkspace';
-import { quoteBodyFromSettings } from '@/domain/quote';
+import { canCreateVersion, quoteBodyFromSettings, versionLabel } from '@/domain/quote';
 import { ConfirmDialog, EmptyState } from '@/components/shared';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -251,7 +251,7 @@ function EditorSurface({
   onReload: () => void;
   onRetry: () => void;
 }) {
-  const { body, mode, number, status, saveState, lastSavedAt } = useEditorStore(
+  const { body, mode, number, status, saveState, lastSavedAt, quoteId, version } = useEditorStore(
     useShallow((state) => ({
       body: state.body,
       mode: state.mode,
@@ -259,6 +259,8 @@ function EditorSurface({
       status: state.status,
       saveState: state.saveState,
       lastSavedAt: state.lastSavedAt,
+      quoteId: state.quoteId,
+      version: state.version,
     })),
   );
 
@@ -295,6 +297,18 @@ function EditorSurface({
   const templates = useTemplateActions();
   // Jedno miejsce, z ktorego wszystkie eksporty biora „gdzie zapisac kopie" (T-56).
   const archive = useArchiveTarget();
+  const newVersion = useCreateQuoteVersion();
+  // Nowa wersja to inny dokument — po jej zalozeniu przechodzimy na nia,
+  // zeby edycja nie szla dalej w kopii, ktora wlasnie zostala zastapiona.
+  const navigate = useNavigate();
+  const workspaceSettings = useWorkspace().data?.settings;
+  /*
+   * Wersja na SAMYM dokumencie tylko przy wlaczonym `showVersionOnPdf`
+   * (domyslnie off) — inwestor nie musi wiedziec, ze to trzecie podejscie.
+   * W nazwie pliku wersja jest zawsze i to jest osobna sprawa.
+   */
+  const pdfVersionLabel =
+    workspaceSettings?.showVersionOnPdf && version > 1 ? versionLabel(version) : null;
   const { exportPdf, exporting: exportingPdf } = useExportPdf();
   const { exportSchedule, exporting: exportingSchedule } = useExportSchedulePdf();
   const { exportStages, exporting: exportingStages } = useExportStagesPdf();
@@ -444,6 +458,8 @@ function EditorSurface({
               currency: 'PLN',
               onExported: markAsSent.afterExport,
               archive: archive.target,
+              version,
+              versionLabel: pdfVersionLabel,
             })
           }
           exportingPdf={exportingPdf}
@@ -454,6 +470,7 @@ function EditorSurface({
               number,
               issueDate,
               archive: archive.target,
+              version,
             })
           }
           exportingSchedule={exportingSchedule}
@@ -465,6 +482,7 @@ function EditorSurface({
               number,
               issueDate,
               archive: archive.target,
+              version,
             })
           }
           exportingStages={exportingStages}
@@ -474,6 +492,7 @@ function EditorSurface({
               number,
               issueDate,
               archive: archive.target,
+              version,
             })
           }
           exportingPriceList={exportingPriceList}
@@ -482,6 +501,21 @@ function EditorSurface({
           onOverwriteTemplate={() => setOverwriteTemplateOpen(true)}
           canOverwriteTemplate={templates.canOverwrite}
           onOpenLibrary={() => setLibraryOpen(true)}
+          version={version}
+          creatingVersion={newVersion.isPending}
+          onNewVersion={
+            canCreateVersion(status) && quoteId
+              ? () => {
+                  newVersion.mutate(quoteId, {
+                    onSuccess: (kopia) => {
+                      toast.success(pl.quotes.versionCreated(versionLabel(kopia.version)));
+                      void navigate(routes.quote(kopia.id));
+                    },
+                    onError: (error) => toast.error(error.message),
+                  });
+                }
+              : null
+          }
         />
 
         <ReadOnlyBanner />

@@ -17,6 +17,8 @@ const log = createLogger('pdf.schedule');
 export interface ExportScheduleArgs {
   /** Kopia do archiwum klienta (T-56). `null`/pominiete = nie archiwizuj. */
   archive?: ArchiveRequest | null;
+  /** Numer wersji — do nazwy pliku, zeby wersje sie nie nadpisywaly (T-57). */
+  version?: number;
   schedule: ScheduleBody | null;
   rooms: Room[];
   number: string | null;
@@ -36,7 +38,7 @@ export function useExportSchedulePdf() {
   const [exporting, setExporting] = useState(false);
 
   const exportSchedule = useCallback(
-    async ({ schedule, rooms, number, issueDate, validDays = 7, archive }: ExportScheduleArgs) => {
+    async ({ schedule, rooms, number, issueDate, validDays = 7, archive, version }: ExportScheduleArgs) => {
       if (!schedule) {
         // Bez harmonogramu nie ma czego drukowac — mowimy, gdzie go ustawic,
         // zamiast wypuszczac pusty dokument.
@@ -72,7 +74,7 @@ export function useExportSchedulePdf() {
         ).toBlob();
 
         const bytes = new Uint8Array(await blob.arrayBuffer());
-        const fileName = scheduleFileName(number);
+        const fileName = scheduleFileName(number, version);
 
         await deliverPdf({
           bytes,

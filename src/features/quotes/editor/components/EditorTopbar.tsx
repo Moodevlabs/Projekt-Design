@@ -3,6 +3,7 @@ import { ArrowLeft, Eye, MoreHorizontal, Pencil } from 'lucide-react';
 import { InlineText } from './InlineText';
 import { SaveIndicator } from './SaveIndicator';
 import { StatusMark } from '@/components/shared';
+import { showsVersion, versionLabel } from '@/domain/quote';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -46,6 +47,9 @@ export function EditorTopbar({
   onOverwriteTemplate,
   canOverwriteTemplate,
   onOpenLibrary,
+  version,
+  onNewVersion,
+  creatingVersion,
 }: {
   number: string | null;
   status: QuoteStatus;
@@ -81,6 +85,11 @@ export function EditorTopbar({
   /** Bez szablonów nie ma czego nadpisywać — pozycja menu znika. */
   canOverwriteTemplate: boolean;
   onOpenLibrary: () => void;
+  /** Numer wersji (T-57). Badge pojawia sie dopiero od v2. */
+  version: number;
+  /** `null` = tej wyceny nie da sie wersjonowac (jest juz archiwalna). */
+  onNewVersion: (() => void) | null;
+  creatingVersion: boolean;
 }) {
   return (
     <div className="glass relative z-10 flex h-[68px] shrink-0 items-center gap-4 px-7">
@@ -99,6 +108,11 @@ export function EditorTopbar({
           ariaLabel={pl.quotes.number}
           className="tabular w-52 rounded-[var(--radius-control)] px-2 py-1 text-sm font-medium hover:bg-white/60 focus:bg-white/70"
         />
+        {/* Wersja przy numerze, jak w 05-UI §3: `WYC/2026/08/0012 · v2`.
+            Dopiero od v2 — „· v1" przy każdej wycenie byłby szumem. */}
+        {showsVersion(version) ? (
+          <span className="text-ink-soft text-sm whitespace-nowrap">{versionLabel(version)}</span>
+        ) : null}
         <StatusMark status={status} />
         <SaveIndicator
           state={saveState}
@@ -178,6 +192,18 @@ export function EditorTopbar({
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={onExportPackage}>{pl.pdf.exportPackage}</DropdownMenuItem>
             <DropdownMenuSeparator />
+            {/* „Nowa wersja" kontynuuje TĘ SAMĄ linię (koncepcja §4 reguła 1);
+                „Duplikuj" z listy zakłada nową. Archiwalnej nie wersjonujemy —
+                linia poszła dalej i powstałyby dwie „najnowsze". */}
+            {onNewVersion ? (
+              <DropdownMenuItem
+                disabled={creatingVersion}
+                title={pl.quotes.newVersionHint}
+                onSelect={onNewVersion}
+              >
+                {pl.quotes.newVersion}
+              </DropdownMenuItem>
+            ) : null}
             <DropdownMenuItem onSelect={onOpenLibrary}>{pl.library.title}</DropdownMenuItem>
             <DropdownMenuItem onSelect={onSaveAllToLibrary}>
               {pl.editor.saveAllToLibrary}

@@ -48,6 +48,8 @@ export const pl = {
     accepted: 'Zaakceptowana',
     rejected: 'Odrzucona',
     expired: 'Wygasła',
+    /** Wersja zastąpiona przez nowszą. NIE to samo co kosz (`deleted_at`). */
+    archived: 'Archiwalna',
   },
   quotes: {
     title: 'Wyceny',
@@ -98,17 +100,40 @@ export const pl = {
       number_asc: 'Numer rosnąco',
     },
     filterByClient: 'Filtruj po kliencie',
+
+    // Wersje wycen (T-57).
+    newVersion: 'Nowa wersja',
+    newVersionHint: 'Kolejna propozycja dla tej samej inwestycji.',
+    duplicateHint: 'Ta sama oferta dla innego klienta — nowa linia od v1.',
+    versionCreated: (label: string) => `Utworzono ${label}`,
+    olderVersions: (count: number) =>
+      count === 1 ? '1 starsza wersja' : `${count} starsze wersje`,
+    showOlder: 'Pokaż starsze wersje',
+    hideOlder: 'Ukryj starsze wersje',
+    versionColumn: 'Wersja',
+
+    replaceAcceptedTitle: 'Zastąpić zaakceptowaną wycenę?',
+    replaceAcceptedDescription:
+      'W tym projekcie zaakceptowana jest już inna wycena. Projekt może mieć tylko jedną — poprzednia stanie się archiwalna.',
+    replaceAcceptedConfirm: 'Zastąp',
+    replaceAccepted: 'Zastąpiono zaakceptowaną wycenę',
     moveToProject: 'Przenieś do projektu',
     markAs: 'Oznacz jako',
     statusChanged: 'Status wyceny zmieniony',
     allClients: 'Wszyscy klienci',
     openClient: (name: string) => `Otwórz kartę klienta: ${name}`,
-    archived: 'Zarchiwizowane',
-    archiveConfirmTitle: 'Zarchiwizować wycenę?',
+    archived: 'Usunięte',
+    /*
+     * Dawne „Archiwizuj" z T-07 to w rzeczywistości KOSZ (`deleted_at`).
+     * Od T-57 istnieje osobny status `archived` i trzymanie dwóch różnych
+     * „archiwów" w jednym interfejsie byłoby pułapką — więc kosz nazywa się
+     * teraz wprost „Usuń".
+     */
+    archiveConfirmTitle: 'Usunąć wycenę?',
     archiveConfirmDescription:
       'Wycena zniknie z listy, ale zostanie w bazie — będzie można ją przywrócić.',
     duplicated: 'Utworzono kopię wyceny',
-    archivedToast: 'Wycena zarchiwizowana',
+    archivedToast: 'Wycena usunięta',
     loadError: 'Nie udało się wczytać wycen.',
   },
   clients: {
@@ -1060,6 +1085,9 @@ export const pl = {
     numberPatternPreview: 'Następna wycena dostanie numer',
     numberPatternHint: 'Tokeny: {YYYY}, {YY}, {MM}, {DD}, {seq}, {seq:6}.',
     numberPatternReset: 'Przywróć domyślny wzorzec',
+    showVersionOnPdf: 'Numer wersji na dokumencie',
+    showVersionOnPdfHint:
+      'Domyślnie wyłączone — inwestor nie musi wiedzieć, że to kolejne podejście. W nazwie pliku wersja jest zawsze.',
     showDisabledItems: 'Pokazuj wyłączone pozycje w PDF',
     showDisabledItemsHint:
       'Wyłączone pozycje trafiają do PDF jako opcje bez kwoty — przydatne przy wariantach do wyboru.',

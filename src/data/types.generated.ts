@@ -609,6 +609,7 @@ export type Database = {
           documents: Json | null
           id: string
           internal_notes: string | null
+          lineage_id: string
           number: string | null
           project_id: string | null
           schedule: Json | null
@@ -619,6 +620,7 @@ export type Database = {
           total_net_cents: number
           updated_at: string
           valid_until: string | null
+          version: number
           workspace_id: string
         }
         Insert: {
@@ -635,6 +637,7 @@ export type Database = {
           documents?: Json | null
           id?: string
           internal_notes?: string | null
+          lineage_id: string
           number?: string | null
           project_id?: string | null
           schedule?: Json | null
@@ -645,6 +648,7 @@ export type Database = {
           total_net_cents?: number
           updated_at?: string
           valid_until?: string | null
+          version?: number
           workspace_id: string
         }
         Update: {
@@ -661,6 +665,7 @@ export type Database = {
           documents?: Json | null
           id?: string
           internal_notes?: string | null
+          lineage_id?: string
           number?: string | null
           project_id?: string | null
           schedule?: Json | null
@@ -671,6 +676,7 @@ export type Database = {
           total_net_cents?: number
           updated_at?: string
           valid_until?: string | null
+          version?: number
           workspace_id?: string
         }
         Relationships: [

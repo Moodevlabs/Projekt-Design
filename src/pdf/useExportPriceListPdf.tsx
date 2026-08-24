@@ -16,6 +16,8 @@ const log = createLogger('pdf.priceList');
 export interface ExportPriceListArgs {
   /** Kopia do archiwum klienta (T-56). `null`/pominiete = nie archiwizuj. */
   archive?: ArchiveRequest | null;
+  /** Numer wersji — do nazwy pliku, zeby wersje sie nie nadpisywaly (T-57). */
+  version?: number;
   doc: PriceListDoc | null;
   number: string | null;
   issueDate: string;
@@ -28,7 +30,7 @@ export function useExportPriceListPdf() {
   const [exporting, setExporting] = useState(false);
 
   const exportPriceList = useCallback(
-    async ({ doc, number, issueDate, currency = 'PLN', archive }: ExportPriceListArgs) => {
+    async ({ doc, number, issueDate, currency = 'PLN', archive, version }: ExportPriceListArgs) => {
       if (!doc) {
         toast.info(pl.pdf.priceListMissing);
         return;
@@ -61,7 +63,7 @@ export function useExportPriceListPdf() {
         ).toBlob();
 
         const bytes = new Uint8Array(await blob.arrayBuffer());
-        const fileName = priceListFileName(number);
+        const fileName = priceListFileName(number, version);
 
         await deliverPdf({
           bytes,

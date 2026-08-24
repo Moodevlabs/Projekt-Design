@@ -15,6 +15,8 @@ export interface PdfRenderPayload {
   theme: PdfTheme;
   brandKit: BrandKit;
   number: string | null;
+  /** Etykieta wersji na dokumencie (T-57). `null` = nie pokazuj — tak jest domyślnie. */
+  versionLabel?: string | null;
   issueDate: string;
   currency: string;
   logoDataUrl: string | null;

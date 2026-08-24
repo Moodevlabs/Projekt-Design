@@ -1,7 +1,9 @@
 import { useMutation, useQuery, useQueryClient, type Query } from '@tanstack/react-query';
 import {
+  acceptReplacing,
   archiveQuote,
   createQuote,
+  createQuoteVersion,
   duplicateQuote,
   getQuote,
   listQuotes,
@@ -105,6 +107,47 @@ export function useDuplicateQuote() {
     onSuccess: (copy) => {
       queryClient.setQueryData<Quote>(queryKeys.quote(copy.id), copy);
       void queryClient.invalidateQueries(listQueries);
+    },
+  });
+}
+
+
+/**
+ * „Nowa wersja" — kolejna propozycja w tej samej linii (T-57).
+ *
+ * Rozni sie od `useDuplicateQuote` tym, co zostaje: tutaj `lineage_id`,
+ * tam nowa linia. Oba przyciski istnieja swiadomie i maja rozne zastosowania
+ * (koncepcja §4 regula 5).
+ */
+export function useCreateQuoteVersion() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => createQuoteVersion(id),
+    onSuccess: (kopia) => {
+      queryClient.setQueryData<Quote>(queryKeys.quote(kopia.id), kopia);
+      void queryClient.invalidateQueries(listQueries);
+      // Poprzednia wersja mogla zmienic status na `archived` — jej detal
+      // w cache jest juz nieaktualny.
+      void queryClient.invalidateQueries({ queryKey: queryKeys.quotes() });
+    },
+  });
+}
+
+/**
+ * Akceptacja zastepujaca poprzednia zaakceptowana wycene w projekcie.
+ *
+ * Osobna mutacja, a nie flaga w `useSetQuoteStatus`: zastapienie to decyzja
+ * czlowieka podjeta w dialogu, a nie wariant zwyklej zmiany statusu.
+ */
+export function useAcceptReplacing() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, projectId }: { id: string; projectId: string }) =>
+      acceptReplacing(id, projectId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.quotes() });
     },
   });
 }

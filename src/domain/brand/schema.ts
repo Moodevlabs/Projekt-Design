@@ -70,6 +70,14 @@ export const WorkspaceSettingsSchema = z.object({
   vatRate: z.number().min(0).max(100).default(23),
   numberPattern: z.string().min(1).default(DEFAULT_NUMBER_PATTERN),
   showDisabledItems: z.boolean().default(true),
+  /**
+   * Czy numer wersji ma trafiać na dokument klienta (T-57).
+   *
+   * Domyślnie **nie**: inwestor nie musi wiedzieć, że to trzecie podejście.
+   * W nazwie pliku wersja jest zawsze — tam chodzi o to, żeby pliki się nie
+   * nadpisywały, a nie o to, co widzi klient.
+   */
+  showVersionOnPdf: z.boolean().default(false),
   pricesInclude: PricesIncludeSchema.default('net'),
   /**
    * Stawka godzinowa w groszach (F2.1) — **wzorzec** dla nowych wycen.

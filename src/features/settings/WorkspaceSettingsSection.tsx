@@ -201,6 +201,22 @@ export function WorkspaceSettingsSection({ canWrite }: { canWrite: boolean }) {
         />
       </div>
 
+      {/* Wersja na dokumencie klienta — domyślnie NIE (T-57). W nazwie pliku
+          wersja jest zawsze i to jest osobna sprawa: tam chodzi o to, żeby
+          pliki się nie nadpisywały, a nie o to, co widzi inwestor. */}
+      <div className="flex items-start justify-between gap-4">
+        <div className="space-y-0.5">
+          <Label htmlFor="showVersionOnPdf">{pl.settings.showVersionOnPdf}</Label>
+          <p className="text-ink-soft text-xs">{pl.settings.showVersionOnPdfHint}</p>
+        </div>
+        <Switch
+          id="showVersionOnPdf"
+          disabled={!canWrite}
+          checked={draft.showVersionOnPdf}
+          onCheckedChange={(checked) => patch({ showVersionOnPdf: checked })}
+        />
+      </div>
+
       <div className="flex items-center gap-3">
         <Button type="button" disabled={!canWrite || !dirty || !valid || update.isPending} onClick={save}>
           {pl.common.save}

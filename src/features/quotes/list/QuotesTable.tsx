@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Money, StatusMark } from '@/components/shared';
+import { showsVersion, versionLabel } from '@/domain/quote';
 import { QuoteRowMenu } from './QuoteRowMenu';
 import { QuoteNotesPopover } from './QuoteNotesPopover';
 import type { QuoteSummary } from '@/data/repos/quotes.repo';
@@ -46,6 +47,13 @@ export function QuotesTable({ rows, loading }: { rows: QuoteSummary[]; loading: 
                   <Link to={routes.quote(quote.id)} className="underline-offset-4 hover:underline">
                     {quote.number ?? pl.quotes.noNumber}
                   </Link>
+                  {/* Badge tylko od v2 — „· v1" przy kazdej wycenie bylby
+                      szumem, bo wersji nie ma zdecydowana wiekszosc. */}
+                  {showsVersion(quote.version) ? (
+                    <span className="text-ink-soft ml-1.5 text-xs">
+                      · {versionLabel(quote.version)}
+                    </span>
+                  ) : null}
                 </TableCell>
                 <TableCell className="max-w-0 truncate">
                   <Link to={routes.quote(quote.id)} className="underline-offset-4 hover:underline">
@@ -94,6 +102,7 @@ export function QuotesTable({ rows, loading }: { rows: QuoteSummary[]; loading: 
                     title={quote.title}
                     clientId={quote.clientId}
                     projectId={quote.projectId}
+                    status={quote.status}
                   />
                 </TableCell>
               </TableRow>

@@ -16,6 +16,8 @@ const log = createLogger('pdf.stages');
 export interface ExportStagesArgs {
   /** Kopia do archiwum klienta (T-56). `null`/pominiete = nie archiwizuj. */
   archive?: ArchiveRequest | null;
+  /** Numer wersji — do nazwy pliku, zeby wersje sie nie nadpisywaly (T-57). */
+  version?: number;
   doc: StagesDoc | null;
   number: string | null;
   issueDate: string;
@@ -33,7 +35,7 @@ export function useExportStagesPdf() {
   const [exporting, setExporting] = useState(false);
 
   const exportStages = useCallback(
-    async ({ doc, number, issueDate, archive }: ExportStagesArgs) => {
+    async ({ doc, number, issueDate, archive, version }: ExportStagesArgs) => {
       if (!doc) {
         // Nie wypuszczamy pustego dokumentu — mowimy, gdzie go zlozyc.
         toast.info(pl.pdf.stagesMissing);
@@ -66,7 +68,7 @@ export function useExportStagesPdf() {
         ).toBlob();
 
         const bytes = new Uint8Array(await blob.arrayBuffer());
-        const fileName = stagesFileName(number);
+        const fileName = stagesFileName(number, version);
 
         await deliverPdf({
           bytes,

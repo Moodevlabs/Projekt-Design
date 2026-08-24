@@ -32,6 +32,14 @@ export interface ExportArgs {
    * tak jest przy wycenie bez klienta i po odznaczeniu checkboxa.
    */
   archive?: ArchiveRequest | null;
+  /** Numer wersji — do NAZWY PLIKU, zawsze (T-57). */
+  version?: number;
+  /**
+   * Etykieta wersji na SAMYM DOKUMENCIE. `null` = nie pokazuj.
+   * Domyślnie właśnie `null`: inwestor nie musi wiedzieć, że to trzecie
+   * podejście (ustawienie `showVersionOnPdf`, domyślnie wyłączone).
+   */
+  versionLabel?: string | null;
 }
 
 /**
@@ -47,7 +55,16 @@ export function useExportPdf() {
   const [exporting, setExporting] = useState(false);
 
   const exportPdf = useCallback(
-    async ({ body, number, issueDate, currency, onExported, archive }: ExportArgs) => {
+    async ({
+      body,
+      number,
+      issueDate,
+      currency,
+      onExported,
+      archive,
+      version,
+      versionLabel = null,
+    }: ExportArgs) => {
       setExporting(true);
       try {
         const kit = brandKit.data ?? defaultBrandKit();
@@ -67,12 +84,13 @@ export function useExportPdf() {
           theme,
           brandKit: kit,
           number,
+          versionLabel,
           issueDate,
           currency,
           logoDataUrl,
         });
 
-        const fileName = quoteFileName(number, body.client.name);
+        const fileName = quoteFileName(number, body.client.name, version);
 
         // Archiwizacja i zapis na dysk idą przez JEDNO wspolne wyjscie (§9.9).
         const { saved } = await deliverPdf({
