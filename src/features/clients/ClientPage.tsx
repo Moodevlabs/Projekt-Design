@@ -11,6 +11,7 @@ import { ClientQuotesTab } from './ClientQuotesTab';
 import { ClientNotesTab } from './ClientNotesTab';
 import { ClientProjectsTab } from '@/features/projects/ClientProjectsTab';
 import { FilesTab } from '@/features/files/FilesTab';
+import { DocumentsTab } from '@/features/files/DocumentsTab';
 import { ClientRowMenu } from './ClientRowMenu';
 import { useClientOverview } from '@/data/queries/useClients';
 import { useNewQuoteForClient } from './useNewQuoteForClient';
@@ -21,10 +22,10 @@ import { pl } from '@/i18n/pl';
 /**
  * Karta klienta (05-UI §3).
  *
- * Zakładki: **Projekty | Wyceny | Pliki | Notatki**. „Dokumenty" NIE SĄ
- * renderowane, bo archiwum wygenerowanych PDF-ów wchodzi dopiero w T-56 —
- * zakładka z napisem „wkrótce" jest gorsza niż jej brak (05-UI §3a.8,
- * zasada z T-44).
+ * Zakładki: **Projekty | Wyceny | Dokumenty | Pliki | Notatki** — komplet
+ * z 05-UI §3. „Dokumenty" to archiwum wygenerowanych PDF-ów (co poszło do
+ * inwestora), „Pliki" to materiały robocze; dwie różne rzeczy i dwie różne
+ * listy.
  *
  * „Projekty" idą pierwsze, bo to one są teczkami inwestycji; lista wycen
  * klienta zbiera wszystko ponad podziałem na projekty i jest widokiem
@@ -121,6 +122,7 @@ export function ClientPage() {
         <TabsList aria-label={pl.clients.title}>
           <TabsTrigger value="projects">{pl.clients.tabProjects}</TabsTrigger>
           <TabsTrigger value="quotes">{pl.clients.tabQuotes}</TabsTrigger>
+          <TabsTrigger value="documents">{pl.documents.tab}</TabsTrigger>
           <TabsTrigger value="files">{pl.files.tab}</TabsTrigger>
           <TabsTrigger value="notes">{pl.clients.tabNotes}</TabsTrigger>
         </TabsList>
@@ -130,6 +132,9 @@ export function ClientPage() {
         </TabsContent>
         <TabsContent value="quotes">
           <ClientQuotesTab client={data} />
+        </TabsContent>
+        <TabsContent value="documents">
+          <DocumentsTab clientId={data.id} />
         </TabsContent>
         <TabsContent value="files">
           <FilesTab clientId={data.id} />

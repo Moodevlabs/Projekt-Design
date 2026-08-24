@@ -13,6 +13,8 @@ import { buildPdfTheme, type PdfTheme } from './theme';
 import { isPdfFontRegistered, registerPdfFonts } from './fonts/register';
 import { mergePdfs } from './merge';
 import { packageFileName, packagePlan, type PackageDocKind } from './package-plan';
+import { archiveExportedPdf, deliverPdf, type ArchiveRequest } from './export';
+import type { DocType } from '@/domain/files/schema';
 import { pl } from '@/i18n/pl';
 
 const log = createLogger('pdf.package');
@@ -34,7 +36,23 @@ export interface ExportPackageArgs extends PackageSource {
   single: boolean;
   /** Ważność terminu — osobna od oferty (F5.3), stała 7 dni jak w eksporcie pojedynczym. */
   scheduleValidDays?: number;
+  /** Kopia do archiwum klienta (T-56). `null`/pominiete = nie archiwizuj. */
+  archive?: ArchiveRequest | null;
 }
+
+/**
+ * Rodzaj dokumentu w archiwum.
+ *
+ * `priceList` w planie pakietu i `price_list` w bazie to ta sama rzecz zapisana
+ * dwiema konwencjami — mapowanie trzymamy w jednym miejscu, zamiast liczyć na
+ * to, że nikt nie pomyli camelCase ze snake_case.
+ */
+const DOC_TYPE: Record<PackageDocKind, DocType> = {
+  quote: 'quote',
+  schedule: 'schedule',
+  stages: 'stages',
+  priceList: 'price_list',
+};
 
 /**
  * Eksport pakietu dokumentów (F6.3).
@@ -48,7 +66,7 @@ export function usePackageExport() {
   const [exporting, setExporting] = useState(false);
 
   const exportPackage = useCallback(
-    async ({ selected, single, scheduleValidDays = 7, ...source }: ExportPackageArgs) => {
+    async ({ selected, single, scheduleValidDays = 7, archive, ...source }: ExportPackageArgs) => {
       const plan = packagePlan(
         selected,
         {
@@ -75,6 +93,7 @@ export function usePackageExport() {
 
         const czesci = await Promise.all(
           plan.map(async (part) => ({
+            kind: part.kind,
             fileName: part.fileName,
             bytes: await renderPart(part.kind, {
               ...source,
@@ -91,8 +110,30 @@ export function usePackageExport() {
             czesci.map((part) => part.bytes),
             { pageLabel: pl.pdf.packagePageLabel },
           );
-          await saveOne(scalony, packageFileName(source.number));
+          // Scalony pakiet to JEDEN wpis w archiwum — bo jeden plik poszedl
+          // do inwestora (koncepcja §3 regula 6).
+          await deliverPdf({
+            bytes: scalony,
+            fileName: packageFileName(source.number),
+            docType: 'package',
+            savedToast: pl.pdf.packageSaved,
+            archive: archive ?? null,
+          });
           return;
+        }
+
+        // Osobne pliki = osobne wpisy, kazdy ze swoim typem. Zapis na dysk
+        // idzie tu przez dialog FOLDERU, wiec nie da sie go przepuscic przez
+        // `deliverPdf` — ale archiwizacja jest ta sama funkcja.
+        if (archive) {
+          for (const part of czesci) {
+            await archiveExportedPdf({
+              archive,
+              docType: DOC_TYPE[part.kind],
+              fileName: part.fileName,
+              bytes: part.bytes,
+            });
+          }
         }
 
         await saveMany(czesci);
@@ -166,26 +207,6 @@ async function renderPart(kind: PackageDocKind, ctx: RenderContext): Promise<Uin
 
 async function toBytes(blob: Promise<Blob>): Promise<Uint8Array> {
   return new Uint8Array(await (await blob).arrayBuffer());
-}
-
-/** Jeden plik — dialog zapisu jak przy pozostałych dokumentach. */
-async function saveOne(bytes: Uint8Array, fileName: string) {
-  if (!runningInTauri()) {
-    downloadInBrowser(bytes, fileName);
-    return;
-  }
-
-  const { save } = await import('@tauri-apps/plugin-dialog');
-  const target = await save({
-    defaultPath: fileName,
-    filters: [{ name: 'PDF', extensions: ['pdf'] }],
-  });
-  if (!target) return;
-
-  const savedPath = await saveFile(target, bytes);
-  toast.success(pl.pdf.packageSaved, {
-    action: { label: pl.editor.pdfOpen, onClick: () => void openPath(savedPath) },
-  });
 }
 
 /**

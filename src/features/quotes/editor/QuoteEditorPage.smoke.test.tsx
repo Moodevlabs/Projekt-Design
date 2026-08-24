@@ -63,6 +63,15 @@ vi.mock('@/data/queries/useClients', () => ({
   useUpdateClient: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }));
 
+// Karta „Dokumenty" w prawej kolumnie (T-56) pyta o archiwum klienta.
+vi.mock('@/data/queries/useFiles', () => ({
+  useFiles: () => ({ data: [], isLoading: false, isError: false }),
+  useStorageUsage: () => ({ data: { usedBytes: 0, quotaBytes: 1 }, isLoading: false }),
+  useUploadFile: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useRenameFile: () => ({ mutate: vi.fn(), isPending: false }),
+  useDeleteFile: () => ({ mutate: vi.fn(), isPending: false }),
+}));
+
 vi.mock('@/data/queries/useProjects', () => ({
   useProjects: () => ({ data: [], isLoading: false, isError: false }),
 }));

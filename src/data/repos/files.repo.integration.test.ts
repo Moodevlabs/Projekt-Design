@@ -10,6 +10,7 @@ import { createProject } from './projects.repo';
 import {
   FILES_BUCKET,
   QuotaExceededError,
+  archiveGeneratedPdf,
   deleteFile,
   downloadFile,
   getDownloadUrl,
@@ -207,5 +208,82 @@ describe('files.repo — archiwum klienta', () => {
     expect(data ?? []).toEqual([]);
 
     await supabase.auth.signInWithPassword({ email: DEMO_EMAIL, password: DEMO_PASSWORD });
+  });
+});
+
+describe('files.repo — archiwum dokumentow (T-56)', () => {
+  it('wygenerowany PDF ma kind `generated`, typ i przypisanie do wyceny', async () => {
+    const doc = await archiveGeneratedPdf({
+      workspaceId,
+      clientId,
+      projectId,
+      quoteId: null,
+      quoteVersion: null,
+      docType: 'quote',
+      fileName: 'wyc-2026-08-0001-test.pdf',
+      bytes: bytes(2048, 5),
+    });
+    files.push({ id: doc.id, storagePath: doc.storagePath });
+
+    expect(doc.kind).toBe('generated');
+    expect(doc.docType).toBe('quote');
+    expect(doc.mime).toBe('application/pdf');
+    expect(doc.projectId).toBe(projectId);
+  });
+
+  it('zakladka Dokumenty widzi TYLKO wygenerowane, zakladka Pliki tylko wrzucone', async () => {
+    const wrzucony = await put('materialy-robocze.bin', 128);
+    const doc = await archiveGeneratedPdf({
+      workspaceId,
+      clientId,
+      projectId: null,
+      docType: 'schedule',
+      fileName: 'wyc-2026-08-0001-termin.pdf',
+      bytes: bytes(256, 6),
+    });
+    files.push({ id: doc.id, storagePath: doc.storagePath });
+
+    const dokumenty = await listFiles({ workspaceId, clientId, kind: 'generated' });
+    expect(dokumenty.map((row) => row.id)).toContain(doc.id);
+    expect(dokumenty.map((row) => row.id)).not.toContain(wrzucony.id);
+
+    const pliki = await listFiles({ workspaceId, clientId, kind: 'upload' });
+    expect(pliki.map((row) => row.id)).toContain(wrzucony.id);
+    expect(pliki.map((row) => row.id)).not.toContain(doc.id);
+  });
+
+  it('„Otworz" daje TEN SAM plik, ktory zapisano — bez ponownego renderu', async () => {
+    const oryginal = bytes(1024, 9);
+    const doc = await archiveGeneratedPdf({
+      workspaceId,
+      clientId,
+      projectId: null,
+      docType: 'package',
+      fileName: 'wyc-2026-08-0001-pakiet.pdf',
+      bytes: oryginal,
+    });
+    files.push({ id: doc.id, storagePath: doc.storagePath });
+
+    // Sedno koncepcji §3 reguly 7: archiwum to zapisany plik, a nie przepis
+    // na jego odtworzenie z biezacego brand kitu i biblioteki.
+    const pobrany = await downloadFile(doc.storagePath);
+    expect(pobrany.byteLength).toBe(oryginal.byteLength);
+    expect(Array.from(pobrany.slice(0, 4))).toEqual(Array.from(oryginal.slice(0, 4)));
+  });
+
+  it('archiwum zajmuje ten sam limit co pliki wrzucone recznie', async () => {
+    const przed = await getStorageUsage(workspaceId);
+    const doc = await archiveGeneratedPdf({
+      workspaceId,
+      clientId,
+      projectId: null,
+      docType: 'stages',
+      fileName: 'wyc-2026-08-0001-etapy.pdf',
+      bytes: bytes(4096, 3),
+    });
+    files.push({ id: doc.id, storagePath: doc.storagePath });
+
+    const po = await getStorageUsage(workspaceId);
+    expect(po.usedBytes).toBe(przed.usedBytes + 4096);
   });
 });

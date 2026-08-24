@@ -1,12 +1,12 @@
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 import { useBrandKit } from '@/data/queries/useBrandKit';
-import { openPath, runningInTauri, saveFile } from '@/lib/tauri';
 import { defaultBrandKit } from '@/domain/brand/schema';
 import type { QuoteBody } from '@/domain/quote';
 import { createLogger } from '@/lib/logger';
 import { fetchLogoAsDataUrl } from './logo';
 import { quoteFileName } from './file-name';
+import { deliverPdf, type ArchiveRequest } from './export';
 import { renderQuotePdf } from './render';
 import { buildPdfTheme } from './theme';
 import { isPdfFontRegistered, registerPdfFonts } from './fonts/register';
@@ -27,6 +27,11 @@ export interface ExportArgs {
    * „oznaczyc jako wyslana?".
    */
   onExported?: () => void;
+  /**
+   * Kopia do archiwum klienta (T-56). `null`/pominiete = nie archiwizuj —
+   * tak jest przy wycenie bez klienta i po odznaczeniu checkboxa.
+   */
+  archive?: ArchiveRequest | null;
 }
 
 /**
@@ -42,7 +47,7 @@ export function useExportPdf() {
   const [exporting, setExporting] = useState(false);
 
   const exportPdf = useCallback(
-    async ({ body, number, issueDate, currency, onExported }: ExportArgs) => {
+    async ({ body, number, issueDate, currency, onExported, archive }: ExportArgs) => {
       setExporting(true);
       try {
         const kit = brandKit.data ?? defaultBrandKit();
@@ -69,29 +74,17 @@ export function useExportPdf() {
 
         const fileName = quoteFileName(number, body.client.name);
 
-        if (!runningInTauri()) {
-          // W przeglądarce (`pnpm dev`) nie ma dialogu systemowego — pobieramy
-          // plik po staremu, żeby dało się sprawdzić wynik bez budowania appki.
-          downloadInBrowser(bytes, fileName);
-          onExported?.();
-          return;
-        }
-
-        const { save } = await import('@tauri-apps/plugin-dialog');
-        const target = await save({
-          defaultPath: fileName,
-          filters: [{ name: 'PDF', extensions: ['pdf'] }],
+        // Archiwizacja i zapis na dysk idą przez JEDNO wspolne wyjscie (§9.9).
+        const { saved } = await deliverPdf({
+          bytes,
+          fileName,
+          docType: 'quote',
+          savedToast: pl.editor.pdfSaved,
+          archive: archive ?? null,
         });
 
-        // `null` znaczy, że użytkownik zamknął dialog — to nie jest błąd.
-        if (!target) return;
-
-        const savedPath = await saveFile(target, bytes);
-
-        toast.success(pl.editor.pdfSaved, {
-          action: { label: pl.editor.pdfOpen, onClick: () => void openPath(savedPath) },
-        });
-        onExported?.();
+        // „Oznaczyc jako wyslana?" tylko po pliku, ktory naprawde powstal.
+        if (saved) onExported?.();
       } catch (error) {
         log.error('Eksport PDF nieudany', error);
         toast.error(error instanceof Error ? error.message : pl.editor.pdfFailed);
@@ -103,14 +96,4 @@ export function useExportPdf() {
   );
 
   return { exportPdf, exporting };
-}
-
-function downloadInBrowser(bytes: Uint8Array, fileName: string) {
-  const blob = new Blob([bytes], { type: 'application/pdf' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = fileName;
-  link.click();
-  URL.revokeObjectURL(url);
 }

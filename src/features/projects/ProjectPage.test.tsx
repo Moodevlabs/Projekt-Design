@@ -127,13 +127,18 @@ describe('ProjectPage', () => {
     expect(links[0]).toHaveAttribute('href', '/klienci/c1');
   });
 
-  it('ma zakladki Wyceny, Pliki i Notatki — i tylko te', () => {
-    // 05-UI §3a.8: Dokumenty wchodza z T-56. „Termin" jest zakladka wyceny,
-    // nie projektu.
+  it('ma zakladki Wyceny, Dokumenty, Pliki i Notatki — i tylko te', () => {
+    // „Termin" jest zakladka WYCENY, nie projektu — harmonogram dotyczy
+    // konkretnej oferty i duplikowanie go tutaj daloby dwa zrodla tej samej daty.
     renderPage(overview());
 
     const tabs = screen.getAllByRole('tab').map((tab) => tab.textContent);
-    expect(tabs).toEqual([pl.projects.tabQuotes, pl.files.tab, pl.projects.tabNotes]);
+    expect(tabs).toEqual([
+      pl.projects.tabQuotes,
+      pl.documents.tab,
+      pl.files.tab,
+      pl.projects.tabNotes,
+    ]);
   });
 
   it('status da sie przestawic z naglowka, bez wchodzenia w edycje', () => {

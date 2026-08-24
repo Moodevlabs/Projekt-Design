@@ -119,15 +119,16 @@ describe('ClientPage', () => {
     expect(screen.getByRole('tab', { name: pl.clients.tabNotes })).toBeInTheDocument();
   });
 
-  it('NIE renderuje zakladek, ktorych funkcji jeszcze nie ma', () => {
-    // 05-UI §3a.8 (zasada z T-44): zakladka „wkrotce" jest gorsza niz jej brak.
-    // Dokumenty wchodza dopiero w T-56.
+  it('ma komplet zakladek z 05-UI §3 i nic ponadto', () => {
+    // Zakladka bez funkcji sie nie renderuje (05-UI §3a.8, zasada z T-44) —
+    // od T-56 komplet jest juz pelny.
     renderPage(overview());
 
     const tabs = screen.getAllByRole('tab').map((tab) => tab.textContent);
     expect(tabs).toEqual([
       pl.clients.tabProjects,
       pl.clients.tabQuotes,
+      pl.documents.tab,
       pl.files.tab,
       pl.clients.tabNotes,
     ]);

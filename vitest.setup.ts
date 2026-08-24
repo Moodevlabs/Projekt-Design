@@ -55,3 +55,14 @@ if (!Blob.prototype.arrayBuffer) {
     });
   };
 }
+
+/*
+ * `URL.createObjectURL` / `revokeObjectURL` — jsdom ich nie ma, a droga
+ * przegladarki przy pobieraniu plikow i eksporcie PDF opiera sie na nich
+ * (`<a download>` z blobem). Zwracamy atrape: testy sprawdzaja, CO trafilo
+ * do zapisu, a nie jak wyglada adres bloba.
+ */
+if (!URL.createObjectURL) {
+  URL.createObjectURL = () => 'blob:test';
+  URL.revokeObjectURL = () => {};
+}

@@ -3,6 +3,7 @@ import {
   FileKindSchema,
   buildStoragePath,
   formatBytes,
+  type DocType,
   type FileKind,
   type StoredFile,
 } from '@/domain/files/schema';
@@ -171,6 +172,89 @@ export async function uploadFile(input: UploadFileInput): Promise<StoredFile> {
 
   const row = (result.data as unknown as Row[])[0];
   if (!row) throw new RepoError('Nie udało się zapisać pliku.');
+  return mapFile(row);
+}
+
+
+export interface ArchiveTarget {
+  clientId: string;
+  projectId?: string | null;
+  quoteId?: string | null;
+  /** Wersja wyceny w chwili eksportu. `null` do czasu T-57 (wersje v1/v2). */
+  quoteVersion?: number | null;
+}
+
+export interface ArchivePdfInput extends ArchiveTarget {
+  workspaceId: string;
+  docType: DocType;
+  fileName: string;
+  bytes: Uint8Array;
+}
+
+/**
+ * Zapisuje wygenerowany PDF w archiwum klienta (P2, T-56).
+ *
+ * To ten sam mechanizm co upload — obiekt, potem wiersz — z jedną różnicą:
+ * `kind: 'generated'`. Dzięki temu zakładka „Dokumenty" pokazuje **zapisany
+ * plik**, a nie renderuje go ponownie: otwarcie po miesiącu daje dokładnie to,
+ * co poszło do inwestora, mimo późniejszych zmian w brand kicie i bibliotece
+ * (koncepcja §3 reguła 7).
+ *
+ * Limit miejsca obowiązuje tak samo jak przy uploadzie — archiwum dokumentów
+ * to też pliki i też zajmują 2 GB.
+ */
+export async function archiveGeneratedPdf(input: ArchivePdfInput): Promise<StoredFile> {
+  const supabase = getSupabase();
+  const fileId = crypto.randomUUID();
+  const storagePath = buildStoragePath({
+    workspaceId: input.workspaceId,
+    clientId: input.clientId,
+    projectId: input.projectId ?? null,
+    fileId,
+    fileName: input.fileName,
+  });
+
+  const upload = await supabase.storage.from(FILES_BUCKET).upload(storagePath, input.bytes, {
+    contentType: 'application/pdf',
+    upsert: false,
+  });
+  if (upload.error) {
+    throw new RepoError(`Archiwizacja dokumentu: ${upload.error.message}`, upload.error);
+  }
+
+  const insert: TablesInsert<'files'> = {
+    id: fileId,
+    workspace_id: input.workspaceId,
+    client_id: input.clientId,
+    project_id: input.projectId ?? null,
+    quote_id: input.quoteId ?? null,
+    kind: 'generated',
+    doc_type: input.docType,
+    quote_version: input.quoteVersion ?? null,
+    name: input.fileName,
+    mime: 'application/pdf',
+    size_bytes: input.bytes.byteLength,
+    storage_path: storagePath,
+  };
+
+  const result = await supabase.from('files').insert(insert).select('*');
+
+  if (result.error) {
+    const cleanup = await supabase.storage.from(FILES_BUCKET).remove([storagePath]);
+    if (cleanup.error) {
+      log.error('Nie udalo sie posprzatac obiektu po nieudanej archiwizacji', {
+        storagePath,
+        error: cleanup.error.message,
+      });
+    }
+
+    const quota = asQuotaError(result.error);
+    if (quota) throw quota;
+    throw new RepoError(`Archiwizacja dokumentu: ${result.error.message}`, result.error);
+  }
+
+  const row = (result.data as unknown as Row[])[0];
+  if (!row) throw new RepoError('Nie udało się zapisać dokumentu w archiwum.');
   return mapFile(row);
 }
 

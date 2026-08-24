@@ -17,6 +17,7 @@ import { ScheduleTab } from './schedule/ScheduleTab';
 import { DocumentsTab } from './documents/DocumentsTab';
 import { PricingBasisCard } from './components/PricingBasisCard';
 import { ClientCard } from './components/ClientCard';
+import { DocumentsCard } from './components/DocumentsCard';
 import { DiscountsSection } from './components/DiscountsSection';
 import { AddLink } from './components/AddLink';
 import { LibrarySheet } from './components/LibrarySheet';
@@ -45,6 +46,7 @@ import { useVariantOptions } from './useVariantOptions';
 import { useMarkAsSentPrompt } from './useMarkAsSentPrompt';
 import { usePricingBasisChange } from './usePricingBasisChange';
 import { useTemplateActions } from './useTemplateActions';
+import { useArchiveTarget } from './useArchiveTarget';
 import { useExportPdf } from '@/pdf/useExportPdf';
 import { useExportSchedulePdf } from '@/pdf/useExportSchedulePdf';
 import { useExportStagesPdf } from '@/pdf/useExportStagesPdf';
@@ -291,6 +293,8 @@ function EditorSurface({
   const setItemVariant = useEditorStore((state) => state.setItemVariant);
   const [libraryOpen, setLibraryOpen] = useState(false);
   const templates = useTemplateActions();
+  // Jedno miejsce, z ktorego wszystkie eksporty biora „gdzie zapisac kopie" (T-56).
+  const archive = useArchiveTarget();
   const { exportPdf, exporting: exportingPdf } = useExportPdf();
   const { exportSchedule, exporting: exportingSchedule } = useExportSchedulePdf();
   const { exportStages, exporting: exportingStages } = useExportStagesPdf();
@@ -429,6 +433,9 @@ function EditorSurface({
           onRetry={onRetry}
           onReload={onReload}
           onSaveAllToLibrary={library.saveAll}
+          archiveAvailable={archive.available}
+          archiveEnabled={archive.enabled}
+          onArchiveChange={archive.setEnabled}
           onExportPdf={() =>
             void exportPdf({
               body,
@@ -436,6 +443,7 @@ function EditorSurface({
               issueDate,
               currency: 'PLN',
               onExported: markAsSent.afterExport,
+              archive: archive.target,
             })
           }
           exportingPdf={exportingPdf}
@@ -445,6 +453,7 @@ function EditorSurface({
               rooms: body.rooms,
               number,
               issueDate,
+              archive: archive.target,
             })
           }
           exportingSchedule={exportingSchedule}
@@ -455,6 +464,7 @@ function EditorSurface({
               doc: useEditorStore.getState().documents?.stages ?? null,
               number,
               issueDate,
+              archive: archive.target,
             })
           }
           exportingStages={exportingStages}
@@ -463,6 +473,7 @@ function EditorSurface({
               doc: useEditorStore.getState().documents?.priceList ?? null,
               number,
               issueDate,
+              archive: archive.target,
             })
           }
           exportingPriceList={exportingPriceList}
@@ -536,6 +547,7 @@ function EditorSurface({
               number,
               issueDate,
               currency: 'PLN',
+              archive: archive.target,
             });
           }}
         />
@@ -684,6 +696,10 @@ function EditorSurface({
                   informacja robocza, a nie trescia oferty. W podgladzie liczy
                   sie to, co w naglowku dokumentu. */}
               {editing ? <ClientCard /> : null}
+
+              {/* Archiwum dokumentow — skrot do tego, co juz poszlo do
+                  inwestora. Sama karta chowa sie, gdy wycena nie ma klienta. */}
+              {editing ? <DocumentsCard /> : null}
 
               <RoomsPanel
                 rooms={body.rooms}

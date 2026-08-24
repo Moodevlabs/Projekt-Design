@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuCheckboxItem,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -31,6 +32,9 @@ export function EditorTopbar({
   onSaveAllToLibrary,
   onExportPdf,
   exportingPdf,
+  archiveAvailable,
+  archiveEnabled,
+  onArchiveChange,
   onExportSchedule,
   exportingSchedule,
   onExportStages,
@@ -57,6 +61,10 @@ export function EditorTopbar({
   onSaveAllToLibrary: () => void;
   onExportPdf: () => void;
   exportingPdf: boolean;
+  /** Widoczne tylko, gdy wycena ma klienta — bez niego nie ma archiwum (T-56). */
+  archiveAvailable: boolean;
+  archiveEnabled: boolean;
+  onArchiveChange: (next: boolean) => void;
   /** Osobny dokument „Szacowany termin" (F5.3). */
   onExportSchedule: () => void;
   exportingSchedule: boolean;
@@ -138,6 +146,24 @@ export function EditorTopbar({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-64">
+            {/*
+              Checkbox nad listą eksportów, a nie osobny dialog przed każdym:
+              zapis do archiwum jest domyślny i rzadko się go wyłącza, więc
+              modal przed jednoklikową akcją byłby karą za normalne użycie.
+              Bez klienta nie ma go wcale — zasada z 05-UI §3a.8.
+            */}
+            {archiveAvailable ? (
+              <>
+                <DropdownMenuCheckboxItem
+                  checked={archiveEnabled}
+                  onCheckedChange={onArchiveChange}
+                  onSelect={(event) => event.preventDefault()}
+                >
+                  {pl.documents.saveToClient}
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuSeparator />
+              </>
+            ) : null}
             <DropdownMenuItem onSelect={onExportPdf} disabled={exportingPdf}>
               {pl.editor.exportPdf}
             </DropdownMenuItem>

@@ -1,7 +1,6 @@
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 import { useBrandKit } from '@/data/queries/useBrandKit';
-import { openPath, runningInTauri, saveFile } from '@/lib/tauri';
 import { defaultBrandKit } from '@/domain/brand/schema';
 import type { ScheduleBody } from '@/domain/schedule';
 import type { Room } from '@/domain/quote';
@@ -10,11 +9,14 @@ import { fetchLogoAsDataUrl } from './logo';
 import { buildPdfTheme } from './theme';
 import { isPdfFontRegistered, registerPdfFonts } from './fonts/register';
 import { scheduleFileName } from './file-name';
+import { deliverPdf, type ArchiveRequest } from './export';
 import { pl } from '@/i18n/pl';
 
 const log = createLogger('pdf.schedule');
 
 export interface ExportScheduleArgs {
+  /** Kopia do archiwum klienta (T-56). `null`/pominiete = nie archiwizuj. */
+  archive?: ArchiveRequest | null;
   schedule: ScheduleBody | null;
   rooms: Room[];
   number: string | null;
@@ -34,7 +36,7 @@ export function useExportSchedulePdf() {
   const [exporting, setExporting] = useState(false);
 
   const exportSchedule = useCallback(
-    async ({ schedule, rooms, number, issueDate, validDays = 7 }: ExportScheduleArgs) => {
+    async ({ schedule, rooms, number, issueDate, validDays = 7, archive }: ExportScheduleArgs) => {
       if (!schedule) {
         // Bez harmonogramu nie ma czego drukowac — mowimy, gdzie go ustawic,
         // zamiast wypuszczac pusty dokument.
@@ -72,21 +74,12 @@ export function useExportSchedulePdf() {
         const bytes = new Uint8Array(await blob.arrayBuffer());
         const fileName = scheduleFileName(number);
 
-        if (!runningInTauri()) {
-          downloadInBrowser(bytes, fileName);
-          return;
-        }
-
-        const { save } = await import('@tauri-apps/plugin-dialog');
-        const target = await save({
-          defaultPath: fileName,
-          filters: [{ name: 'PDF', extensions: ['pdf'] }],
-        });
-        if (!target) return;
-
-        const savedPath = await saveFile(target, bytes);
-        toast.success(pl.pdf.scheduleSaved, {
-          action: { label: pl.editor.pdfOpen, onClick: () => void openPath(savedPath) },
+        await deliverPdf({
+          bytes,
+          fileName,
+          docType: 'schedule',
+          savedToast: pl.pdf.scheduleSaved,
+          archive: archive ?? null,
         });
       } catch (error) {
         log.error('Eksport terminu nieudany', error);
@@ -99,14 +92,4 @@ export function useExportSchedulePdf() {
   );
 
   return { exportSchedule, exporting };
-}
-
-function downloadInBrowser(bytes: Uint8Array, fileName: string) {
-  const blob = new Blob([bytes], { type: 'application/pdf' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = fileName;
-  link.click();
-  URL.revokeObjectURL(url);
 }

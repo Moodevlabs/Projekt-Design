@@ -339,6 +339,36 @@ export const pl = {
     usageWarning: 'Zostało mało miejsca — usuń niepotrzebne pliki.',
     usageFull: 'Limit wyczerpany. Nie dodasz nowych plików, dopóki czegoś nie usuniesz.',
   },
+  documents: {
+    tab: 'Dokumenty',
+    title: 'Dokumenty',
+    emptyTitle: 'Brak dokumentów',
+    emptyDescription:
+      'PDF-y wyeksportowane z wycen trafiają tutaj automatycznie. Zobaczysz dokładnie to, co poszło do inwestora.',
+    open: 'Otwórz',
+    quoteNumber: 'Wycena',
+    docType: 'Typ',
+    created: 'Data',
+    types: {
+      quote: 'Wycena',
+      schedule: 'Termin',
+      stages: 'Etapy',
+      price_list: 'Cennik',
+      package: 'Pakiet',
+    },
+    unknownType: 'Dokument',
+
+    // Archiwizacja przy eksporcie.
+    saveToClient: 'Zapisz w dokumentach klienta',
+    archived: 'Zapisano w dokumentach klienta',
+    archiveFailed: 'Nie udało się zapisać w dokumentach klienta.',
+
+    // Karta w prawej kolumnie edytora.
+    recent: 'Dokumenty',
+    recentEmpty: 'Wyeksportowane PDF-y pojawią się tutaj.',
+    seeAll: 'Zobacz wszystkie',
+    hint: 'Archiwum pokazuje zapisany plik — nie renderuje go ponownie.',
+  },
   editor: {
     preview: 'Podgląd',
     edit: 'Edycja',
