@@ -1,4 +1,9 @@
 # Pomysły poza zakresem bieżących zadań
+- Wersja web/SaaS Toolier w przeglądarce (koncepcja `nowosci.md` §15) — decyzja D6: desktop na 1.0. Kod jest przeglądarkowy; do zrobienia byłyby: sesja bez keychaina, zapis PDF przez `<a download>`, OAuth bez deep linku, hosting.
+- Z koncepcji §9/§13 na później: umowa, aneks, brief (jako formularz do klienta), protokół spotkania, protokół przekazania projektu — jako kolejne `doc_type` w `quotes.documents` i archiwum (T-56).
+- Ikona per usługa w bibliotece (inspiracja 1 pokazuje piktogramy) — pole `icon` z listy lucide; kosmetyka, nie weszło do T-59…T-61.
+- „Minimalna wartość usługi w ofercie" jako reguła liczenia (clamp od dołu) — odrzucone w T-60 (ukryta logika); jeśli wróci, to jako jawny tryb z dopiskiem w wierszu.
+- Integracja z chmurami zewnętrznymi (Drive/Dropbox) dla plików klienta — zamiast/obok Storage.
 - Marketplace bibliotek pozycji per branża (projektanci, remonty, fotografia, web) — onboarding „wybierz branżę, dostaniesz 40 pozycji startowych".
 - Warianty wyceny (Basic / Standard / Premium) jako 3 kolumny w PDF.
 - Pozycje „opcjonalne — wybierz jedną z" (radio zamiast toggla).

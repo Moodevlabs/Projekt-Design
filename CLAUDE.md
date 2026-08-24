@@ -1,6 +1,10 @@
-# Projekt Anzorge — CLAUDE.md
+# Toolier — CLAUDE.md
 
-Desktopowa aplikacja (Tauri 2) do tworzenia interaktywnych wycen/ofert z brandowanym PDF. Model SaaS: subskrypcja 19,99 zł/mies. przez Stripe, konta i dane w Supabase.
+> **Nazwa produktu: Toolier** (do 2026-08-24 „Anzorge" — nazwa repo/katalogu zostaje, w kodzie i UI obowiązuje Toolier; podmiana to zadanie T-65). Historyczne notatki w `06-TASKS.md` i `CHANGELOG.md` mogą mówić „Anzorge" — to ten sam produkt.
+
+Desktopowa aplikacja (Tauri 2) — **workspace / back office studia projektowania wnętrz**: klienci → projekty → wyceny, termin, dokumenty, pliki. Rdzeń to interaktywna wycena TAK/NIE z brandowanym PDF. Model SaaS: subskrypcja **98,99 zł/mies. lub 999,99 zł/rok** przez Stripe (bez darmowego planu, trial 14 dni), konta i dane w Supabase.
+
+Hierarchia danych: **STUDIO (workspace) → KLIENT → PROJEKT → wyceny / termin / dokumenty / pliki / notatki.** Po zalogowaniu użytkownik widzi klientów; wycena żyje wewnątrz projektu. Szczegóły: `docs/FEATURES-Z-KONCEPCJI.md`.
 
 Ten plik jest źródłem prawdy o zasadach pracy. Szczegóły są w `docs/` — **zawsze przeczytaj właściwy plik przed rozpoczęciem zadania**:
 
@@ -15,6 +19,8 @@ Ten plik jest źródłem prawdy o zasadach pracy. Szczegóły są w `docs/` — 
 | `docs/06-TASKS.md` | Lista zadań w kolejności — pracuj po jednym |
 | `docs/07-BUILD-MACOS.md` | Budowanie podpisanego `.dmg` na macOS |
 | `docs/FEATURES-Z-EXCELA.md` | Funkcje z arkusza klienta (cennik parametryczny, pomieszczenia, rabaty %, harmonogram, pakiet dokumentów) — model i wzory dla zadań T-30…T-49. **§8 zawiera korekty założeń wobec stanu kodu — przeczytaj przed startem chunku.** |
+| `docs/FEATURES-Z-KONCEPCJI.md` | Oś aplikacji z koncepcji `reference/nowosci.md`: klienci, projekty, pliki i archiwum dokumentów w Storage, wersje wycen, restrukturyzacja biblioteki (grupy/jednostki/biblioteka przykładowa), pakiety, rebranding Toolier i nowa cena — model i reguły dla zadań T-53…T-66. **§0 = zamknięte decyzje, §9 = kolizje z kodem — przeczytaj przed startem chunku.** |
+| `reference/nowosci.md`, `reference/bilbioteka.md`, `reference/inspiracja 1.jpeg`, `reference/inspiracja 2.jpeg` | Źródła koncepcji. Z inspiracji bierzemy **użyteczność i przepływy**, nie wygląd. Czytaj, gdy zadanie odwołuje się do nich wprost. |
 
 ## Stack (nie negocjujemy bez powodu)
 
@@ -42,6 +48,8 @@ Ten plik jest źródłem prawdy o zasadach pracy. Szczegóły są w `docs/` — 
 9. **Migracje Supabase tylko przez pliki SQL** w `supabase/migrations/`. Nigdy nie zmieniaj schematu z dashboardu bez migracji. Każda tabela ma RLS.
 10. **Sekrety nigdy w repo.** Frontend widzi tylko `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_STRIPE_PUBLISHABLE_KEY`. Klucz Stripe secret i webhook secret — tylko w Edge Functions.
 11. **Tauri commands (Rust)** tylko dla: zapis pliku PDF na dysk, dialogi systemowe, deep link, updater, keychain (sesja). Logika biznesowa nie idzie do Rusta.
+13. **Pliki użytkownika = Supabase Storage (bucket `files`) + wiersz w tabeli `files`.** Metadane w Postgresie są jedynym źródłem listy; limit 2 GB/workspace i 25 MB/plik egzekwowany w bazie (trigger), nie tylko w UI. Każdy wygenerowany PDF może trafić do archiwum klienta jako plik `kind: 'generated'`.
+14. **Dane klienta w wycenie są snapshotem** (`body.client`) skopiowanym z `clients` w chwili utworzenia — edycja klienta nie zmienia wysłanej oferty. Odświeżenie jest jawną akcją użytkownika.
 12. **Commity:** Conventional Commits (`feat:`, `fix:`, `chore:`, `refactor:`, `db:`). Jeden task z `docs/06-TASKS.md` = jedna gałąź / jeden PR.
 
 ## Workflow pracy z zadaniami
@@ -73,3 +81,5 @@ supabase functions serve
 - Nie licz totali w komponentach — tylko `domain/quote/calc.ts`.
 - Nie generuj PDF po stronie serwera (na start). PDF powstaje lokalnie w webview.
 - Nie rób własnego auth. Supabase Auth, sesja w keychain przez `tauri-plugin-stronghold`/`keyring`.
+- Nie buduj wersji web/SaaS w przeglądarce „przy okazji" — decyzja D6: desktop zostaje na 1.0. Kod ma pozostać przeglądarkowy (`pnpm dev` działa), ale nie dokładaj warstw pod hosting.
+- Nie rób z Toolier systemu project-management: bez Gantta z osią czasu, kalendarza, chatu, faktur, CRM sprzedażowego, katalogu produktów (koncepcja §17). Pomysły → `docs/IDEAS.md`.

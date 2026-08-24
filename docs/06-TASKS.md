@@ -4,6 +4,8 @@ Format: `- [ ] T-xx Nazwa` — czytaj: wymagane dokumenty → kryteria akceptacj
 
 **Numer to tożsamość zadania, nie kolejność.** Kolejność wykonania = pozycja na liście. Po wchłonięciu `FEATURES-Z-EXCELA.md` (2026-08-22) zadania T-30+ zostały wplecione **pomiędzy** T-11…T-17, bo część z nich musi wyprzedzić PDF i brand kit — inaczej pisalibyśmy je dwa razy. Stare numery zostawiono nietknięte, żeby notatki i commity dalej się zgadzały.
 
+**2026-08-24 — koncepcja Toolier.** Zadania **T-53…T-66** (`FEATURES-Z-KONCEPCJI.md`) stoją **przed T-17**: oś klient → projekt → pliki, wersje wycen, restrukturyzacja biblioteki, rebranding i nowa cena wchodzą do 1.0. **Następne zadanie do wzięcia: T-53.**
+
 Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełna specyfikacja, wzory z arkusza i model domenowy. Tutaj jest **kolejność, zależności i kolizje z istniejącym kodem**; nie duplikuję treści tamtego dokumentu.
 
 ## Faza 0 — Fundament
@@ -415,9 +417,79 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - W testach `userEvent.type` nie nadaje się do wzorca numeracji: `{` otwiera tam opis klawisza, a tokeny to właśnie klamry. Używamy `fireEvent.change`.
   > **Nie zweryfikowane na żywo:** `delete-account` nie było uruchamiane (skasowałoby konto testowe); wymaga `supabase functions deploy delete-account`.
 
+### Oś workspace'u: klienci → projekty → pliki (koncepcja Toolier, 2026-08-24) — przed release 1.0
+
+> **Dlaczego przed T-17.** Właściciel zdecydował (D10 w `FEATURES-Z-KONCEPCJI.md §0`), że 1.0 wychodzi jako workspace studia, a nie generator wycen: po zalogowaniu widać klientów, wycena żyje w projekcie, pliki i wygenerowane PDF-y są w archiwum klienta. Bez tego 1.0 byłoby innym produktem niż ten, który sprzedajemy za 98,99 zł/mies. Zadania oznaczone `(K…/P…/W…/B…/S…/U…/R…)` mają pełną specyfikację w **`docs/FEATURES-Z-KONCEPCJI.md`** — tu jest kolejność, zależności i kolizje. **Zanim ruszysz, przeczytaj §9 tamtego pliku.** Faza 1.5 (T-38…T-49) jest już zrobiona, więc kolejność wykonania jest taka jak niżej.
+
+- [ ] **T-53 Klienci — repo, lista, karta, przypięcie wyceny** (FEATURES-Z-KONCEPCJI §2 K1, 02-DATABASE §3a, 05-UI §3)
+  Migracja kolumn `clients` (`address`, `city`, `status`, `archived_at`), `domain/client/`, `clients.repo` + `useClients`, `/klienci` (szukaj/sort/filtr w Postgresie), `/klienci/:id` z zakładkami **Projekty | Wyceny | Notatki** (Dokumenty/Pliki dopiero z T-55/56 — nie renderuj), combobox klienta w prawej kolumnie edytora z „+ Nowy klient" i „Odśwież dane klienta", `quotes.client_id` zapisywane w `saveQuote`, kolumna „Klient" w rejestrze jako link + filtr. Sumy na karcie (projekty, wartość zaakceptowanych) liczone w bazie.
+  ✅ Nowa wycena z karty klienta ma wypełnione dane inwestora; edycja telefonu klienta nie zmienia wysłanej wyceny (snapshot); szukanie po fragmencie e-maila działa po stronie bazy; eksport danych (T-16) zawiera nowe kolumny.
+  ⚠️ Wchłania **T-18**. Konflikt `quotes.city` ↔ `clients.city` (zapowiedziany w T-49): klient jest źródłem, wycena trzyma kopię w `body.client` — nie dokładaj drugiego miejsca zapisu. Zakładka „Projekty" na razie pusta z CTA prowadzącym do T-54 — **albo** ukryta do T-54; wybierz i zanotuj.
+
+- [ ] **T-54 Projekty** (FEATURES-Z-KONCEPCJI §2 K2)
+  Migracja `projects` + `quotes.project_id`, `projects.repo` + `useProjects`, `/klienci/:id/projekty/:pid` z zakładkami **Wyceny | Notatki** (Dokumenty/Pliki z T-55/56), formularz projektu (adres domyślnie z klienta), tworzenie wyceny z projektu (`project_id`, `client_id`, snapshot klienta, „Skopiować pomieszczenia z ostatniej wyceny?"), „Przenieś do projektu" w menu ⋯, propozycja `in_progress` po akceptacji (toast z akcją, nie automat), seed: 2 klientów / 3 projekty.
+  ✅ Klient z dwoma projektami widzi dwie osobne listy wycen; przeniesienie wyceny zmienia tylko `project_id`; wycena bez projektu dalej działa.
+  ⚠️ Pomieszczenia **nie** przenoszą się do projektu (§9.2) — kopia do nowej wyceny, nie relacja.
+
+- [ ] **T-55 Pliki — bucket, tabela, limity, RLS, upload/lista/pobierz** (FEATURES-Z-KONCEPCJI §3 P1, 02-DATABASE §3a, 01-ARCHITECTURE §3)
+  Migracja: bucket `files` (25 MiB), tabela `files`, granty, RLS, `workspaces.storage_quota_bytes/used_bytes` + triggery kwoty (`STORAGE_QUOTA_EXCEEDED`), `domain/files/`, `files.repo` (obiekt → wiersz; nieudany wiersz kasuje obiekt), `useFiles`, zakładka **Pliki** u klienta i projektu (drag&drop + dialog, lista, rename, pobierz przez signed URL → `save_file`, usuń = soft delete + kasowanie obiektu, podgląd obrazów), pasek limitu w Ustawieniach → Pliki, blokada rozszerzeń wykonywalnych **przed** wysyłką. `delete-account` i `export.repo` obejmują bucket `files`.
+  ✅ Przeciągnięcie 3 plików → widoczne u klienta i w projekcie; 30 MB odbite po polsku przed wysyłką; przy 2 GB insert odbity przez bazę z komunikatem „zajęte X z 2 GB"; test integracyjny: RLS odmawia cudzemu workspace'owi, soft delete zwalnia miejsce.
+  ⚠️ Dwie ścieżki wejścia (Tauri: ścieżki z `dialog.open`/`onDragDropEvent`; przeglądarka: `File`) za jednym adapterem w `lib/tauri.ts` — sprawdź `capabilities/default.json` (§9.12). Bez kosza w 1.0 — usunięcie jest natychmiastowe i tak ma być napisane w dialogu.
+
+- [ ] **T-56 Archiwum dokumentów — PDF do Storage przy eksporcie** (FEATURES-Z-KONCEPCJI §3 P2)
+  Checkbox „Zapisz w dokumentach klienta" (domyślnie on, ukryty bez `client_id`) w każdym eksporcie (T-13/45/46/47/48) przez **jedno** wejście w `pdf/export.ts`; `archiveGeneratedPdf` w `files.repo` (`kind: 'generated'`, `doc_type`, `quote_version`); zakładka **Dokumenty** u klienta i projektu; karta „Dokumenty" (3 ostatnie) w prawej kolumnie edytora. Archiwizacja niezależna od zapisu na dysk (anulowany dialog nie cofa; nieudana archiwizacja → toast „Ponów").
+  ✅ Eksport wyceny → w Dokumentach klienta jest `…-wycena.pdf`; „Otwórz" daje ten sam plik mimo późniejszej zmiany brand kitu; pakiet zapisuje jeden wpis `package`.
+
+- [ ] **T-57 Wersje wycen v1/v2 + status `archived`** (FEATURES-Z-KONCEPCJI §4 W1)
+  Migracja `lineage_id`/`version`/status `archived` + unikalny `accepted` per projekt; `domain/quote/versions.ts`; „Nowa wersja" (duplikat w linii, nowy numer, poprzedni szkic → `archived`) w menu edytora i wiersza; grupowanie po linii w projekcie i rejestrze; badge `v2`; dialog zastąpienia zaakceptowanej (kod `23505` na indeksie → komunikat po polsku); `showVersionOnPdf` (off) — w nazwie pliku wersja zawsze; `StatusBadge` dla `archived` = wygaszony tor; dotychczasowa „Archiwizuj" (soft delete) przemianowana na „Usuń".
+  ✅ Flow z koncepcji §11: v1 → „Nowa wersja" → v2 zaakceptowana, v1 archiwalna, jeden `accepted` w projekcie; rejestr pokazuje obie z filtrem; szablon i duplikat startują linię od v1.
+  ⚠️ Wchłania lekką część **T-22**; pełna historia zmian zostaje w fazie 2. Dwa różne „archiwum" (status vs kosz) to pułapka — nazwy w i18n muszą się różnić.
+
+- [ ] **T-58 Pulpit i nawigacja pod klienta + paleta ⌘K** (FEATURES-Z-KONCEPCJI §2 K3, 05-UI §2–3)
+  Sidebar: Pulpit · Klienci · Wyceny · Biblioteka · Szablony · Ustawienia (Branding jako sekcja Ustawień, `/branding` alias); blok „Aktywni klienci i projekty" + „Nowy klient" na pulpicie; „Nowa wycena" pyta o klienta/projekt; paleta ⌘K (`command` z shadcn — bez nowej zależności): klienci, projekty, wyceny, usługi, akcje; `useMatch` z `end: false` dla tras zagnieżdżonych.
+  ✅ Po zalogowaniu pierwszy ekran prowadzi do klientów; ⌘K znajduje klienta po fragmencie nazwy i otwiera kartę; testy `Sidebar`/`AppShell` zaktualizowane (mockują `useEntitlement`).
+  ⚠️ Zabiera część **T-21** (paleta) — tryb ciemny i skróty zostają w fazie 2.
+
+- [ ] **T-59 Biblioteka: grupy (słownik), zestawy, zakładki, Pomieszczenia** (FEATURES-Z-KONCEPCJI §5 B1, 05-UI §3)
+  Migracja `library_categories` + `library_items.category_id` + migracja danych z tekstowej `category` (kolumna zostaje jedną wersję); zakładki **Usługi | Grupy | Zestawy | Pomieszczenia | Stawki**; zakładka Grupy (drag, kod, kolor z palety, licznik, soft delete → usługi do „Bez grupy"); „Grupy → Zestawy" w i18n; `RoomTypesSection` w bibliotece (ten sam komponent, link z Ustawień); lista usług: pigułki grup, licznik, kolumny, lista–siatka, „Pokaż więcej" po 50, split-button „Dodaj ▾"; import CSV dopasowuje `grupa` do słownika (nieznana → tworzy).
+  ✅ Istniejące kategorie po migracji są grupami w kolejności alfabetycznej; picker sortuje po grupach; usunięcie grupy nie kasuje usług.
+  ⚠️ **Nie zmieniaj nazwy tabeli `library_groups`** (zestawy) — snapshoty mają własną ścieżkę zgodności i testy integracyjne (§9.3).
+
+- [ ] **T-60 Biblioteka: jednostki, cena „od", „indywidualnie", aktywna** (FEATURES-Z-KONCEPCJI §5 B2)
+  Migracja kolumn (`unit`, `unit_label`, `min_price_cents`, `active`, `is_sample`; `unit_price_cents` nullable); `Unit` w domenie, `formatUnit`, `minRuleCents`; **`bodyVersion + 1`** (cena `null` = wycena indywidualna, krok migracji bez przekształceń); kaskada `unit`; jedna kontrolka „Sposób wyceny" (8 opcji → para `mode+unit`) na karcie; „Aktywna" chowa z pickera i „Rozpisz na pomieszczenia"; wiersz edytora: „× 14 m²", „wycena indywidualna"; `TotalsCard` dopisek; PDF: ilość z jednostką, pozycje indywidualne.
+  ✅ „Pomiar wnętrza 12 zł/m², qty 80" → 960 zł i „80 m² × 12,00 zł" w PDF; pozycja indywidualna nie zmienia sumy i jest w PDF; nieaktywna znika z pickera, kaskada działa.
+  ⚠️ Cena `null` dotyka ~20 miejsc (§9.4) — jedno przejście jak w T-36, ze snapshotami zestawów, CSV (pusta = null) i `convertUnits` (null → null).
+
+- [ ] **T-61 Biblioteka: pełnoekranowy edytor usługi z podglądem + statystyki użycia** (FEATURES-Z-KONCEPCJI §5 B3, 05-UI §3 „Edytor usługi")
+  Trasy `/biblioteka/uslugi/:id` i `/nowa`; sekcje 1–6; prawa kolumna: „Podgląd w ofercie" (`ItemRow` w podglądzie + stawki dla `per_room`), „Jak to działa?" (4 warianty w i18n), „Statystyki użycia" (RPC `library_item_usage`, cache 5 min), „Wskazówka" z linkiem do Pomieszczeń; zapis jawny; inline-edit na karcie zostaje dla nazwy/ceny.
+  ✅ Zmiana stawki odświeża podgląd bez zapisu; „Zapisz" = jedno wywołanie; statystyka zgodna z seedem.
+  ⚠️ Kaskada do otwartej wyceny działa tylko z `LibrarySheet` w edytorze (T-10 — tam jest store); pełna strona ma to powiedzieć, nie udawać.
+
+- [ ] **T-62 Biblioteka przykładowa na start konta** (FEATURES-Z-KONCEPCJI §5 B4, `reference/bilbioteka.md`)
+  `seed_library_sample(ws)` (8 grup / 38 usług, nazwy i opisy **dosłownie** z `bilbioteka.md`, ceny `null`, `is_sample`), wpięcie w `handle_new_user()` (idempotentne, tylko pusta biblioteka; bez backfillu), badge „Przykładowa", zdejmowanie flagi przy edycji, „Usuń pozostałe przykładowe (N)" w Ustawieniach → Biblioteka, krok onboardingu „Przejrzyj bibliotekę" (rozstrzygnij §9.11).
+  ✅ Nowe konto: 8 grup i 38 usług bez cen z badge; edycja jednej zdejmuje badge tylko z niej; „Usuń pozostałe" kasuje 37 i puste grupy przykładowe. `seed.sql` demo **bez** biblioteki przykładowej.
+
+- [ ] **T-63 Pakiety: szablon niesie termin i dokumenty** (FEATURES-Z-KONCEPCJI §6 S1)
+  Migracja `quote_templates.schedule/documents`; `templates.repo` z miękkim parsowaniem obu kolumn; dialog „Zapisz jako szablon" z checkboxami zawartości (ukryte, gdy wycena czegoś nie ma); wycena z szablonu dostaje komplet, `startDate` zerowana; ikony zawartości na karcie szablonu.
+  ✅ Szablon z harmonogramem → nowa wycena ma Termin bez daty startu; szablon bez dokumentów nie tworzy pustej zakładki.
+
+- [ ] **T-64 Usługi dodatkowe → wpływ na termin** (FEATURES-Z-KONCEPCJI §7 U1)
+  `PriceListEntry.addedDays`, pole w zakładce Cennik, most z dwoma przełącznikami (koszt / termin), etap `kind: 'extras'` w domenie harmonogramu i `ScheduleTab` (lista usług składowych, usuwanie pojedynczo), PDF terminu.
+  ✅ „Panorama 360, +3 dni" wydłuża optymalne zakończenie o 3 dni robocze i dodaje pozycję; odznaczenie „koszt" dodaje tylko dni.
+  ⚠️ Usunięcie pozycji z wyceny **nie** zdejmuje dni automatycznie (zasada z T-44).
+
+- [ ] **T-65 Rebranding: Toolier** (FEATURES-Z-KONCEPCJI §8 R1)
+  `productName`/`identifier`/tytuł okna w `tauri.conf.json`, `package.json`, `pl.app.name`, ekrany auth, stopka, README, CHANGELOG, `07-BUILD-MACOS.md`; deep link **`anzorge://` → `toolier://`** (`config.toml`, `deep-links.ts`, capabilities, panel Supabase ręcznie); keychain `pl.anzorge.app` → `pl.toolier.app` (kasuje sesje testowe — wpis w CHANGELOG); seed `demo@toolier.local` (+ testy integracyjne); ikona: nowy logotyp od właściciela, do tego czasu „T" w miejsce „A" (`scripts/make-icon.mjs`).
+  ✅ `grep -ri anzorge src src-tauri supabase docs` zwraca tylko historyczne notatki w `06-TASKS.md`, `CHANGELOG.md` i `FEATURES-Z-EXCELA.md`; `pnpm tauri build` daje `Toolier_*.msi`.
+
+- [ ] **T-66 Cena 98,99 zł/mies., 999,99 zł/rok** (FEATURES-Z-KONCEPCJI §8 R2, 03-BILLING §1)
+  Nowe `price` w Stripe (`lookup_key` `toolier_monthly`/`toolier_yearly`), stare archiwizowane; produkt „Toolier"; kwoty w UI wyłącznie z `pl.billing.prices`; „2 miesiące gratis" przy rocznej; testy `billing-ui.test.tsx` pilnują, że 19,99/199 nie wraca; `03-BILLING.md`.
+  ✅ Checkout w sandboxie pokazuje 98,99 zł / 999,99 zł; `stripe-create-checkout` znajduje ceny po nowych `lookup_key`.
+
 - [ ] **T-17 Polish & release 1.0**
-  Pusty stan onboardingu (3 kroki: logo → biblioteka → pierwsza wycena), obsługa błędów (ErrorBoundary, toasty), ikony aplikacji, `tauri build` Win+mac, podpisywanie (notarization macOS, cert Win — zanotuj w README co trzeba mieć), CHANGELOG.
+  Pusty stan onboardingu (3 kroki: logo → biblioteka → pierwsza wycena; po T-62: „przejrzyj bibliotekę przykładową"), obsługa błędów (ErrorBoundary, toasty), ikony aplikacji, `tauri build` Win+mac, podpisywanie (notarization macOS, cert Win — zanotuj w README co trzeba mieć), CHANGELOG.
   ✅ Instalator działa na czystej maszynie.
+  > **2026-08-24: przesunięte za T-53…T-66** (decyzja D10). Instalator ma się nazywać `Toolier_*`, więc build finalny dopiero po T-65. Poniższe notatki dotyczą stanu sprzed przesunięcia.
   > **Częściowo zrobione — zadanie zostaje otwarte.** Kod jest gotowy, reszta wymaga certyfikatów i drugiej maszyny.
   > **Zrobione:**
   > - `AppErrorBoundary` **nad providerami** — wyjątek w renderze daje ekran z komunikatem, treścią błędu do skopiowania i zdaniem „dane są bezpieczne", zamiast białej strony. Nie hipoteza: dokładnie tak wyglądał błąd podwójnego montowania edytora w `StrictMode`.
@@ -611,13 +683,16 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
 
 ## Faza 2
 
-- [ ] T-18 Klienci (CRM-lite) + przypięcie do wyceny
+- [x] ~~T-18 Klienci (CRM-lite) + przypięcie do wyceny~~ → **wchłonięte przez T-53** (faza 1, 2026-08-24).
 - [ ] T-19 Auto-update (tauri-plugin-updater, endpoint w Supabase Storage / GitHub Releases)
-- [ ] T-20 Wysyłka e-mail z PDF (Resend) + szablon wiadomości
-- [ ] T-21 Tryb ciemny + paleta komend ⌘K + skróty
-- [ ] T-22 Wersjonowanie wyceny — historia wersji dokumentu dla użytkownika (nie mylić z **T-30**, które wersjonuje *schemat* `body` na potrzeby migracji)
-- [ ] T-23 Import/eksport CSV (biblioteka, lista wycen)
+- [ ] T-20 Wysyłka e-mail z PDF (Resend) + szablon wiadomości — załącznik może iść z archiwum dokumentów (T-56), bez ponownego renderu
+- [ ] T-21 Tryb ciemny + skróty (paleta ⌘K → **T-58**)
+- [ ] T-22 Pełna historia wersji wyceny (diff pozycji, porównanie totali między wersjami) — lekkie wersje v1/v2 są w **T-57**; nie mylić z **T-30**, które wersjonuje *schemat* `body`
+- [ ] T-23 Import/eksport CSV — biblioteka (T-50) i rejestr (T-49) zrobione; zostaje **eksport XLSX** i import klientów z CSV
 - [ ] T-24 Wiele walut i lokalizacja liczb
+- [ ] T-67 Kosz na pliki (30 dni; dziś usunięcie w T-55 jest natychmiastowe)
+- [ ] T-68 Statusy realizacji etapów w projekcie (koncepcja §7 „w przyszłości")
+- [ ] T-69 Usunięcie kolumny `library_items.category` (tekst) po jednej wersji od T-59
 
 ## Faza 3
 
