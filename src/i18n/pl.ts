@@ -1298,9 +1298,26 @@ export const pl = {
     intro: 'Toolier jest aplikacją płatną. Wybierz, jak chcesz płacić.',
     monthly: 'Miesięcznie',
     yearly: 'Rocznie',
-    monthlyPrice: '19,99 zł / mies.',
-    yearlyPrice: '199 zł / rok',
-    yearlySaving: 'dwa miesiące taniej',
+    /**
+     * **Jedyne miejsce z kwotami w aplikacji** (T-66).
+     *
+     * Cena stoi w trzech miejscach naraz: tutaj, w Stripe i w materiałach
+     * marketingowych. Dwóch pierwszych nie da się połączyć automatycznie —
+     * Stripe zna kwotę dopiero po utworzeniu sesji Checkout, a ekran wyboru
+     * musi ją pokazać wcześniej. Skoro i tak przepisujemy ręcznie, niech
+     * będzie jedno miejsce do poprawienia, a nie kilka stringów po JSX-ie.
+     *
+     * `1099,88` przy rocznej to 12 × 98,99 — kwota, której klient NIE płaci.
+     * Pokazujemy ją przekreśloną, żeby „dwa miesiące taniej" dało się
+     * sprawdzić, a nie tylko przeczytać.
+     */
+    prices: {
+      monthly: '98,99 zł / mies.',
+      yearly: '999,99 zł / rok',
+      /** 12 × cena miesięczna — odniesienie dla oszczędności. */
+      yearlyBefore: '1 187,88 zł',
+      yearlySaving: 'prawie dwa miesiące taniej',
+    },
     perPeriod: (period: string) => (period === 'yearly' ? 'rocznie' : 'miesięcznie'),
 
     statusLabel: 'Status',

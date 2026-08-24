@@ -77,15 +77,16 @@ export function SubscriptionPage() {
           <PeriodCard
             period="monthly"
             title={pl.billing.monthly}
-            price={pl.billing.monthlyPrice}
+            price={pl.billing.prices.monthly}
             busy={busy}
             onSelect={startCheckout}
           />
           <PeriodCard
             period="yearly"
             title={pl.billing.yearly}
-            price={pl.billing.yearlyPrice}
-            hint={pl.billing.yearlySaving}
+            price={pl.billing.prices.yearly}
+            before={pl.billing.prices.yearlyBefore}
+            hint={pl.billing.prices.yearlySaving}
             busy={busy}
             onSelect={startCheckout}
           />
@@ -107,6 +108,7 @@ function PeriodCard({
   period,
   title,
   price,
+  before,
   hint,
   busy,
   onSelect,
@@ -114,6 +116,8 @@ function PeriodCard({
   period: BillingPeriod;
   title: string;
   price: string;
+  /** Kwota, ktorej klient NIE placi — 12 x cena miesieczna (T-66). */
+  before?: string;
   hint?: string;
   busy: boolean;
   onSelect: (period: BillingPeriod) => Promise<void>;
@@ -121,7 +125,12 @@ function PeriodCard({
   return (
     <div className="border-hair flex flex-col gap-2 rounded-[var(--radius-card)] border p-4">
       <p className="text-ink text-sm font-medium">{title}</p>
-      <p className="text-ink text-lg font-semibold">{price}</p>
+      <p className="text-ink flex items-baseline gap-2 text-lg font-semibold">
+        {price}
+        {before ? (
+          <span className="text-ink-soft text-xs font-normal line-through">{before}</span>
+        ) : null}
+      </p>
       {hint ? (
         <p className="text-ink-soft flex items-center gap-1 text-xs">
           <Check className="size-3.5" aria-hidden />

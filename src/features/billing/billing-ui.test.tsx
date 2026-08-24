@@ -68,7 +68,30 @@ describe('SubscriptionPage — rama produktowa', () => {
 
     expect(screen.getByText(pl.billing.monthly)).toBeInTheDocument();
     expect(screen.getByText(pl.billing.yearly)).toBeInTheDocument();
-    expect(screen.getByText(pl.billing.monthlyPrice)).toBeInTheDocument();
+    expect(screen.getByText(pl.billing.prices.monthly)).toBeInTheDocument();
+  });
+
+  it('pokazuje NOWA cene, a stara nie wraca (T-66)', () => {
+    /*
+     * Kwoty siedza w trzech miejscach naraz (i18n, Stripe, marketing).
+     * Ten test pilnuje tego jednego, ktore mozemy sprawdzic automatycznie —
+     * zeby "19,99" nie wrocilo przez odwrocony merge albo skopiowany fragment.
+     */
+    const { container } = renderWithRouter(<SubscriptionPage />);
+
+    expect(container.textContent).toContain('98,99');
+    expect(container.textContent).toContain('999,99');
+    expect(container.textContent).not.toContain('19,99 zł');
+    expect(container.textContent).not.toContain('199 zł / rok');
+  });
+
+  it('pokazuje, ILE oszczedza roczna — przekreslona kwota, nie sama obietnica', () => {
+    const { container } = renderWithRouter(<SubscriptionPage />);
+
+    // 12 x 98,99 = 1 187,88. Bez tej liczby "dwa miesiace taniej" jest
+    // haslem, ktorego klient nie ma jak sprawdzic.
+    expect(container.textContent).toContain(pl.billing.prices.yearlyBefore);
+    expect(screen.getByText(pl.billing.prices.yearlySaving)).toBeInTheDocument();
   });
 
   it('mowi wprost, ze dane zostaja po wygasnieciu', () => {

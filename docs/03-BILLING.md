@@ -1,8 +1,17 @@
 # 03 — Subskrypcja i Stripe
 
 ## 1. Produkty w Stripe
-- Product „Toolier": price `monthly` **98,99 PLN/mies.**, `yearly` **999,99 PLN/rok** (roczna = ~10 miesięcy w cenie 12; ekran subskrypcji pokazuje oszczędność).
-  **Zmiana ceny 2026-08-24** (wcześniej 19,99 / 199 pod nazwą „Anzorge"). Stripe nie pozwala edytować kwoty istniejącego `price` — tworzymy **nowe** ceny z `lookup_key` `toolier_monthly` / `toolier_yearly`, stare archiwizujemy (nie kasujemy: mogą być na nich istniejące subskrypcje testowe). Kwoty w UI tylko z `pl.billing.prices` (i18n) — jedno miejsce. Zadanie: T-66.
+- Product „Toolier": `lookup_key` **`toolier_monthly`** = 98,99 PLN/mies., **`toolier_yearly`** = 999,99 PLN/rok (roczna = ~10 miesięcy w cenie 12; ekran subskrypcji pokazuje przekreśloną kwotę 1 187,88 zł, czyli 12 × miesięczna).
+  **Zmiana ceny 2026-08-24** (wcześniej 19,99 / 199 pod nazwą „Anzorge"). Stripe nie pozwala edytować kwoty istniejącego `price` — 98,99 / 999,99 to **nowe** obiekty. Kwoty w UI tylko z `pl.billing.prices` (i18n) — jedno miejsce. Zadanie: T-66 (kod zrobiony).
+
+  **Co zrobić w panelu Stripe (ręcznie, sandbox i produkcja):**
+  1. Zmień nazwę produktu na „Toolier" (widoczna klientowi na stronie płatności).
+  2. Dodaj dwa nowe `price` w PLN, `tax_behavior: inclusive`: 98 999 gr / mies. i 999 99 gr / rok.
+  3. Nadaj im `lookup_key` `toolier_monthly` i `toolier_yearly`. **Najpierw nowe klucze, potem archiwizacja starych** — dopóki funkcja brzegowa nie znajdzie ceny po kluczu, Checkout zwraca błąd.
+  4. Stare ceny (`monthly`, `yearly`, 19,99 / 199) **archiwizuj, nie kasuj** — mogą na nich wisieć subskrypcje testowe. Archiwizacja zdejmuje je z `active: true`, więc `findPriceId` ich nie znajdzie.
+  5. Jeśli w sekretach stoją `STRIPE_PRICE_MONTHLY` / `STRIPE_PRICE_YEARLY`, podmień je na ID nowych cen albo usuń — **przypięte ID wygrywa z `lookup_key`** i po cichu zostawiłoby starą kwotę.
+
+  Kolejność z punktów 3–4 pilnuje test `src/domain/billing/price-keys.test.ts`: sprawdza, że kod pyta o `toolier_*`, a nie o samą nazwę planu.
   **Nazwa produktu jest widoczna dla klienta na stronie płatności** — nie ma tu żadnego „Pro”, bo nie ma wersji darmowej. Płaci się za korzystanie z aplikacji; miesięcznie albo rocznie. Tax: ceny brutto (`tax_behavior: inclusive`), włączony Stripe Tax (VAT PL / OSS).
 - Trial nie jest w Stripe — trial jest **nasz** (`subscriptions.trial_ends_at` nadawany przy signup). Dzięki temu nie wymagamy karty i Stripe customer powstaje dopiero przy pierwszym checkout.
 - Customer Portal: włączone zmiana planu, anulowanie na koniec okresu, faktury.

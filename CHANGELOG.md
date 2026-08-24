@@ -25,6 +25,12 @@ identyfikator pakietu (`pl.anzorge.app` → `pl.toolier.app`), schemat deep link
 Nazwa „AnzorgeDesign" w podpisie aplikacji zostaje — to nazwa studia, które
 zamówiło aplikację, a nie dawna nazwa produktu.
 
+**Nowa cena: 98,99 zł/mies. albo 999,99 zł/rok** (wcześniej 19,99 / 199).
+Roczna to około dziesięć miesięcy w cenie dwunastu — ekran subskrypcji pokazuje
+obok niej przekreśloną kwotę 1 187,88 zł, żeby oszczędność dało się sprawdzić.
+Istniejące subskrypcje testowe zostają na starych cenach; nowe zakupy idą po
+`lookup_key` `toolier_monthly` / `toolier_yearly`.
+
 ### Dodane
 
 **Wycena**
