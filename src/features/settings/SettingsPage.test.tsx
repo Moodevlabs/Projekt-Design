@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { defaultWorkspaceSettings, type WorkspaceSettings } from '@/domain/brand/schema';
@@ -163,71 +163,15 @@ describe('Ustawienia a wygasly dostep', () => {
     expect(screen.getByRole('button', { name: pl.common.save })).toBeDisabled();
   });
 
-  it('nie pokazuje dodawania typow pomieszczen bez prawa zapisu', () => {
-    canWrite.value = false;
-    render(<SettingsPage />);
-
-    expect(screen.queryByRole('button', { name: pl.common.add })).not.toBeInTheDocument();
-  });
 });
 
-describe('Typy pomieszczen', () => {
-  it('dodaje nowy typ na koniec listy, nie na poczatek', async () => {
-    // Kolejnosc typow jest decyzja uzytkownika (odpowiada ukladowi w ofercie),
-    // a nie alfabetu — nowy wpis nie ma prawa wskoczyc przed istniejace.
-    useRoomTypes.mockReturnValue({
-      isLoading: false,
-      data: [roomType('Kuchnia', 'kuchnia', 1), roomType('Salon', 'salon', 5)],
-    });
-    const user = userEvent.setup();
+describe('Typy pomieszczen (T-73)', () => {
+  it('NIE sa w Ustawieniach — mieszkaja w Bibliotece → Pomieszczenia', () => {
+    // Dwa miejsca do personalizacji tej samej listy to pytanie „ktore liczy".
     render(<SettingsPage />);
-
-    await user.type(screen.getByPlaceholderText(pl.settings.roomTypeNamePlaceholder), 'Łazienka');
-    await user.click(screen.getByRole('button', { name: pl.common.add }));
-
-    expect(createMutate).toHaveBeenCalledTimes(1);
-    expect(createMutate.mock.calls[0]?.[0]).toMatchObject({ name: 'Łazienka', sortOrder: 6 });
-  });
-
-  it('nie pozwala dodac typu, ktory dalby ten sam klucz', async () => {
-    // „Kuchnia” i „kuchnia ” daja ten sam slug — bez tego wpadlyby na unikalny
-    // indeks w bazie i uzytkownik dostalby surowy blad Postgresa.
-    const user = userEvent.setup();
-    render(<SettingsPage />);
-
-    await user.type(screen.getByPlaceholderText(pl.settings.roomTypeNamePlaceholder), 'kuchnia');
-    await user.click(screen.getByRole('button', { name: pl.common.add }));
-
-    expect(createMutate).not.toHaveBeenCalled();
-    expect(toastError).toHaveBeenCalledWith(pl.settings.roomTypeDuplicate);
-  });
-
-  it('zmiana nazwy NIE zmienia klucza', async () => {
-    // Slug jest kluczem technicznym cennika parametrycznego. Gdyby szedl za
-    // nazwa, poprawka literowki wyzerowalaby ceny w zapisanych wycenach.
-    const user = userEvent.setup();
-    render(<SettingsPage />);
-
-    const pole = screen.getByLabelText(pl.settings.roomTypeName('Kuchnia'));
-    await user.clear(pole);
-    await user.type(pole, 'Kuchnia otwarta');
-    await user.tab();
-
-    expect(updateRoomMutate).toHaveBeenCalledTimes(1);
-    const [args] = updateRoomMutate.mock.calls[0] as [{ id: string; patch: Record<string, unknown> }];
-    expect(args.patch).toEqual({ name: 'Kuchnia otwarta' });
-    expect(args.patch).not.toHaveProperty('slug');
-  });
-
-  it('pokazuje klucz obok nazwy', () => {
-    render(<SettingsPage />);
-    const wiersz = screen.getByLabelText(pl.settings.roomTypeName('Kuchnia')).closest('li');
-    expect(within(wiersz as HTMLElement).getByText('kuchnia')).toBeInTheDocument();
-  });
-
-  it('pusta lista mowi wprost, ze nie ma typow', () => {
-    useRoomTypes.mockReturnValue({ isLoading: false, data: [] });
-    render(<SettingsPage />);
-    expect(screen.getByText(pl.settings.roomTypesEmpty)).toBeInTheDocument();
+    expect(screen.queryByText(pl.settings.roomTypes)).not.toBeInTheDocument();
+    expect(
+      screen.queryByPlaceholderText(pl.settings.roomTypeNamePlaceholder),
+    ).not.toBeInTheDocument();
   });
 });

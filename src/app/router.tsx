@@ -21,6 +21,7 @@ import { BrandSettingsPage } from '@/features/brand/BrandSettingsPage';
 import { SettingsPage } from '@/features/settings/SettingsPage';
 import { SettingsLayout } from '@/features/settings/SettingsLayout';
 import { SubscriptionPage } from '@/features/billing/SubscriptionPage';
+import { HelpPage } from '@/features/help/HelpPage';
 import { pl } from '@/i18n/pl';
 
 /** `handle.title` trafia do Topbara (patrz AppShell). */
@@ -99,6 +100,7 @@ const routeTree = [
                   { path: 'branding', element: <BrandSettingsPage /> },
                 ],
               },
+              { path: 'pomoc', element: <HelpPage />, handle: { title: pl.nav.help } },
               {
                 path: 'subskrypcja',
                 element: <SubscriptionPage />,

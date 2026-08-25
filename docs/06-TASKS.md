@@ -697,6 +697,19 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - Przełącznik lista–siatka z 05-UI §3 **nie powstał** — siatka kart była problemem, nie alternatywą; wróci, jeśli ktoś o nią poprosi.
   > - **Nie sprawdzone na żywo** (brak przeglądarki w sesji): szerokości kolumn na 1280 px i wygląd osadzonej karty.
 
+- [x] **T-73 Pomoc w nawigacji, Ustawienia pod kreską, pomieszczenia tylko w Bibliotece** (zgłoszenie właściciela 2026-08-25)
+  Trzy szybkie poprawki: (1) typy pomieszczeń były edytowalne w dwóch miejscach (Ustawienia i Biblioteka) — to pytanie „które liczy"; (2) Ustawienia stały w jednym rzędzie z obszarami pracy; (3) nie było żadnej pomocy w aplikacji.
+  ✅ Ustawienia bez sekcji pomieszczeń; sidebar: Pulpit · Klienci · Wyceny · Biblioteka · Szablony | Pomoc · Ustawienia; `/pomoc` z kompletnym poradnikiem w stylu aplikacji.
+  **Zrobiono:**
+  > - **`NavItem.group`** (`main` | `system`) i `navItemsOf()`; `Sidebar` rysuje dwie grupy oddzielone kreską, **każda z własnym `ActiveIndicator`** — kulka liczy pozycję z indeksu wiersza, więc wspólna musiałaby przeskakiwać przez separator. `activeNavIndex` dalej liczy po całej liście; blok przelicza na indeks lokalny.
+  > - `RoomTypesSection` zdjęta z `SettingsPage`; komponent zostaje (Biblioteka → Pomieszczenia). Testy sekcji przeniesione do **`RoomTypesSection.test.tsx`** (renderują sekcję wprost), w `SettingsPage.test` został jeden test-strażnik: „NIE ma pomieszczeń w Ustawieniach".
+  > - **`/pomoc`** — `HelpPage` + `HelpBlocks` (`features/help/`), treść w **`src/i18n/help.pl.ts`** jako dane (`HelpSection[]` z blokami `p` / `steps` / `list` / `tip` / `warn` / `keys` / `faq`). 14 sekcji: Pierwsze kroki · Klienci i projekty · Wycena · Statusy i wersje · Termin · Dokumenty · PDF i branding · Biblioteka · Szablony · Pliki · Ustawienia · Subskrypcja · Skróty · FAQ. Spis treści przyklejony, podświetla bieżącą sekcję (`IntersectionObserver`, wyłączany, gdy go nie ma — jsdom). Test pilnuje, że każda z 14 sekcji istnieje i że szybkie linki prowadzą do istniejących kotwic.
+  **Na co uważać:**
+  > - **Poradnik opisuje stan 1.0 i trzeba go aktualizować razem z funkcją** — tekst mówi m.in. „kosza jeszcze nie ma", „Ctrl+S / Ctrl+K" (jedyne skróty w kodzie), „25 MB / 2 GB", „14 dni, 98,99 / 999,99". Zmiana którejś z tych rzeczy bez poprawki w `help.pl.ts` zostawi poradnik kłamiący.
+  > - Skrótu `⌘P` z 05-UI §5 **nie ma w kodzie** — poradnik go nie wymienia. Jeśli ma być, to osobna zmiana w `QuoteEditorPage`.
+  > - `pl.settings.roomTypes*` zostają — używa ich `RoomTypesSection` w bibliotece (klucz jest w `settings`, bo tam sekcja powstała).
+  > - **Nie sprawdzone na żywo**: kreska między grupami w zwiniętym pasku i podświetlanie spisu treści przy przewijaniu.
+
 ## Faza 1.5 — reszta pakietu z Excela (zaraz po 1.0)
 
 > **Dlaczego to nie wchodzi do 1.0.** `F1` i `F3` są w Fazie 1, bo bez nich klient z tego arkusza **nie przeniesie swojego cennika** — to warunek wejścia. `F2`, `F4`, `F5` i `F6` są tym, co sprawi, że przestanie otwierać Excela, ale każde z nich to osobny moduł (harmonogram to własna domena, dat i świąt; pakiet dokumentów to trzy nowe generatory PDF). Wepchnięcie ich do 1.0 przesuwa premierę o miesiące przy zerowym zysku dla pierwszego wydania. Rekomenduję 1.1 wkrótce po 1.0 — jeśli uznasz inaczej, przenieś je do Fazy 1; zależności na to pozwalają.

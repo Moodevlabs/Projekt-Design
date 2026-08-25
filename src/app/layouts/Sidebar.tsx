@@ -13,9 +13,11 @@ import {
 import { useAuth } from '@/features/auth/auth-context';
 import {
   activeNavIndex,
+  NAV_GROUPS,
   NAV_ITEMS,
   NAV_ROW_HEIGHT,
   NAV_ROW_STEP,
+  navItemsOf,
   type NavItem,
 } from './nav-items';
 import { useSidebarExpanded } from './useSidebarExpanded';
@@ -204,20 +206,42 @@ export function Sidebar({ subscriptionOk = true }: { subscriptionOk?: boolean })
         ) : null}
       </div>
 
-      <div className="relative w-full" style={{ height: NAV_ITEMS.length * NAV_ROW_STEP }}>
-        <ActiveIndicator index={activeIndex} expanded={expanded} />
-        <div className="relative flex flex-col" style={{ gap: NAV_ROW_STEP - NAV_ROW_HEIGHT }}>
-          {NAV_ITEMS.map((item, index) => (
-            <SidebarLink
-              key={item.to}
-              item={item}
-              order={index}
-              active={index === activeIndex}
-              expanded={expanded}
-            />
-          ))}
-        </div>
-      </div>
+      {/*
+        Dwie grupy oddzielone kreska (T-73): obszary pracy i — nizej — Pomoc
+        z Ustawieniami. Kazda grupa ma WLASNA kulke: jedna wspolna musialaby
+        przeskakiwac przez separator, a jej pozycja liczy sie z indeksu wiersza.
+      */}
+      {NAV_GROUPS.map((group, groupIndex) => {
+        const items = navItemsOf(group);
+        const offset = NAV_ITEMS.findIndex((item) => item.group === group);
+        const localActive = activeIndex >= 0 ? activeIndex - offset : -1;
+        const inGroup = localActive >= 0 && localActive < items.length;
+
+        return (
+          <div
+            key={group}
+            className={cn(
+              'relative w-full',
+              groupIndex > 0 && 'mt-4 border-t border-white/10 pt-4',
+            )}
+          >
+            <div className="relative w-full" style={{ height: items.length * NAV_ROW_STEP }}>
+              <ActiveIndicator index={inGroup ? localActive : -1} expanded={expanded} />
+              <div className="relative flex flex-col" style={{ gap: NAV_ROW_STEP - NAV_ROW_HEIGHT }}>
+                {items.map((item, index) => (
+                  <SidebarLink
+                    key={item.to}
+                    item={item}
+                    order={offset + index}
+                    active={offset + index === activeIndex}
+                    expanded={expanded}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      })}
 
       <div className={cn('mt-auto flex w-full flex-col gap-3 pt-4', expanded ? '' : 'items-center')}>
         <Tooltip>

@@ -23,6 +23,7 @@ export const pl = {
     library: 'Biblioteka',
     templates: 'Szablony',
     brand: 'Branding',
+    help: 'Pomoc',
     settings: 'Ustawienia',
     subscription: 'Subskrypcja',
     collapse: 'Zwiń panel',
