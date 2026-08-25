@@ -15,17 +15,20 @@ export function CategoryPills({
   categories,
   value,
   onChange,
+  className,
 }: {
   categories: string[];
   /** `null` = „Wszystkie”. */
   value: string | null;
   onChange: (value: string | null) => void;
+  /** Nadpisanie układu — panel „Dodaj usługi” ma miejsce, żeby zawijać. */
+  className?: string;
 }) {
   return (
     <div
       role="group"
       aria-label={pl.library.categories}
-      className="border-hair flex gap-1 overflow-x-auto border-b px-2 py-1.5"
+      className={cn('border-hair flex gap-1 overflow-x-auto border-b px-2 py-1.5', className)}
     >
       <Pill label={pl.editor.pickerAllCategories} active={value === null} onClick={() => onChange(null)} />
       {categories.map((category) => (

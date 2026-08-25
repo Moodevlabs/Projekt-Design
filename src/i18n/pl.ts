@@ -457,6 +457,49 @@ export const pl = {
     priceFrom: (amount: string) => `od ${amount}`,
     pickerNoRooms: 'Wycena nie ma pomieszczeń — ta usługa policzy samą bazę.',
     pickerNoRoomsAction: 'Dodaj pomieszczenia',
+
+    // Panel „Dodaj usługi” — zakres wyceny jako tabela z biblioteki (T-71, inspiracja 1).
+    scopeOpen: 'Dodaj usługi',
+    scopeTitle: 'Dodaj usługi do wyceny',
+    scopeHint:
+      'Kliknij „Dodaj” przy usłudze — trafia od razu do wyceny. Panel zostaje otwarty, aż klikniesz „Gotowe”.',
+    scopeTarget: 'Dodaj do',
+    scopeTargetLabel: (section: string, group: string | null) =>
+      group ? `${section} › ${group}` : section,
+    scopeSearch: 'Szukaj usługi…',
+    scopeCount: (count: number) => {
+      if (count === 1) return '1 usługa';
+      const rest = count % 10;
+      const tens = count % 100;
+      if (rest >= 2 && rest <= 4 && (tens < 12 || tens > 14)) return `${count} usługi`;
+      return `${count} usług`;
+    },
+    scopeTabItems: 'Usługi',
+    scopeTabSets: 'Zestawy',
+    scopeColService: 'Usługa',
+    scopeColGroup: 'Grupa',
+    scopeColMode: 'Sposób wyceny',
+    scopeColPrice: 'Cena / stawka',
+    scopeAdd: 'Dodaj',
+    scopeAddLabel: (name: string) => `Dodaj do wyceny: ${name}`,
+    scopeNoGroup: 'Bez grupy',
+    scopeEmpty: 'Nic nie pasuje do filtrów.',
+    scopeLibraryEmpty: 'Biblioteka jest pusta — dodaj usługi w Bibliotece.',
+    scopeSetsEmpty: 'Nie masz jeszcze zestawów. Zapisz grupę wyceny jako zestaw ikoną zakładki.',
+    scopeSetItems: (count: number) => (count === 1 ? '1 pozycja' : `${count} poz.`),
+    scopeNoRoomsTitle: 'Wycena nie ma jeszcze pomieszczeń',
+    scopeNoRoomsBody:
+      'Usługi liczone według pomieszczeń biorą stawki z biblioteki dla każdego pomieszczenia wyceny. Bez pomieszczeń policzą samą bazę — często 0 zł.',
+    scopeNoRoomsAction: 'Dodaj pomieszczenie',
+    scopeRoomsOk: (count: number) =>
+      count === 1
+        ? 'Usługi według pomieszczeń policzą się dla 1 pomieszczenia wyceny.'
+        : `Usługi według pomieszczeń policzą się dla ${count} pomieszczeń wyceny.`,
+    addItemManual: 'Pozycja ręcznie',
+    // Nagłówek kolumn nad pozycjami w trybie edycji.
+    itemsColName: 'Usługa',
+    itemsColQty: 'Ilość',
+    itemsColPrice: 'Cena',
     // Pomieszczenia wyceny (cennik parametryczny).
     rooms: 'Pomieszczenia',
     roomsHint: 'Usługi liczone za pomieszczenie biorą stąd swoje składniki.',

@@ -5,6 +5,16 @@ Wersje zgodne z [SemVer](https://semver.org/lang/pl/).
 
 ## [Nieopublikowane]
 
+### Dodane
+
+**Panel „Dodaj usługi” w edytorze wyceny (T-71).** Zakres wyceny dobiera się
+z pełnowymiarowej tabeli (usługa · grupa · sposób wyceny · stawka) z wyborem
+sekcji lub grupy docelowej, szukajką, pigułkami grup i zakładką „Zestawy”.
+Panel zostaje otwarty, aż klikniesz „Gotowe”; jedno ostrzeżenie nad listą mówi,
+że usługi liczone za pomieszczenie potrzebują pomieszczeń, i pozwala je dodać.
+W trybie edycji pola mają widoczną kreskowaną ramkę, a nad pozycjami stoi
+nagłówek kolumn *Usługa · Ilość · Cena*.
+
 ### Zmienione
 
 **Nazwa produktu: Anzorge → Toolier.** Zmiana obejmuje nazwę aplikacji i okna,

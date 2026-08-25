@@ -21,6 +21,7 @@ import { DocumentsCard } from './components/DocumentsCard';
 import { DiscountsSection } from './components/DiscountsSection';
 import { AddLink } from './components/AddLink';
 import { LibrarySheet } from './components/LibrarySheet';
+import { ScopePanel } from './scope/ScopePanel';
 import { OverwriteTemplateDialog, SaveAsTemplateDialog } from './components/TemplateDialogs';
 import { useCreateQuote, useCreateQuoteVersion, useQuote } from '@/data/queries/useQuotes';
 import { useWorkspace } from '@/data/queries/useWorkspace';
@@ -560,6 +561,13 @@ function EditorSurface({
         </Dialog>
 
         <LibrarySheet open={libraryOpen} onOpenChange={setLibraryOpen} />
+
+        {/* Panel „Dodaj usługi" (T-71) — jeden na wycenę, cel wybierany w środku. */}
+        <ScopePanel
+          pricing={pricing}
+          onInsertItems={handleInsertItems}
+          onInsertGroup={insertGroup}
+        />
 
         <ExportPackageDialog
           open={packageOpen}

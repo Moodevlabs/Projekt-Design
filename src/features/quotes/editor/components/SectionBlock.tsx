@@ -2,14 +2,17 @@ import { memo, useState } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { LayoutGrid, Trash2 } from 'lucide-react';
+import { LayoutGrid, Plus, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { InlineText } from './InlineText';
 import { ItemRow } from './ItemRow';
 import { GroupBlock } from './GroupBlock';
 import { AddLink } from './AddLink';
 import { LibraryPicker } from './LibraryPicker';
 import { DragHandle } from './DragHandle';
+import { ItemsColumnsHeader } from './ItemsColumnsHeader';
 import { useStableIds } from '../dnd/useStableIds';
+import { useScopePanel } from '../scope/scope-panel.store';
 import type { DocumentTextInfo, PricingContext } from '@/domain/quote';
 import type { VariantOptions } from '../useVariantOptions';
 import type { ItemVariant } from '../editor.store';
@@ -89,6 +92,8 @@ export const SectionBlock = memo(function SectionBlock({
   onInsertItemToRoomBlocks,
 }: SectionBlockProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
+  // Akcja ze store'u ma stałą referencję — nie przebija `memo` na bloku.
+  const openScope = useScopePanel((state) => state.openFor);
   const totals = calcSectionTotals(section, pricing, { vatRate, pricesInclude, rooms });
   const isEmpty = section.items.length === 0 && section.groups.length === 0;
 
@@ -171,6 +176,8 @@ export const SectionBlock = memo(function SectionBlock({
         ) : null}
       </div>
 
+      {editing && section.items.length > 0 ? <ItemsColumnsHeader /> : null}
+
       <div
         ref={setLooseRef}
         className={cn(
@@ -200,8 +207,23 @@ export const SectionBlock = memo(function SectionBlock({
       </div>
 
       {editing ? (
-        <div className="mt-2.5 flex items-center gap-4">
-          <AddLink onClick={() => onAddItem(section.id, null)}>{pl.editor.addItem}</AddLink>
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+          {/*
+            Główne wejście do budowania zakresu: panel z tabelą (T-71).
+            Linki obok zostają dla szybkich, pojedynczych ruchów — dopisanie
+            jednej pozycji do gotowej oferty to najczęstsza czynność (T-70).
+          */}
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="h-8 rounded-[var(--radius-pill)] border-[var(--doc-ink)] bg-transparent px-3 text-[12.5px] font-semibold text-[var(--doc-ink)] hover:bg-[var(--doc-ink)] hover:text-white"
+            onClick={() => openScope({ sectionId: section.id, groupId: null })}
+          >
+            <Plus className="size-3.5" aria-hidden />
+            {pl.editor.scopeOpen}
+          </Button>
+          <AddLink onClick={() => onAddItem(section.id, null)}>{pl.editor.addItemManual}</AddLink>
           <LibraryPicker
             pricing={pricing}
             priorityCategory={section.title}

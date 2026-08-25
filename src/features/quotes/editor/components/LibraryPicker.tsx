@@ -17,15 +17,9 @@ import { useLibraryGroups, useLibraryItems } from '@/data/queries/useLibrary';
 import { useEditorStore } from '../editor.store';
 import type { LibraryItem } from '@/data/repos/library.repo';
 import { byCategory } from './group-library-items';
-import { toast } from 'sonner';
-import {
-  convertItemUnits,
-  newGroup,
-  type Group,
-  type Item,
-  type PricingContext,
-} from '@/domain/quote';
-import { libraryItemToQuoteItem, librarySnapshotToQuoteItem } from '@/domain/library/schema';
+import { newGroup, type Group, type Item, type PricingContext } from '@/domain/quote';
+import { librarySnapshotToQuoteItem } from '@/domain/library/schema';
+import { useInsertFromLibrary } from '../scope/useInsertFromLibrary';
 import { pl } from '@/i18n/pl';
 
 export interface LibraryPickerProps {
@@ -95,45 +89,15 @@ export function LibraryPicker({
 
   const dodanychRazem = Object.values(added).reduce((sum, count) => sum + count, 0);
 
-  /**
-   * Wstawienie pozycji z biblioteki.
-   *
-   * Gdy jednostka wpisu nie zgadza się z trybem wyceny, **przeliczamy** po
-   * stawce dokumentu i mówimy o tym wprost. Bez stawki nie ma kursu wymiany,
-   * więc odmawiamy — wstawienie liczby „jak leci" wpisałoby do oferty 45 groszy
-   * tam, gdzie ktoś policzył 45 minut pracy, i nikt by tego nie zauważył.
-   */
+  // Przeliczenie jednostek (albo odmowa) siedzi we wspólnym hooku — panel
+  // „Dodaj usługi" (T-71) ma zachowywać się identycznie.
+  const toQuoteItem = useInsertFromLibrary(pricing);
+
   const pickItem = (libraryItem: LibraryItem) => {
-    const wyceniona = libraryItemToQuoteItem(libraryItem);
-
-    if (libraryItem.pricingBasis === pricing.pricingBasis) {
-      wstaw(libraryItem.id, wyceniona);
-      return;
-    }
-
-    const przeliczona = convertItemUnits(
-      wyceniona,
-      libraryItem.pricingBasis,
-      pricing.pricingBasis,
-      pricing.hourlyRateCents,
-    );
-
-    if (!przeliczona) {
-      toast.error(pl.editor.libraryBasisMismatch);
-      return;
-    }
-
-    wstaw(libraryItem.id, przeliczona);
-    toast.info(
-      pricing.pricingBasis === 'time'
-        ? pl.editor.libraryConvertedToTime
-        : pl.editor.libraryConvertedToAmount,
-    );
-  };
-
-  const wstaw = (libraryItemId: string, item: Item) => {
+    const item = toQuoteItem(libraryItem);
+    if (!item) return;
     onPickItem(item);
-    setAdded((current) => ({ ...current, [libraryItemId]: (current[libraryItemId] ?? 0) + 1 }));
+    setAdded((current) => ({ ...current, [libraryItem.id]: (current[libraryItem.id] ?? 0) + 1 }));
   };
 
   /**

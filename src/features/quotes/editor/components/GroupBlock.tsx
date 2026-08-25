@@ -2,7 +2,7 @@ import { memo, useState } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Trash2 } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { InlineText } from './InlineText';
 import { ItemRow } from './ItemRow';
 import { ItemToggle } from './ItemToggle';
@@ -10,7 +10,9 @@ import { AddLink } from './AddLink';
 import { LibraryPicker } from './LibraryPicker';
 import { SaveToLibraryButton } from './SaveToLibraryButton';
 import { DragHandle } from './DragHandle';
+import { ItemsColumnsHeader } from './ItemsColumnsHeader';
 import { useStableIds } from '../dnd/useStableIds';
+import { useScopePanel } from '../scope/scope-panel.store';
 import type { DocumentTextInfo, PricingContext } from '@/domain/quote';
 import type { VariantOptions } from '../useVariantOptions';
 import type { ItemVariant } from '../editor.store';
@@ -80,6 +82,7 @@ export const GroupBlock = memo(function GroupBlock({
   onInsertItemToRoomBlocks,
 }: GroupBlockProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const openScope = useScopePanel((state) => state.openFor);
   // `rooms` są konieczne: bez nich pozycja `per_room` policzyłaby samą bazę
   // i nagłówek pokazałby inną kwotę niż podsumowanie wyceny.
   const totals = calcGroupTotals(group, pricing, { vatRate, pricesInclude, rooms });
@@ -208,6 +211,8 @@ export const GroupBlock = memo(function GroupBlock({
         ) : null}
       </div>
 
+      {editing && group.items.length > 0 ? <ItemsColumnsHeader /> : null}
+
       <div
         ref={setListRef}
         className={cn(
@@ -237,8 +242,11 @@ export const GroupBlock = memo(function GroupBlock({
       </div>
 
       {editing ? (
-        <div className="mt-2.5 flex items-center gap-4">
-          <AddLink onClick={() => onAddItem(sectionId, group.id)}>{pl.editor.addItem}</AddLink>
+        <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-2">
+          <AddLink icon={Plus} onClick={() => openScope({ sectionId, groupId: group.id })}>
+            {pl.editor.scopeOpen}
+          </AddLink>
+          <AddLink onClick={() => onAddItem(sectionId, group.id)}>{pl.editor.addItemManual}</AddLink>
           <LibraryPicker
             pricing={pricing}
             priorityCategory={group.name}
