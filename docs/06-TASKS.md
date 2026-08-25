@@ -4,7 +4,7 @@ Format: `- [ ] T-xx Nazwa` — czytaj: wymagane dokumenty → kryteria akceptacj
 
 **Numer to tożsamość zadania, nie kolejność.** Kolejność wykonania = pozycja na liście. Po wchłonięciu `FEATURES-Z-EXCELA.md` (2026-08-22) zadania T-30+ zostały wplecione **pomiędzy** T-11…T-17, bo część z nich musi wyprzedzić PDF i brand kit — inaczej pisalibyśmy je dwa razy. Stare numery zostawiono nietknięte, żeby notatki i commity dalej się zgadzały.
 
-**2026-08-24 — koncepcja Toolier.** Zadania **T-53…T-66** (`FEATURES-Z-KONCEPCJI.md`) stoją **przed T-17**: oś klient → projekt → pliki, wersje wycen, restrukturyzacja biblioteki, rebranding i nowa cena wchodzą do 1.0. **Cała oś T-53…T-66 zrobiona (2026-08-25), T-70 i T-71 (tworzenie wyceny — ergonomia z inspiracji) też. Otwarte zostaje T-17 (Polish & release 1.0 — instalator, macOS, certyfikaty).**
+**2026-08-24 — koncepcja Toolier.** Zadania **T-53…T-66** (`FEATURES-Z-KONCEPCJI.md`) stoją **przed T-17**: oś klient → projekt → pliki, wersje wycen, restrukturyzacja biblioteki, rebranding i nowa cena wchodzą do 1.0. **Cała oś T-53…T-66 zrobiona (2026-08-25), T-70, T-71 i T-72 (tworzenie wyceny i biblioteka — ergonomia z inspiracji) też. Otwarte zostaje T-17 (Polish & release 1.0 — instalator, macOS, certyfikaty).**
 
 Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełna specyfikacja, wzory z arkusza i model domenowy. Tutaj jest **kolejność, zależności i kolizje z istniejącym kodem**; nie duplikuję treści tamtego dokumentu.
 
@@ -680,6 +680,22 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - Wariant mobilny wiersza (`sm:hidden`) dubluje sposób wyceny pod nazwą — w jsdom oba są „widoczne", test liczy `getAllByText`.
   > - `QuoteEditorPage.smoke.test` dostał mock `useLibraryCategoryList` — panel wisi w stronie także zamknięty, więc hook i tak się wykonuje (jak `useTemplates` w T-70).
   > - **Nie sprawdzone na żywo** w tej sesji (brak podłączonej przeglądarki): układ kolumn tabeli i wygląd kreskowanych ramek — obejrzeć w `pnpm dev` przed merge'em.
+
+- [x] **T-72 Biblioteka: usługi jako zwijane wiersze** (inspiracja 1; zgłoszenie właściciela 2026-08-25: „katalog biblioteki zasypany objętościowo")
+  Zakładka Usługi pokazywała każdą usługę jako rozłożoną kartę edycji w siatce 3 kolumn — z biblioteką przykładową (38 wpisów) to trzynaście rzędów formularzy. Inspiracja 1 pokazuje listę: jeden wiersz na usługę, kolumny mówią, czym się różni, a edycja jest osobnym krokiem.
+  ✅ Lista 38 usług mieści się na jednym ekranie; klik w wiersz rozwija dotychczasowy formularz, drugi klik zwija; „Aktywna" przełącza się z listy.
+  **Zrobiono:**
+  > - **`LibraryItemRow`** — zwinięty wiersz: nazwa (+ badge „Przykładowa", „nieaktywna") i opis · pigułka grupy w kolorze ze słownika · ikona + sposób wyceny · stawka („12,00 zł / m²", „od 250,00 zł", „wycena indywidualna") · przełącznik **Aktywna** · chevron. Nagłówek kolumn nad listą (`ROW_GRID` wspólny dla nagłówka i wierszy). Na wąskim ekranie sposób wyceny i stawka schodzą pod nazwę.
+  > - **Rozwinięcie = dotychczasowa `LibraryItemCard`** z propsem `embedded` (bez własnej karty, bez powtórzonego badge'a). Formularz, kaskada, warianty, reguły cenowe — bez zmian; zmienia się tylko to, kiedy je widać.
+  > - **Rozwinięty jest co najwyżej jeden wiersz** (`expandedId`). Nowo dodana usługa rozwija się sama (`onSuccess` z `createItem`) — inaczej „Nowa pozycja" lądowała zwinięta gdzieś na liście.
+  > - Przełącznik „Aktywna" stoi **poza** przyciskiem rozwijania: zmiana stanu z listy nie otwiera formularza (05-UI §3a.3). Zapis idzie prosto przez `updateItem` z `{ active }` — kaskady nie ma, bo `active` nie jest polem kaskadowanym.
+  > - Wiersz używa `libraryRowSummary` z edytora i `PRICING_CHOICE_ICONS` — ta sama etykieta i ikona w bibliotece, w panelu „Dodaj usługi" i w popoverze.
+  **Na co uważać:**
+  > - **Testy karty muszą najpierw rozwinąć wiersz** (`expand(user)` w `LibraryItemsTab.test`). Formularza nie ma w DOM, dopóki nikt nie kliknie.
+  > - `createItem.mutate` dostaje teraz **drugi argument** (`onSuccess`) — asercje `toHaveBeenCalledWith(vars)` przestały pasować, sprawdzają `mock.calls[0][0]`.
+  > - Szkic niezapisanej edycji **przepada przy zwinięciu** (karta odmontowuje się). Przycisk „Zapisz" jest widoczny dopóki jest co zapisać; jeśli to będzie bolało, następny krok to pytanie „Porzucić zmiany?" przy zwijaniu.
+  > - Przełącznik lista–siatka z 05-UI §3 **nie powstał** — siatka kart była problemem, nie alternatywą; wróci, jeśli ktoś o nią poprosi.
+  > - **Nie sprawdzone na żywo** (brak przeglądarki w sesji): szerokości kolumn na 1280 px i wygląd osadzonej karty.
 
 ## Faza 1.5 — reszta pakietu z Excela (zaraz po 1.0)
 

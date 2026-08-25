@@ -128,6 +128,11 @@ function fieldLabel(base: string, name = 'Blat kuchenny') {
   return `${base}: ${name}`;
 }
 
+/** Wiersze są zwinięte (T-72) — formularz karty widać dopiero po kliknięciu. */
+async function expand(user: ReturnType<typeof userEvent.setup>, name = 'Blat kuchenny') {
+  await user.click(screen.getByRole('button', { name: pl.library.rowExpand(name) }));
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
   linkedCount.mockReturnValue(0);
@@ -192,7 +197,7 @@ describe('LibraryItemsTab — filtry', () => {
 
     // „Nowa pozycja" nie pasuje do frazy „blat" — bez czyszczenia przycisk
     // wygladalby na zepsuty: pozycja powstaje, ale nie ma jej na ekranie.
-    expect(createMutate).toHaveBeenCalledWith({
+    expect(createMutate.mock.calls[0]?.[0]).toEqual({
       name: pl.library.newItemName,
       categoryId: null,
     });
@@ -207,7 +212,7 @@ describe('LibraryItemsTab — filtry', () => {
     await user.click(screen.getByRole('button', { name: 'Instalacje' }));
     await user.click(screen.getByRole('button', { name: pl.library.addItem }));
 
-    expect(createMutate).toHaveBeenCalledWith({
+    expect(createMutate.mock.calls[0]?.[0]).toEqual({
       name: pl.library.newItemName,
       categoryId: 'cat-2',
       // Kolumna tekstowa zostaje jako kopia do czasu T-69.
@@ -226,10 +231,57 @@ describe('LibraryItemsTab — filtry', () => {
   });
 });
 
+describe('LibraryItemsTab — zwijane wiersze (T-72)', () => {
+  it('wiersz jest zwiniety i mowi, czym sie rozni pozycja: sposob wyceny i stawka', () => {
+    mockItems([baseItem({ unit: 'm2', unitPriceCents: 1_200 })]);
+    render(<LibraryItemsTab />);
+
+    // Formularza nie ma, dopoki nikt nie kliknie — 38 rozlozonych kart to sciana.
+    expect(screen.queryByLabelText(fieldLabel(pl.library.itemNameLabel))).not.toBeInTheDocument();
+    expect(screen.getAllByText(pl.library.pricingChoices.flat_m2).length).toBeGreaterThan(0);
+    expect(screen.getAllByText('12,00 zł / m²').length).toBeGreaterThan(0);
+  });
+
+  it('klik rozwija formularz, drugi klik zwija', async () => {
+    const user = userEvent.setup();
+    render(<LibraryItemsTab />);
+
+    await expand(user);
+    expect(screen.getByLabelText(fieldLabel(pl.library.itemNameLabel))).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: pl.library.rowCollapse('Blat kuchenny') }));
+    expect(screen.queryByLabelText(fieldLabel(pl.library.itemNameLabel))).not.toBeInTheDocument();
+  });
+
+  it('rozwiniety jest co najwyzej jeden wiersz', async () => {
+    const user = userEvent.setup();
+    mockItems([baseItem(), baseItem({ id: 'item-2', name: 'Fronty' })]);
+    render(<LibraryItemsTab />);
+
+    await expand(user);
+    await expand(user, 'Fronty');
+
+    expect(screen.queryByLabelText(fieldLabel(pl.library.itemNameLabel))).not.toBeInTheDocument();
+    expect(screen.getByLabelText(fieldLabel(pl.library.itemNameLabel, 'Fronty'))).toBeInTheDocument();
+  });
+
+  it('przelacznik „Aktywna" zmienia stan z listy, bez rozwijania', async () => {
+    const user = userEvent.setup();
+    render(<LibraryItemsTab />);
+
+    await user.click(screen.getByRole('switch', { name: pl.library.rowToggleActive('Blat kuchenny') }));
+
+    expect(updateMutate).toHaveBeenCalledTimes(1);
+    expect(updateMutate.mock.calls[0]?.[0]).toEqual({ id: 'item-1', patch: { active: false } });
+    expect(screen.queryByLabelText(fieldLabel(pl.library.itemNameLabel))).not.toBeInTheDocument();
+  });
+});
+
 describe('LibraryItemsTab — edycja pozycji', () => {
   it('zapisuje cene przepuszczona przez parseMoney (grosze, nie zlotowki)', async () => {
     const user = userEvent.setup();
     render(<LibraryItemsTab />);
+    await expand(user);
 
     const price = screen.getByLabelText(fieldLabel(pl.library.itemPriceLabel));
     await user.clear(price);
@@ -241,9 +293,11 @@ describe('LibraryItemsTab — edycja pozycji', () => {
     expect(vars?.patch.unitPriceCents).toBe(120_050);
   });
 
-  it('rozpoznaje rabat: pokazuje znak minus przy kwocie', () => {
+  it('rozpoznaje rabat: pokazuje znak minus przy kwocie', async () => {
+    const user = userEvent.setup();
     mockItems([baseItem({ kind: 'discount', name: 'Rabat stałego klienta' })]);
     render(<LibraryItemsTab />);
+    await expand(user, 'Rabat stałego klienta');
 
     expect(
       screen.getByRole('button', { name: pl.library.kindDiscount, pressed: true }),
@@ -254,6 +308,7 @@ describe('LibraryItemsTab — edycja pozycji', () => {
   it('usuwa dopiero po potwierdzeniu w dialogu', async () => {
     const user = userEvent.setup();
     render(<LibraryItemsTab />);
+    await expand(user);
 
     await user.click(screen.getByRole('button', { name: label(pl.library.deleteItem) }));
     expect(deleteMutate).not.toHaveBeenCalled();
@@ -267,6 +322,7 @@ describe('LibraryItemsTab — reguly cenowe', () => {
   it('przelaczenie na „za pomieszczenie” zapisuje regule z macierza stawek', async () => {
     const user = userEvent.setup();
     render(<LibraryItemsTab />);
+    await expand(user);
 
     await user.click(
       screen.getByRole('button', {
@@ -303,6 +359,7 @@ describe('LibraryItemsTab — reguly cenowe', () => {
       }),
     ]);
     render(<LibraryItemsTab />);
+    await expand(user);
 
     await user.click(screen.getByRole('button', { name: pl.library.pricingFlat }));
     await user.click(screen.getByRole('button', { name: pl.library.saveItem('Blat kuchenny') }));
@@ -314,6 +371,7 @@ describe('LibraryItemsTab — reguly cenowe', () => {
 
 describe('LibraryItemsTab — kaskada do otwartej wyceny', () => {
   async function editNameAndSave(user: ReturnType<typeof userEvent.setup>) {
+    await expand(user);
     const name = screen.getByLabelText(fieldLabel(pl.library.itemNameLabel));
     await user.clear(name);
     await user.type(name, 'Blat dębowy');
@@ -371,6 +429,7 @@ describe('LibraryItemsTab — kaskada do otwartej wyceny', () => {
     const user = userEvent.setup();
     linkedCount.mockReturnValue(5);
     render(<LibraryItemsTab />);
+    await expand(user);
 
     const category = screen.getByLabelText(fieldLabel(pl.library.itemCategoryLabel));
     await user.clear(category);
