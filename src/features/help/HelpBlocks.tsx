@@ -21,7 +21,7 @@ export function HelpBlockView({ block }: { block: HelpBlock }) {
         <ol className="flex flex-col gap-2.5">
           {block.items.map((item, index) => (
             <li key={index} className="flex gap-3">
-              <span className="bg-ink text-accent-fg tabular flex size-6 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold">
+              <span className="bg-primary text-primary-foreground tabular flex size-6 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold">
                 {index + 1}
               </span>
               <span className="text-ink pt-0.5 text-[14.5px] leading-[1.6]">{item}</span>
