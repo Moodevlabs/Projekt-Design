@@ -3,18 +3,22 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { defaultWorkspaceSettings } from '@/domain/brand/schema';
+import { newItem, newQuoteBody, newSection } from '@/domain/quote';
+import { newScheduleBody } from '@/domain/schedule';
 import { pl } from '@/i18n/pl';
 
 const useClients = vi.hoisted(() => vi.fn(() => ({ data: [] as unknown[] })));
 const useProjects = vi.hoisted(() =>
   vi.fn((_filters?: Record<string, unknown>) => ({ data: [] as unknown[] })),
 );
+const useTemplates = vi.hoisted(() => vi.fn(() => ({ data: [] as unknown[] })));
 const createMutateAsync = vi.hoisted(() =>
   vi.fn((_vars: Record<string, unknown>) => Promise.resolve({ id: 'nowa-1' })),
 );
 
 vi.mock('@/data/queries/useClients', () => ({ useClients }));
 vi.mock('@/data/queries/useProjects', () => ({ useProjects }));
+vi.mock('@/data/queries/useTemplates', () => ({ useTemplates }));
 vi.mock('@/data/queries/useQuotes', () => ({
   useCreateQuote: () => ({ mutateAsync: createMutateAsync, isPending: false }),
 }));
@@ -58,6 +62,7 @@ describe('NewQuoteDialog', () => {
     vi.clearAllMocks();
     useClients.mockReturnValue({ data: [KOWALSCY] });
     useProjects.mockReturnValue({ data: [] });
+    useTemplates.mockReturnValue({ data: [] });
   });
 
   it('domyslnie NIE wybiera klienta — „bez klienta" zostaje mozliwe', async () => {
@@ -113,5 +118,106 @@ describe('NewQuoteDialog', () => {
 
     const calls = useProjects.mock.calls;
     expect(calls[calls.length - 1]?.[0]).toEqual({ clientId: 'c1' });
+  });
+});
+
+describe('NewQuoteDialog — start z szablonu (T-70)', () => {
+  const SZABLON = {
+    id: 't1',
+    workspaceId: 'ws',
+    name: 'Projekt kompleksowy',
+    body: newQuoteBody({
+      title: 'Projekt kompleksowy',
+      sections: [newSection({ title: 'Etap wizualny', items: [newItem({ name: 'Koncepcja' })] })],
+    }),
+    bodyError: null,
+    schedule: newScheduleBody({ startDate: '2026-03-01' }),
+    documents: { stages: null, priceList: null },
+    itemCount: 1,
+    totalNetCents: 0,
+    createdAt: '2026-08-01T10:00:00Z',
+    updatedAt: '2026-08-01T10:00:00Z',
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    useClients.mockReturnValue({ data: [KOWALSCY] });
+    useProjects.mockReturnValue({ data: [] });
+    useTemplates.mockReturnValue({ data: [SZABLON] });
+  });
+
+  async function wybierzSzablon(user: ReturnType<typeof userEvent.setup>) {
+    await user.click(screen.getByRole('combobox', { name: pl.quotes.startFrom }));
+    await user.click(screen.getByRole('option', { name: 'Projekt kompleksowy' }));
+  }
+
+  it('bez szablonow pole w ogole sie nie pokazuje', () => {
+    // Pusty select udawalby, ze cos da sie wybrac.
+    useTemplates.mockReturnValue({ data: [] });
+    renderDialog();
+
+    expect(screen.queryByRole('combobox', { name: pl.quotes.startFrom })).not.toBeInTheDocument();
+  });
+
+  it('domyslnie zaklada PUSTA wycene', async () => {
+    const user = userEvent.setup();
+    renderDialog();
+
+    await user.click(screen.getByRole('button', { name: pl.quotes.new }));
+
+    await waitFor(() => expect(createMutateAsync).toHaveBeenCalledTimes(1));
+    const vars = createMutateAsync.mock.calls[0]?.[0] as { body: { sections: unknown[] } };
+    expect(vars.body.sections).toHaveLength(0);
+  });
+
+  it('wybrany szablon wnosi uklad i pozycje', async () => {
+    const user = userEvent.setup();
+    renderDialog();
+
+    await wybierzSzablon(user);
+    await user.click(screen.getByRole('button', { name: pl.quotes.new }));
+
+    await waitFor(() => expect(createMutateAsync).toHaveBeenCalledTimes(1));
+    const vars = createMutateAsync.mock.calls[0]?.[0] as {
+      body: { sections: { title: string; items: { name: string }[] }[] };
+    };
+    expect(vars.body.sections[0]?.title).toBe('Etap wizualny');
+    expect(vars.body.sections[0]?.items[0]?.name).toBe('Koncepcja');
+  });
+
+  it('szablon niesie termin i dokumenty, ale BEZ daty startu', async () => {
+    /*
+     * Pakiet z T-63 ma dojechac do nowej wyceny w calosci. Data startu nalezy
+     * do konkretnego projektu — szablon zapisany w marcu z marcowa data bylby
+     * pulapka, ktorej nikt nie zauwazy przed wyslaniem oferty.
+     */
+    const user = userEvent.setup();
+    renderDialog();
+
+    await wybierzSzablon(user);
+    await user.click(screen.getByRole('button', { name: pl.quotes.new }));
+
+    await waitFor(() => expect(createMutateAsync).toHaveBeenCalledTimes(1));
+    const vars = createMutateAsync.mock.calls[0]?.[0] as {
+      schedule: { startDate: string | null; stages: unknown[] } | null;
+      documents: unknown;
+    };
+    expect(vars.schedule?.stages.length).toBeGreaterThan(0);
+    expect(vars.schedule?.startDate).toBeNull();
+    expect(vars.documents).not.toBeNull();
+  });
+
+  it('dane klienta wygrywaja z tym, co bylo w szablonie', async () => {
+    const user = userEvent.setup();
+    renderDialog();
+
+    await wybierzSzablon(user);
+    await user.click(screen.getByRole('combobox', { name: pl.quotes.client }));
+    await user.click(screen.getByRole('option', { name: 'Kowalscy' }));
+    await user.click(screen.getByRole('button', { name: pl.quotes.new }));
+
+    await waitFor(() => expect(createMutateAsync).toHaveBeenCalledTimes(1));
+    const vars = createMutateAsync.mock.calls[0]?.[0] as { body: { client: { name: string } } };
+    expect(vars.body.client.name).toBe('Kowalscy');
   });
 });

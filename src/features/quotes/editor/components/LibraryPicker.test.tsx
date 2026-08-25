@@ -12,6 +12,7 @@ vi.mock('@/data/queries/useLibrary', () => ({ useLibraryItems, useLibraryGroups 
 
 const { LibraryPicker } = await import('./LibraryPicker');
 const { byCategory } = await import('./group-library-items');
+const { useEditorStore } = await import('../editor.store');
 
 function item(partial: Partial<LibraryItem> & { id: string; name: string }): LibraryItem {
   return {
@@ -151,5 +152,147 @@ describe('LibraryPicker', () => {
 
     await user.click(screen.getByRole('button', { name: pl.editor.fromLibrary }));
     expect(screen.queryByRole('button', { name: pl.editor.pickerGroupsTab })).not.toBeInTheDocument();
+  });
+});
+
+describe('LibraryPicker — dobieranie bez zamykania (T-70)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    useLibraryItems.mockReturnValue({
+      data: [
+        item({ id: 'l1', name: 'Blat kuchenny', category: 'Kuchnia' }),
+        item({ id: 'l2', name: 'Fronty', category: 'Kuchnia' }),
+        item({ id: 'l3', name: 'Nadzór autorski', category: 'Nadzór' }),
+      ],
+    });
+    useLibraryGroups.mockReturnValue({ data: [] });
+    useEditorStore.getState().reset();
+  });
+
+  async function otworz(onPickItem = vi.fn()) {
+    const user = userEvent.setup();
+    render(<LibraryPicker onPickItem={onPickItem} pricing={AMOUNT_BASIS} />);
+    await user.click(screen.getByRole('button', { name: pl.editor.fromLibrary }));
+    return { user, onPickItem };
+  }
+
+  it('po dodaniu pozycji picker ZOSTAJE otwarty', async () => {
+    /*
+     * Sedno T-70: wycena "Projekt kompleksowy" to kilkanascie uslug.
+     * Zamykanie po kazdej zamienialo to w kilkanascie cykli
+     * otworz-szukaj-kliknij.
+     */
+    const { user } = await otworz();
+
+    await user.click(await screen.findByText('Blat kuchenny'));
+
+    expect(screen.getByRole('button', { name: pl.editor.fromLibrary })).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    );
+    expect(screen.getByText('Fronty')).toBeInTheDocument();
+  });
+
+  it('dodaje kilka pozycji jednym otwarciem', async () => {
+    const { user, onPickItem } = await otworz();
+
+    await user.click(await screen.findByText('Blat kuchenny'));
+    await user.click(screen.getByText('Fronty'));
+    await user.click(screen.getByText('Nadzór autorski'));
+
+    expect(onPickItem).toHaveBeenCalledTimes(3);
+  });
+
+  it('ta sama usluga dodana dwa razy liczy sie dwa razy', async () => {
+    // Dwie wizualizacje to dwie pozycje — blokowanie powtorki bylaby
+    // zgadywaniem, czego uzytkownik chcial.
+    const { user, onPickItem } = await otworz();
+
+    await user.click(await screen.findByText('Blat kuchenny'));
+    await user.click(screen.getByText('Blat kuchenny'));
+
+    expect(onPickItem).toHaveBeenCalledTimes(2);
+    expect(screen.getByText(pl.editor.pickerAdded(2))).toBeInTheDocument();
+  });
+
+  it('stopka z licznikiem pojawia sie dopiero po pierwszym dodaniu', async () => {
+    const { user } = await otworz();
+
+    expect(screen.queryByRole('button', { name: pl.editor.pickerDone })).not.toBeInTheDocument();
+
+    await user.click(await screen.findByText('Blat kuchenny'));
+    expect(screen.getByText(pl.editor.pickerAddedSummary(1))).toBeInTheDocument();
+
+    // „Gotowe" zamyka — bez tego jedynym wyjsciem byloby kliniecie obok.
+    await user.click(screen.getByRole('button', { name: pl.editor.pickerDone }));
+    expect(screen.getByRole('button', { name: pl.editor.fromLibrary })).toHaveAttribute(
+      'aria-expanded',
+      'false',
+    );
+  });
+
+  it('licznik zeruje sie przy ponownym otwarciu', async () => {
+    // Licznik dotyczy JEDNEJ sesji dobierania — zostawiony mowilby
+    // o dodaniach, ktorych nikt juz nie pamieta.
+    const { user } = await otworz();
+
+    await user.click(await screen.findByText('Blat kuchenny'));
+    await user.click(screen.getByRole('button', { name: pl.editor.pickerDone }));
+    await user.click(screen.getByRole('button', { name: pl.editor.fromLibrary }));
+
+    expect(screen.queryByText(pl.editor.pickerAdded(1))).not.toBeInTheDocument();
+  });
+
+  it('pokazuje sposob wyceny obok nazwy', async () => {
+    useLibraryItems.mockReturnValue({
+      data: [item({ id: 'l1', name: 'Wizualizacja', category: 'Wizualizacje', unit: 'm2' })],
+    });
+    await otworz();
+
+    expect(await screen.findByText(pl.library.pricingChoices.flat_m2)).toBeInTheDocument();
+  });
+
+  it('ostrzega, gdy usluga za pomieszczenie trafia do wyceny BEZ pomieszczen', async () => {
+    /*
+     * Bez pomieszczen taka usluga liczy sama baze — czesto zero. Pozycja za
+     * 0 zl w ofercie to blad, ktory widac dopiero po wyslaniu.
+     */
+    useLibraryItems.mockReturnValue({
+      data: [
+        item({
+          id: 'l1',
+          name: 'Koncepcja funkcjonalna',
+          pricing: {
+            mode: 'per_room',
+            baseCents: 0,
+            perRoomCents: { kuchnia: 50_000 },
+            defaultPerRoomCents: 0,
+            roomScope: 'all',
+          },
+        }),
+      ],
+    });
+    await otworz();
+
+    expect(await screen.findByText(pl.editor.pickerNoRooms)).toBeInTheDocument();
+  });
+
+  it('usluga o stalej cenie NIE dostaje ostrzezenia o pomieszczeniach', async () => {
+    // Ostrzezenie przy kazdej pozycji zamienia sie w tlo, ktorego nikt nie czyta.
+    await otworz();
+
+    expect(screen.queryByText(pl.editor.pickerNoRooms)).not.toBeInTheDocument();
+  });
+
+  it('filtr kategorii zawęża listę', async () => {
+    const { user } = await otworz();
+
+    await user.click(await screen.findByRole('button', { name: 'Nadzór' }));
+
+    expect(screen.getByText('Nadzór autorski')).toBeInTheDocument();
+    expect(screen.queryByText('Blat kuchenny')).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: pl.editor.pickerAllCategories }));
+    expect(screen.getByText('Blat kuchenny')).toBeInTheDocument();
   });
 });

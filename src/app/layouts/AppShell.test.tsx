@@ -31,6 +31,12 @@ vi.mock('@/data/queries/useQuotes', () => ({
   useCreateQuote: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }));
 
+// „Nowa wycena" pyta o szablon startowy (T-70), a dialog wisi w powłoce
+// także zamknięty — hook i tak się wykonuje.
+vi.mock('@/data/queries/useTemplates', () => ({
+  useTemplates: () => ({ data: [] }),
+}));
+
 vi.mock('@/data/queries/useLibrary', () => ({
   useLibraryItems: () => ({ data: [] }),
 }));

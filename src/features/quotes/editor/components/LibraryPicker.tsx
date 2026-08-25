@@ -9,8 +9,12 @@ import {
   CommandList,
 } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
 import { AddLink } from './AddLink';
+import { CategoryPills } from './CategoryPills';
+import { PickerRow } from './PickerRow';
 import { useLibraryGroups, useLibraryItems } from '@/data/queries/useLibrary';
+import { useEditorStore } from '../editor.store';
 import type { LibraryItem } from '@/data/repos/library.repo';
 import { byCategory } from './group-library-items';
 import { toast } from 'sonner';
@@ -22,7 +26,6 @@ import {
   type PricingContext,
 } from '@/domain/quote';
 import { libraryItemToQuoteItem, librarySnapshotToQuoteItem } from '@/domain/library/schema';
-import { formatMoney } from '@/domain/money';
 import { pl } from '@/i18n/pl';
 
 export interface LibraryPickerProps {
@@ -47,6 +50,12 @@ export interface LibraryPickerProps {
 /**
  * Wybór z biblioteki. `Command` daje szukajkę, nawigację strzałkami i Enter
  * bez dopisywania własnej obsługi klawiatury.
+ *
+ * **Popover NIE zamyka się po dodaniu pozycji (T-70).** Wycena „Projekt
+ * kompleksowy" to kilkanaście usług; zamykanie po każdej zamieniało budowanie
+ * oferty w kilkanaście cykli otwórz–szukaj–kliknij. Dodane pozycje zostają na
+ * liście z licznikiem, bo tę samą usługę czasem dodaje się dwa razy — i to
+ * jest poprawna wycena, a nie pomyłka do zablokowania.
  */
 export function LibraryPicker({
   priorityCategory,
@@ -57,16 +66,34 @@ export function LibraryPicker({
 }: LibraryPickerProps) {
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<'items' | 'groups'>('items');
+  const [category, setCategory] = useState<string | null>(null);
+  /** Ile razy dodano daną pozycję w tej sesji pickera. */
+  const [added, setAdded] = useState<Record<string, number>>({});
 
   // Biblioteka jest mała i współdzieli cache TanStack Query z resztą aplikacji,
   // więc kilkanaście pickerów na stronie pobiera ją raz.
   const items = useLibraryItems();
   const groups = useLibraryGroups();
 
+  /*
+   * Pomieszczenia bierzemy ze store'u, a nie z propsów, i to jest decyzja
+   * wydajnościowa: `SectionBlock` jest zmemoizowany, a przekazanie tu nowego
+   * callbacka przy każdym renderze rodzica przerysowywałoby wszystkie wiersze
+   * przy każdej literze (pułapka z T-39). Subskrypcja siedzi w pickerze, więc
+   * zmiana pomieszczeń rusza wyłącznie jego.
+   */
+  const roomCount = useEditorStore((state) => state.body?.rooms.length ?? 0);
+  const addRoom = useEditorStore((state) => state.addRoom);
+
   const grouped = useMemo(
     () => byCategory(items.data ?? [], priorityCategory),
     [items.data, priorityCategory],
   );
+
+  const categories = useMemo(() => grouped.map(([name]) => name), [grouped]);
+  const visible = category === null ? grouped : grouped.filter(([name]) => name === category);
+
+  const dodanychRazem = Object.values(added).reduce((sum, count) => sum + count, 0);
 
   /**
    * Wstawienie pozycji z biblioteki.
@@ -80,8 +107,7 @@ export function LibraryPicker({
     const wyceniona = libraryItemToQuoteItem(libraryItem);
 
     if (libraryItem.pricingBasis === pricing.pricingBasis) {
-      onPickItem(wyceniona);
-      setOpen(false);
+      wstaw(libraryItem.id, wyceniona);
       return;
     }
 
@@ -97,13 +123,31 @@ export function LibraryPicker({
       return;
     }
 
-    onPickItem(przeliczona);
+    wstaw(libraryItem.id, przeliczona);
     toast.info(
       pricing.pricingBasis === 'time'
         ? pl.editor.libraryConvertedToTime
         : pl.editor.libraryConvertedToAmount,
     );
+  };
+
+  const wstaw = (libraryItemId: string, item: Item) => {
+    onPickItem(item);
+    setAdded((current) => ({ ...current, [libraryItemId]: (current[libraryItemId] ?? 0) + 1 }));
+  };
+
+  /**
+   * Zamknięcie pickera — **jedyna droga wyjścia**, także dla „Gotowe".
+   *
+   * Licznik i filtr dotyczą jednej sesji dobierania; zostawione mówiłyby przy
+   * następnym otwarciu o dodaniach, których nikt już nie pamięta. Reset
+   * w samym `onOpenChange` nie wystarczał: `setOpen(false)` wołany z przycisku
+   * omija handler Radiksa i zostawiał stan poprzedniej sesji.
+   */
+  const close = () => {
     setOpen(false);
+    setAdded({});
+    setCategory(null);
   };
 
   const pickGroup = (groupId: string) => {
@@ -116,11 +160,12 @@ export function LibraryPicker({
         items: source.items.map((snapshot) => librarySnapshotToQuoteItem(snapshot)),
       }),
     );
-    setOpen(false);
+    // Zestaw to komplet pozycji — po nim nie ma czego dobierać.
+    close();
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={(next) => (next ? setOpen(true) : close())}>
       {/*
         Bez własnego `onClick` — otwieraniem steruje wyłącznie `PopoverTrigger`.
         Własny handler ustawiający `true` wygrywałby z toggle'em Radiksa
@@ -131,7 +176,7 @@ export function LibraryPicker({
         <AddLink icon={Library}>{label ?? pl.editor.fromLibrary}</AddLink>
       </PopoverTrigger>
 
-      <PopoverContent align="start" className="w-[300px] p-0">
+      <PopoverContent align="start" className="w-[340px] p-0">
         {onPickGroup ? (
           <div className="border-hair flex border-b p-1">
             {(['items', 'groups'] as const).map((value) => (
@@ -154,26 +199,26 @@ export function LibraryPicker({
 
         <Command>
           <CommandInput placeholder={pl.editor.pickerSearch} />
+
+          {tab === 'items' && categories.length > 1 ? (
+            <CategoryPills categories={categories} value={category} onChange={setCategory} />
+          ) : null}
+
           <CommandList className="max-h-[280px]">
             <CommandEmpty>{pl.editor.pickerEmpty}</CommandEmpty>
 
             {tab === 'items'
-              ? grouped.map(([category, categoryItems]) => (
-                  <CommandGroup key={category} heading={category}>
+              ? visible.map(([categoryName, categoryItems]) => (
+                  <CommandGroup key={categoryName} heading={categoryName}>
                     {categoryItems.map((item) => (
-                      <CommandItem
+                      <PickerRow
                         key={item.id}
-                        value={`${item.name} ${item.description} ${category}`}
-                        onSelect={() => pickItem(item)}
-                        className="flex items-center gap-3"
-                      >
-                        <span className="min-w-0 flex-1 truncate">{item.name}</span>
-                        <span className="tabular text-ink-soft shrink-0 text-xs">
-                          {item.unitPriceCents === null
-                            ? pl.editor.individualPrice
-                            : formatMoney(item.unitPriceCents)}
-                        </span>
-                      </CommandItem>
+                        item={item}
+                        addedCount={added[item.id] ?? 0}
+                        roomCount={roomCount}
+                        onAddRooms={() => addRoom()}
+                        onPick={() => pickItem(item)}
+                      />
                     ))}
                   </CommandGroup>
                 ))
@@ -192,6 +237,21 @@ export function LibraryPicker({
                 ))}
           </CommandList>
         </Command>
+
+        {/*
+          Stopka pojawia się dopiero po pierwszym dodaniu. Pusta mówiłaby
+          „Dodano 0 pozycji" — informacja o tym, że nic się nie stało.
+        */}
+        {dodanychRazem > 0 ? (
+          <div className="border-hair flex items-center justify-between gap-2 border-t px-3 py-2">
+            <span className="text-ink-soft text-xs">
+              {pl.editor.pickerAddedSummary(dodanychRazem)}
+            </span>
+            <Button type="button" size="sm" onClick={close}>
+              {pl.editor.pickerDone}
+            </Button>
+          </div>
+        ) : null}
       </PopoverContent>
     </Popover>
   );

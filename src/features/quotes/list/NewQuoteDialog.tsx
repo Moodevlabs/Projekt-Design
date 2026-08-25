@@ -21,9 +21,11 @@ import { Label } from '@/components/ui/label';
 import { useClients } from '@/data/queries/useClients';
 import { useProjects } from '@/data/queries/useProjects';
 import { useCreateQuote } from '@/data/queries/useQuotes';
+import { useTemplates } from '@/data/queries/useTemplates';
 import { useWorkspace } from '@/data/queries/useWorkspace';
 import { clientSnapshot } from '@/domain/client/schema';
-import { quoteBodyFromSettings } from '@/domain/quote';
+import { fromTemplate, quoteBodyFromSettings } from '@/domain/quote';
+import { scheduleFromTemplate } from '@/domain/schedule';
 import { routes } from '@/app/routes';
 import { pl } from '@/i18n/pl';
 
@@ -51,16 +53,19 @@ export function NewQuoteDialog({
   const navigate = useNavigate();
   const [clientId, setClientId] = useState<string>(NONE);
   const [projectId, setProjectId] = useState<string>(NONE);
+  const [templateId, setTemplateId] = useState<string>(NONE);
 
   const clients = useClients(open ? { status: 'active', sort: 'name_asc' } : {});
   const projects = useProjects(open && clientId !== NONE ? { clientId: clientId } : {});
   const workspace = useWorkspace();
+  const templates = useTemplates();
   const create = useCreateQuote();
 
   useEffect(() => {
     if (!open) {
       setClientId(NONE);
       setProjectId(NONE);
+      setTemplateId(NONE);
     }
   }, [open]);
 
@@ -73,10 +78,21 @@ export function NewQuoteDialog({
 
   const settings = workspace.data?.settings;
 
+  const template = templates.data?.find((row) => row.id === templateId) ?? null;
+
   const submit = () => {
     if (!settings) return;
 
-    const body = quoteBodyFromSettings(settings);
+    /*
+     * Szablon niesie caly pakiet (T-63): uklad wyceny, termin i dokumenty.
+     * `fromTemplate` nadaje nowe identyfikatory i czysci dane inwestora —
+     * inaczej nowa oferta startowalaby z nazwiskiem z poprzedniej.
+     */
+    const body =
+      template?.body === null || template === null
+        ? quoteBodyFromSettings(settings)
+        : fromTemplate(template.body);
+
     const client = clients.data?.find((row) => row.id === clientId);
     if (client) body.client = clientSnapshot(client);
 
@@ -88,6 +104,8 @@ export function NewQuoteDialog({
         body,
         clientId: clientId === NONE ? null : clientId,
         projectId: projectId === NONE ? null : projectId,
+        schedule: scheduleFromTemplate(template?.schedule ?? null),
+        documents: template?.documents ? structuredClone(template.documents) : null,
       })
       .then((quote) => {
         onOpenChange(false);
@@ -142,6 +160,33 @@ export function NewQuoteDialog({
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+          ) : null}
+
+          {/*
+            Szablon wybierany TUTAJ, a nie po otwarciu pustego edytora
+            (koncepcja §5 pkt 7, T-70). Pole pokazujemy tylko, gdy jest z czego
+            wybierać — pusty select udawałby, że coś się da zrobić.
+          */}
+          {(templates.data ?? []).length > 0 ? (
+            <div className="space-y-2">
+              <Label htmlFor="new-quote-template">{pl.quotes.startFrom}</Label>
+              <Select value={templateId} onValueChange={setTemplateId}>
+                <SelectTrigger id="new-quote-template" aria-label={pl.quotes.startFrom}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NONE}>{pl.quotes.startFromEmpty}</SelectItem>
+                  {(templates.data ?? []).map((row) => (
+                    <SelectItem key={row.id} value={row.id} disabled={row.body === null}>
+                      {row.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {template?.schedule || template?.documents ? (
+                <p className="text-ink-soft text-xs">{pl.quotes.startFromPackage}</p>
+              ) : null}
             </div>
           ) : null}
         </div>

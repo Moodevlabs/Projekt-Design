@@ -61,6 +61,10 @@ export const pl = {
     title: 'Wyceny',
     new: 'Nowa wycena',
     newDialogHint: 'Wybierz klienta i projekt — dane inwestora wypełnią się same.',
+    // Start z szablonu przy zakładaniu wyceny (T-70).
+    startFrom: 'Zacznij od',
+    startFromEmpty: 'Pustej wyceny',
+    startFromPackage: 'Szablon niesie też termin i dokumenty — trafią do nowej wyceny.',
     withoutClient: 'Bez klienta',
     number: 'Numer',
     client: 'Klient',
@@ -438,6 +442,21 @@ export const pl = {
     pickerItemsTab: 'Pozycje',
     pickerGroupsTab: 'Grupy',
     pickerGroupItems: (count: number) => `${count} poz.`,
+
+    // Picker zostaje otwarty po dodaniu (T-70).
+    pickerAllCategories: 'Wszystkie',
+    pickerAdded: (count: number) => (count === 1 ? 'Dodano' : `Dodano ×${count}`),
+    pickerAddedSummary: (count: number) => {
+      if (count === 1) return 'Dodano 1 pozycję';
+      const rest = count % 10;
+      const tens = count % 100;
+      if (rest >= 2 && rest <= 4 && (tens < 12 || tens > 14)) return `Dodano ${count} pozycje`;
+      return `Dodano ${count} pozycji`;
+    },
+    pickerDone: 'Gotowe',
+    priceFrom: (amount: string) => `od ${amount}`,
+    pickerNoRooms: 'Wycena nie ma pomieszczeń — ta usługa policzy samą bazę.',
+    pickerNoRoomsAction: 'Dodaj pomieszczenia',
     // Pomieszczenia wyceny (cennik parametryczny).
     rooms: 'Pomieszczenia',
     roomsHint: 'Usługi liczone za pomieszczenie biorą stąd swoje składniki.',

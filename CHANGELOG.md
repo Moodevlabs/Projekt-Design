@@ -55,6 +55,13 @@ Istniejące subskrypcje testowe zostają na starych cenach; nowe zakupy idą po
 - Miasto inwestora, notatki wewnętrzne i rodzaj dokumentu na liście wycen; filtr po mieście.
 - Eksport rejestru do CSV w układzie arkusza (UTF-8 BOM, separator `;`) — otwiera się w Excelu bez kreatora importu.
 
+**Budowanie wyceny**
+
+- Wybór z biblioteki nie zamyka się po jednej pozycji — dobierasz ile trzeba za jednym otwarciem, z licznikiem przy dodanych.
+- Filtr grup nad listą usług i widoczny sposób wyceny przy każdej („Według pomieszczenia · od 250,00 zł"), zanim klikniesz.
+- Ostrzeżenie, gdy usługa liczona za pomieszczenie trafia do wyceny bez pomieszczeń — policzyłaby samą bazę.
+- „Nowa wycena" pyta, czy zacząć od pustej, czy od szablonu; szablon wnosi też termin i dokumenty.
+
 **Pierwsze uruchomienie**
 
 - Trzy kroki startowe na pulpicie: logo → biblioteka → pierwsza wycena.

@@ -639,15 +639,28 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - **Wersja podniesiona do `1.0.0`** w `package.json`, `tauri.conf.json` **i `Cargo.toml`** — README mówił o dwóch plikach, a numer stoi w trzech. Nagłówek CHANGELOG zostaje `[Nieopublikowane]` do chwili wydania: sekcja z datą znaczy „to jest u ludzi", nie „to jest zbudowane u nas".
   > **Zostało bez zmian (po stronie właściciela):** instalator na czystej maszynie, build i notaryzacja macOS, certyfikaty.
 
-- [ ] **T-70 Tworzenie wyceny: zakres zamiast listy** (inspiracja 1 + 2, koncepcja §5)
+- [x] **T-70 Tworzenie wyceny: zakres zamiast listy** (inspiracja 1 + 2, koncepcja §5)
   Z inspiracji bierzemy **sposób działania, nie wygląd**. Dziś zbudowanie wyceny na 20 pozycji to 20 cykli „otwórz picker → szukaj → kliknij → picker się zamyka". Inspiracje pokazują odwrotny kierunek: **zaznaczasz zakres — co i dla których pomieszczeń — a aplikacja składa dokument.**
   1. **Wielokrotny wybór z biblioteki.** Picker przestaje zamykać się po jednej pozycji: zaznaczasz ptaszkami ile chcesz i wstawiasz jednym „Dodaj (N)". Dziś `pickItem` woła `setOpen(false)` po każdym kliknięciu (`LibraryPicker.tsx`).
   2. **Filtr kategorii jako pigułki** (inspiracja 1: „Wszystkie · 01. Przygotowanie · 02. Układ przestrzeni…"). Picker grupuje po kategorii, ale nie pozwala zawęzić — przy 38 usługach z biblioteki przykładowej (T-62) lista jest dłuższa niż okno.
-  3. **Pomieszczenia przy dodawaniu usługi, nie przed.** Inspiracja 2 mówi wprost: *„Podczas tworzenia wyceny wybierasz pomieszczenia, dla których chcesz dodać usługę. System automatycznie pobierze odpowiednie stawki z biblioteki"*. Dla wpisu `per_room`/`per_frame` picker pyta o pomieszczenia od razu. `RoomsPanel` zostaje do zarządzania listą, ale przestaje być warunkiem wstępnym.
+  3. **Pomieszczenia widoczne przy dodawaniu usługi.** Inspiracja 2 mówi: *„Podczas tworzenia wyceny wybierasz pomieszczenia, dla których chcesz dodać usługę. System automatycznie pobierze odpowiednie stawki z biblioteki"*.
+     ⚠️ **Odstępstwo od litery inspiracji, świadome.** W naszym modelu usługa `per_room` liczy się po **zasięgu** (`roomScope`: wszystkie / część wizualna / techniczna), a nie po dowolnym podzbiorze pomieszczeń — dowolny podzbiór per pozycja to zmiana w `calcItemCents`, czyli w ścieżce liczącej pieniądze, i osobne zadanie. Zamiast tego bierzemy **to, co ta obietnica ma naprawdę dać**: dodanie usługi liczonej za pomieszczenie do wyceny **bez pomieszczeń** daje dziś po cichu samą bazę (często 0 zł) — picker ma to powiedzieć w chwili dodawania i dać skrót do panelu pomieszczeń. Wiersz pokazuje też zasięg, żeby było wiadomo, które pomieszczenia się liczą.
   4. **Widać sposób wyceny, ZANIM klikniesz** (inspiracja 1: „Za m² · 12,00 zł/m²", „Według pomieszczeń · od 250,00 zł"). Dziś wiersz pickera pokazuje samą kwotę, więc „250,00 zł" przy usłudze liczonej per pomieszczenie wygląda na cenę końcową.
   5. **Szablon wybierany przy zakładaniu wyceny** (koncepcja §5 pkt 7), a nie po otwarciu pustego edytora — `NewQuoteDialog` dostaje trzecie pole „Zacznij od: pusta / szablon".
   ✅ Wycena z sześcioma pomieszczeniami i kilkunastoma usługami powstaje bez ani jednego zamknięcia i ponownego otwarcia pickera.
   ⚠️ **To nie jest kreator krok-po-kroku.** Edytor zostaje jednoekranowy; wielokrotny wybór jest dodatkiem do dzisiejszej ścieżki, a nie zamiast niej — „Z biblioteki" przy pojedynczym wierszu zostaje, bo dopisanie jednej pozycji do gotowej oferty to najczęstsza czynność.
+  **Zrobiono:**
+  > - **Kliknięcie dodaje i picker zostaje otwarty**, zamiast ptaszków i osobnego „Dodaj (N)" z pierwotnego opisu. Checkbox z commitem kosztuje przy jednej pozycji dwa kliknięcia zamiast jednego, a dopisanie jednej usługi do gotowej oferty jest najczęstszą czynnością — natychmiastowe dodanie jest szybsze przy KAŻDYM N. Dodane wiersze dostają licznik („Dodano ×2"), stopka pokazuje sumę i „Gotowe".
+  > - **Ta sama usługa dodana dwa razy liczy się dwa razy** — dwie wizualizacje to dwie pozycje; blokada byłaby zgadywaniem.
+  > - `CategoryPills` — filtr grup nad listą, pasek przewija się w poziomie (popover ma stałą szerokość, a lista usług jest tym, po co się go otwiera).
+  > - `library-row-summary.ts` — wiersz pokazuje **sposób wyceny obok stawki**. To była realna pułapka: „250,00 zł" przy usłudze `per_room` wyglądało na cenę końcową, a jest stawką za jedno pomieszczenie.
+  > - Ostrzeżenie w wierszu, gdy usługa liczona za pomieszczenie trafia do wyceny **bez pomieszczeń** (policzyłaby samą bazę, często 0 zł), ze skrótem „Dodaj pomieszczenia".
+  > - `NewQuoteDialog` dostał „Zacznij od" — pustej wyceny albo szablonu. Szablon wnosi **cały pakiet z T-63** (układ, termin, dokumenty), a `scheduleFromTemplate` zeruje datę startu.
+  > **Na co uważać:**
+  > - **Picker czyta pomieszczenia ze store'u, nie z propsów.** `SectionBlock` jest zmemoizowany; nowy callback przy każdym renderze rodzica przerysowywałby wszystkie wiersze przy każdej literze (pułapka z T-39).
+  > - **`close()` jest jedyną drogą wyjścia.** Reset licznika w samym `onOpenChange` nie wystarczał — `setOpen(false)` z przycisku omija handler Radiksa i zostawiał stan poprzedniej sesji. Złapane testem.
+  > - Skrót „Dodaj pomieszczenia" używa `onMouseDown` z `preventDefault`: `CommandItem` wybiera pozycję już przy wciśnięciu, więc zwykły `onClick` najpierw dodałby usługę.
+  > - `AppShell.test` musiał dostać mock `useTemplates` — dialog wisi w powłoce także zamknięty, więc hook i tak się wykonuje.
 
 ## Faza 1.5 — reszta pakietu z Excela (zaraz po 1.0)
 
