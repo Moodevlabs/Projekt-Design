@@ -1,19 +1,19 @@
 import { useEffect, useState } from 'react';
 import {
   ArrowRight,
-  CalendarClock,
   CircleHelp,
+  Clock,
   CreditCard,
+  Download,
   FileText,
-  Files,
   FolderOpen,
-  GitBranch,
+  History,
   Keyboard,
+  LayoutDashboard,
   LayoutTemplate,
   Library,
-  Paintbrush,
-  Rocket,
   Settings,
+  Upload,
   Users,
   type LucideIcon,
 } from 'lucide-react';
@@ -21,17 +21,23 @@ import { helpPl, type HelpSection } from '@/i18n/help.pl';
 import { HelpBlockView } from './HelpBlocks';
 import { cn } from '@/lib/utils';
 
+/*
+ * Te same ikony, ktore uzytkownik widzi w aplikacji: pasek boczny (Pulpit,
+ * Klienci, Wyceny, Biblioteka, Szablony, Ustawienia), Subskrypcja, „Dodaj
+ * pliki", eksport, zegar pracochlonnosci. Poradnik ma byc mapa do ekranow,
+ * a nie osobnym zestawem piktogramow do nauczenia.
+ */
 const ICONS: Record<HelpSection['icon'], LucideIcon> = {
-  start: Rocket,
+  start: LayoutDashboard,
   clients: Users,
   quote: FileText,
-  status: GitBranch,
-  schedule: CalendarClock,
+  status: History,
+  schedule: Clock,
   documents: FolderOpen,
-  pdf: Paintbrush,
+  pdf: Download,
   library: Library,
   templates: LayoutTemplate,
-  files: Files,
+  files: Upload,
   settings: Settings,
   billing: CreditCard,
   keys: Keyboard,
@@ -75,40 +81,56 @@ export function HelpPage() {
   };
 
   return (
-    <div className="grid items-start gap-6 lg:grid-cols-[232px_minmax(0,1fr)]">
-      <nav aria-label={helpPl.tocLabel} className="card-surface p-3 lg:sticky lg:top-6">
-        <p className="text-ink-soft px-2 pt-1 pb-2 text-[10.5px] font-semibold tracking-[0.1em] uppercase">
-          {helpPl.tocLabel}
-        </p>
-        <ol className="flex flex-col gap-0.5">
-          {helpPl.sections.map((section, index) => {
-            const Icon = ICONS[section.icon];
-            const active = current === section.id;
-            return (
-              <li key={section.id}>
-                <a
-                  href={`#${section.id}`}
-                  aria-current={active ? 'location' : undefined}
-                  onClick={(event) => {
-                    event.preventDefault();
-                    jump(section.id);
-                  }}
-                  className={cn(
-                    'flex items-center gap-2.5 rounded-[var(--radius-control)] px-2 py-1.5 text-[13px] transition-colors',
-                    active ? 'bg-ink text-accent-fg font-medium' : 'text-ink-soft hover:bg-surface-2 hover:text-ink',
-                  )}
-                >
-                  <Icon className="size-3.5 shrink-0" aria-hidden />
-                  <span className="truncate">{section.title}</span>
-                  <span className={cn('tabular ml-auto text-[10.5px]', active ? 'text-accent-fg/70' : 'text-ink-soft/70')}>
-                    {number(index)}
-                  </span>
-                </a>
-              </li>
-            );
-          })}
-        </ol>
-      </nav>
+    <div className="grid gap-6 lg:grid-cols-[232px_minmax(0,1fr)]">
+      {/*
+        Spis tresci jest przyklejony. Owijka rozciaga sie na cala wysokosc
+        kolumny (domyslne `stretch` gridu) — `sticky` liczy sie wzgledem
+        rodzica, wiec przy `items-start` komorka miala wysokosc samego spisu
+        i nie bylo w czym sie „kleic".
+      */}
+      <div className="lg:self-stretch">
+        <nav aria-label={helpPl.tocLabel} className="card-surface p-3 lg:sticky lg:top-6">
+          <p className="text-ink-soft px-2 pt-1 pb-2 text-[10.5px] font-semibold tracking-[0.1em] uppercase">
+            {helpPl.tocLabel}
+          </p>
+          <ol className="flex flex-col gap-0.5">
+            {helpPl.sections.map((section, index) => {
+              const Icon = ICONS[section.icon];
+              const active = current === section.id;
+              return (
+                <li key={section.id}>
+                  <a
+                    href={`#${section.id}`}
+                    aria-current={active ? 'location' : undefined}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      jump(section.id);
+                    }}
+                    className={cn(
+                      'flex items-center gap-2.5 rounded-[var(--radius-pill)] px-2.5 py-1.5 text-[13px] transition-colors',
+                      // Ta sama para co aktywna pozycja paska bocznego i pigulki.
+                      active
+                        ? 'bg-primary text-primary-foreground font-medium'
+                        : 'text-ink-soft hover:bg-surface-2 hover:text-ink',
+                    )}
+                  >
+                    <Icon className="size-3.5 shrink-0" aria-hidden />
+                    <span className="truncate">{section.title}</span>
+                    <span
+                      className={cn(
+                        'tabular ml-auto text-[10.5px]',
+                        active ? 'text-primary-foreground/70' : 'text-ink-soft/70',
+                      )}
+                    >
+                      {number(index)}
+                    </span>
+                  </a>
+                </li>
+              );
+            })}
+          </ol>
+        </nav>
+      </div>
 
       <div className="flex min-w-0 flex-col gap-5 pb-16">
         <header className="card-surface p-7">
@@ -129,7 +151,7 @@ export function HelpPage() {
                 <button
                   type="button"
                   onClick={() => jump(link.target)}
-                  className="border-hair text-ink hover:bg-ink hover:text-accent-fg hover:border-ink flex items-center gap-1.5 rounded-[var(--radius-pill)] border px-3 py-1.5 text-[12.5px] font-medium transition-colors"
+                  className="border-hair text-ink hover:bg-primary hover:text-primary-foreground hover:border-primary flex items-center gap-1.5 rounded-[var(--radius-pill)] border px-3 py-1.5 text-[12.5px] font-medium transition-colors"
                 >
                   {link.label}
                   <ArrowRight className="size-3.5" aria-hidden />
