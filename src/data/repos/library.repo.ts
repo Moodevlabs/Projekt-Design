@@ -18,6 +18,7 @@ import {
 import { getSupabase } from '@/data/supabase';
 import type { Tables, TablesUpdate } from '@/data/types.generated';
 import { RepoError, unwrap } from './errors';
+import { ilikeAnyOf } from './postgrest-filters';
 import { createLogger } from '@/lib/logger';
 
 const log = createLogger('library.repo');
@@ -177,8 +178,7 @@ export async function listLibraryItems(
   const term = opts.search?.trim();
   if (term) {
     // Szukamy po nazwie i opisie — to jedyne teksty widoczne na liście.
-    const pattern = '%' + term + '%';
-    query = query.or('name.ilike.' + pattern + ',description.ilike.' + pattern);
+    query = query.or(ilikeAnyOf(['name', 'description'], term));
   }
 
   const rows = unwrap(

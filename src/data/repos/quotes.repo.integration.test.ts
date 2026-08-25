@@ -133,6 +133,26 @@ describe('quotes.repo — CRUD', () => {
     expect(miss.some((q) => q.id === quote.id)).toBe(false);
   });
 
+  it('fraza z przecinkiem nie rozsypuje zapytania', async () => {
+    /*
+     * `,` i `)` rozdzielaja warunki w `or(...)` PostgREST-a, a backslash NIE
+     * jest tam znakiem ucieczki — bez cudzyslowu to zapytanie wracalo bledem
+     * `failed to parse logic tree`. Klienci dostali te poprawke w T-53,
+     * wyceny dopiero teraz (T-17).
+     */
+    const quote = await makeQuote('Kowalski, Jan (integracja)');
+
+    const found = await listQuotes({ workspaceId, search: 'Kowalski, Jan' });
+    expect(found.some((q) => q.id === quote.id)).toBe(true);
+  });
+
+  it('nawias w frazie tez przechodzi', async () => {
+    const quote = await makeQuote('Wycena (wersja robocza)');
+
+    const found = await listQuotes({ workspaceId, search: '(wersja robocza)' });
+    expect(found.some((q) => q.id === quote.id)).toBe(true);
+  });
+
   it('zapisuje zmiany i przelicza zdenormalizowane totale', async () => {
     const quote = await makeQuote('Do zapisu');
     const body = quote.body;

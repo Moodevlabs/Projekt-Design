@@ -1,6 +1,6 @@
 [package]
 name = "toolier"
-version = "0.1.0"
+version = "1.0.0"
 description = "Toolier — interaktywne wyceny z brandowanym PDF"
 authors = ["Toolier"]
 edition = "2021"

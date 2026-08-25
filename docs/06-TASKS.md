@@ -631,7 +631,13 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - **Instalator na czystej maszynie** — kryterium odbioru. Zbudowany, ale **nikt go nie uruchomił na maszynie bez Node, Rusta i `.env`**.
   > - **Build macOS** — z Windowsa się nie da.
   > - **Podpis i notaryzacja** — wymagają certyfikatów (Apple Developer, EV/Azure). Co dokładnie mieć, stoi w README.
-  > - **Wersja `0.1.0`** w `package.json` i `tauri.conf.json` — przed wydaniem podnieś w obu.
+  > - ~~**Wersja `0.1.0`** w `package.json` i `tauri.conf.json` — przed wydaniem podnieś w obu.~~ → zrobione niżej.
+  >
+  > **2026-08-25 — domknięta część kodowa (zadanie dalej otwarte).**
+  > - **Onboarding mówił nieprawdę po T-62.** Logika kroku „biblioteka" była już poprawna (liczy pozycje bez flagi `is_sample`), ale napis brzmiał „Dodaj pozycje do biblioteki" — a konto startuje z 38 usługami. Teraz: „Ustaw swoje ceny w bibliotece" + „Konto startuje z gotowymi usługami — popraw ceny na swoje albo dodaj własne". Krok zalicza pierwsza poprawiona cena, bo edycja zdejmuje flagę.
+  > - **Naprawione wyszukiwanie z przecinkiem** (dług z `IDEAS.md`). `,` i `)` rozdzielają warunki w `or(...)` PostgREST-a, a backslash **nie jest** tam znakiem ucieczki — „Kowalski, Jan" wracało błędem `failed to parse logic tree`. T-53 naprawił klientów i projekty, ale **wyceny i biblioteka zostały zepsute**. Cytowanie wyjęte do `data/repos/postgrest-filters.ts` (`ilikeFilter`, `ilikeAnyOf`) i podpięte we wszystkich czterech repozytoriach — cztery kopie jednego cytowania to cztery okazje, żeby piąte wyszukiwanie znów je zgubiło. 7 testów jednostkowych + 3 integracyjne; **sprawdzone, że na starym kodzie padają** (cofnięta poprawka → `failed to parse logic tree`).
+  > - **Wersja podniesiona do `1.0.0`** w `package.json`, `tauri.conf.json` **i `Cargo.toml`** — README mówił o dwóch plikach, a numer stoi w trzech. Nagłówek CHANGELOG zostaje `[Nieopublikowane]` do chwili wydania: sekcja z datą znaczy „to jest u ludzi", nie „to jest zbudowane u nas".
+  > **Zostało bez zmian (po stronie właściciela):** instalator na czystej maszynie, build i notaryzacja macOS, certyfikaty.
 
 - [ ] **T-70 Tworzenie wyceny: zakres zamiast listy** (inspiracja 1 + 2, koncepcja §5)
   Z inspiracji bierzemy **sposób działania, nie wygląd**. Dziś zbudowanie wyceny na 20 pozycji to 20 cykli „otwórz picker → szukaj → kliknij → picker się zamyka". Inspiracje pokazują odwrotny kierunek: **zaznaczasz zakres — co i dla których pomieszczeń — a aplikacja składa dokument.**

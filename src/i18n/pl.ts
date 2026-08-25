@@ -1368,9 +1368,15 @@ export const pl = {
         title: 'Wgraj logo',
         hint: 'Trafia do każdego PDF-a — wgrane raz oszczędza poprawianie ofert później.',
       },
+      /*
+       * Od T-62 nowe konto dostaje 38 usług przykładowych, więc „Dodaj
+       * pozycje do biblioteki" prosiłoby o coś, co już tam jest. Krok liczy
+       * pozycje BEZ flagi „przykładowa" — a tę flagę zdejmuje pierwsza
+       * poprawiona cena. Napis ma mówić dokładnie to.
+       */
       library: {
-        title: 'Dodaj pozycje do biblioteki',
-        hint: 'Wycena składa się wtedy z klikania, a nie z przepisywania.',
+        title: 'Ustaw swoje ceny w bibliotece',
+        hint: 'Konto startuje z gotowymi usługami — popraw ceny na swoje albo dodaj własne.',
       },
       quote: {
         title: 'Zrób pierwszą wycenę',

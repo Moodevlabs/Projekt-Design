@@ -8,6 +8,7 @@ import {
 import { getSupabase } from '@/data/supabase';
 import type { TablesInsert, TablesUpdate } from '@/data/types.generated';
 import { RepoError, unwrap } from './errors';
+import { ilikeAnyOf } from './postgrest-filters';
 
 /**
  * Kartoteka klientów (K1, T-53).
@@ -67,23 +68,6 @@ const SORTS: Record<ClientSort, { column: string; ascending: boolean }> = {
   created_desc: { column: 'created_at', ascending: false },
 };
 
-/**
- * Warunek `ilike` dla jednej kolumny w `or(...)` PostgREST-a.
- *
- * Wartość idzie **w cudzysłowie**, a nie z odkreślonymi przecinkami:
- * `,` i `)` rozdzielają warunki w drzewie logicznym, a backslash **nie jest**
- * tam znakiem ucieczki — PostgREST odpowiada wtedy `failed to parse logic
- * tree` (złapane testem integracyjnym). W cudzysłowie uciekać trzeba już
- * tylko przed `"` i `\`.
- *
- * Wycinanie takich znaków z frazy odpada: „Kowalski, Jan" to nazwa, którą
- * człowiek widzi na ekranie i ma prawo w nią wpisać.
- */
-function ilikeFilter(column: string, term: string): string {
-  const escaped = term.replace(/["\\]/g, (znak) => '\\' + znak);
-  return `${column}.ilike."%${escaped}%"`;
-}
-
 export async function listClients(filters: ClientFilters): Promise<ClientOverview[]> {
   const sort = SORTS[filters.sort ?? 'activity_desc'];
 
@@ -99,7 +83,7 @@ export async function listClients(filters: ClientFilters): Promise<ClientOvervie
   const term = filters.search?.trim();
   if (term) {
     query = query.or(
-      ['name', 'email', 'phone', 'city'].map((column) => ilikeFilter(column, term)).join(','),
+      ilikeAnyOf(['name', 'email', 'phone', 'city'], term),
     );
   }
 

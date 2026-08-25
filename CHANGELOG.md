@@ -70,5 +70,11 @@ Istniejące subskrypcje testowe zostają na starych cenach; nowe zakupy idą po
 
 ---
 
-Wpisy powstają przy zadaniach; wersje nadajemy przy wydaniu (`package.json`
-i `src-tauri/tauri.conf.json` muszą się zgadzać — instalator bierze numer stamtąd).
+Wpisy powstają przy zadaniach; wersje nadajemy przy wydaniu. Numer stoi
+w `package.json`, `src-tauri/tauri.conf.json` i `src-tauri/Cargo.toml` — muszą
+się zgadzać, instalator bierze go z `tauri.conf.json`.
+
+Numer podniesiony do `1.0.0`, ale **nagłówek zostaje „Nieopublikowane"** do
+chwili, gdy podpisany instalator faktycznie wyjdzie: sekcja z datą znaczy
+„to jest u ludzi", a nie „to jest zbudowane u nas". Przy wydaniu zamień
+nagłówek na `## [1.0.0] - RRRR-MM-DD`.

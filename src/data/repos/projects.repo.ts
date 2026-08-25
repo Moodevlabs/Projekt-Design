@@ -9,6 +9,7 @@ import {
 import { getSupabase } from '@/data/supabase';
 import type { TablesInsert, TablesUpdate } from '@/data/types.generated';
 import { RepoError, unwrap } from './errors';
+import { ilikeAnyOf } from './postgrest-filters';
 
 /**
  * Projekty klienta (K2, T-54).
@@ -76,14 +77,7 @@ export async function listProjects(filters: ProjectFilters): Promise<ProjectOver
 
   const term = filters.search?.trim();
   if (term) {
-    // Wartość w cudzysłowie — backslash NIE jest w PostgREST znakiem ucieczki
-    // w `or(...)`, więc fraza z przecinkiem wywracała zapytanie (T-53).
-    const escaped = term.replace(/["\\]/g, (znak) => '\\' + znak);
-    query = query.or(
-      ['name', 'city', 'address', 'client_name']
-        .map((column) => `${column}.ilike."%${escaped}%"`)
-        .join(','),
-    );
+    query = query.or(ilikeAnyOf(['name', 'city', 'address', 'client_name'], term));
   }
 
   query = query.order('sort_order', { ascending: true }).order('updated_at', { ascending: false });

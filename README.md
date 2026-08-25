@@ -27,10 +27,11 @@ system operacyjny pokaże ostrzeżenie i część użytkowników się wycofa.
 
 ### Numer wersji
 
-Numer stoi w **dwóch** plikach i musi się zgadzać:
+Numer stoi w **trzech** plikach i musi się zgadzać:
 
 - `package.json` → `version`
 - `src-tauri/tauri.conf.json` → `version` (stąd bierze go instalator i updater)
+- `src-tauri/Cargo.toml` → `version` (Tauri użyje go, jeśli kiedyś zniknie z `tauri.conf.json`; rozjazd trudno zauważyć, bo nic się nie psuje od razu)
 
 ### Windows — podpis kodu
 

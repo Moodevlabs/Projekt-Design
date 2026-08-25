@@ -14,6 +14,7 @@ import { parseQuoteDocuments, type QuoteDocuments } from '@/domain/documents';
 import { getSupabase } from '@/data/supabase';
 import type { TablesUpdate } from '@/data/types.generated';
 import { ConflictError, RepoError, unwrap } from './errors';
+import { ilikeAnyOf } from './postgrest-filters';
 import { nextVersion, statusAfterSuperseding } from '@/domain/quote/versions';
 import { createLogger } from '@/lib/logger';
 
@@ -187,10 +188,7 @@ export async function listQuotes(filters: QuoteFilters): Promise<QuoteSummary[]>
   const term = filters.search?.trim();
   if (term) {
     // Szukamy po numerze, tytule i nazwie klienta — te trzy pola widac na liscie.
-    const pattern = '%' + term + '%';
-    query = query.or(
-      'number.ilike.' + pattern + ',title.ilike.' + pattern + ',client_name.ilike.' + pattern,
-    );
+    query = query.or(ilikeAnyOf(['number', 'title', 'client_name'], term));
   }
 
   const rows = unwrap(

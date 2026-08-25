@@ -142,6 +142,15 @@ describe('library.repo — pozycje', () => {
     expect(miss.some((row) => row.id === item.id)).toBe(false);
   });
 
+  it('fraza z przecinkiem nie rozsypuje zapytania', async () => {
+    // Ten sam blad co w klientach (T-53) i wycenach — `,` rozdziela warunki
+    // w `or(...)`, wiec bez cudzyslowu PostgREST zwracal blad parsowania.
+    const item = await makeItem('Wizualizacja, 360 stopni');
+
+    const found = await listLibraryItems(workspaceId, { search: 'Wizualizacja, 360' });
+    expect(found.some((row) => row.id === item.id)).toBe(true);
+  });
+
   it('sortuje po sort_order, a przy remisie po nazwie', async () => {
     const b = await makeItem('B-sort-test');
     const a = await makeItem('A-sort-test');
