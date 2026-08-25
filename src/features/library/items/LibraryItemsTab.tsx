@@ -14,9 +14,12 @@ import type { LibraryItem } from '@/data/repos/library.repo';
 import { CardsSkeleton, LoadError } from '../components/LibraryStates';
 import { ItemsToolbar } from './ItemsToolbar';
 import { LibraryItemCard } from './LibraryItemCard';
+import { LibraryItemRow, ROW_GRID } from './LibraryItemRow';
 import { useCascadePrompt } from './useCascadePrompt';
 import type { ItemDraft } from './item-draft';
+import type { LibraryColor } from '@/domain/library/schema';
 import { pl } from '@/i18n/pl';
+import { cn } from '@/lib/utils';
 
 const CATEGORY_LIST_ID = 'library-categories';
 
@@ -28,6 +31,8 @@ export function LibraryItemsTab() {
   // `null` = wszystkie, `'none'` = bez grupy, inaczej id grupy ze slownika.
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<LibraryItem | null>(null);
+  /** Rozwinięty wiersz (T-72) — co najwyżej jeden naraz. */
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   // Filtry idą do zapytania — szuka i filtruje baza, nie przeglądarka.
   const filters = useMemo(
@@ -49,6 +54,12 @@ export function LibraryItemsTab() {
   const rows = items.data ?? [];
   const hasFilters = categoryId !== null || search.trim().length > 0;
 
+  const colorById = useMemo(() => {
+    const map = new Map<string, LibraryColor | null>();
+    for (const row of categories.data ?? []) map.set(row.id, row.color);
+    return map;
+  }, [categories.data]);
+
   /**
    * Nowa pozycja nazywa się „Nowa pozycja", więc przy wpisanej frazie nie
    * przeszłaby przez filtr i zniknęłaby zaraz po dodaniu — z zewnątrz wygląda
@@ -61,11 +72,16 @@ export function LibraryItemsTab() {
     // „Wszystkie" i „Bez grupy" to nie grupy, wiec tam zostaje bez przypisania.
     const target = categoryId && categoryId !== 'none' ? categoryId : null;
     const name = categories.data?.find((row) => row.id === target)?.name;
-    createItem.mutate({
-      name: pl.library.newItemName,
-      categoryId: target,
-      ...(name ? { category: name } : {}),
-    });
+    createItem.mutate(
+      {
+        name: pl.library.newItemName,
+        categoryId: target,
+        ...(name ? { category: name } : {}),
+      },
+      // Nowa pozycja od razu rozwinięta — inaczej „Nowa pozycja" ląduje
+      // zwinięta gdzieś na liście i trzeba jej szukać, żeby ją nazwać.
+      { onSuccess: (created) => setExpandedId(created.id) },
+    );
   };
 
   const handleSave = (item: LibraryItem, draft: ItemDraft) => {
@@ -128,18 +144,47 @@ export function LibraryItemsTab() {
       ) : null}
 
       {rows.length > 0 ? (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {rows.map((item) => (
-            <LibraryItemCard
-              key={item.id}
-              item={item}
-              allItems={allItems.data ?? EMPTY_ITEMS}
-              categoryListId={CATEGORY_LIST_ID}
-              saving={updateItem.isPending}
-              onSave={(draft) => handleSave(item, draft)}
-              onDelete={() => setPendingDelete(item)}
-            />
-          ))}
+        /*
+         * Lista zwiniętych wierszy zamiast siatki rozłożonych kart (T-72).
+         * Rozwinięty jest co najwyżej jeden — dwa otwarte formularze obok
+         * siebie to znów ściana, a szkic zamkniętego wiersza i tak by przepadł.
+         */
+        <div className="card-surface overflow-hidden">
+          <div
+            className={cn(
+              ROW_GRID,
+              'border-hair text-ink-soft border-b px-3 py-2 text-[10.5px] font-semibold tracking-[0.08em] uppercase',
+            )}
+          >
+            <span>{pl.library.colService}</span>
+            <span className="hidden lg:block">{pl.library.colGroup}</span>
+            <span className="hidden lg:block">{pl.library.colMode}</span>
+            <span className="hidden text-right lg:block">{pl.library.colPrice}</span>
+            <span className="text-center">{pl.library.colActive}</span>
+            <span />
+          </div>
+          <ul>
+            {rows.map((item) => (
+              <LibraryItemRow
+                key={item.id}
+                item={item}
+                categoryColor={colorById.get(item.categoryId ?? '') ?? null}
+                expanded={expandedId === item.id}
+                onToggle={() => setExpandedId((current) => (current === item.id ? null : item.id))}
+                onToggleActive={(active) => updateItem.mutate({ id: item.id, patch: { active } })}
+              >
+                <LibraryItemCard
+                  item={item}
+                  allItems={allItems.data ?? EMPTY_ITEMS}
+                  categoryListId={CATEGORY_LIST_ID}
+                  saving={updateItem.isPending}
+                  onSave={(draft) => handleSave(item, draft)}
+                  onDelete={() => setPendingDelete(item)}
+                  embedded
+                />
+              </LibraryItemRow>
+            ))}
+          </ul>
         </div>
       ) : null}
 

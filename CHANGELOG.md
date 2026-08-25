@@ -15,6 +15,11 @@ Panel zostaje otwarty, aż klikniesz „Gotowe”; jedno ostrzeżenie nad listą
 W trybie edycji pola mają widoczną kreskowaną ramkę, a nad pozycjami stoi
 nagłówek kolumn *Usługa · Ilość · Cena*.
 
+**Biblioteka → Usługi jako zwijane wiersze (T-72).** Zamiast siatki rozłożonych
+kart: jeden wiersz na usługę (nazwa · grupa · sposób wyceny · stawka ·
+przełącznik „Aktywna”), klik rozwija formularz edycji, drugi klik zwija.
+Nowo dodana usługa rozwija się sama.
+
 ### Zmienione
 
 **Nazwa produktu: Anzorge → Toolier.** Zmiana obejmuje nazwę aplikacji i okna,

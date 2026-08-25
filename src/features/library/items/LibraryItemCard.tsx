@@ -32,6 +32,8 @@ type LibraryItemCardProps = {
   onSave: (draft: ItemDraft) => void;
   onDelete: () => void;
   saving?: boolean;
+  /** Osadzona pod rozwiniętym wierszem listy (T-72) — bez własnej karty. */
+  embedded?: boolean;
 };
 
 /**
@@ -48,6 +50,7 @@ export function LibraryItemCard({
   onSave,
   onDelete,
   saving = false,
+  embedded = false,
 }: LibraryItemCardProps) {
   const [draft, setDraft] = useState<ItemDraft>(() => toItemDraft(item));
   // Ostatni stan pozycji, jaki widziała karta — po nim poznajemy, czy szkic
@@ -73,7 +76,12 @@ export function LibraryItemCard({
   const pricingId = `library-item-pricing-${item.id}`;
 
   return (
-    <article className="card-surface flex flex-col gap-3 p-5">
+    <article
+      className={cn(
+        'flex flex-col gap-3',
+        embedded ? 'bg-surface rounded-[var(--radius-control)] border-hair border p-4' : 'card-surface p-5',
+      )}
+    >
       <header className="flex items-start justify-between gap-2">
         <KindToggle
           value={draft.kind}
@@ -110,7 +118,7 @@ export function LibraryItemCard({
 
       {/* Badge „Przykładowa" (T-62) — znika, gdy ktoś wpis edytuje, bo wtedy
           przestaje być nasz i „Usuń pozostałe" go nie ruszy. */}
-      {item.isSample ? (
+      {item.isSample && !embedded ? (
         <span className="bg-surface-2 text-ink-soft self-start rounded-[var(--radius-pill)] px-2 py-0.5 text-[11px]">
           {pl.library.sampleBadge}
         </span>
