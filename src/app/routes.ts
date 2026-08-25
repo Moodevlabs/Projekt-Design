@@ -13,6 +13,7 @@ export const routes = {
   templates: '/szablony',
   /** Alias sprzed T-58 — Branding jest teraz sekcja Ustawien. */
   brand: '/branding',
+  help: '/pomoc',
   settings: '/ustawienia',
   settingsBranding: '/ustawienia/branding',
   subscription: '/subskrypcja',

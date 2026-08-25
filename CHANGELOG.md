@@ -20,6 +20,17 @@ kart: jeden wiersz na usługę (nazwa · grupa · sposób wyceny · stawka ·
 przełącznik „Aktywna”), klik rozwija formularz edycji, drugi klik zwija.
 Nowo dodana usługa rozwija się sama.
 
+**Pomoc w aplikacji (T-73).** Nowa pozycja „Pomoc” w pasku bocznym otwiera
+kompletny poradnik: pierwsze kroki, klienci i projekty, edytor wyceny, statusy
+i wersje, termin, dokumenty, PDF i branding, biblioteka, szablony, pliki,
+ustawienia, subskrypcja, skróty klawiszowe i FAQ. Pasek boczny dzieli się
+kreską na obszary pracy i — niżej — Pomoc z Ustawieniami.
+
+### Usunięte
+
+**Typy pomieszczeń z Ustawień (T-73).** Edytujesz je wyłącznie w Bibliotece →
+Pomieszczenia — jedno miejsce zamiast dwóch.
+
 ### Zmienione
 
 **Nazwa produktu: Anzorge → Toolier.** Zmiana obejmuje nazwę aplikacji i okna,

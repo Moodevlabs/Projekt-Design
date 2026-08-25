@@ -3,7 +3,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useWorkspace } from '@/data/queries/useWorkspace';
 import { useEntitlement } from '@/features/billing/useEntitlement';
 import { WorkspaceSettingsSection } from './WorkspaceSettingsSection';
-import { RoomTypesSection } from './RoomTypesSection';
 import { AccountSection } from './AccountSection';
 import { StorageUsageSection } from '@/features/files/StorageUsageSection';
 import { SampleLibrarySection } from './SampleLibrarySection';
@@ -47,7 +46,8 @@ export function SettingsPage() {
       ) : null}
 
       <WorkspaceSettingsSection canWrite={canWrite} />
-      <RoomTypesSection canWrite={canWrite} />
+      {/* Typy pomieszczen mieszkaja w Bibliotece → Pomieszczenia (T-73) —
+          jedno miejsce do personalizacji, nie dwa. */}
       <SampleLibrarySection />
       <StorageUsageSection />
       <AccountSection />

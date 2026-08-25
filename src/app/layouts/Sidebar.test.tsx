@@ -117,7 +117,7 @@ describe('Sidebar — rozwijanie', () => {
 });
 
 describe('Sidebar — kolejnosc i zakres (T-58)', () => {
-  it('kolejnosc z 05-UI §2: Pulpit · Klienci · Wyceny · Biblioteka · Szablony · Ustawienia', () => {
+  it('kolejnosc z 05-UI §2: Pulpit · Klienci · Wyceny · Biblioteka · Szablony | Pomoc · Ustawienia', () => {
     // Klienci PRZED wycenami: od T-53 to oni sa osia aplikacji.
     expect(NAV_ITEMS.map((item) => item.label)).toEqual([
       pl.nav.dashboard,
@@ -125,8 +125,28 @@ describe('Sidebar — kolejnosc i zakres (T-58)', () => {
       pl.nav.quotes,
       pl.nav.library,
       pl.nav.templates,
+      pl.nav.help,
       pl.nav.settings,
     ]);
+    // Pomoc i Ustawienia sa w osobnej grupie, pod kreska (T-73).
+    expect(NAV_ITEMS.map((item) => item.group)).toEqual([
+      'main',
+      'main',
+      'main',
+      'main',
+      'main',
+      'system',
+      'system',
+    ]);
+  });
+
+  it('Pomoc prowadzi do poradnika i podswietla sie na jego trasie', () => {
+    renderAt('/pomoc');
+    const help = screen.getByRole('link', { name: pl.nav.help });
+    expect(help).toHaveAttribute('href', '/pomoc');
+    expect(help).toHaveAttribute('aria-current', 'page');
+    // Kulka liczy pozycje W SWOJEJ grupie — Pomoc jest w niej pierwsza.
+    expect(screen.getByTestId('nav-active-marker')).toHaveAttribute('data-index', '0');
   });
 
   it('Branding zniknal z sidebara — wszedl do Ustawien', () => {
