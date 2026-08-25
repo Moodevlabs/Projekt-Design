@@ -52,6 +52,11 @@ vi.mock('@/data/queries/useLibrary', () => ({
   useLibraryCategories: () => ({ data: [], isLoading: false }),
 }));
 
+// Panel „Dodaj usługi" (T-71) koloruje pigułki grup ze słownika.
+vi.mock('@/data/queries/useLibraryCategories', () => ({
+  useLibraryCategoryList: () => ({ data: [] }),
+}));
+
 vi.mock('@/data/queries/useRoomTypes', () => ({
   useRoomTypes: () => ({ data: [] }),
 }));

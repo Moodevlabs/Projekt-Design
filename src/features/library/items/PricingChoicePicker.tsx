@@ -1,18 +1,7 @@
-import { Box, Clock, Frame, Grid3x3, HelpCircle, Home, Package, Ruler } from 'lucide-react';
 import { PRICING_CHOICES, type PricingChoiceId } from '@/domain/library/units';
+import { PRICING_CHOICE_ICONS as ICONS } from './pricing-choice-icons';
 import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
-
-const ICONS: Record<PricingChoiceId, typeof Box> = {
-  flat_lump: Package,
-  flat_m2: Ruler,
-  per_room: Home,
-  per_frame: Frame,
-  flat_hour: Clock,
-  flat_visit: Grid3x3,
-  flat_element: Box,
-  individual: HelpCircle,
-};
 
 /**
  * „Sposób wyceny" — **jeden wybór**, osiem kafelków (koncepcja §5 reguła 1).

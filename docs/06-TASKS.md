@@ -4,7 +4,7 @@ Format: `- [ ] T-xx Nazwa` — czytaj: wymagane dokumenty → kryteria akceptacj
 
 **Numer to tożsamość zadania, nie kolejność.** Kolejność wykonania = pozycja na liście. Po wchłonięciu `FEATURES-Z-EXCELA.md` (2026-08-22) zadania T-30+ zostały wplecione **pomiędzy** T-11…T-17, bo część z nich musi wyprzedzić PDF i brand kit — inaczej pisalibyśmy je dwa razy. Stare numery zostawiono nietknięte, żeby notatki i commity dalej się zgadzały.
 
-**2026-08-24 — koncepcja Toolier.** Zadania **T-53…T-66** (`FEATURES-Z-KONCEPCJI.md`) stoją **przed T-17**: oś klient → projekt → pliki, wersje wycen, restrukturyzacja biblioteki, rebranding i nowa cena wchodzą do 1.0. **Cała oś T-53…T-66 zrobiona (2026-08-25). Następne zadania: T-17 (Polish & release 1.0) i T-70 (tworzenie wyceny — ergonomia z inspiracji).**
+**2026-08-24 — koncepcja Toolier.** Zadania **T-53…T-66** (`FEATURES-Z-KONCEPCJI.md`) stoją **przed T-17**: oś klient → projekt → pliki, wersje wycen, restrukturyzacja biblioteki, rebranding i nowa cena wchodzą do 1.0. **Cała oś T-53…T-66 zrobiona (2026-08-25), T-70 i T-71 (tworzenie wyceny — ergonomia z inspiracji) też. Otwarte zostaje T-17 (Polish & release 1.0 — instalator, macOS, certyfikaty).**
 
 Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełna specyfikacja, wzory z arkusza i model domenowy. Tutaj jest **kolejność, zależności i kolizje z istniejącym kodem**; nie duplikuję treści tamtego dokumentu.
 
@@ -661,6 +661,25 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - **`close()` jest jedyną drogą wyjścia.** Reset licznika w samym `onOpenChange` nie wystarczał — `setOpen(false)` z przycisku omija handler Radiksa i zostawiał stan poprzedniej sesji. Złapane testem.
   > - Skrót „Dodaj pomieszczenia" używa `onMouseDown` z `preventDefault`: `CommandItem` wybiera pozycję już przy wciśnięciu, więc zwykły `onClick` najpierw dodałby usługę.
   > - `AppShell.test` musiał dostać mock `useTemplates` — dialog wisi w powłoce także zamknięty, więc hook i tak się wykonuje.
+
+- [x] **T-71 Tworzenie wyceny: panel „Dodaj usługi” z tabelą** (inspiracja 1 + 2, po zgłoszeniu właściciela 2026-08-25: „nadal nie tak czytelne")
+  T-70 dał wielokrotny wybór, ale w **popoverze 340 px** — kolumny z inspiracji 1 (usługa · grupa · sposób wyceny · stawka) nie miały gdzie stanąć, a ostrzeżenie o braku pomieszczeń powtarzało się przy każdym wierszu i zamieniało w tło. W trybie edycji pola nie różniły się od tekstu (podświetlenie dopiero pod kursorem), a nad pozycjami nie było nagłówka kolumn — liczba „1" obok kwoty była zagadką.
+  ✅ Wycena z kilkunastoma usługami z dwóch sekcji powstaje z jednego otwarcia panelu; w edycji od razu widać, co jest polem i co znaczy każda kolumna.
+  **Zrobiono:**
+  > - **`ScopePanel`** (`editor/scope/`) — panel boczny na całą wysokość (`sm:max-w-4xl`) z **tabelą jak w inspiracji 1**: nagłówek kolumn, wiersz = nazwa + opis · pigułka grupy w kolorze ze słownika · ikona + etykieta sposobu wyceny · stawka („12,00 zł / m²", „od 250,00 zł", „wycena indywidualna") · przycisk „Dodaj" z licznikiem. Nad tabelą: **„Dodaj do: Sekcja › Grupa"** (`ScopeTargetSelect` — cel zmienny bez zamykania), szukajka, licznik „N usług", zakładki **Usługi | Zestawy**, pigułki grup (zawijane — tu jest miejsce). Kolejność grup = kolejność z bazy (`sort_order`), nie alfabetyczna.
+  > - **Jedno ostrzeżenie o braku pomieszczeń** nad listą (tylko gdy widać usługę liczoną za pomieszczenie), z tekstem „jak to działa" (05-UI §3a pkt 5) i przyciskiem „Dodaj pomieszczenie"; po dodaniu zamienia się w jednolinijkową informację „policzą się dla N pomieszczeń".
+  > - **`useInsertFromLibrary`** — przeliczenie jednostek albo odmowa (F2.2) wyjęte z `LibraryPicker` do wspólnego hooka; panel i popover zachowują się identycznie. `PRICING_CHOICE_ICONS` wyjęte z `PricingChoicePicker` — ta sama ikona na karcie usługi i w kolumnie panelu.
+  > - **`useScopePanel`** — osobny malutki store (open + cel). Bloki są zmemoizowane; akcja ze store'u ma stałą referencję, więc `SectionBlock`/`GroupBlock` biorą ją same, bez nowych propsów (pułapka z T-39).
+  > - **W sekcji: wyraźny przycisk „Dodaj usługi"** (pigułka z obrysem) + linki „Pozycja ręcznie" · „Z biblioteki" (popover z T-70 zostaje — szybkie dopisanie jednej pozycji) · „Rozpisz na pomieszczenia". W grupie to samo jako linki (blok pomieszczenia zachowuje „Do wszystkich pomieszczeń").
+  > - **`ItemsColumnsHeader`** — nagłówek *Usługa · Ilość · Cena* nad pozycjami sekcji/grupy, **tylko w edycji** i tylko gdy są pozycje. Szerokości zgodne z `ItemRow`.
+  > - **Pola inline w edycji mają kreskowaną ramkę** (`globals.css`): widać, co jest polem, zanim się najedzie; hover/focus zamienia ją w pełną z tłem sage. W podglądzie ramka dalej przezroczysta — layout nie skacze (trik z prototypu zachowany).
+  **Na co uważać:**
+  > - **Panel jest jeden na wycenę, renderowany w `QuoteEditorPage`** obok `LibrarySheet`. Dostaje `handleInsertItems` (rozdziela rabaty) i `insertGroup` — te same ścieżki co popover, żadnej nowej drogi do store'u.
+  > - **Zestaw nie wchodzi do grupy** — gdy cel ma `groupId`, zakładka „Zestawy" znika, a nie jest wyszarzona (zasada „zakładka bez funkcji nie istnieje").
+  > - **`finish()` jest jedyną drogą wyjścia** (także `onOpenChange(false)`), zeruje licznik, szukajkę i filtr — ta sama lekcja co `close()` w T-70.
+  > - Wariant mobilny wiersza (`sm:hidden`) dubluje sposób wyceny pod nazwą — w jsdom oba są „widoczne", test liczy `getAllByText`.
+  > - `QuoteEditorPage.smoke.test` dostał mock `useLibraryCategoryList` — panel wisi w stronie także zamknięty, więc hook i tak się wykonuje (jak `useTemplates` w T-70).
+  > - **Nie sprawdzone na żywo** w tej sesji (brak podłączonej przeglądarki): układ kolumn tabeli i wygląd kreskowanych ramek — obejrzeć w `pnpm dev` przed merge'em.
 
 ## Faza 1.5 — reszta pakietu z Excela (zaraz po 1.0)
 

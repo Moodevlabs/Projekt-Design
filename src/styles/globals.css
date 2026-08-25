@@ -414,9 +414,20 @@
   outline: none;
 }
 
+/*
+ * W edycji pole MA byc widoczne od razu, a nie dopiero pod kursorem
+ * (inspiracja 2: pola sa obramowane). Kreskowana, jasna ramka mowi
+ * „tu sie pisze", nie zamieniajac dokumentu w formularz administracyjny.
+ */
+.quote-doc[data-mode='edit'] .inline-field {
+  border-color: var(--doc-hair);
+  border-style: dashed;
+}
+
 .quote-doc[data-mode='edit'] .inline-field:hover,
 .quote-doc[data-mode='edit'] .inline-field:focus {
   background: var(--doc-sage-light);
+  border-style: solid;
 }
 
 .quote-doc[data-mode='edit'] .price-field {
