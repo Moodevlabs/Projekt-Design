@@ -5,7 +5,8 @@
 export const pl = {
   app: {
     name: 'Toolier',
-    tagline: 'Interaktywne wyceny',
+    // Podpis pod logo na ekranach logowania. Hasło marki — nie tłumaczymy.
+    tagline: 'Tools for Atelier',
     /**
      * Podpis wytłoczony w tle aplikacji. Nazwy własne — nie tłumaczymy.
      *
