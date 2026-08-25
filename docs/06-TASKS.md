@@ -4,7 +4,7 @@ Format: `- [ ] T-xx Nazwa` — czytaj: wymagane dokumenty → kryteria akceptacj
 
 **Numer to tożsamość zadania, nie kolejność.** Kolejność wykonania = pozycja na liście. Po wchłonięciu `FEATURES-Z-EXCELA.md` (2026-08-22) zadania T-30+ zostały wplecione **pomiędzy** T-11…T-17, bo część z nich musi wyprzedzić PDF i brand kit — inaczej pisalibyśmy je dwa razy. Stare numery zostawiono nietknięte, żeby notatki i commity dalej się zgadzały.
 
-**2026-08-24 — koncepcja Toolier.** Zadania **T-53…T-66** (`FEATURES-Z-KONCEPCJI.md`) stoją **przed T-17**: oś klient → projekt → pliki, wersje wycen, restrukturyzacja biblioteki, rebranding i nowa cena wchodzą do 1.0. **Cała oś T-53…T-66 zrobiona (2026-08-25). Następne zadanie do wzięcia: T-17 (Polish & release 1.0).**
+**2026-08-24 — koncepcja Toolier.** Zadania **T-53…T-66** (`FEATURES-Z-KONCEPCJI.md`) stoją **przed T-17**: oś klient → projekt → pliki, wersje wycen, restrukturyzacja biblioteki, rebranding i nowa cena wchodzą do 1.0. **Cała oś T-53…T-66 zrobiona (2026-08-25). Następne zadania: T-17 (Polish & release 1.0) i T-70 (tworzenie wyceny — ergonomia z inspiracji).**
 
 Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełna specyfikacja, wzory z arkusza i model domenowy. Tutaj jest **kolejność, zależności i kolizje z istniejącym kodem**; nie duplikuję treści tamtego dokumentu.
 
@@ -632,6 +632,16 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - **Build macOS** — z Windowsa się nie da.
   > - **Podpis i notaryzacja** — wymagają certyfikatów (Apple Developer, EV/Azure). Co dokładnie mieć, stoi w README.
   > - **Wersja `0.1.0`** w `package.json` i `tauri.conf.json` — przed wydaniem podnieś w obu.
+
+- [ ] **T-70 Tworzenie wyceny: zakres zamiast listy** (inspiracja 1 + 2, koncepcja §5)
+  Z inspiracji bierzemy **sposób działania, nie wygląd**. Dziś zbudowanie wyceny na 20 pozycji to 20 cykli „otwórz picker → szukaj → kliknij → picker się zamyka". Inspiracje pokazują odwrotny kierunek: **zaznaczasz zakres — co i dla których pomieszczeń — a aplikacja składa dokument.**
+  1. **Wielokrotny wybór z biblioteki.** Picker przestaje zamykać się po jednej pozycji: zaznaczasz ptaszkami ile chcesz i wstawiasz jednym „Dodaj (N)". Dziś `pickItem` woła `setOpen(false)` po każdym kliknięciu (`LibraryPicker.tsx`).
+  2. **Filtr kategorii jako pigułki** (inspiracja 1: „Wszystkie · 01. Przygotowanie · 02. Układ przestrzeni…"). Picker grupuje po kategorii, ale nie pozwala zawęzić — przy 38 usługach z biblioteki przykładowej (T-62) lista jest dłuższa niż okno.
+  3. **Pomieszczenia przy dodawaniu usługi, nie przed.** Inspiracja 2 mówi wprost: *„Podczas tworzenia wyceny wybierasz pomieszczenia, dla których chcesz dodać usługę. System automatycznie pobierze odpowiednie stawki z biblioteki"*. Dla wpisu `per_room`/`per_frame` picker pyta o pomieszczenia od razu. `RoomsPanel` zostaje do zarządzania listą, ale przestaje być warunkiem wstępnym.
+  4. **Widać sposób wyceny, ZANIM klikniesz** (inspiracja 1: „Za m² · 12,00 zł/m²", „Według pomieszczeń · od 250,00 zł"). Dziś wiersz pickera pokazuje samą kwotę, więc „250,00 zł" przy usłudze liczonej per pomieszczenie wygląda na cenę końcową.
+  5. **Szablon wybierany przy zakładaniu wyceny** (koncepcja §5 pkt 7), a nie po otwarciu pustego edytora — `NewQuoteDialog` dostaje trzecie pole „Zacznij od: pusta / szablon".
+  ✅ Wycena z sześcioma pomieszczeniami i kilkunastoma usługami powstaje bez ani jednego zamknięcia i ponownego otwarcia pickera.
+  ⚠️ **To nie jest kreator krok-po-kroku.** Edytor zostaje jednoekranowy; wielokrotny wybór jest dodatkiem do dzisiejszej ścieżki, a nie zamiast niej — „Z biblioteki" przy pojedynczym wierszu zostaje, bo dopisanie jednej pozycji do gotowej oferty to najczęstsza czynność.
 
 ## Faza 1.5 — reszta pakietu z Excela (zaraz po 1.0)
 
