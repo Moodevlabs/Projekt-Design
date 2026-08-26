@@ -1,14 +1,20 @@
 /**
- * Barwa paska okresu próbnego: zielona na starcie, przez bursztyn, do
- * czerwieni w ostatnich dniach. Im bliżej końca, tym cieplej — kolor jest
- * drugim, „przedjęzykowym" sygnałem obok liczby dni w tekście.
+ * Barwa paska okresu próbnego: oliwka na starcie, przez ochrę, do terakoty
+ * w ostatnich dniach. Im bliżej końca, tym cieplej — kolor jest drugim,
+ * „przedjęzykowym" sygnałem obok liczby dni w tekście.
  *
- * Interpolacja jest dwuodcinkowa (zieleń → bursztyn → czerwień), bo prosta
- * między zielenią a czerwienią przechodzi przez brudną oliwkę.
+ * Interpolacja jest dwuodcinkowa (oliwka → ochra → terakota), bo prosta
+ * między nimi przechodzi przez brudną szarozieleń.
+ *
+ * ⚠️ **Te trzy kotwice są kopiami `--positive` / `--warning` / `--danger`
+ * z `globals.css` i muszą chodzić z nimi w parze.** Nie da się ich zastąpić
+ * `var(--…)`: funkcja interpoluje kanały RGB w JavaScripcie i musi dostać
+ * konkretne liczby, a nie nazwę zmiennej CSS rozwiązywaną dopiero przez
+ * przeglądarkę. Duplikat jest tu świadomy, nie przeoczony.
  */
-const GREEN = '#2c7a51';
-const AMBER = '#de8b2c';
-const RED = '#c0392b';
+const OLIVE = '#4a6340';
+const OCHRE = '#b07d2c';
+const TERRACOTTA = '#a8402f';
 
 function parseHex(hex: string): [number, number, number] {
   return [
@@ -34,13 +40,13 @@ function mix(from: string, to: string, amount: number): string {
  * @param totalDays długość okresu próbnego
  */
 export function trialTone(daysLeft: number, totalDays: number): string {
-  if (totalDays <= 0) return RED;
+  if (totalDays <= 0) return TERRACOTTA;
 
   const left = Math.min(totalDays, Math.max(0, daysLeft));
   const ratio = left / totalDays;
 
-  // Górna połowa zapasu: zieleń stygnie do bursztynu.
-  if (ratio >= 0.5) return mix(AMBER, GREEN, (ratio - 0.5) * 2);
-  // Dolna połowa: bursztyn przechodzi w czerwień.
-  return mix(RED, AMBER, ratio * 2);
+  // Górna połowa zapasu: oliwka ciepleje do ochry.
+  if (ratio >= 0.5) return mix(OCHRE, OLIVE, (ratio - 0.5) * 2);
+  // Dolna połowa: ochra przechodzi w terakotę.
+  return mix(TERRACOTTA, OCHRE, ratio * 2);
 }

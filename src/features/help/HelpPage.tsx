@@ -90,7 +90,7 @@ export function HelpPage() {
       */}
       <div className="lg:self-stretch">
         <nav aria-label={helpPl.tocLabel} className="card-surface p-3 lg:sticky lg:top-6">
-          <p className="text-ink-soft px-2 pt-1 pb-2 text-[10.5px] font-semibold tracking-[0.1em] uppercase">
+          <p className="label-caps text-ink-soft px-2 pt-1 pb-2">
             {helpPl.tocLabel}
           </p>
           <ol className="flex flex-col gap-0.5">
@@ -134,15 +134,15 @@ export function HelpPage() {
 
       <div className="flex min-w-0 flex-col gap-5 pb-16">
         <header className="card-surface p-7">
-          <p className="text-ink-soft text-[11px] font-semibold tracking-[0.14em] uppercase">
+          <p className="label-caps text-ink-soft">
             {helpPl.eyebrow}
           </p>
-          <h1 className="font-display text-ink mt-2 text-[28px] font-semibold tracking-tight">
+          <h1 className="font-display text-ink mt-2 text-[28px]">
             {helpPl.heading}
           </h1>
           <p className="text-ink-soft mt-3 max-w-[640px] text-[14.5px] leading-[1.65]">{helpPl.intro}</p>
 
-          <p className="text-ink-soft mt-6 text-[10.5px] font-semibold tracking-[0.1em] uppercase">
+          <p className="label-caps text-ink-soft mt-6">
             {helpPl.quickTitle}
           </p>
           <ul className="mt-2 flex flex-wrap gap-2">
@@ -175,10 +175,10 @@ export function HelpPage() {
                   <Icon className="size-[18px]" aria-hidden />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="text-ink-soft tabular text-[11px] font-semibold tracking-[0.14em] uppercase">
+                  <p className="label-caps text-ink-soft tabular">
                     {number(index)}
                   </p>
-                  <h2 id={`${section.id}-title`} className="font-display text-ink mt-0.5 text-[20px] font-semibold tracking-tight">
+                  <h2 id={`${section.id}-title`} className="font-display text-ink mt-0.5 text-[20px]">
                     {section.title}
                   </h2>
                   <p className="text-ink-soft mt-1.5 text-[14px] leading-[1.6]">{section.lead}</p>

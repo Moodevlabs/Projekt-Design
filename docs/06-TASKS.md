@@ -621,55 +621,132 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
 >
 > Materiały: `reference/nowy wyglad.png`, `reference/logotypy/{sygnet,toolier napis,toolier logo}.svg`. Kolory bazowe: **`#33251e`** (brąz), **`#efece8`** (beż). Fonty: **Faculty Glyphic** (display) + **Inter** (interfejs).
 
-- [ ] **T-74 Fundament: tokeny i paleta, fonty** (08-REDESIGN §1, §2)
+- [x] **T-74 Fundament: tokeny i paleta, fonty** (08-REDESIGN §1, §2)
   Wymiana `:root` w `globals.css` na ciepłą rampę (neutralne + szyna + funkcyjne), nowe cienie i promienie, przemapowanie bloku shadcn. `+ @fontsource/faculty-glyphic`, `− @fontsource-variable/instrument-sans`. Nowa utility `.label-caps`. Usunięcie `--field` i `body::before`.
   ✅ `pnpm dev` — aplikacja jest ciepła i czytelna bez ani jednej zmiany w JSX.
+  **Zrobiono:**
+  > - **Fonty nie były w ogóle ładowane.** `@fontsource-variable/inter` i `instrument-sans` stały w `package.json`, ale **żaden plik ich nie importował** — w całym repo nie było ani jednego `@font-face`. `'Inter Variable'` w stosie CSS nie rozwiązywało się do niczego i aplikacja renderowała się w systemowym Segoe UI. Bez naprawy tego dołożenie Faculty Glyphic też byłoby niewidoczne. Import wszedł do `main.tsx` **przed** `globals.css`.
+  > - Pełna rampa z §1: marka (`--brown`, `--beige`, `--espresso`), podłoże, **osobna rampa szyny** (`--rail-*`) i statusy w oliwce/ochrze/terakocie.
+  > - `.tabular` **jawnie** na `--font-sans` (pułapka niżej), `h1/h2/.font-display` z `font-weight: 400` wymuszonym w `@layer base` — żeby utility wagi nie zrobiło syntetyku.
+  > - `--ring: #9aa0aa` → `#7d6555` (≈4,8:1 na kanwie, ≈5,4:1 na karcie). Stary chłodny szary na beżu praktycznie znikał, a to jedyny wskaźnik pozycji dla klawiatury.
+  > - Warstwa szkła **została** i ma przestrojone na ciepło wartości — znika w T-76. Ten chunk celowo nie rusza JSX-a.
+  **Na co uważać:**
+  > - **Cienie nazywają się w `:root` `--elevation-card`/`--elevation-sheet`, nie `--shadow-*`.** Blok `@theme inline` wystawia je Tailwindowi pod nazwą `--shadow-card`; token odwołujący się do samego siebie (`--shadow-card: var(--shadow-card)`) jest cyklem i wysypuje kompilację.
+  > - `--canvas-light` zostało **celowo** — używa go jeszcze poświata w `AuthLayout`. Znika razem z nią w T-76.
   ⚠️ **`.tabular` musi zostać odpięte od `--font-display`** — inaczej wszystkie kwoty przeskoczą do Faculty Glyphic, który nie ma gwarantowanych cyfr tabularnych. Kolumna pieniędzy zacznie skakać.
-  ⚠️ **Faculty Glyphic ma jedną wagę (400), nie ma wariantu variable.** Każde `font-display` + `font-semibold` w JSX da sztuczne pogrubienie. Hierarchia idzie przez stopień pisma i wersaliki.
+  ⚠️ **Faculty Glyphic ma jedną wagę (400), nie ma wariantu variable.** Każde `font-display` + `font-semibold` w JSX da sztuczne pogrubienie. Hierarchia idzie przez stopień pisma i wersaliki. Do posprzątania w T-77/T-80 (8 wystąpień).
 
-- [ ] **T-75 Logotypy jako komponenty + ikony aplikacji** (08-REDESIGN §4)
+- [x] **T-75 Logotypy jako komponenty + ikony aplikacji** (08-REDESIGN §4)
   `src/assets/brand/{Sygnet,Wordmark,LogoLockup}.tsx` z `fill="currentColor"`. Podmiana liter „A" w `Sidebar.tsx` i `AuthLayout.tsx`. Favicon, `src-tauri/icons/` z sygnetu, ikona instalatora, `AppCredit` na nowe tokeny.
-  ✅ `grep -rnE '^\s*A\s*$' src --include=*.tsx` nic nie zwraca (dziś: `Sidebar.tsx:200`, `AuthLayout.tsx:35`); aplikacja w pasku zadań pokazuje Toolier.
-  ⚠️ Master ikony: **1024 PNG na beżu, nie na przezroczystości** — sygnet na ciemnym pasku zadań zniknąłby.
-  ⚠️ `logoDarkPath`/`logoLightPath` w brand kicie to logo **klienta** na jego PDF. Nie ruszać.
+  ✅ `grep -rnE '^\s*A\s*$' src --include=*.tsx` nic nie zwraca; aplikacja w pasku zadań pokazuje Toolier.
+  **Zrobiono:**
+  > - Trzy komponenty wygenerowane skryptem z plików w `reference/logotypy/`, nie przepisane ręcznie. Skrypt zdejmuje `<defs>`/`<style>` z wpisanym na sztywno `fill: #33251e` i klasy `.cls-1` — bez tego logotyp na brązowej szynie byłby brązem na brązie.
+  > - Wzorzec dostępności: `title` opcjonalny. Jest → `role="img"` z tytułem; nie ma → `aria-hidden`. Logotyp stojący obok nazwy produktu w tekście nie ma być czytany dwa razy.
+  > - **Podział zgodny z D-2:** sygnet (szyna zwinięta) / napis (szyna rozwinięta) / pełny lockup (tylko logowanie).
+  > - `AuthLayout` stracił `pl.app.name` i `pl.app.tagline` spod logotypu — hasło „Tools for Atelier" jest już w krzywych w lockupie i wychodziło dwa razy.
+  > - **`tauri icon` przyjmuje SVG**, więc master to `src-tauri/app-icon.svg`, a nie PNG — jedno źródło, ostre w każdym rozmiarze, wersjonowalne w gicie.
+  > - `public/favicon.svg` + `<link rel="icon">` w `index.html` (wcześniej aplikacja nie miała favicona w ogóle).
+  **Na co uważać:**
+  > - **Ikona aplikacji jest pełnospadowym kwadratem**, bez zaokrągleń. Tak wygląda natywnie w kafelkach Windows, dla których `tauri icon` generuje `Square*Logo.png`. Zaokrąglenie „squircle" pod macOS to osobny krok przy budowie na macu (T-17) — dorobienie go teraz zepsułoby kafelki.
+  > - Favicon **ma** zaokrąglenie (nie trafia do kafelków) i też beżowe tło — pasek kart bywa ciemny.
+  ⚠️ Master ikony: **na beżu, nie na przezroczystości** — sygnet na ciemnym pasku zadań zniknąłby.
+  ⚠️ `logoDarkPath`/`logoLightPath` w brand kicie to logo **klienta** na jego PDF. Nie ruszane.
 
-- [ ] **T-76 Płaskość: koniec szkła** (08-REDESIGN §3)
-  `.glass` / `.glass-strong` / `.glass-dark` / `.card-surface` → `.surface-card` / `.surface-band` / `.rail`. Usunięcie tokenów `--glass-*`, masek `mask-composite` i trzech bloków `@supports not (backdrop-filter)`. Przepięcie 5 plików używających `glass`.
-  ✅ `grep -rn "backdrop-filter|glass" src/` zwraca zero.
+- [x] **T-76 Płaskość: koniec szkła** (08-REDESIGN §3)
+  `.glass` / `.glass-strong` / `.glass-dark` → płaskie `.card-surface` / `.surface-band` / `.rail`. Usunięcie tokenów `--glass-*`, masek `mask-composite` i trzech bloków `@supports not (backdrop-filter)`. Przepięcie 5 plików używających `glass`.
+  ✅ `grep -rn "backdrop-filter\|glass" src/` zwraca tylko komentarz historyczny.
+  **Zrobiono:**
+  > - Cały `@layer components` (124 linie masek i rozmyć) zastąpiony trzema powierzchniami. Zniknęły `mask-composite`, `saturate()` i trzy fallbacki `@supports`.
+  > - **Nazwa `card-surface` ZOSTAJE**, mimo że w planie była `surface-card`. Ta klasa stoi w ~40 plikach — przemianowanie byłoby czystym szumem w dyfie. Wymieniona implementacja, nie nazwa.
+  > - `AuthLayout` stracił skupioną poświatę za kartą: istniała po to, żeby szkło miało co załamywać.
+  > - `.quote-sheet` na `--elevation-sheet` — kartka wyceny ma cień MOCNIEJSZY niż karty, żeby czytała się jako osobny przedmiot, a nie kolejny panel.
+  > - `ui/card.tsx` z `rounded-xl shadow-sm` na tokeny Toolier.
+  **Na co uważać — zmiana wobec planu:**
+  > - **Krój display przestał być regułą dla `h1, h2` i jest teraz jawnym opt-inem (`.font-display`).** Powód wyszedł dopiero przy przeglądzie kodu: `h2` jest w tej aplikacji niemal wyłącznie **małym** nagłówkiem karty (13–14 px), a w kilku miejscach wręcz etykietą wersalikową. Faculty Glyphic w 13 px z syntetycznym pogrubieniem zalewa światła w szeryfach i wygląda na zepsuty font. Display należy do tytułów, nie do każdego nagłówka.
+  > - Przy okazji zdjęte `font-semibold` z **wszystkich czterech** pozostałych par `font-display` + waga (`Topbar`, `AuthLayout`, `HelpPage` ×2). Zrobione tutaj, a nie w T-77/T-80, bo między chunkami aplikacja renderowałaby syntetyczny bold na tytułach.
   ⚠️ **Kolejność:** przed T-77 i T-78. Odwrotnie znaczyłoby restylowanie komponentów dwa razy — raz na szkle, raz na płasko.
 
-- [ ] **T-77 Powłoka: szyna i pas** (08-REDESIGN §5, makieta)
+- [x] **T-77 Powłoka: szyna i pas** (08-REDESIGN §5, makieta)
   Brązowa szyna z wersalikowymi etykietami, beżowy pas topbara, tytuł strony w Faculty Glyphic, CTA w ramce, awatar i kropka subskrypcji na brązie.
-  ✅ Zrzut pulpitu różni się od `reference/nowy wyglad.png` tylko tam, gdzie odstąpiliśmy świadomie (D-1…D-3, D-5).
-  ⚠️ **Makieta ma w menu „STUDIO" i nie ma „PULPIT" — nawigacji NIE zmieniamy** (D-5). To decyzja produktowa o tym, gdzie mieszka konfiguracja studia, a nie wizualna; osobne zadanie po redesignie.
-  ⚠️ **`nav-pill-stretch` do usunięcia** — animacja „kropli" należała do języka liquid glass; na płaskim brązie czyta się jak usterka. Sam przesuw zostaje.
-  ⚠️ Mechanizm jednej przejeżdżającej kulki zostaje — `Sidebar.test.tsx` go pilnuje.
+  ✅ `grep -rn "white/\|bg-white\|#131519" src/app/layouts/` zwraca zero — cała powłoka jedzie na tokenach `--rail-*`.
+  **Zrobiono:**
+  > - Etykiety nawigacji na `.label-caps` (wersaliki ze światłem) — język makiety, ten sam wzorzec co główki tabel.
+  > - Blok aktywnej pozycji: beż `--rail-pill`, promień 6 px, tekst w brązie. Pigułka 999 px zniknęła razem z resztą zaokrągleń.
+  > - **`nav-pill-stretch` usunięty**, a razem z nim **martwy stan `travelling`** w `ActiveIndicator` (`useState` + `useEffect` + `useRef` + `setTimeout` istniejące wyłącznie po to, żeby odpalić tę animację). Testy pilnują `data-index`, nie animacji — przeszły bez zmian.
+  > - Tytuł strony: Faculty Glyphic, wersaliki, światło **dodatnie** `0.06em`. Poprzednie `tracking-[-0.01em]` było ustawieniem pod gęsty grotesk; krój glificzny w wersalikach potrzebuje powietrza między szeryfami.
+  > - Nowy wariant przycisku **`frame`** (ramka + wersaliki) — CTA z makiety. Użyty wyłącznie w pasie; w treści zostaje `default` (D-3).
+  > - Pole wyszukiwania z `border-white/60 bg-white/45` (liczyło na szkło) na `--surface` + `--hair-strong`.
+  ⚠️ **Makieta ma w menu „STUDIO" i nie ma „PULPIT" — nawigacji NIE zmieniono** (D-5). To decyzja produktowa o tym, gdzie mieszka konfiguracja studia, a nie wizualna; osobne zadanie po redesignie.
+  ⚠️ **Nie zweryfikowane wizualnie na żywo.** Rozszerzenie Chrome nie było podłączone w tej sesji, więc zrzutu pulpitu obok makiety nikt nie porównał. Sprawdzone pośrednio: dev server odpowiada 200, build przechodzi, a w zbudowanym CSS są `--brown:#33251e`, `--beige:#efece8`, `--ring:#7d6555` i `@font-face` Faculty Glyphic.
 
-- [ ] **T-78 Kontrolki shadcn** (08-REDESIGN §5)
-  24 komponenty w `src/components/ui/` — warianty `button`, pola formularzy, `switch`, `badge`, `table`, `tabs`, warstwy nad treścią (`dialog`/`sheet`/`popover`/`dropdown`/`tooltip`/`command`/`sonner`).
-  ✅ Wszystkie stany (hover, focus-visible, disabled, invalid) sprawdzone na kanwie, na karcie i na beżowym pasie.
-  ⚠️ **`--ring` musi być brązowy i mieć ≥3:1 wobec obu podłoży.** Dzisiejszy `#9aa0aa` na beżu zniknie — a to jedyny wskaźnik fokusu dla klawiatury.
+- [x] **T-78 Kontrolki shadcn** (08-REDESIGN §5)
+  24 komponenty w `src/components/ui/` — warianty `button`, pola formularzy, `switch`, `table`, `tabs`, warstwy nad treścią.
+  ✅ Zmiany wyłącznie w klasach `cva`; żaden plik shadcn nie został przepisany od zera.
+  **Zrobiono:**
+  > - **Skala cieni Tailwinda nadpisana w `@theme`** (`--shadow-xs`…`--shadow-xl`) na warianty w atramencie marki. To jedna zmiana, która ociepla **wszystkie** warstwy nad treścią naraz — dialog, sheet, popover, dropdown, select, tooltip, input. Alternatywą było dopisywanie własnego cienia w kilkunastu plikach.
+  > - Welon dialogów i sheetów z `bg-black/50` na `rgba(31,22,17,0.42)`. Czerń na ciepłym beżu odbarwia tło na sino i wygląda jak wygaszony ekran.
+  > - Pola (`input`, `textarea`, `select`) z `bg-transparent` na `bg-surface` — pole stojące bezpośrednio na kanwie nie miało czym pokazać, gdzie się zaczyna. Placeholdery na `--ink-faint`.
+  > - Główki tabel: beżowy pas + `.label-caps`. Tabela czyta się jako arkusz z nagłówkiem, nie jako lista z pogrubioną pierwszą linijką.
+  > - Aktywna zakładka na `bg-surface` zamiast `bg-background` — tor jest na `--surface-2`, a kanwa różni się od niego o trzy punkty jasności i zakładka nie miała czym się odciąć.
+  > - Usunięte martwe warianty `dark:` z komponentów, których dotykałem (trybu ciemnego nie ma — T-21).
+  **Na co uważać:**
+  > - **Przełącznik dostał własny token `--toggle-off`.** Domyślne `bg-input` to rgba brązu 20% — dobre jako ramka pola, ale jako tor daje ~`#e0dad6`, na którym biały kciuk niemal znika. Kciuk zmieniony z `bg-background` (ciepła kanwa) na czystą biel z tego samego powodu.
+  ⚠️ **`--ring` brązowy i ≥3:1 wobec obu podłoży** — zrobione w T-74 (`#7d6555`).
   ⚠️ Zmieniać klasy w `cva`, nie przepisywać plików — `npx shadcn add` je kiedyś nadpisze.
 
-- [ ] **T-79 Statusy i barwy funkcyjne** (08-REDESIGN §1.3, §1.4)
-  Nowe `--status-*` w oliwce/ochrze/terakocie, `trial-tone.ts` z hexów na tokeny, trzy chłodne odcienie w `swatches.ts`. Hexy logo Google w `GoogleButton.tsx` **zostają**.
-  ✅ Pięć statusów obok siebie rozróżnialnych, także w symulacji deuteranopii.
-  ⚠️ `trial-tone.test.ts` asertuje wartości — aktualizacja razem ze zmianą.
+- [x] **T-79 Statusy i barwy funkcyjne** (08-REDESIGN §1.3, §1.4)
+  Nowe `--status-*` w oliwce/ochrze/terakocie, zestrojony `trial-tone.ts`, trzy chłodne odcienie w `swatches.ts`. Hexy logo Google w `GoogleButton.tsx` **zostały**.
+  ✅ `StatusMark` jedzie w całości na `var(--status-*)`, więc statusy przeszły już z T-74 — bez zmian w komponencie.
+  **Zrobiono:**
+  > - `trial-tone.ts`: `GREEN/AMBER/RED` → `OLIVE/OCHRE/TERRACOTTA` zestrojone z `--positive`/`--warning`/`--danger`.
+  > - `swatches.ts`: przestrojone **tylko trzy chłodne** odcienie (`sky`, `plum`, `slate`). `sand`, `sage`, `clay`, `moss` były ciepłe od początku i przeszły bez zmiany.
+  > - `GoogleButton` dostał komentarz ostrzegawczy nad znakiem — żeby przyszły sweep szukający hexów ich nie „naprawił".
+  > - Zweryfikowana regresja z §2: `Money` → `.tabular` → `--font-sans`. Kwoty są w Inter, nie w Faculty Glyphic.
+  **Na co uważać:**
+  > - **`trial-tone.ts` NIE dostał tokenów i to jest świadome.** Funkcja interpoluje kanały RGB w JavaScripcie i musi dostać konkretne liczby, a nie nazwę zmiennej CSS rozwiązywaną dopiero przez przeglądarkę. Trzy kotwice są kopiami wartości z `globals.css` — jest to zapisane w komentarzu przy nich i **muszą chodzić w parze**.
+  > - **Nazwy kluczy w `swatches.ts` zostały bez zmian** — siedzą w bazie jako `library_categories.color`. Zmieniamy wygląd odcienia, nie jego tożsamość; przemianowanie wymagałoby migracji.
+  ⚠️ `trial-tone.test.ts` asertował stare wartości — zaktualizowany razem ze zmianą. Test monotoniczności („im mniej dni, tym cieplejsza barwa") przechodzi na nowych kotwicach bez rozluźniania asercji.
 
-- [ ] **T-80 Ekrany treści** (08-REDESIGN §5)
-  Pulpit, klienci, projekty, rejestr wycen, edytor, biblioteka, szablony, pliki, ustawienia, pomoc, subskrypcja, auth, komponenty wspólne.
-  ✅ Klik przez wszystkie trasy z `routes.ts` bez elementu w chłodnej szarości.
-  ⚠️ **To chunk stylowania, nie refaktoru.** Jeśli przekroczy jeden PR — tnij po obszarach, nie po typach zmian. Pomysły na układ → `docs/IDEAS.md`.
+- [x] **T-80 Ekrany treści** (08-REDESIGN §5)
+  Pulpit, klienci, projekty, edytor, biblioteka, ustawienia, pomoc, subskrypcja, komponenty wspólne.
+  ✅ `grep -rE "#[0-9a-fA-F]{6}" src/features src/components src/app` zwraca tylko fallback natywnego `input[type=color]`. `grep "var(--doc-" ` poza dokumentem — zero.
+  **Znaleziony i naprawiony błąd sprzed redesignu:**
+  > - **Siedem komponentów CHROMU sięgało po tokeny `--doc-*`, które są zdefiniowane wyłącznie w scope `.quote-doc`.** Poza kartką wyceny `var()` nie rozwiązywał się do niczego, więc pasek „tryb tylko do odczytu" (`ReadOnlyBanner`), bloki „Uwaga" w pomocy (`HelpBlocks`) i ramka kasowania konta (`AccountSection`) renderowały się **bez tła**, a ich ikony ostrzegawcze dziedziczyły zwykły kolor tekstu zamiast terakoty. To nie regresja redesignu — tak było wcześniej, tyle że nikt tego nie zauważył, bo brakujące tło na chłodnej szarości wyglądało po prostu jak brak tła.
+  > - Doszły dwa tokeny chromu: `--danger-wash` i `--positive-wash`. Reszta przecieków przepięta na `--danger`, `--positive`, `--hair-strong`, `--primary`.
+  > - `OnboardingChecklist` na pulpicie używał `--doc-sage`. To szczególnie źle: paleta `--doc-*` jest **nadpisywana brand kitem klienta**, więc checklista onboardingowa zmieniałaby kolor razem z logo klienta.
+  **Zrobiono poza tym:**
+  > - `TrialBar` (stoi w szynie) z `bg-white/10 text-white/80` na rampę `--rail-*`.
+  > - `EditorTopbar`: przełącznik trybu i pole numeru z `border-white/60 bg-white/45` na tokeny — ten sam wzorzec, który liczył na szkło, co wyszukiwarka w topbarze.
+  > - Wersalikowe etykiety chromu ujednolicone na `.label-caps`: pulpit (3), pomoc (4), karta klienta, karta projektu, główka listy usług. Wcześniej były to **cztery różne** warianty tego samego wzorca (`text-[11px]/[10.5px]/text-xs`, `tracking-[0.14em]/[0.1em]/[0.08em]/wide`).
+  ⚠️ **To chunk stylowania, nie refaktoru.** Etykiety wersalikowe wewnątrz `.quote-doc` (edytor, dokumenty) **nie były ruszane** — należą do palety dokumentu i idą w T-81.
 
-- [ ] **T-81 Dokument wyceny i PDF** (08-REDESIGN §5, 04-PDF)
+- [x] **T-81 Dokument wyceny i PDF** (08-REDESIGN §5, 04-PDF)
   `.quote-doc` i `src/pdf/theme.ts` w ciepłym atramencie; biel kartki zostaje biała. Domyślne `accentColor`/`bgColor` brand kitu — tylko dla nowych workspace'ów.
-  ✅ PDF na świeżym koncie ma brąz Toolier; PDF istniejącego klienta z własnym akcentem nie zmienia się ani o piksel.
-  ⚠️ **Kolor na PDF jest własnością klienta.** Zmiana `default()` w zodzie nie rusza istniejących wierszy — i dobrze. Nadpisanie ich wymagałoby migracji i osobnej decyzji (D-4).
+  ✅ Migracja `0024` zmienia wyłącznie `default`; żadnego `update brand_kits set`.
+  **Zrobiono:**
+  > - **Sprawdzone, czym te pola naprawdę są, zanim nadano im wartości.** `accent_color` to tło **paska nagłówka** PDF, a `bg_color` — tło **bloku podsumowania**, nie tło całej strony (`QuotePdfDocument.tsx:119` i `:271`). Dlatego brąz `#33251E` i beż `#EFECE8` pasują tu wprost; gdyby `bg_color` był tłem strony, beż na całym A4 byłby złym pomysłem drukarskim.
+  > - `headerLogo` liczy się z `isLightBackground(accent)` — brąz jest ciemny, więc nagłówek automatycznie bierze **jasny** wariant logo klienta. Bez zmian w kodzie, po prostu działa.
+  > - Stałe PDF: `INK #21201C` → `#33251E`, `INK_SOFT` i `HAIR` w ciepło. `DISCOUNT` bez zmian.
+  > - `.quote-doc`: atrament, włos i „sage" w brąz; `--doc-bg` **zostaje bielą** (po redesignie kontrast dokument ↔ kanwa niesie jasność, nie temperatura).
+  **Na co uważać:**
+  > - **Test „domyślne wartości odpowiadają migracji brand_kits" ma wartości wpisane na sztywno — nie czyta pliku SQL.** Parytet jest więc konwencją, nie egzekwowanym kontraktem: przy kolejnej zmianie domyślnych trzeba ruszyć **oba** miejsca, bo test złapie rozjazd tylko po stronie zodu. (Inaczej niż `price-keys.test.ts`, które faktycznie czyta plik Deno.)
+  ⚠️ **Kolor na PDF jest własnością klienta.** Migracja rusza tylko `default`, czyli to, co dostanie nowe konto. Istniejące wiersze zostają nietknięte — świadomie (D-4).
+  ⚠️ **Nie zweryfikowane na żywo:** migracja nie była uruchomiona (`supabase db reset` wymaga wstającego Dockera), a PDF nie był wygenerowany. Testy jednostkowe PDF przechodzą.
 
-- [ ] **T-82 Domknięcie: dokumentacja, kontrast, build** (08-REDESIGN §5)
-  Przepisanie `docs/05-UI.md` §1–§2 (dziś podaje `#F2F4F8` i „literę «T» w czarnym kółku"), nagłówek tezy w `globals.css`, CHANGELOG, zrzuty do README, usunięcie martwych tokenów.
-  ✅ Audyt WCAG AA na **czterech** podłożach (szyna, pas, kanwa, karta): tekst ≥4,5:1, kontrolki i `focus-visible` ≥3:1. `pnpm build` i `pnpm tauri build` przechodzą.
-  ⚠️ Faculty Glyphic to nowy asset w łańcuchu Vite — sprawdzić, że wchodzi do bundla, a nie tylko do `pnpm dev`.
+- [x] **T-82 Domknięcie: dokumentacja, kontrast, build** (08-REDESIGN §5)
+  Przepisane `docs/05-UI.md` §1–§2, nagłówek tezy w `globals.css`, CHANGELOG, usunięte martwe tokeny.
+  ✅ Audyt WCAG AA: **30 par, 0 niezaliczonych**. `pnpm build` przechodzi, Faculty Glyphic i Inter są w `dist/assets/`.
+  **Audyt kontrastu wykrył pięć realnych niezgodności — nie było ich widać „na oko":**
+  > Ciepłe barwy przy tej samej *intuicyjnej* jasności mają niższą luminancję względną niż chłodne, więc paleta, która wyglądała dobrze, wpadała pod próg dopiero po przeliczeniu.
+  > - **`--discount` 4,25:1** — a to kolor **kwoty**, czyli tekstu niosącego pieniądze. Przyciemniony do `#b0563c`, czyli dokładnie tyle co `--doc-terracotta`: przy okazji jeden kolor mniej w systemie i rabat wygląda tak samo na ekranie i na wydruku.
+  > - **`--warning` 3,62:1** — ostrzeżenie bywa tekstem. Przyciemnione do `#9a6c24`. Odcinek statusu „szkic" **zostaje jaśniejszy**, bo tam ochra jest grafiką i obowiązuje próg 3:1.
+  > - **`--toggle-off` 1,44:1 w dwóch miejscach naraz.** Biały kciuk na torze i tor na białej karcie to matematycznie **ten sam** stosunek — jedna zmiana zamknęła oba. Nie było widać ani przełącznika na karcie, ani pozycji kciuka, czyli jedynego nośnika stanu.
+  > - **`--ink-faint` 2,87:1** — placeholdery poniżej progu 3:1.
+  **Zrobiono poza tym:**
+  > - **Audyt jest teraz testem, nie jednorazowym skryptem: `src/styles/contrast.test.ts` (29 asercji).** Czyta i **parsuje `globals.css`** zamiast trzymać kopię palety — świadomie inaczej niż `schema.test.ts` wobec migracji, gdzie kopia może się rozjechać (patrz T-81). Sprawdzone, że test **faktycznie łapie regresję**: cofnięcie `--discount` do starej wartości go zaczerwienia.
+  > - `hover:bg-primary/90` → `hover:bg-espresso` na głównym przycisku. Krycie 90% brązu na **jasnej** kanwie daje kolor **jaśniejszy** od spoczynkowego, czyli hover działał w odwrotną stronę.
+  > - Usunięty martwy `--rail-deep`; `--canvas-light` wypadł już w T-76.
+  ⚠️ **Nie zweryfikowane:** wygląd nie porównany z makietą na żywo (brak podłączonego rozszerzenia Chrome), `pnpm tauri build` nieuruchomiony, migracja `0024` nieuruchomiona (wymaga Dockera), PDF niewygenerowany.
 
 - [ ] **T-17 Polish & release 1.0**
   Pusty stan onboardingu (3 kroki: logo → biblioteka → pierwsza wycena; po T-62: „przejrzyj bibliotekę przykładową"), obsługa błędów (ErrorBoundary, toasty), ikony aplikacji, `tauri build` Win+mac, podpisywanie (notarization macOS, cert Win — zanotuj w README co trzeba mieć), CHANGELOG.

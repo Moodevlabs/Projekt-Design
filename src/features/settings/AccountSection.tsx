@@ -146,7 +146,7 @@ function DeleteAccount({ onDeleted }: { onDeleted: () => void }) {
   };
 
   return (
-    <div className="space-y-2 rounded-[var(--radius-card)] border border-[var(--doc-hair-strong)] bg-[var(--doc-danger-wash)] p-4">
+    <div className="space-y-2 rounded-[var(--radius-card)] border-hair-strong bg-danger-wash border p-4">
       <Label htmlFor="deleteConfirmation">{pl.settings.deleteAccount}</Label>
       <p className="text-ink-soft text-xs">{pl.settings.deleteAccountHint}</p>
       <div className="flex flex-wrap items-center gap-2">

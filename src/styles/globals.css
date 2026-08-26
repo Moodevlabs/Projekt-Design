@@ -4,89 +4,140 @@
 @custom-variant dark (&:is(.dark *));
 
 /* ===============================================================
-   TOOLIER — system wizualny
+   TOOLIER — system wizualny (redesign 2026, T-74…T-82)
    ---------------------------------------------------------------
-   Teza: CHROM APLIKACJI JEST ZE SZKŁA, DOKUMENT JEST Z PAPIERU.
-   Powłoka (sidebar, paski, karty) jest chłodna, warstwowa i
-   półprzezroczysta — cofa się. Wycena zostaje ciepłym, matowym
-   papierem i wychodzi do przodu. Szkło oprawia papier.
+   Teza: APLIKACJA JEST DRUKOWANĄ TECZKĄ ATELIER.
+   Szyna to brązowa okładka, kanwa to papier roboczy, wycena to
+   biała kartka na wierzchu. Kontrast chrom ↔ dokument niesie
+   JASNOŚĆ I MATERIAŁ, nie temperatura (jak w poprzedniej tezie
+   „chrom ze szkła" z T-08a): cztery plany idą monotonicznie od
+   ciemnego brązu do czystej bieli.
+
+     szyna #33251e → pas #efece8 → kanwa #f7f4f0 → karta #fff
+
    Paleta dokumentu żyje osobno, na dole tego pliku.
+   Pełne uzasadnienie: docs/08-REDESIGN-2026.md
    =============================================================== */
 
 :root {
+  /* --- marka ---
+     Dwa kolory podane przez właściciela; cała reszta rampy jest z nich
+     wyprowadzona: ta sama rodzina odcienia (~25°), niska chroma. */
+  --brown: #33251e;
+  --beige: #efece8;
+  --espresso: #1f1611;
+
   /* --- podłoże ---
-     Szkło potrzebuje czegoś, co może załamać. Kanwa jest chłodna
-     i o ton głębsza, niż byłaby dla płaskiego UI. */
-  /* Szarobiel. Chrom ma być cichy i nie konkurować z dokumentem —
-     docelowa kolorystyka przyjdzie na końcu budowy (T-17). */
-  --canvas: #eceef1;
-  --canvas-light: #fdfdfe;
-  --canvas-deep: #dfe2e7;
+     Kanwa leży MIĘDZY beżem a bielą, żeby beżowy pas topbara czytał się
+     jako osobny, ciemniejszy plan, a biała karta jako uniesiona. */
+  --canvas: #f7f4f0;
 
   --surface: #ffffff;
-  --surface-2: #f4f5f7;
+  --surface-2: #f4f0eb;
 
-  --ink: #16181c;
-  --ink-soft: #6a6e76;
-  --hair: rgba(22, 24, 28, 0.10);
+  --ink: #33251e;
+  /* #74645a, nie #7a6a5f: ta druga wartość ma na kanwie 4,59:1 — zdaje AA
+     bez marginesu, a na --surface-2 już nie zdaje. Ta ma ≈5,0:1 wszędzie. */
+  --ink-soft: #74645a;
+  /* Wyłącznie placeholdery i stany wyłączone. Nigdy nie niesie treści.
+     #9b8d80, nie #a4968a: ta druga miała na karcie 2,87:1 i nie dobijała
+     do progu 3:1 dla elementów interfejsu (audyt T-82). */
+  --ink-faint: #9b8d80;
+  --hair: rgba(51, 37, 30, 0.12);
+  --hair-strong: rgba(51, 37, 30, 0.2);
 
-  --cta: #14161c;
-  --cta-fg: #ffffff;
+  /* --- szyna (ciemne tło) ---
+     Ciemna powierzchnia potrzebuje WŁASNEJ rampy. Bez niej wszystko ląduje
+     w JSX jako `white/65` i `white/25` — dokładnie tak wyglądał Sidebar
+     przed redesignem. Przy okazji: to gotowa baza pod tryb ciemny (T-21). */
+  --rail: #33251e;
+  --rail-ink: #efece8;
+  --rail-ink-soft: rgba(239, 236, 232, 0.62);
+  --rail-hair: rgba(239, 236, 232, 0.14);
+  --rail-pill: #efece8;
+  --rail-pill-ink: #33251e;
 
-  --positive: #2f855a;
-  --warning: #b7791f;
-  --danger: #c53030;
-  --discount: #b9634a;
+  --cta: #33251e;
+  --cta-fg: #efece8;
+
+  /*
+   * Tor przełącznika w stanie WYŁĄCZONYM.
+   *
+   * Ciemniejszy, niż podpowiada odruch. Audyt T-82 pokazał, że jasny tor
+   * (`#ded6cf`) daje **1,44:1** — i to w DWÓCH miejscach naraz, bo biały
+   * kciuk na torze i tor na białej karcie to matematycznie ten sam stosunek.
+   * Przy takiej wartości nie widać ani samego przełącznika na karcie, ani
+   * pozycji kciuka, czyli jedynego nośnika stanu.
+   *
+   * `#94897f` daje 3,42:1 w obu tych parach jednocześnie. Czyta się ciemniej
+   * niż typowy „wyłączony", ale stan dalej jest jednoznaczny: tor włączony
+   * to brąz, różnica między nimi to 4,3:1, a kciuk widać zawsze.
+   */
+  --toggle-off: #94897f;
+
+  --positive: #4a6340;
+  /* #9a6c24, nie #b07d2c: ostrzeżenie bywa TEKSTEM, a jaśniejsza ochra
+     miała na karcie 3,62:1 — poniżej progu 4,5:1 dla tekstu (audyt T-82).
+     Odcinek statusu „szkic" zostaje jaśniejszy, bo tam ochra jest grafiką
+     i obowiązuje próg 3:1. */
+  --warning: #9a6c24;
+  --danger: #a8402f;
+
+  /*
+   * Tła ostrzeżeń i potwierdzeń w CHROMIE.
+   *
+   * Istnieją, bo do T-80 siedem komponentów powłoki (ReadOnlyBanner,
+   * HelpBlocks, AccountSection, SubscriptionPage…) sięgało po `--doc-*` —
+   * a te są zdefiniowane WYŁĄCZNIE w scope `.quote-doc`. Poza kartką wyceny
+   * `var()` nie rozwiązywało się do niczego, więc pasek „tryb tylko do
+   * odczytu" i bloki „Uwaga" w pomocy renderowały się bez tła.
+   */
+  --danger-wash: #f7ece9;
+  --positive-wash: #eef0e9;
+  /*
+   * Terakota rabatów. Przyciemniona z `#b9634a` do wartości identycznej
+   * z `--doc-terracotta`: stara miała na karcie **4,25:1**, a to jest kolor
+   * KWOTY — tekstu niosącego pieniądze, więc obowiązuje próg 4,5:1.
+   * Zrównanie z odcieniem dokumentu to przy okazji jeden kolor mniej
+   * w systemie: rabat wygląda tak samo na ekranie i na wydruku.
+   */
+  --discount: #b0563c;
 
   /*
    * Barwy statusu wyceny. Liczba odcinków niesie POSTĘP (szkic → wysłana →
-   * rozstrzygnięcie), barwa niesie KONDYCJĘ oferty: bursztyn = jeszcze u nas,
-   * zieleń = poszła do klienta i im ciemniejsza, tym bliżej domknięcia.
+   * rozstrzygnięcie), barwa niesie KONDYCJĘ oferty: ochra = jeszcze u nas,
+   * oliwka = poszła do klienta i im ciemniejsza, tym bliżej domknięcia.
    * Napis zostaje neutralny, żeby nie tracić kontrastu na drobnym stopniu.
+   *
+   * Po ociepleniu ochra i jasna oliwka mają zbliżoną JASNOŚĆ. To nie problem,
+   * dopóki obowiązuje zasada: kolor jest wzmocnieniem, nigdy jedynym nośnikiem
+   * (informację niesie liczba odcinków i słowo obok).
    */
-  --status-draft: #de8b2c;
-  --status-sent: #6ab98a;
-  --status-accepted: #2c7a51;
-  --status-rejected: #c05a4e;
-  --status-expired: #9aa0aa;
+  --status-draft: #b8863b;
+  --status-sent: #7d9068;
+  --status-accepted: #4a6340;
+  --status-rejected: #a8503c;
+  --status-expired: #9c9088;
 
-  /* --- szkło ---
-     Prawdziwe „liquid glass" to nie sam blur: potrzebne są cztery
-     rzeczy naraz — rozmycie tła, podbicie nasycenia (inaczej wychodzi
-     brudna szarość), włos obramowania JAŚNIEJSZY u góry niż u dołu
-     (odblask) i miękki cień w kolorze atramentu, nie czerni. */
-  --glass-bg: rgba(255, 255, 255, 0.52);
-  --glass-bg-strong: rgba(255, 255, 255, 0.72);
-  --glass-blur: 22px;
-  --glass-saturate: 175%;
-  --glass-highlight: rgba(255, 255, 255, 0.9);
-  --glass-edge: rgba(22, 24, 28, 0.08);
-  --glass-shadow:
-    0 1px 2px rgba(22, 24, 28, 0.04), 0 14px 34px -12px rgba(22, 24, 28, 0.16);
+  /* --- cienie ---
+     Ciepłe, nie czarne. Cień w kolorze atramentu na beżu czyta się jak
+     światło w pomieszczeniu; czarny wygląda jak brud pod krawędzią. */
+  /* Nazwa `--elevation-*`, a nie `--shadow-*`: blok `@theme inline` niżej
+     wystawia je Tailwindowi jako `--shadow-card`/`--shadow-sheet`, a token
+     odwołujący się do samego siebie byłby cyklem. */
+  --elevation-card:
+    0 1px 2px rgba(51, 37, 30, 0.05), 0 8px 24px -12px rgba(51, 37, 30, 0.12);
+  --elevation-sheet:
+    0 1px 3px rgba(51, 37, 30, 0.06), 0 24px 48px -20px rgba(51, 37, 30, 0.2);
 
-  /* Ciemna tafla — nawigacja. Ta sama fizyka, odwrócone wartości:
-     rozjaśnienie u góry (odblask), głębia u dołu. */
-  --glass-dark-bg: rgba(19, 21, 25, 0.93);
-  --glass-dark-highlight: rgba(255, 255, 255, 0.22);
-  --glass-dark-edge: rgba(255, 255, 255, 0.04);
-  --glass-dark-shadow: 0 0 0 1px rgba(19, 21, 25, 0.6), 0 18px 44px -14px rgba(19, 21, 25, 0.5);
+  /* Blok aktywnej pozycji leży na BRĄZOWEJ szynie, więc jest beżowy. */
+  --nav-pill: var(--rail-pill);
 
-  /* Kulka aktywnej pozycji leży na CIEMNEJ szynie, więc jest biała. */
-  --nav-pill: #ffffff;
-
-  /*
-   * Pole swiatla jako zmienna, bo uzywa go i `body::before`, i wciecie
-   * w nawigacji. Oba renderuja je z `background-attachment: fixed`, wiec
-   * sa zakotwiczone w tym samym punkcie widoku i pasuja co do piksela.
-   */
-  --field:
-    radial-gradient(72rem 52rem at 4% -10%, var(--canvas-light), transparent 60%),
-    radial-gradient(60rem 48rem at 106% 110%, var(--canvas-deep), transparent 58%);
-
-  --radius-card: 20px;
-  --radius-control: 12px;
+  /* Makieta jest niemal ostrokątna — promienie w dół (20/12 → 10/8).
+     `--radius-pill` zostaje tylko dla znaczników statusu i awatara. */
+  --radius-card: 10px;
+  --radius-control: 8px;
   --radius-pill: 999px;
-  --shadow-card: var(--glass-shadow);
 
   /* --- ruch ---
      Jedna krzywa na wszystko, co „płynie": lekkie przestrzelenie
@@ -114,22 +165,42 @@
   --destructive: var(--danger);
   --destructive-foreground: #ffffff;
   --border: var(--hair);
-  --input: var(--hair);
-  --ring: #9aa0aa;
+  --input: var(--hair-strong);
+  /*
+   * Wskaźnik fokusu to JEDYNA informacja o pozycji dla osoby na klawiaturze,
+   * więc nie może być dekoracją. Poprzedni `#9aa0aa` (chłodna szarość) na
+   * ciepłym beżu praktycznie znikał. Ten ma ≈4,8:1 na kanwie i ≈5,4:1 na
+   * karcie — dobrze powyżej progu 3:1 dla elementów interfejsu.
+   */
+  --ring: #7d6555;
 }
 
 @theme inline {
+  --color-brown: var(--brown);
+  --color-beige: var(--beige);
+  --color-espresso: var(--espresso);
   --color-canvas: var(--canvas);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
   --color-ink: var(--ink);
   --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
   --color-hair: var(--hair);
+  --color-hair-strong: var(--hair-strong);
+  --color-toggle-off: var(--toggle-off);
+  --color-rail: var(--rail);
+  --color-rail-ink: var(--rail-ink);
+  --color-rail-ink-soft: var(--rail-ink-soft);
+  --color-rail-hair: var(--rail-hair);
+  --color-rail-pill: var(--rail-pill);
+  --color-rail-pill-ink: var(--rail-pill-ink);
   --color-cta: var(--cta);
   --color-cta-fg: var(--cta-fg);
   --color-positive: var(--positive);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
+  --color-danger-wash: var(--danger-wash);
+  --color-positive-wash: var(--positive-wash);
   --color-discount: var(--discount);
 
   --color-background: var(--background);
@@ -156,17 +227,42 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --radius-card: 20px;
-  --radius-control: 12px;
+  --radius-card: 10px;
+  --radius-control: 8px;
   --radius-pill: 999px;
 
-  --shadow-card: var(--glass-shadow);
+  --shadow-card: var(--elevation-card);
+  --shadow-sheet: var(--elevation-sheet);
 
-  /* Inter niesie gęsty interfejs; Instrument Sans — tytuły, etykiety
-     wersalikowe i LICZBY. W narzędziu do wycen liczby są bohaterem,
-     więc dostają własny krój, a nie ten sam co reszta. */
+  /*
+   * Nadpisanie STANDARDOWEJ skali cieni Tailwinda. Robimy to w jednym
+   * miejscu, bo inaczej każdy komponent shadcn (dialog, sheet, popover,
+   * dropdown, select, tooltip, input) niósłby domyślny cień w czerni —
+   * na ciepłym beżu czyta się on jak brud pod krawędzią, nie jak światło.
+   * Wszystkie warstwy w kolorze atramentu marki.
+   */
+  --shadow-2xs: 0 1px 1px rgba(51, 37, 30, 0.04);
+  --shadow-xs: 0 1px 2px rgba(51, 37, 30, 0.06);
+  --shadow-sm: 0 1px 2px rgba(51, 37, 30, 0.06), 0 1px 3px rgba(51, 37, 30, 0.07);
+  --shadow-md: 0 2px 4px -1px rgba(51, 37, 30, 0.06), 0 8px 16px -6px rgba(51, 37, 30, 0.14);
+  --shadow-lg: 0 4px 8px -2px rgba(51, 37, 30, 0.07), 0 16px 32px -12px rgba(51, 37, 30, 0.18);
+  --shadow-xl: 0 8px 16px -4px rgba(51, 37, 30, 0.08), 0 28px 56px -20px rgba(51, 37, 30, 0.22);
+
+  /*
+   * Inter niesie gęsty interfejs I LICZBY. Faculty Glyphic — wyłącznie
+   * tytuły stron i nagłówki.
+   *
+   * ⚠️ Liczby zostają w Inter świadomie. Faculty Glyphic to krój glificzny
+   * bez gwarantowanych cyfr tabularnych, a to jest narzędzie do wycen —
+   * kolumna pieniędzy nie ma prawa skakać przy zmianie cyfry. Patrz `.tabular`.
+   *
+   * ⚠️ Faculty Glyphic ma JEDNĄ wagę (400) i nie ma wariantu variable.
+   * Nigdy nie łącz `font-display` z klasą wagi — przeglądarka wyrenderuje
+   * sztuczne pogrubienie, które na szeryfach glificznych zalewa światła.
+   * Hierarchia idzie przez stopień pisma, wersaliki i światło międzyliterowe.
+   */
   --font-sans: 'Inter Variable', ui-sans-serif, system-ui, 'Segoe UI', sans-serif;
-  --font-display: 'Instrument Sans Variable', 'Inter Variable', ui-sans-serif, sans-serif;
+  --font-display: 'Faculty Glyphic', 'Iowan Old Style', Georgia, serif;
 }
 
 @layer base {
@@ -187,32 +283,57 @@
   }
 
   /*
-   * Podłoże pod szkłem. Nie gradient kolorystyczny — sama LUMINANCJA:
-   * jaśniej u góry po lewej, ciemniej u dołu po prawej, jak światło
-   * padające na matową ścianę. Szkło musi mieć różnicę jasności, żeby
-   * w ogóle było widać, że coś rozmywa; barwy do tego nie potrzebuje.
-   * Statyczne i `fixed` — nic się nie animuje przy przewijaniu.
+   * Radialne pole światła (`body::before` + `--field`) usunięte w T-74.
+   * Istniało WYŁĄCZNIE po to, żeby szkło miało różnicę luminancji do
+   * załamania. Na płaskim, ciepłym podłożu jest niewidoczne, a kosztuje
+   * jedną warstwę `fixed` przemalowywaną przy każdym przewinięciu.
    */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    background-color: var(--canvas);
-    background-image: var(--field);
-  }
 
-  h1,
-  h2,
+  /*
+   * Krój display jest JAWNYM opt-inem (`.font-display`), a nie regułą dla
+   * `h1, h2`.
+   *
+   * Poprzednia wersja łapała każdy `h2` — a `h2` jest w tej aplikacji niemal
+   * wyłącznie małym nagłówkiem karty (13–14 px), czasem wręcz etykietą
+   * wersalikową. Faculty Glyphic to krój glificzny o jednej wadze: w 13 px
+   * ze sztucznym pogrubieniem zalewa światła w szeryfach i wygląda na
+   * zepsuty font. Display należy do TYTUŁÓW, nie do każdego nagłówka.
+   */
   .font-display {
     font-family: var(--font-display);
+    /* Waga wymuszona, bo krój ma tylko 400. Utility wagi i tak wygra
+       (warstwa utilities > base), więc `font-display` nie może NIGDY
+       stać obok `font-semibold` — patrz docs/08-REDESIGN-2026.md §2. */
+    font-weight: 400;
   }
 
-  /* Ceny i liczby zawsze tabularne — kolumny się nie rozjeżdżają. */
+  /*
+   * Ceny i liczby zawsze tabularne — kolumny się nie rozjeżdżają.
+   *
+   * ⚠️ Krój JAWNIE z `--font-sans`, nie z `--font-display`. Przed redesignem
+   * ta klasa dziedziczyła krój display i podmiana na Faculty Glyphic
+   * przeciągnęłaby wszystkie kwoty w aplikacji do glificznego szeryfu bez
+   * gwarantowanych cyfr tabularnych.
+   */
   .tabular {
     font-variant-numeric: tabular-nums;
-    font-family: var(--font-display);
+    font-family: var(--font-sans);
+  }
+
+  /*
+   * Etykieta wersalikowa — nawigacja, główki tabel, „oczka" nad listami.
+   * Jedno miejsce zamiast powtarzanego `text-[11px] uppercase tracking-[.12em]`
+   * w kilkudziesięciu komponentach. Kolor NIE jest tu ustawiony: ta sama
+   * etykieta stoi i na kanwie (`--ink-soft`), i na brązowej szynie
+   * (`--rail-ink-soft`), więc barwę nadaje miejsce użycia.
+   */
+  .label-caps {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.45;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
   }
 
   input[type='number']::-webkit-outer-spin-button,
@@ -224,128 +345,57 @@
 
 @layer components {
   /*
-   * Podstawowa tafla. `::before` rysuje WŁOS obramowania jako gradient
-   * (jasny u góry, ciemniejszy u dołu) przez maskę — zwykły
-   * `border: 1px solid` daje płaską ramkę i od razu widać, że to
-   * rozmyty div, a nie szkło.
+   * ===============================================================
+   * WARSTWA MATERIAŁOWA — trzy powierzchnie, zero rozmycia (T-76)
+   * ---------------------------------------------------------------
+   * Poprzednia wersja („liquid glass", T-08a) budowała każdą taflę
+   * z czterech rzeczy naraz: `backdrop-filter`, podbicia nasycenia,
+   * gradientowego włosa przez `mask-composite` i cienia. Miało to sens,
+   * dopóki pod spodem leżało chłodne pole światła z różnicą luminancji.
+   *
+   * Na ciepłym, płaskim podłożu rozmycie nie ma czego załamać: beż
+   * rozmyty przez beż daje mulistą szarość, a `saturate()` na brązie
+   * robi rdzę. Materiał niesie teraz sama JASNOŚĆ i włos obramowania.
+   *
+   * Efekt uboczny nie jest kosmetyczny: `backdrop-filter` na pełnej
+   * wysokości szyny i na przyklejonym pasku to dwa pełnoekranowe
+   * przemalowania przy każdym przewinięciu w WebView2. Zniknęły —
+   * razem z trzema blokami `@supports not (backdrop-filter)`.
+   * ===============================================================
    */
-  .glass {
-    position: relative;
-    background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-    box-shadow: var(--glass-shadow);
-  }
 
-  .glass::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(
-      160deg,
-      var(--glass-highlight) 0%,
-      rgba(255, 255, 255, 0.25) 34%,
-      var(--glass-edge) 100%
-    );
-    -webkit-mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    mask-composite: exclude;
-    pointer-events: none;
-  }
-
-  .glass-strong {
-    background: var(--glass-bg-strong);
-  }
-
-  /* Ciemny wariant tafli. Nawigacja jest osią aplikacji: czarna szyna,
-     jasne szkło treści, ciepły papier dokumentu — trzy wyraźne plany. */
-  .glass-dark {
-    position: relative;
-    background: var(--glass-dark-bg);
-    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-    box-shadow: var(--glass-dark-shadow);
-    color: #fff;
-  }
-
-  .glass-dark::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(
-      168deg,
-      var(--glass-dark-highlight) 0%,
-      rgba(255, 255, 255, 0.06) 30%,
-      var(--glass-dark-edge) 100%
-    );
-    -webkit-mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    mask-composite: exclude;
-    pointer-events: none;
-  }
-
-  @supports not (backdrop-filter: blur(1px)) {
-    .glass-dark {
-      background: #131519;
-    }
-  }
-
-  /* Karta chromu = tafla szkła. Nie przez `@apply .glass` — w Tailwind 4
-     `@apply` przyjmuje tylko utilities, nie własne klasy. */
+  /*
+   * Karta — biel uniesiona nad kanwą. Jedna klasa; wcześniej to samo robiły
+   * dwie bliźniacze (`.glass` i `.card-surface`), różniące się tylko tym,
+   * że druga miała wpisany promień.
+   *
+   * Nazwa zostaje `card-surface`, mimo że „surface-card" czytałoby się
+   * lepiej: ta klasa stoi w ~40 plikach i przemianowanie byłoby czystym
+   * szumem w dyfie redesignu. Zmieniamy implementację, nie nazwę.
+   */
   .card-surface {
     position: relative;
     border-radius: var(--radius-card);
-    background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-    box-shadow: var(--glass-shadow);
+    background: var(--surface);
+    border: 1px solid var(--hair);
+    box-shadow: var(--elevation-card);
   }
 
-  .card-surface::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(
-      160deg,
-      var(--glass-highlight) 0%,
-      rgba(255, 255, 255, 0.25) 34%,
-      var(--glass-edge) 100%
-    );
-    -webkit-mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    mask-composite: exclude;
-    pointer-events: none;
+  /* Pas — topbar i główki. Beż jest CIEMNIEJSZY od kanwy, więc pas
+     czyta się jako osobny plan bez potrzeby cienia i bez krawędzi
+     u góry; wystarczy kreska u dołu. */
+  .surface-band {
+    background: var(--beige);
+    border-bottom: 1px solid var(--hair);
   }
 
-  /* Przeglądarki bez `backdrop-filter` dostają zwykłą, nieprzezroczystą taflę. */
-  @supports not (backdrop-filter: blur(1px)) {
-    .glass {
-      background: rgba(255, 255, 255, 0.94);
-    }
+  /* Szyna nawigacji — brązowa okładka teczki. Pełny kolor, bez cienia:
+     kontrast z kanwą jest tak duży, że cień byłby brudem. */
+  .rail {
+    background: var(--rail);
+    color: var(--rail-ink);
   }
 }
-
 /* Kto prosi o mniej ruchu, dostaje mniej ruchu. */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -363,23 +413,33 @@
    T-12 nadpisze je inline ze stylu brand kitu, dlatego sÄ… zmiennymi.
    --------------------------------------------------------------- */
 .quote-doc {
+  /*
+   * ⚠️ Te tokeny są zdefiniowane WYŁĄCZNIE w tym scope. Sięganie po nie
+   * spoza kartki wyceny nie działa — `var()` nie rozwiązuje się do niczego
+   * i deklaracja przepada. Do T-80 robiło tak siedem komponentów powłoki
+   * i przez to renderowały się bez tła. Chrom ma własne `--danger-wash`
+   * i `--positive-wash`; tutaj mieszka tylko dokument.
+   */
+
+  /* Kartka ZOSTAJE biała. To ona odróżnia dokument od ciepłej kanwy —
+     po redesignie kontrast niesie jasność, a nie temperatura. */
   --doc-bg: #ffffff;
   --doc-surface: #ffffff;
-  --doc-ink: #16181c;
-  --doc-ink-soft: #6a6e76;
-  --doc-hair: #e6e8ec;
-  --doc-hair-strong: #d3d7dd;
+  --doc-ink: #33251e;
+  --doc-ink-soft: #74645a;
+  --doc-hair: #e8e1da;
+  --doc-hair-strong: #d6cbc1;
   /* Kolor etykiet sekcyjnych i linków „+ dodaj". Nazwa historyczna po
      prototypie (był tam oliwkowy „sage"); dziś to po prostu przygaszony
      atrament, żeby nie konkurował z nazwami pozycji. */
-  --doc-sage: #4c515a;
-  --doc-sage-light: #f1f2f5;
+  --doc-sage: #6b5a4e;
+  --doc-sage-light: #f5f1ec;
   /* Rabaty. Jedyna barwa w dokumencie — ujemna kwota musi się odróżniać
      od zwykłej pozycji także wtedy, gdy ktoś czyta wycenę pobieżnie. */
   --doc-terracotta: #b0563c;
-  --doc-toggle-off: #dcdfe4;
-  --doc-price-off: #a6abb3;
-  --doc-danger-wash: #eff1f4;
+  --doc-toggle-off: #94897f;
+  --doc-price-off: #9b8d80;
+  --doc-danger-wash: #f7ece9;
 
   background: var(--doc-bg);
   color: var(--doc-ink);
@@ -393,9 +453,13 @@
  */
 .quote-sheet {
   border-radius: var(--radius-card);
-  box-shadow:
-    0 1px 2px rgba(20, 22, 28, 0.05),
-    0 24px 48px -20px rgba(20, 22, 28, 0.22);
+  /*
+   * Cień ciepły i MOCNIEJSZY niż u kart. Kartka leży teraz na beżowej
+   * kanwie, a nie na chłodnej szarości — biel odcina się od ciepłego
+   * podłoża lepiej, ale musi mieć czym pokazać, że jest osobnym
+   * przedmiotem, a nie kolejnym panelem interfejsu.
+   */
+  box-shadow: var(--elevation-sheet);
 }
 
 /* Kwoty zawsze tabularne â€” kolumna nie skacze przy zmianie cyfr. */
@@ -436,12 +500,16 @@
 }
 
 /* ---------------------------------------------------------------
-   Nawigacja — „kulka" aktywnej pozycji.
+   Nawigacja — blok aktywnej pozycji.
 
-   Dwa zagnieżdżone elementy, bo jeden nie da rady: zewnętrzny robi
-   PRZESUNIĘCIE (transition na transform), wewnętrzny ROZCIĄGNIĘCIE
-   (animation na transform). Na jednym elemencie transition i animation
-   biłyby się o tę samą właściwość.
+   Jeden znacznik przejeżdżający między wierszami, a nie siedem
+   niezależnych teł: widać RUCH, a nie przeskok.
+
+   Animacja „kropli", która rozciągała się w locie i osiadała
+   (`nav-pill-stretch`), została usunięta w T-77. Należała do języka
+   liquid glass — na płaskim, drukarskim brązie czytała się jak usterka
+   renderowania, a nie jak zamierzony efekt. Sam przesuw zostaje: on
+   niesie informację (skąd dokąd), rozciąganie było dekoracją.
    --------------------------------------------------------------- */
 .nav-pill-track {
   transition:
@@ -452,30 +520,10 @@
 
 .nav-pill-body {
   background: var(--nav-pill);
-  border-radius: var(--radius-pill);
+  /* Blok, nie pigułka — makieta jest ostrokątna. */
+  border-radius: 6px;
   height: 100%;
   width: 100%;
-  transform-origin: center;
-}
-
-/* Kropla, która wydłuża się w locie i osiada na miejscu. */
-.nav-pill-body[data-travelling='true'] {
-  animation: nav-pill-stretch var(--dur-slide) var(--ease-liquid);
-}
-
-@keyframes nav-pill-stretch {
-  0% {
-    transform: scaleY(1) scaleX(1);
-  }
-  38% {
-    transform: scaleY(1.16) scaleX(0.93);
-  }
-  70% {
-    transform: scaleY(0.97) scaleX(1.02);
-  }
-  100% {
-    transform: scaleY(1) scaleX(1);
-  }
 }
 
 /* Etykiety wjeżdżają z lekkim opóźnieniem rosnącym w dół listy —

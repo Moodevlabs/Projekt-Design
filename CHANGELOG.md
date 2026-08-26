@@ -5,6 +5,39 @@ Wersje zgodne z [SemVer](https://semver.org/lang/pl/).
 
 ## [Nieopublikowane]
 
+### Zmienione
+
+**Nowy wygląd aplikacji — brąz i beż Toolier (T-74…T-82).** Cała powłoka
+przeszła z chłodnej, rozmytej szarości na ciepłą i płaską paletę marki:
+brązowa szyna nawigacji `#33251e`, beżowy pas u góry `#efece8`, jasna kanwa
+i białe karty. Wycena zostaje białą kartką — po zmianie to **jasność**, a nie
+temperatura, odróżnia dokument od reszty aplikacji.
+
+Typografia: **Faculty Glyphic** w tytułach, **Inter** w interfejsie i we
+wszystkich liczbach. Przy okazji naprawiony błąd, przez który żaden z krojów
+nie był w ogóle ładowany — aplikacja renderowała się dotąd w systemowym
+Segoe UI.
+
+Logotypy Toolier zastąpiły zastępcze litery „A" w pasku bocznym i na ekranie
+logowania; sygnet trafił do ikony aplikacji, instalatora i favicona.
+
+Zniknęło rozmycie tła (`backdrop-filter`) — na ciepłym podłożu dawało mulistą
+szarość, a kosztowało dwa pełnoekranowe przemalowania przy każdym przewinięciu.
+
+Nowe konta dostają brand kit w barwach Toolier. **Istniejące zachowują swoje
+kolory na PDF bez zmian** — kolor oferty jest własnością studia, nie nasz.
+
+### Naprawione
+
+**Ostrzeżenia bez tła.** Pasek „tryb tylko do odczytu", bloki „Uwaga" w Pomocy
+i ramka kasowania konta w Ustawieniach sięgały po barwy zdefiniowane wyłącznie
+wewnątrz dokumentu wyceny, więc poza nim renderowały się bez tła, a ikony
+ostrzegawcze traciły kolor.
+
+**Kontrast.** Terakota rabatów, ochra ostrzeżeń, placeholdery i tor
+przełącznika nie spełniały progów WCAG AA. Wartości poprawione, a próg pilnuje
+teraz test liczący kontrast wprost z pliku palety.
+
 ### Dodane
 
 **Panel „Dodaj usługi” w edytorze wyceny (T-71).** Zakres wyceny dobiera się

@@ -47,8 +47,11 @@ export const BrandKitSchema = z.object({
   /** Ścieżka w Storage, np. `brand/{workspaceId}/logo-dark.png`. */
   logoDarkPath: z.string().nullable().default(null),
   logoLightPath: z.string().nullable().default(null),
-  accentColor: HexColorSchema.default('#21201C'),
-  bgColor: HexColorSchema.default('#FAF7F1'),
+  // Parytet z `0024_brand_defaults_toolier.sql`. Dotyczy TYLKO nowych
+  // workspace'ów — istniejące mają własne wartości w wierszu i nic ich
+  // nie nadpisuje (08-REDESIGN D-4: kolor oferty jest własnością klienta).
+  accentColor: HexColorSchema.default('#33251E'),
+  bgColor: HexColorSchema.default('#EFECE8'),
   fontFamily: FontFamilySchema.default('Lato'),
   contacts: z.array(BrandContactSchema).default([]),
   address: z.string().nullable().default(null),

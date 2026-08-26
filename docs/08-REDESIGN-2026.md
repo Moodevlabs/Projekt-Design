@@ -1,6 +1,15 @@
 # 08 — Redesign Toolier 2026 (brąz / beż / papier)
 
-> **Status:** plan. Nic z tego nie jest jeszcze zaimplementowane.
+> **Status: ZREALIZOWANE (T-74…T-82).** Ten plik zostaje jako zapis *dlaczego* — uzasadnienia decyzji i odstępstw. Stan bieżący systemu opisuje `docs/05-UI.md` §1–§2; co dokładnie zrobiono w każdym chunku i na co uważać — `docs/06-TASKS.md`.
+>
+> **Co wyszło inaczej, niż zakładał plan** (szczegóły przy chunkach w `06-TASKS.md`):
+> - **Fonty w ogóle nie były ładowane.** Pakiety stały w `package.json`, ale nikt ich nie importował — aplikacja renderowała się w Segoe UI. Naprawione w T-74; bez tego cała typografia redesignu byłaby niewidoczna.
+> - **Krój display przestał być regułą dla `h1, h2`** i jest jawnym opt-inem. `h2` to tu niemal wyłącznie mały nagłówek karty, a Faculty Glyphic w 13 px ze sztucznym pogrubieniem wygląda na zepsuty font (T-76).
+> - **Nazwa `card-surface` została** zamiast planowanej `surface-card` — klasa stoi w ~40 plikach i przemianowanie byłoby czystym szumem (T-76).
+> - **Siedem komponentów chromu sięgało po tokeny `--doc-*`** zdefiniowane wyłącznie w scope `.quote-doc`, więc ostrzeżenia renderowały się bez tła. Błąd sprzed redesignu, naprawiony w T-80.
+> - **Audyt kontrastu wykrył pięć niezgodności**, w tym terakotę rabatów (4,25:1 — a to kolor kwoty) i tor przełącznika (1,44:1). Wartości poprawione, a próg pilnuje teraz `src/styles/contrast.test.ts`, który **parsuje `globals.css`** zamiast trzymać kopię palety (T-82).
+>
+> **Niezweryfikowane:** wygląd nie był porównany z makietą na żywo (brak podłączonego rozszerzenia Chrome w sesji), migracja `0024` nie była uruchomiona (wymaga Dockera), PDF nie był wygenerowany.
 > **Źródła:** `reference/nowy wyglad.png` (makieta), `reference/logotypy/*.svg` (sygnet, napis, lockup).
 > **Zakres:** kompletna wymiana warstwy wizualnej aplikacji. Zero zmian w domenie, repozytoriach, schemacie bazy i logice liczącej.
 > **Kolejność:** chunki **T-74 … T-82**, każdy = jedna gałąź / jeden PR (CLAUDE.md §12). Całość **przed T-17** — T-17 mówi wprost „docelowa kolorystyka przyjdzie na końcu budowy", a instalator i ikony aplikacji nie mają sensu przed rebrandingiem.

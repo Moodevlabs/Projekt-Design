@@ -9,7 +9,10 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        // `hover:bg-espresso`, nie `hover:bg-primary/90`: krycie 90% brązu na
+        // JASNEJ kanwie daje kolor jaśniejszy od spoczynkowego, czyli hover
+        // odwrotny do oczekiwanego. Espresso przyciemnia, jak należy.
+        default: "bg-primary text-primary-foreground hover:bg-espresso",
         destructive:
           "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40",
         outline:
@@ -19,6 +22,11 @@ const buttonVariants = cva(
         ghost:
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
+        // Ramka + wersaliki — CTA z makiety, stojące na BEŻOWYM pasie
+        // (08-REDESIGN D-3). Wypełniony brąz na beżu krzyczałby; w treści,
+        // gdzie przycisk konkuruje z białymi kartami, zostaje `default`.
+        frame:
+          "label-caps border border-hair-strong bg-transparent text-ink hover:border-brown hover:bg-brown hover:text-cta-fg",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",

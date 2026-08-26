@@ -168,7 +168,7 @@ function StatusPill({ reason }: { reason: ReturnType<typeof useEntitlement>['rea
     <span
       className={cn(
         'rounded-[var(--radius-pill)] px-2 py-0.5 text-xs font-medium',
-        ok ? 'bg-[var(--doc-sage-light)] text-[var(--doc-sage)]' : 'bg-surface text-ink-soft',
+        ok ? 'bg-positive-wash text-positive' : 'bg-surface text-ink-soft',
       )}
     >
       {label}

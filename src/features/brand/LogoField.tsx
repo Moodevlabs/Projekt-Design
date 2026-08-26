@@ -59,7 +59,7 @@ export function LogoField({
       <div
         className={cn(
           'border-hair flex h-24 items-center justify-center rounded-[var(--radius-card)] border p-3',
-          variant === 'light' ? 'bg-[var(--doc-ink)]' : 'bg-surface',
+          variant === 'light' ? 'bg-brown' : 'bg-surface',
         )}
       >
         {path && url.isLoading ? (

@@ -92,7 +92,7 @@ export function EditorTopbar({
   creatingVersion: boolean;
 }) {
   return (
-    <div className="glass relative z-10 flex h-[68px] shrink-0 items-center gap-4 px-7">
+    <div className="surface-band relative z-10 flex h-[68px] shrink-0 items-center gap-4 px-7">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
         <Link to={routes.quotes}>
           <ArrowLeft className="size-4" aria-hidden />
@@ -106,7 +106,7 @@ export function EditorTopbar({
           onCommit={onNumberChange}
           placeholder={pl.quotes.noNumber}
           ariaLabel={pl.quotes.number}
-          className="tabular w-52 rounded-[var(--radius-control)] px-2 py-1 text-sm font-medium hover:bg-white/60 focus:bg-white/70"
+          className="tabular hover:bg-surface focus:bg-surface w-52 rounded-[var(--radius-control)] px-2 py-1 text-sm font-medium"
         />
         {/* Wersja przy numerze, jak w 05-UI §3: `WYC/2026/08/0012 · v2`.
             Dopiero od v2 — „· v1" przy każdej wycenie byłby szumem. */}
@@ -123,7 +123,7 @@ export function EditorTopbar({
       </div>
 
       <div className="ml-auto flex items-center gap-2">
-        <div className="flex items-center rounded-[var(--radius-pill)] border border-white/60 bg-white/45 p-0.5">
+        <div className="border-hair-strong bg-surface flex items-center rounded-[var(--radius-control)] border p-0.5">
           {(['edit', 'preview'] as const).map((value) => {
             const Icon = value === 'edit' ? Pencil : Eye;
             const label = value === 'edit' ? pl.editor.edit : pl.editor.preview;

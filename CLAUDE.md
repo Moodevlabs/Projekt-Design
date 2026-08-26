@@ -15,7 +15,7 @@ Ten plik jest źródłem prawdy o zasadach pracy. Szczegóły są w `docs/` — 
 | `docs/02-DATABASE.md` | Schemat Supabase, RLS, migracje |
 | `docs/03-BILLING.md` | Stripe, Edge Functions, gating subskrypcji |
 | `docs/04-PDF.md` | Generowanie PDF i brand kit |
-| `docs/05-UI.md` | Design system, komponenty, layout. **§1–§2 opisują stan sprzed redesignu (T-74…T-82) — do przepisania w T-82.** |
+| `docs/05-UI.md` | Design system, komponenty, layout. §1–§2 opisują paletę i powłokę **po redesignie 2026** (T-74…T-82). |
 | `docs/06-TASKS.md` | Lista zadań w kolejności — pracuj po jednym |
 | `docs/07-BUILD-MACOS.md` | Budowanie podpisanego `.dmg` na macOS |
 | `docs/FEATURES-Z-EXCELA.md` | Funkcje z arkusza klienta (cennik parametryczny, pomieszczenia, rabaty %, harmonogram, pakiet dokumentów) — model i wzory dla zadań T-30…T-49. **§8 zawiera korekty założeń wobec stanu kodu — przeczytaj przed startem chunku.** |

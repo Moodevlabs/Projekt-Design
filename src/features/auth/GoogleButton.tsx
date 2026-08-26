@@ -32,6 +32,12 @@ export function GoogleButton({ disabled }: { disabled?: boolean }) {
   );
 }
 
+/**
+ * ⚠️ Cztery hexy w tym znaku to **barwy marki Google** i nie wolno ich
+ * przestrajać do palety Toolier — wytyczne Google zabraniają przemalowania
+ * logo. To jedyne miejsce w aplikacji, gdzie zahardkodowany kolor jest
+ * poprawny; sweep szukający hexów ma je ominąć, a nie „naprawić".
+ */
 function GoogleMark() {
   return (
     <svg viewBox="0 0 24 24" className="size-4" aria-hidden focusable="false">
