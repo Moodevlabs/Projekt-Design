@@ -395,6 +395,45 @@
     background: var(--rail);
     color: var(--rail-ink);
   }
+
+  /*
+   * ===============================================================
+   * SZKŁO — wyłącznie ekran logowania
+   * ---------------------------------------------------------------
+   * To NIE jest powrót do „liquid glass" wycofanego w T-76. Tamto
+   * padło z konkretnego powodu: rozmycie potrzebuje pod spodem
+   * różnicy luminancji, żeby cokolwiek załamać, a płaski beż jej nie
+   * ma — wychodziła z tego mulista szarość.
+   *
+   * Tutaj pod spodem leży FOTOGRAFIA wnętrza: pełna zakresu tonalnego,
+   * krawędzi i ciepłego światła. Dokładnie to, czego rozmyciu brakowało
+   * w powłoce. Ta sama technika, odwrotne warunki.
+   *
+   * Zasięg jest celowo wąski — jeden ekran, na który użytkownik patrzy
+   * kilkanaście sekund przy pierwszym uruchomieniu. Reszta aplikacji,
+   * w której się pracuje godzinami, zostaje płaska i tania w renderze.
+   * ===============================================================
+   */
+  .auth-glass {
+    background: rgba(255, 255, 255, 0.78);
+    backdrop-filter: blur(24px) saturate(130%);
+    -webkit-backdrop-filter: blur(24px) saturate(130%);
+    border: 1px solid rgba(255, 255, 255, 0.75);
+    box-shadow:
+      0 1px 2px rgba(31, 22, 17, 0.06),
+      0 24px 60px -24px rgba(31, 22, 17, 0.4);
+  }
+
+  /*
+   * Bez `backdrop-filter` (starsze WebView2) szkło zamienia się w mleczną
+   * biel. Nieprzezroczystą, nie półprzezroczystą: bez rozmycia zdjęcie
+   * prześwitywałoby ostro przez kartę i zjadło czytelność formularza.
+   */
+  @supports not (backdrop-filter: blur(1px)) {
+    .auth-glass {
+      background: rgba(255, 255, 255, 0.96);
+    }
+  }
 }
 /* Kto prosi o mniej ruchu, dostaje mniej ruchu. */
 @media (prefers-reduced-motion: reduce) {
