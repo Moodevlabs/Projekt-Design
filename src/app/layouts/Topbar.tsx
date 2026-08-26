@@ -29,7 +29,13 @@ export function Topbar({ title }: { title: string }) {
 
   return (
     <header className="surface-band sticky top-0 z-10 flex h-[68px] shrink-0 items-center gap-4 px-7">
-      <h1 className="font-display text-ink truncate text-[19px]">
+      {/*
+        Tytuł strony wersalikami w kroju display — jedyne miejsce w powłoce,
+        gdzie Faculty Glyphic stoi w większym stopniu (makieta: „PULPIT").
+        Światło międzyliterowe DODATNIE: wersaliki bez rozstrzelenia zbijają
+        się w blok, a krój glificzny potrzebuje powietrza między szeryfami.
+      */}
+      <h1 className="font-display text-ink truncate text-[19px] tracking-[0.06em] uppercase">
         {title}
       </h1>
 
@@ -38,11 +44,11 @@ export function Topbar({ title }: { title: string }) {
           type="button"
           onClick={() => setSearchOpen(true)}
           aria-label={pl.search.open}
-          className="text-ink-soft hover:text-ink flex h-9 w-64 items-center gap-2 rounded-[var(--radius-pill)] border border-white/60 bg-white/45 px-3.5 text-sm transition-colors"
+          className="text-ink-soft hover:text-ink border-hair-strong bg-surface flex h-9 w-64 items-center gap-2 rounded-[var(--radius-control)] border px-3.5 text-sm transition-colors"
         >
           <Search className="size-4 shrink-0" aria-hidden />
           <span>{pl.common.search}</span>
-          <kbd className="text-ink-soft/70 ml-auto rounded-md border border-white/70 bg-white/60 px-1.5 py-0.5 text-[10px]">
+          <kbd className="text-ink-faint border-hair bg-surface-2 ml-auto rounded-[4px] border px-1.5 py-0.5 text-[10px]">
             ⌘K
           </kbd>
         </button>
@@ -53,8 +59,9 @@ export function Topbar({ title }: { title: string }) {
           teraz decyzja, a nie domyślny efekt kliknięcia.
         */}
         <Button
+          variant="frame"
           onClick={() => setNewQuoteOpen(true)}
-          className="h-9 rounded-[var(--radius-pill)] px-4 shadow-[0_4px_14px_-4px_rgba(20,22,28,0.5)]"
+          className="h-9 gap-2.5 px-4"
         >
           <Plus className="size-4" aria-hidden />
           {pl.quotes.new}

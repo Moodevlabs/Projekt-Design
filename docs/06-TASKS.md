@@ -666,12 +666,18 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - Przy okazji zdjęte `font-semibold` z **wszystkich czterech** pozostałych par `font-display` + waga (`Topbar`, `AuthLayout`, `HelpPage` ×2). Zrobione tutaj, a nie w T-77/T-80, bo między chunkami aplikacja renderowałaby syntetyczny bold na tytułach.
   ⚠️ **Kolejność:** przed T-77 i T-78. Odwrotnie znaczyłoby restylowanie komponentów dwa razy — raz na szkle, raz na płasko.
 
-- [ ] **T-77 Powłoka: szyna i pas** (08-REDESIGN §5, makieta)
+- [x] **T-77 Powłoka: szyna i pas** (08-REDESIGN §5, makieta)
   Brązowa szyna z wersalikowymi etykietami, beżowy pas topbara, tytuł strony w Faculty Glyphic, CTA w ramce, awatar i kropka subskrypcji na brązie.
-  ✅ Zrzut pulpitu różni się od `reference/nowy wyglad.png` tylko tam, gdzie odstąpiliśmy świadomie (D-1…D-3, D-5).
-  ⚠️ **Makieta ma w menu „STUDIO" i nie ma „PULPIT" — nawigacji NIE zmieniamy** (D-5). To decyzja produktowa o tym, gdzie mieszka konfiguracja studia, a nie wizualna; osobne zadanie po redesignie.
-  ⚠️ **`nav-pill-stretch` do usunięcia** — animacja „kropli" należała do języka liquid glass; na płaskim brązie czyta się jak usterka. Sam przesuw zostaje.
-  ⚠️ Mechanizm jednej przejeżdżającej kulki zostaje — `Sidebar.test.tsx` go pilnuje.
+  ✅ `grep -rn "white/\|bg-white\|#131519" src/app/layouts/` zwraca zero — cała powłoka jedzie na tokenach `--rail-*`.
+  **Zrobiono:**
+  > - Etykiety nawigacji na `.label-caps` (wersaliki ze światłem) — język makiety, ten sam wzorzec co główki tabel.
+  > - Blok aktywnej pozycji: beż `--rail-pill`, promień 6 px, tekst w brązie. Pigułka 999 px zniknęła razem z resztą zaokrągleń.
+  > - **`nav-pill-stretch` usunięty**, a razem z nim **martwy stan `travelling`** w `ActiveIndicator` (`useState` + `useEffect` + `useRef` + `setTimeout` istniejące wyłącznie po to, żeby odpalić tę animację). Testy pilnują `data-index`, nie animacji — przeszły bez zmian.
+  > - Tytuł strony: Faculty Glyphic, wersaliki, światło **dodatnie** `0.06em`. Poprzednie `tracking-[-0.01em]` było ustawieniem pod gęsty grotesk; krój glificzny w wersalikach potrzebuje powietrza między szeryfami.
+  > - Nowy wariant przycisku **`frame`** (ramka + wersaliki) — CTA z makiety. Użyty wyłącznie w pasie; w treści zostaje `default` (D-3).
+  > - Pole wyszukiwania z `border-white/60 bg-white/45` (liczyło na szkło) na `--surface` + `--hair-strong`.
+  ⚠️ **Makieta ma w menu „STUDIO" i nie ma „PULPIT" — nawigacji NIE zmieniono** (D-5). To decyzja produktowa o tym, gdzie mieszka konfiguracja studia, a nie wizualna; osobne zadanie po redesignie.
+  ⚠️ **Nie zweryfikowane wizualnie na żywo.** Rozszerzenie Chrome nie było podłączone w tej sesji, więc zrzutu pulpitu obok makiety nikt nie porównał. Sprawdzone pośrednio: dev server odpowiada 200, build przechodzi, a w zbudowanym CSS są `--brown:#33251e`, `--beige:#efece8`, `--ring:#7d6555` i `@font-face` Faculty Glyphic.
 
 - [ ] **T-78 Kontrolki shadcn** (08-REDESIGN §5)
   24 komponenty w `src/components/ui/` — warianty `button`, pola formularzy, `switch`, `badge`, `table`, `tabs`, warstwy nad treścią (`dialog`/`sheet`/`popover`/`dropdown`/`tooltip`/`command`/`sonner`).

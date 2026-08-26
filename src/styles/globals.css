@@ -436,12 +436,16 @@
 }
 
 /* ---------------------------------------------------------------
-   Nawigacja — „kulka" aktywnej pozycji.
+   Nawigacja — blok aktywnej pozycji.
 
-   Dwa zagnieżdżone elementy, bo jeden nie da rady: zewnętrzny robi
-   PRZESUNIĘCIE (transition na transform), wewnętrzny ROZCIĄGNIĘCIE
-   (animation na transform). Na jednym elemencie transition i animation
-   biłyby się o tę samą właściwość.
+   Jeden znacznik przejeżdżający między wierszami, a nie siedem
+   niezależnych teł: widać RUCH, a nie przeskok.
+
+   Animacja „kropli", która rozciągała się w locie i osiadała
+   (`nav-pill-stretch`), została usunięta w T-77. Należała do języka
+   liquid glass — na płaskim, drukarskim brązie czytała się jak usterka
+   renderowania, a nie jak zamierzony efekt. Sam przesuw zostaje: on
+   niesie informację (skąd dokąd), rozciąganie było dekoracją.
    --------------------------------------------------------------- */
 .nav-pill-track {
   transition:
@@ -452,30 +456,10 @@
 
 .nav-pill-body {
   background: var(--nav-pill);
-  border-radius: var(--radius-pill);
+  /* Blok, nie pigułka — makieta jest ostrokątna. */
+  border-radius: 6px;
   height: 100%;
   width: 100%;
-  transform-origin: center;
-}
-
-/* Kropla, która wydłuża się w locie i osiada na miejscu. */
-.nav-pill-body[data-travelling='true'] {
-  animation: nav-pill-stretch var(--dur-slide) var(--ease-liquid);
-}
-
-@keyframes nav-pill-stretch {
-  0% {
-    transform: scaleY(1) scaleX(1);
-  }
-  38% {
-    transform: scaleY(1.16) scaleX(0.93);
-  }
-  70% {
-    transform: scaleY(0.97) scaleX(1.02);
-  }
-  100% {
-    transform: scaleY(1) scaleX(1);
-  }
 }
 
 /* Etykiety wjeżdżają z lekkim opóźnieniem rosnącym w dół listy —

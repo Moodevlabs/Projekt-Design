@@ -1,4 +1,3 @@
-import { useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -29,27 +28,13 @@ import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
 
 /**
- * Wskaźnik aktywnej pozycji — jedna kulka przejeżdżająca między wierszami,
+ * Wskaźnik aktywnej pozycji — jeden blok przejeżdżający między wierszami,
  * a nie siedem niezależnych teł. Dzięki temu widać ruch, a nie przeskok.
  *
- * Zwinięty pasek: kółko pod ikoną. Rozwinięty: pigułka pod całym wierszem.
- * Na ciemnej szynie kulka jest biała, więc aktywna ikona idzie w atrament.
+ * Zwinięty pasek: kwadrat pod ikoną. Rozwinięty: blok pod całym wierszem.
+ * Na brązowej szynie blok jest beżowy, więc aktywna ikona idzie w brąz.
  */
 function ActiveIndicator({ index, expanded }: { index: number; expanded: boolean }) {
-  const [travelling, setTravelling] = useState(false);
-  const previous = useRef(index);
-
-  useEffect(() => {
-    if (previous.current === index || index < 0 || previous.current < 0) {
-      previous.current = index;
-      return;
-    }
-    previous.current = index;
-    setTravelling(true);
-    const timer = setTimeout(() => setTravelling(false), 520);
-    return () => clearTimeout(timer);
-  }, [index]);
-
   if (index < 0) return null;
 
   return (
@@ -64,7 +49,7 @@ function ActiveIndicator({ index, expanded }: { index: number; expanded: boolean
         width: expanded ? '100%' : NAV_ROW_HEIGHT,
       }}
     >
-      <span className="nav-pill-body block" data-travelling={travelling} />
+      <span className="nav-pill-body block" />
     </span>
   );
 }
@@ -95,22 +80,24 @@ function SidebarLink({
       }}
       style={{ height: NAV_ROW_HEIGHT }}
       className={cn(
-        'relative flex items-center rounded-[var(--radius-pill)] transition-colors',
-        'focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none',
+        'relative flex items-center rounded-[6px] transition-colors',
+        'focus-visible:ring-rail-ink/70 focus-visible:ring-2 focus-visible:outline-none',
         expanded ? 'w-full gap-3 px-3.5' : 'w-[46px] justify-center',
         item.disabled
-          ? 'cursor-not-allowed text-white/25'
+          ? 'text-rail-ink/25 cursor-not-allowed'
           : active
-            ? // Aktywna pozycja zawsze leży na jasnym tle — pigułce (pasek
-              // rozwinięty) albo we wcięciu (pasek zwinięty) — więc idzie w atrament.
-              'text-ink'
-            : 'text-white/65 hover:text-white',
+            ? // Aktywna pozycja zawsze leży na jasnym bloku — beżowym
+              // (pasek rozwinięty) albo we wcięciu (zwinięty) — więc idzie w brąz.
+              'text-rail-pill-ink'
+            : 'text-rail-ink-soft hover:text-rail-ink',
       )}
     >
       <Icon className="size-[18px] shrink-0" aria-hidden />
       {expanded ? (
+        // Wersaliki ze światłem — język makiety (KLIENCI · WYCENY · BIBLIOTEKA).
+        // Ten sam wzorzec co główki tabel i „oczka" nad listami.
         <span
-          className="nav-label truncate text-sm font-medium"
+          className="nav-label label-caps truncate"
           style={{ transitionDelay: `${40 + order * 22}ms` }}
         >
           {item.label}
@@ -140,13 +127,13 @@ function AccountMenu({ subscriptionOk, expanded }: { subscriptionOk: boolean; ex
       <DropdownMenuTrigger
         aria-label={pl.settings.account}
         className={cn(
-          'flex items-center rounded-[var(--radius-pill)] focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none',
-          expanded ? 'w-full gap-3 px-2 py-1.5 hover:bg-white/10' : 'justify-center',
+          'focus-visible:ring-rail-ink/70 flex items-center rounded-[var(--radius-control)] focus-visible:ring-2 focus-visible:outline-none',
+          expanded ? 'hover:bg-rail-ink/10 w-full gap-3 px-2 py-1.5' : 'justify-center',
         )}
       >
         <span className="relative shrink-0">
           <Avatar className="size-9">
-            <AvatarFallback className="text-ink bg-white text-xs font-medium">
+            <AvatarFallback className="bg-rail-ink text-rail-pill-ink text-xs font-medium">
               {initials}
             </AvatarFallback>
           </Avatar>
@@ -154,13 +141,13 @@ function AccountMenu({ subscriptionOk, expanded }: { subscriptionOk: boolean; ex
             aria-hidden
             className={cn(
               // Obwódka w kolorze szyny, żeby kropka „siedziała" w panelu.
-              'absolute -right-0.5 -bottom-0.5 size-3 rounded-full border-2 border-[#131519]',
-              subscriptionOk ? 'bg-white' : 'bg-white/40',
+              'border-rail absolute -right-0.5 -bottom-0.5 size-3 rounded-full border-2',
+              subscriptionOk ? 'bg-rail-ink' : 'bg-rail-ink/40',
             )}
           />
         </span>
         {expanded ? (
-          <span className="min-w-0 flex-1 truncate text-left text-xs text-white/55">
+          <span className="text-rail-ink-soft min-w-0 flex-1 truncate text-left text-xs">
             {email || pl.settings.account}
           </span>
         ) : null}
@@ -228,7 +215,7 @@ export function Sidebar({ subscriptionOk = true }: { subscriptionOk?: boolean })
             key={group}
             className={cn(
               'relative w-full',
-              groupIndex > 0 && 'mt-4 border-t border-white/10 pt-4',
+              groupIndex > 0 && 'border-rail-hair mt-4 border-t pt-4',
             )}
           >
             <div className="relative w-full" style={{ height: items.length * NAV_ROW_STEP }}>
@@ -258,9 +245,9 @@ export function Sidebar({ subscriptionOk = true }: { subscriptionOk?: boolean })
               aria-label={expanded ? pl.nav.collapse : pl.nav.expand}
               aria-expanded={expanded}
               className={cn(
-                'flex h-9 items-center rounded-[var(--radius-control)] text-white/55 transition-colors hover:text-white',
-                'focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none',
-                expanded ? 'w-full gap-3 px-2 hover:bg-white/10' : 'w-9 justify-center',
+                'text-rail-ink-soft hover:text-rail-ink flex h-9 items-center rounded-[var(--radius-control)] transition-colors',
+                'focus-visible:ring-rail-ink/70 focus-visible:ring-2 focus-visible:outline-none',
+                expanded ? 'hover:bg-rail-ink/10 w-full gap-3 px-2' : 'w-9 justify-center',
               )}
             >
               {expanded ? (

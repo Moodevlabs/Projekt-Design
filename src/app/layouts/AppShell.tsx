@@ -36,7 +36,8 @@ export function AppShell() {
   return (
     <div className="relative flex h-full min-h-0">
       <Sidebar />
-      {/* Treść przewija się POD paskiem — szkło ma co rozmywać. */}
+      {/* Pas jest nieprzezroczysty (T-76), więc treść chowa się pod nim
+          całkowicie — a nie prześwituje przez rozmycie jak wcześniej. */}
       <div className="relative flex min-w-0 flex-1 flex-col overflow-y-auto">
         <Topbar title={handle.title ?? pl.app.name} />
         <main className="mx-auto w-full max-w-[1320px] px-7 pt-6 pb-12">

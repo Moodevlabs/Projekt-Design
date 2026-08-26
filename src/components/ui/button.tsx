@@ -19,6 +19,11 @@ const buttonVariants = cva(
         ghost:
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
+        // Ramka + wersaliki — CTA z makiety, stojące na BEŻOWYM pasie
+        // (08-REDESIGN D-3). Wypełniony brąz na beżu krzyczałby; w treści,
+        // gdzie przycisk konkuruje z białymi kartami, zostaje `default`.
+        frame:
+          "label-caps border border-hair-strong bg-transparent text-ink hover:border-brown hover:bg-brown hover:text-cta-fg",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
