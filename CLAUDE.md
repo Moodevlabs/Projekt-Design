@@ -15,12 +15,14 @@ Ten plik jest źródłem prawdy o zasadach pracy. Szczegóły są w `docs/` — 
 | `docs/02-DATABASE.md` | Schemat Supabase, RLS, migracje |
 | `docs/03-BILLING.md` | Stripe, Edge Functions, gating subskrypcji |
 | `docs/04-PDF.md` | Generowanie PDF i brand kit |
-| `docs/05-UI.md` | Design system, komponenty, layout |
+| `docs/05-UI.md` | Design system, komponenty, layout. **§1–§2 opisują stan sprzed redesignu (T-74…T-82) — do przepisania w T-82.** |
 | `docs/06-TASKS.md` | Lista zadań w kolejności — pracuj po jednym |
 | `docs/07-BUILD-MACOS.md` | Budowanie podpisanego `.dmg` na macOS |
 | `docs/FEATURES-Z-EXCELA.md` | Funkcje z arkusza klienta (cennik parametryczny, pomieszczenia, rabaty %, harmonogram, pakiet dokumentów) — model i wzory dla zadań T-30…T-49. **§8 zawiera korekty założeń wobec stanu kodu — przeczytaj przed startem chunku.** |
 | `docs/FEATURES-Z-KONCEPCJI.md` | Oś aplikacji z koncepcji `reference/nowosci.md`: klienci, projekty, pliki i archiwum dokumentów w Storage, wersje wycen, restrukturyzacja biblioteki (grupy/jednostki/biblioteka przykładowa), pakiety, rebranding Toolier i nowa cena — model i reguły dla zadań T-53…T-66. **§0 = zamknięte decyzje, §9 = kolizje z kodem — przeczytaj przed startem chunku.** |
+| `docs/08-REDESIGN-2026.md` | Redesign wizualny: brąz `#33251e` / beż `#efece8`, Faculty Glyphic + Inter, koniec „liquid glass", logotypy — plan chunków **T-74…T-82** (przed T-17). **§0 = zmiana tezy wizualnej, §2 = pułapki typografii, §6 = decyzje do potwierdzenia — przeczytaj przed startem chunku.** |
 | `reference/nowosci.md`, `reference/bilbioteka.md`, `reference/inspiracja 1.jpeg`, `reference/inspiracja 2.jpeg` | Źródła koncepcji. Z inspiracji bierzemy **użyteczność i przepływy**, nie wygląd. Czytaj, gdy zadanie odwołuje się do nich wprost. |
+| `reference/nowy wyglad.png`, `reference/logotypy/*.svg` | **Wygląd docelowy** (w odróżnieniu od `inspiracja*.jpeg`) i logotypy: sygnet, napis, pełny lockup. Wiążące dla T-74…T-82. |
 
 ## Stack (nie negocjujemy bez powodu)
 
