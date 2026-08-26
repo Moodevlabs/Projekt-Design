@@ -652,9 +652,18 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   ⚠️ Master ikony: **na beżu, nie na przezroczystości** — sygnet na ciemnym pasku zadań zniknąłby.
   ⚠️ `logoDarkPath`/`logoLightPath` w brand kicie to logo **klienta** na jego PDF. Nie ruszane.
 
-- [ ] **T-76 Płaskość: koniec szkła** (08-REDESIGN §3)
-  `.glass` / `.glass-strong` / `.glass-dark` / `.card-surface` → `.surface-card` / `.surface-band` / `.rail`. Usunięcie tokenów `--glass-*`, masek `mask-composite` i trzech bloków `@supports not (backdrop-filter)`. Przepięcie 5 plików używających `glass`.
-  ✅ `grep -rn "backdrop-filter|glass" src/` zwraca zero.
+- [x] **T-76 Płaskość: koniec szkła** (08-REDESIGN §3)
+  `.glass` / `.glass-strong` / `.glass-dark` → płaskie `.card-surface` / `.surface-band` / `.rail`. Usunięcie tokenów `--glass-*`, masek `mask-composite` i trzech bloków `@supports not (backdrop-filter)`. Przepięcie 5 plików używających `glass`.
+  ✅ `grep -rn "backdrop-filter\|glass" src/` zwraca tylko komentarz historyczny.
+  **Zrobiono:**
+  > - Cały `@layer components` (124 linie masek i rozmyć) zastąpiony trzema powierzchniami. Zniknęły `mask-composite`, `saturate()` i trzy fallbacki `@supports`.
+  > - **Nazwa `card-surface` ZOSTAJE**, mimo że w planie była `surface-card`. Ta klasa stoi w ~40 plikach — przemianowanie byłoby czystym szumem w dyfie. Wymieniona implementacja, nie nazwa.
+  > - `AuthLayout` stracił skupioną poświatę za kartą: istniała po to, żeby szkło miało co załamywać.
+  > - `.quote-sheet` na `--elevation-sheet` — kartka wyceny ma cień MOCNIEJSZY niż karty, żeby czytała się jako osobny przedmiot, a nie kolejny panel.
+  > - `ui/card.tsx` z `rounded-xl shadow-sm` na tokeny Toolier.
+  **Na co uważać — zmiana wobec planu:**
+  > - **Krój display przestał być regułą dla `h1, h2` i jest teraz jawnym opt-inem (`.font-display`).** Powód wyszedł dopiero przy przeglądzie kodu: `h2` jest w tej aplikacji niemal wyłącznie **małym** nagłówkiem karty (13–14 px), a w kilku miejscach wręcz etykietą wersalikową. Faculty Glyphic w 13 px z syntetycznym pogrubieniem zalewa światła w szeryfach i wygląda na zepsuty font. Display należy do tytułów, nie do każdego nagłówka.
+  > - Przy okazji zdjęte `font-semibold` z **wszystkich czterech** pozostałych par `font-display` + waga (`Topbar`, `AuthLayout`, `HelpPage` ×2). Zrobione tutaj, a nie w T-77/T-80, bo między chunkami aplikacja renderowałaby syntetyczny bold na tytułach.
   ⚠️ **Kolejność:** przed T-77 i T-78. Odwrotnie znaczyłoby restylowanie komponentów dwa razy — raz na szkle, raz na płasko.
 
 - [ ] **T-77 Powłoka: szyna i pas** (08-REDESIGN §5, makieta)

@@ -28,8 +28,8 @@ export function Topbar({ title }: { title: string }) {
   }, []);
 
   return (
-    <header className="glass sticky top-0 z-10 flex h-[68px] shrink-0 items-center gap-4 px-7">
-      <h1 className="font-display text-ink truncate text-[19px] font-semibold tracking-[-0.01em]">
+    <header className="surface-band sticky top-0 z-10 flex h-[68px] shrink-0 items-center gap-4 px-7">
+      <h1 className="font-display text-ink truncate text-[19px]">
         {title}
       </h1>
 

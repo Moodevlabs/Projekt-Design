@@ -92,26 +92,6 @@
   --elevation-sheet:
     0 1px 3px rgba(51, 37, 30, 0.06), 0 24px 48px -20px rgba(51, 37, 30, 0.2);
 
-  /*
-   * TYMCZASOWE — warstwa szkła zostaje do T-76, żeby ten chunk nie ruszał
-   * JSX-a. Wartości przestrojone na ciepło, żeby stan pośredni nie był
-   * brudny; cały blok znika razem z `.glass*` w T-76.
-   */
-  --glass-bg: rgba(255, 255, 255, 0.62);
-  --glass-bg-strong: rgba(255, 255, 255, 0.8);
-  --glass-blur: 22px;
-  --glass-saturate: 140%;
-  --glass-highlight: rgba(255, 255, 255, 0.9);
-  --glass-edge: rgba(51, 37, 30, 0.08);
-  --glass-shadow: var(--elevation-card);
-  --glass-dark-bg: rgba(51, 37, 30, 0.95);
-  --glass-dark-highlight: rgba(239, 236, 232, 0.2);
-  --glass-dark-edge: rgba(239, 236, 232, 0.04);
-  --glass-dark-shadow:
-    0 0 0 1px rgba(42, 30, 24, 0.6), 0 18px 44px -14px rgba(31, 22, 17, 0.45);
-  /* Używane jeszcze przez poświatę w AuthLayout — znika w T-76. */
-  --canvas-light: #fdfcfa;
-
   /* Blok aktywnej pozycji leży na BRĄZOWEJ szynie, więc jest beżowy. */
   --nav-pill: var(--rail-pill);
 
@@ -255,12 +235,21 @@
    * jedną warstwę `fixed` przemalowywaną przy każdym przewinięciu.
    */
 
-  h1,
-  h2,
+  /*
+   * Krój display jest JAWNYM opt-inem (`.font-display`), a nie regułą dla
+   * `h1, h2`.
+   *
+   * Poprzednia wersja łapała każdy `h2` — a `h2` jest w tej aplikacji niemal
+   * wyłącznie małym nagłówkiem karty (13–14 px), czasem wręcz etykietą
+   * wersalikową. Faculty Glyphic to krój glificzny o jednej wadze: w 13 px
+   * ze sztucznym pogrubieniem zalewa światła w szeryfach i wygląda na
+   * zepsuty font. Display należy do TYTUŁÓW, nie do każdego nagłówka.
+   */
   .font-display {
     font-family: var(--font-display);
-    /* Faculty Glyphic ma jedną wagę — pogrubienie musi być zabronione
-       jawnie, bo inaczej `font-bold` z Preflight/utility zrobi syntetyk. */
+    /* Waga wymuszona, bo krój ma tylko 400. Utility wagi i tak wygra
+       (warstwa utilities > base), więc `font-display` nie może NIGDY
+       stać obok `font-semibold` — patrz docs/08-REDESIGN-2026.md §2. */
     font-weight: 400;
   }
 
@@ -302,128 +291,57 @@
 
 @layer components {
   /*
-   * Podstawowa tafla. `::before` rysuje WŁOS obramowania jako gradient
-   * (jasny u góry, ciemniejszy u dołu) przez maskę — zwykły
-   * `border: 1px solid` daje płaską ramkę i od razu widać, że to
-   * rozmyty div, a nie szkło.
+   * ===============================================================
+   * WARSTWA MATERIAŁOWA — trzy powierzchnie, zero rozmycia (T-76)
+   * ---------------------------------------------------------------
+   * Poprzednia wersja („liquid glass", T-08a) budowała każdą taflę
+   * z czterech rzeczy naraz: `backdrop-filter`, podbicia nasycenia,
+   * gradientowego włosa przez `mask-composite` i cienia. Miało to sens,
+   * dopóki pod spodem leżało chłodne pole światła z różnicą luminancji.
+   *
+   * Na ciepłym, płaskim podłożu rozmycie nie ma czego załamać: beż
+   * rozmyty przez beż daje mulistą szarość, a `saturate()` na brązie
+   * robi rdzę. Materiał niesie teraz sama JASNOŚĆ i włos obramowania.
+   *
+   * Efekt uboczny nie jest kosmetyczny: `backdrop-filter` na pełnej
+   * wysokości szyny i na przyklejonym pasku to dwa pełnoekranowe
+   * przemalowania przy każdym przewinięciu w WebView2. Zniknęły —
+   * razem z trzema blokami `@supports not (backdrop-filter)`.
+   * ===============================================================
    */
-  .glass {
-    position: relative;
-    background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-    box-shadow: var(--glass-shadow);
-  }
 
-  .glass::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(
-      160deg,
-      var(--glass-highlight) 0%,
-      rgba(255, 255, 255, 0.25) 34%,
-      var(--glass-edge) 100%
-    );
-    -webkit-mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    mask-composite: exclude;
-    pointer-events: none;
-  }
-
-  .glass-strong {
-    background: var(--glass-bg-strong);
-  }
-
-  /* Ciemny wariant tafli. Nawigacja jest osią aplikacji: czarna szyna,
-     jasne szkło treści, ciepły papier dokumentu — trzy wyraźne plany. */
-  .glass-dark {
-    position: relative;
-    background: var(--glass-dark-bg);
-    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-    box-shadow: var(--glass-dark-shadow);
-    color: #fff;
-  }
-
-  .glass-dark::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(
-      168deg,
-      var(--glass-dark-highlight) 0%,
-      rgba(255, 255, 255, 0.06) 30%,
-      var(--glass-dark-edge) 100%
-    );
-    -webkit-mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    mask-composite: exclude;
-    pointer-events: none;
-  }
-
-  @supports not (backdrop-filter: blur(1px)) {
-    .glass-dark {
-      background: #131519;
-    }
-  }
-
-  /* Karta chromu = tafla szkła. Nie przez `@apply .glass` — w Tailwind 4
-     `@apply` przyjmuje tylko utilities, nie własne klasy. */
+  /*
+   * Karta — biel uniesiona nad kanwą. Jedna klasa; wcześniej to samo robiły
+   * dwie bliźniacze (`.glass` i `.card-surface`), różniące się tylko tym,
+   * że druga miała wpisany promień.
+   *
+   * Nazwa zostaje `card-surface`, mimo że „surface-card" czytałoby się
+   * lepiej: ta klasa stoi w ~40 plikach i przemianowanie byłoby czystym
+   * szumem w dyfie redesignu. Zmieniamy implementację, nie nazwę.
+   */
   .card-surface {
     position: relative;
     border-radius: var(--radius-card);
-    background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-    box-shadow: var(--glass-shadow);
+    background: var(--surface);
+    border: 1px solid var(--hair);
+    box-shadow: var(--elevation-card);
   }
 
-  .card-surface::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(
-      160deg,
-      var(--glass-highlight) 0%,
-      rgba(255, 255, 255, 0.25) 34%,
-      var(--glass-edge) 100%
-    );
-    -webkit-mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    mask-composite: exclude;
-    pointer-events: none;
+  /* Pas — topbar i główki. Beż jest CIEMNIEJSZY od kanwy, więc pas
+     czyta się jako osobny plan bez potrzeby cienia i bez krawędzi
+     u góry; wystarczy kreska u dołu. */
+  .surface-band {
+    background: var(--beige);
+    border-bottom: 1px solid var(--hair);
   }
 
-  /* Przeglądarki bez `backdrop-filter` dostają zwykłą, nieprzezroczystą taflę. */
-  @supports not (backdrop-filter: blur(1px)) {
-    .glass {
-      background: rgba(255, 255, 255, 0.94);
-    }
+  /* Szyna nawigacji — brązowa okładka teczki. Pełny kolor, bez cienia:
+     kontrast z kanwą jest tak duży, że cień byłby brudem. */
+  .rail {
+    background: var(--rail);
+    color: var(--rail-ink);
   }
 }
-
 /* Kto prosi o mniej ruchu, dostaje mniej ruchu. */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -471,9 +389,13 @@
  */
 .quote-sheet {
   border-radius: var(--radius-card);
-  box-shadow:
-    0 1px 2px rgba(20, 22, 28, 0.05),
-    0 24px 48px -20px rgba(20, 22, 28, 0.22);
+  /*
+   * Cień ciepły i MOCNIEJSZY niż u kart. Kartka leży teraz na beżowej
+   * kanwie, a nie na chłodnej szarości — biel odcina się od ciepłego
+   * podłoża lepiej, ale musi mieć czym pokazać, że jest osobnym
+   * przedmiotem, a nie kolejnym panelem interfejsu.
+   */
+  box-shadow: var(--elevation-sheet);
 }
 
 /* Kwoty zawsze tabularne â€” kolumna nie skacze przy zmianie cyfr. */

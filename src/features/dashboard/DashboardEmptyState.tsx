@@ -40,7 +40,7 @@ function DemoQuote() {
   return (
     <div
       aria-hidden
-      className="bg-surface border-hair mt-8 w-full max-w-sm rounded-[var(--radius-card)] border p-5 text-left shadow-[var(--glass-shadow)]"
+      className="card-surface mt-8 w-full max-w-sm p-5 text-left"
     >
       <DemoRow name={pl.dashboard.demoItemConcept} cents={320_000} on />
       <DemoRow name={pl.dashboard.demoItemViz} cents={180_000} on />

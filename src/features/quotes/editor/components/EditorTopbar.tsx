@@ -92,7 +92,7 @@ export function EditorTopbar({
   creatingVersion: boolean;
 }) {
   return (
-    <div className="glass relative z-10 flex h-[68px] shrink-0 items-center gap-4 px-7">
+    <div className="surface-band relative z-10 flex h-[68px] shrink-0 items-center gap-4 px-7">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
         <Link to={routes.quotes}>
           <ArrowLeft className="size-4" aria-hidden />

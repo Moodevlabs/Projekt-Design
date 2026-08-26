@@ -192,7 +192,7 @@ export function Sidebar({ subscriptionOk = true }: { subscriptionOk?: boolean })
       data-expanded={expanded}
       style={{ width: expanded ? 244 : 76 }}
       className={cn(
-        'glass-dark relative z-10 flex shrink-0 flex-col py-5',
+        'rail relative z-10 flex shrink-0 flex-col py-5',
         expanded ? 'px-4' : 'items-center px-[15px]',
         'transition-[width] duration-[var(--dur-slide)] ease-[var(--ease-liquid)]',
       )}
