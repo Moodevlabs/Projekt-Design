@@ -1091,7 +1091,14 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - `daysLeftInTrash` zaokrągla **w górę**: zaniżona liczba w komunikacie o kasowaniu danych jest gorsza niż zawyżona. 4 testy jednostkowe.
   > - Testy integracyjne przepisane na nową semantykę: sprawdzają teraz, że kosz **nie** zwalnia miejsca, że plik w koszu **da się pobrać** (inaczej nie byłoby czego przywracać) i że dopiero trwałe usunięcie kasuje obiekt.
   > ⚠️ **Nie zweryfikowane:** testy integracyjne (`pnpm test:db`) nie były uruchomione — wymagają działającego stacku Supabase, a ten nie wstaje przez zarezerwowane porty Windows (patrz T-25). Migracja `0027` sprawdzona na jednorazowym Postgresie.
-- [ ] T-68 Statusy realizacji etapów w projekcie (koncepcja §7 „w przyszłości")
+- [x] **T-68 Statusy realizacji etapów w projekcie** (koncepcja §7 „w przyszłości")
+  **Zrobione 2026-08-27:**
+  > - 🔑 **Etapy nie mieszkają w projekcie.** Źródłem listy jest harmonogram **zaakceptowanej wyceny**; projekt trzyma wyłącznie postęp. Kopiowanie etapów do projektu znaczyłoby, że pierwsza zmiana harmonogramu rozjeżdża dwa miejsca i nikt nie wie, które jest prawdziwe. Dlatego zakładka bywa pusta i to jest poprawny stan.
+  > - `projects.stage_progress` jako **mapa po `stage_id`, nie tablica**: postęp jest przypisany do etapu, a nie ułożony w kolejność, więc przestawienie etapów w harmonogramie go nie rusza.
+  > - Wpis trzyma **kopię nazwy** etapu — żeby „Etap wizualny — zakończony 12.08" dało się pokazać także wtedy, gdy ten etap zniknął z harmonogramu po zmianie wyceny. Takie wpisy są oznaczone jako osierocone, nie liczą się do procentu i nie da się ich przestawiać: to historia, nie plan.
+  > - Daty ustawiane **przy przejściu**: cofnięcie z „zakończony" na „w toku" zachowuje datę rozpoczęcia i kasuje datę zakończenia, bo ta druga przestała być prawdą.
+  > - **To nie jest Gantt ani lista zadań** (koncepcja §17). Trzy stany i data. Test pilnujący listy zakładek projektu zaktualizowany świadomie, z komentarzem, dlaczego „Etapy" nie łamią zasady „harmonogram tylko w wycenie".
+  > - 20 testów jednostkowych, migracja `0028` sprawdzona na czystym Postgresie.
 - [ ] T-69 Usunięcie kolumny `library_items.category` (tekst) po jednej wersji od T-59
 
 ## Faza 3

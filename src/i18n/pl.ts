@@ -1402,6 +1402,29 @@ Pozdrawiam`,
     packageSavedMany: (count: number) => `Zapisano ${count} dokumentów w wybranym folderze`,
   },
 
+  /** Statusy realizacji etapow w projekcie (T-68). */
+  stages: {
+    tab: 'Etapy',
+    progress: 'Postęp realizacji',
+    doneOf: (done: number, total: number) => `${done} z ${total}`,
+    next: (name: string) => `Następny etap: ${name}`,
+    status: {
+      pending: 'Nierozpoczęty',
+      in_progress: 'W toku',
+      done: 'Zakończony',
+    },
+    notStarted: 'jeszcze nierozpoczęty',
+    startedAt: (date: string) => `rozpoczęty ${date}`,
+    completedAt: (date: string) => `zakończony ${date}`,
+    clientSide: 'Etap po stronie inwestora',
+    orphaned: 'etap spoza obecnego harmonogramu',
+    emptyTitle: 'Brak etapów do śledzenia',
+    emptyNoAccepted:
+      'Etapy pochodzą z harmonogramu zaakceptowanej wyceny. Gdy klient przyjmie ofertę, pojawią się tutaj.',
+    emptyNoSchedule:
+      'Zaakceptowana wycena nie ma harmonogramu. Dodaj etapy w zakładce „Termin" w edytorze wyceny.',
+  },
+
   /** Historia wersji z porownaniem (T-22). */
   versions: {
     title: 'Historia wersji',

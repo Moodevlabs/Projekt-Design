@@ -156,7 +156,11 @@ export function ProjectFormDialog({
                   <FormItem>
                     <FormLabel>{pl.projects.area}</FormLabel>
                     <FormControl>
-                      <Input {...field} inputMode="decimal" placeholder={pl.projects.areaPlaceholder} />
+                      <Input
+                        {...field}
+                        inputMode="decimal"
+                        placeholder={pl.projects.areaPlaceholder}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -196,10 +200,7 @@ export function ProjectFormDialog({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{pl.projects.statusLabel}</FormLabel>
-                    <Select
-                      value={field.value}
-                      onValueChange={field.onChange}
-                    >
+                    <Select value={field.value} onValueChange={field.onChange}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue />

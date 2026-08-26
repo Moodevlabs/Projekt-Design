@@ -483,6 +483,7 @@ export type Database = {
           name: string
           notes: string | null
           sort_order: number
+          stage_progress: Json
           start_date: string | null
           status: string
           updated_at: string
@@ -501,6 +502,7 @@ export type Database = {
           name: string
           notes?: string | null
           sort_order?: number
+          stage_progress?: Json
           start_date?: string | null
           status?: string
           updated_at?: string
@@ -519,6 +521,7 @@ export type Database = {
           name?: string
           notes?: string | null
           sort_order?: number
+          stage_progress?: Json
           start_date?: string | null
           status?: string
           updated_at?: string

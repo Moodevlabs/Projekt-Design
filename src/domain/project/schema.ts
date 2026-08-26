@@ -1,4 +1,6 @@
 import { z } from 'zod';
+
+import { StageProgressSchema } from './stages';
 import type { Client } from '../client/schema';
 
 /**
@@ -44,6 +46,8 @@ export const ProjectSchema = z.object({
   sortOrder: z.number().int().default(0),
   createdAt: z.string(),
   updatedAt: z.string(),
+  /** Postep realizacji etapow (T-68). Etapy zyja w harmonogramie wyceny. */
+  stageProgress: StageProgressSchema.default({}),
 });
 export type Project = z.infer<typeof ProjectSchema>;
 

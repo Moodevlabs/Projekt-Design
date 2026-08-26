@@ -25,6 +25,7 @@ function project(partial: Partial<Project> = {}): Project {
     sortOrder: 0,
     createdAt: '2026-08-01T10:00:00Z',
     updatedAt: '2026-08-01T10:00:00Z',
+    stageProgress: {},
     ...partial,
   };
 }
@@ -90,9 +91,9 @@ describe('emptyProjectDraft', () => {
 describe('ProjectDraftSchema', () => {
   it('wymaga nazwy', () => {
     expect(ProjectDraftSchema.safeParse(emptyProjectDraft()).success).toBe(false);
-    expect(
-      ProjectDraftSchema.safeParse({ ...emptyProjectDraft(), name: 'Dom' }).success,
-    ).toBe(true);
+    expect(ProjectDraftSchema.safeParse({ ...emptyProjectDraft(), name: 'Dom' }).success).toBe(
+      true,
+    );
   });
 
   it('odrzuca metraz, ktory nie jest liczba', () => {
