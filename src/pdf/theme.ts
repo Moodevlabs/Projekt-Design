@@ -30,10 +30,16 @@ export interface PdfTheme {
   };
 }
 
-/** Stałe kolory dokumentu — nie pochodzą z brand kitu, bo to nie jest wybór marki. */
-const INK = '#21201C';
-const INK_SOFT = '#6B6862';
-const HAIR = '#E3DFD7';
+/**
+ * Stałe kolory dokumentu — nie pochodzą z brand kitu, bo to nie jest wybór marki.
+ *
+ * Atrament zestrojony z `--ink` aplikacji (redesign 2026), żeby wydruk i ekran
+ * mówiły tym samym brązem. `DISCOUNT` bez zmian: terakota rabatów była ciepła
+ * od początku.
+ */
+const INK = '#33251E';
+const INK_SOFT = '#74645A';
+const HAIR = '#E4DCD4';
 const DISCOUNT = '#B9634A';
 
 /**

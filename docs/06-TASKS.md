@@ -720,10 +720,18 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - Wersalikowe etykiety chromu ujednolicone na `.label-caps`: pulpit (3), pomoc (4), karta klienta, karta projektu, główka listy usług. Wcześniej były to **cztery różne** warianty tego samego wzorca (`text-[11px]/[10.5px]/text-xs`, `tracking-[0.14em]/[0.1em]/[0.08em]/wide`).
   ⚠️ **To chunk stylowania, nie refaktoru.** Etykiety wersalikowe wewnątrz `.quote-doc` (edytor, dokumenty) **nie były ruszane** — należą do palety dokumentu i idą w T-81.
 
-- [ ] **T-81 Dokument wyceny i PDF** (08-REDESIGN §5, 04-PDF)
+- [x] **T-81 Dokument wyceny i PDF** (08-REDESIGN §5, 04-PDF)
   `.quote-doc` i `src/pdf/theme.ts` w ciepłym atramencie; biel kartki zostaje biała. Domyślne `accentColor`/`bgColor` brand kitu — tylko dla nowych workspace'ów.
-  ✅ PDF na świeżym koncie ma brąz Toolier; PDF istniejącego klienta z własnym akcentem nie zmienia się ani o piksel.
-  ⚠️ **Kolor na PDF jest własnością klienta.** Zmiana `default()` w zodzie nie rusza istniejących wierszy — i dobrze. Nadpisanie ich wymagałoby migracji i osobnej decyzji (D-4).
+  ✅ Migracja `0024` zmienia wyłącznie `default`; żadnego `update brand_kits set`.
+  **Zrobiono:**
+  > - **Sprawdzone, czym te pola naprawdę są, zanim nadano im wartości.** `accent_color` to tło **paska nagłówka** PDF, a `bg_color` — tło **bloku podsumowania**, nie tło całej strony (`QuotePdfDocument.tsx:119` i `:271`). Dlatego brąz `#33251E` i beż `#EFECE8` pasują tu wprost; gdyby `bg_color` był tłem strony, beż na całym A4 byłby złym pomysłem drukarskim.
+  > - `headerLogo` liczy się z `isLightBackground(accent)` — brąz jest ciemny, więc nagłówek automatycznie bierze **jasny** wariant logo klienta. Bez zmian w kodzie, po prostu działa.
+  > - Stałe PDF: `INK #21201C` → `#33251E`, `INK_SOFT` i `HAIR` w ciepło. `DISCOUNT` bez zmian.
+  > - `.quote-doc`: atrament, włos i „sage" w brąz; `--doc-bg` **zostaje bielą** (po redesignie kontrast dokument ↔ kanwa niesie jasność, nie temperatura).
+  **Na co uważać:**
+  > - **Test „domyślne wartości odpowiadają migracji brand_kits" ma wartości wpisane na sztywno — nie czyta pliku SQL.** Parytet jest więc konwencją, nie egzekwowanym kontraktem: przy kolejnej zmianie domyślnych trzeba ruszyć **oba** miejsca, bo test złapie rozjazd tylko po stronie zodu. (Inaczej niż `price-keys.test.ts`, które faktycznie czyta plik Deno.)
+  ⚠️ **Kolor na PDF jest własnością klienta.** Migracja rusza tylko `default`, czyli to, co dostanie nowe konto. Istniejące wiersze zostają nietknięte — świadomie (D-4).
+  ⚠️ **Nie zweryfikowane na żywo:** migracja nie była uruchomiona (`supabase db reset` wymaga wstającego Dockera), a PDF nie był wygenerowany. Testy jednostkowe PDF przechodzą.
 
 - [ ] **T-82 Domknięcie: dokumentacja, kontrast, build** (08-REDESIGN §5)
   Przepisanie `docs/05-UI.md` §1–§2 (dziś podaje `#F2F4F8` i „literę «T» w czarnym kółku"), nagłówek tezy w `globals.css`, CHANGELOG, zrzuty do README, usunięcie martwych tokenów.

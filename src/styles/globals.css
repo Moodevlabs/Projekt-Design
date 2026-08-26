@@ -397,23 +397,33 @@
    T-12 nadpisze je inline ze stylu brand kitu, dlatego sÄ… zmiennymi.
    --------------------------------------------------------------- */
 .quote-doc {
+  /*
+   * ⚠️ Te tokeny są zdefiniowane WYŁĄCZNIE w tym scope. Sięganie po nie
+   * spoza kartki wyceny nie działa — `var()` nie rozwiązuje się do niczego
+   * i deklaracja przepada. Do T-80 robiło tak siedem komponentów powłoki
+   * i przez to renderowały się bez tła. Chrom ma własne `--danger-wash`
+   * i `--positive-wash`; tutaj mieszka tylko dokument.
+   */
+
+  /* Kartka ZOSTAJE biała. To ona odróżnia dokument od ciepłej kanwy —
+     po redesignie kontrast niesie jasność, a nie temperatura. */
   --doc-bg: #ffffff;
   --doc-surface: #ffffff;
-  --doc-ink: #16181c;
-  --doc-ink-soft: #6a6e76;
-  --doc-hair: #e6e8ec;
-  --doc-hair-strong: #d3d7dd;
+  --doc-ink: #33251e;
+  --doc-ink-soft: #74645a;
+  --doc-hair: #e8e1da;
+  --doc-hair-strong: #d6cbc1;
   /* Kolor etykiet sekcyjnych i linków „+ dodaj". Nazwa historyczna po
      prototypie (był tam oliwkowy „sage"); dziś to po prostu przygaszony
      atrament, żeby nie konkurował z nazwami pozycji. */
-  --doc-sage: #4c515a;
-  --doc-sage-light: #f1f2f5;
+  --doc-sage: #6b5a4e;
+  --doc-sage-light: #f5f1ec;
   /* Rabaty. Jedyna barwa w dokumencie — ujemna kwota musi się odróżniać
      od zwykłej pozycji także wtedy, gdy ktoś czyta wycenę pobieżnie. */
   --doc-terracotta: #b0563c;
-  --doc-toggle-off: #dcdfe4;
-  --doc-price-off: #a6abb3;
-  --doc-danger-wash: #eff1f4;
+  --doc-toggle-off: #ded6cf;
+  --doc-price-off: #a4968a;
+  --doc-danger-wash: #f7ece9;
 
   background: var(--doc-bg);
   color: var(--doc-ink);
