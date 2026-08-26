@@ -386,6 +386,30 @@ export const pl = {
     usage: (used: string, quota: string) => `Zajęte ${used} z ${quota}`,
     usageWarning: 'Zostało mało miejsca — usuń niepotrzebne pliki.',
     usageFull: 'Limit wyczerpany. Nie dodasz nowych plików, dopóki czegoś nie usuniesz.',
+
+    // Kosz (T-67).
+    trashTitle: 'Kosz',
+    trashDescription: (days: number, size: string) =>
+      `Usunięte pliki czekają tu ${days} dni, potem znikają na dobre. Zajmują ${size} — miejsce zwolni się dopiero po trwałym usunięciu.`,
+    trashDays: (days: number) =>
+      days === 1 ? 'zostanie usunięty jutro' : `zostanie usunięty za ${days} dni`,
+    trashDueNow: 'zostanie usunięty przy najbliższym sprzątaniu',
+    restore: 'Przywróć',
+    restored: 'Plik przywrócony.',
+    deletedForever: 'Plik usunięty na stałe.',
+    deleteForeverTitle: 'Usunąć plik na stałe?',
+    deleteForeverDescription: (name: string) =>
+      `„${name}" zniknie bezpowrotnie. Tego nie da się cofnąć.`,
+    trashEmpty: 'Opróżnij kosz',
+    trashEmptyTitle: 'Opróżnić kosz?',
+    trashEmptyDescription: (count: number, size: string) =>
+      `${count} ${count === 1 ? 'plik zniknie' : 'plików zniknie'} bezpowrotnie. Zwolni się ${size}. Tego nie da się cofnąć.`,
+    trashEmptied: (count: number) =>
+      count === 1 ? 'Usunięto 1 plik.' : `Usunięto ${count} plików.`,
+    trashEmptyFailed: (count: number) =>
+      count === 1 ? 'Nie udało się usunąć 1 pliku.' : `Nie udało się usunąć ${count} plików.`,
+    /** Dopisek pod paskiem zużycia, gdy w koszu coś leży. */
+    usageTrashNote: (size: string) => `W tym ${size} w koszu.`,
   },
   documents: {
     tab: 'Dokumenty',

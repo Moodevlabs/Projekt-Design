@@ -31,6 +31,8 @@ export const FileSchema = z.object({
   createdBy: z.string().uuid().nullable().default(null),
   createdAt: z.string(),
   updatedAt: z.string(),
+  /** Chwila wyrzucenia do kosza; `null` = plik jest na liście (T-67). */
+  deletedAt: z.string().nullable().default(null),
 });
 export type StoredFile = z.infer<typeof FileSchema>;
 
@@ -116,6 +118,29 @@ export function buildStoragePath(args: {
   const ext = fileExtension(args.fileName);
   const suffix = ext ? `.${ext}` : '';
   return `${args.workspaceId}/${args.clientId}/${args.projectId ?? '_'}/${args.fileId}${suffix}`;
+}
+
+/**
+ * Ile dni plik leży w koszu, zanim zniknie na dobre (T-67).
+ *
+ * Ta sama liczba stoi w bazie (`files_trash_days()`), bo sprzątanie musi ją
+ * znać niezależnie od aplikacji. Tu jest po to, żeby interfejs mógł napisać
+ * „zostanie usunięty za 12 dni" bez odpytywania bazy o stałą.
+ */
+export const TRASH_DAYS = 30;
+
+/**
+ * Ile dni zostało do trwałego usunięcia. `0` = plik jest po terminie
+ * i zniknie przy najbliższym sprzątaniu.
+ *
+ * Zaokrąglamy w GÓRĘ: plik wyrzucony przed chwilą ma „30 dni", a nie 29.
+ * Zaniżona liczba w komunikacie o kasowaniu danych jest gorsza niż zawyżona —
+ * przy zawyżonej człowiek zdąży zareagować.
+ */
+export function daysLeftInTrash(deletedAt: string, now: Date = new Date()): number {
+  const elapsed = now.getTime() - new Date(deletedAt).getTime();
+  const left = TRASH_DAYS - elapsed / 86_400_000;
+  return Math.max(0, Math.ceil(left));
 }
 
 /** Rozmiar po ludzku: „2,4 MB". Bajty tylko poniżej kilobajta. */

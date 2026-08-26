@@ -7,6 +7,7 @@ import {
   isAllowedExtension,
   isPreviewableImage,
   rejectionFor,
+  daysLeftInTrash,
 } from './schema';
 
 describe('fileExtension', () => {
@@ -131,5 +132,30 @@ describe('formatBytes', () => {
 
   it('2 GiB pokazuje jako gigabajty, nie 2048 MB', () => {
     expect(formatBytes(2 * 1024 * 1024 * 1024)).toBe('2 GB');
+  });
+});
+
+describe('daysLeftInTrash', () => {
+  const teraz = new Date('2026-08-27T12:00:00Z');
+
+  it('plik wyrzucony przed chwila ma pelne 30 dni', () => {
+    expect(daysLeftInTrash('2026-08-27T11:59:00Z', teraz)).toBe(30);
+  });
+
+  /**
+   * Zaokraglamy w GORE swiadomie. Zanizona liczba w komunikacie o kasowaniu
+   * danych jest gorsza niz zawyzona — przy zawyzonej czlowiek zdazy zareagowac.
+   */
+  it('zaokragla w gore, nie w dol', () => {
+    // 10 dni i 1 godzina w koszu -> zostalo 19,96 dnia -> pokazujemy 20.
+    expect(daysLeftInTrash('2026-08-17T11:00:00Z', teraz)).toBe(20);
+  });
+
+  it('po terminie zwraca 0, nigdy liczby ujemnej', () => {
+    expect(daysLeftInTrash('2026-06-01T12:00:00Z', teraz)).toBe(0);
+  });
+
+  it('dokladnie w momencie wygasniecia zwraca 0', () => {
+    expect(daysLeftInTrash('2026-07-28T12:00:00Z', teraz)).toBe(0);
   });
 });

@@ -37,6 +37,12 @@ vi.mock('@/data/queries/useLibrary', () => ({
 
 vi.mock('@/data/queries/useFiles', () => ({
   useStorageUsage: () => ({ data: { usedBytes: 0, quotaBytes: 2147483648 }, isLoading: false }),
+  // Kosz (T-67). Pusty, wiec sekcja i tak sie nie renderuje — ale hooki
+  // musza istniec, bo TrashSection wola je bezwarunkowo.
+  useTrash: () => ({ data: [], isLoading: false }),
+  useRestoreFile: () => ({ mutate: vi.fn() }),
+  useDeleteFilePermanently: () => ({ mutate: vi.fn(), mutateAsync: vi.fn() }),
+  usePurgeExpiredTrash: () => ({ data: 0 }),
 }));
 
 vi.mock('@/features/billing/useEntitlement', () => ({

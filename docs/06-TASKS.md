@@ -1066,7 +1066,15 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
 - [ ] T-22 Pełna historia wersji wyceny (diff pozycji, porównanie totali między wersjami) — lekkie wersje v1/v2 są w **T-57**; nie mylić z **T-30**, które wersjonuje *schemat* `body`
 - [ ] T-23 Import/eksport CSV — biblioteka (T-50) i rejestr (T-49) zrobione; zostaje **eksport XLSX** i import klientów z CSV
 - [ ] T-24 Wiele walut i lokalizacja liczb
-- [ ] T-67 Kosz na pliki (30 dni; dziś usunięcie w T-55 jest natychmiastowe)
+- [x] **T-67 Kosz na pliki** (30 dni; do 1.0 usunięcie w T-55 było natychmiastowe)
+  **Zrobione 2026-08-27:**
+  > - **Zmiana semantyki limitu — najważniejsza rzecz w tym zadaniu.** 0017 zwalniał miejsce już przy `deleted_at` i było to POPRAWNE, bo obiekt w Storage znikał w tej samej chwili. Z koszem bajty **zostają** (inaczej nie ma czego przywracać), więc zwalnianie limitu przy wyrzuceniu do kosza znaczyłoby, że workspace może zająć w Storage dowolnie dużo ponad 2 GiB — wystarczy wrzucać i kasować. Migracja `0027` przenosi zwolnienie miejsca na **trwałe usunięcie wiersza** i przelicza liczniki od zera (backfill).
+  > - Tak działa każdy kosz, którego użytkownik już używał (Dysk, Dropbox), więc „opróżnij kosz, żeby odzyskać miejsce" nikogo nie zaskoczy. Sekcja kosza stoi **tuż pod paskiem zużycia** — odpowiedź na „czemu pasek nie drgnął" ma być w zasięgu wzroku.
+  > - Trwałe usunięcie idzie **najpierw obiekt, potem wiersz** — odwrotnie niż wyrzucenie do kosza. Osierocony obiekt kosztuje miejsce i nikt go nie widzi; osierocony wiersz pokazywałby w koszu plik, którego nie da się przywrócić.
+  > - **Sprzątanie bez harmonogramu.** Supabase bez `pg_cron` nie ma crona, a Edge Function z crona dla jednej operacji to przerost. `files_expired_in_trash()` zwraca ścieżki (obiektów w Storage nie da się skasować z SQL-a), aplikacja kasuje je przy wejściu do Ustawień. Plik czekający 40 zamiast 30 dni nikomu nie szkodzi — plik usunięty za wcześnie owszem.
+  > - `daysLeftInTrash` zaokrągla **w górę**: zaniżona liczba w komunikacie o kasowaniu danych jest gorsza niż zawyżona. 4 testy jednostkowe.
+  > - Testy integracyjne przepisane na nową semantykę: sprawdzają teraz, że kosz **nie** zwalnia miejsca, że plik w koszu **da się pobrać** (inaczej nie byłoby czego przywracać) i że dopiero trwałe usunięcie kasuje obiekt.
+  > ⚠️ **Nie zweryfikowane:** testy integracyjne (`pnpm test:db`) nie były uruchomione — wymagają działającego stacku Supabase, a ten nie wstaje przez zarezerwowane porty Windows (patrz T-25). Migracja `0027` sprawdzona na jednorazowym Postgresie.
 - [ ] T-68 Statusy realizacji etapów w projekcie (koncepcja §7 „w przyszłości")
 - [ ] T-69 Usunięcie kolumny `library_items.category` (tekst) po jednej wersji od T-59
 

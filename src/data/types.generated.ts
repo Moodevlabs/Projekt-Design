@@ -1119,6 +1119,14 @@ export type Database = {
         Args: { delta: number; ws: string }
         Returns: undefined
       }
+      files_expired_in_trash: {
+        Args: { ws: string }
+        Returns: {
+          id: string
+          storage_path: string
+        }[]
+      }
+      files_trash_days: { Args: never; Returns: number }
       get_shared_quote: { Args: { p_token: string }; Returns: Json }
       is_member: { Args: { ws: string }; Returns: boolean }
       is_quote_member: { Args: { q: string }; Returns: boolean }

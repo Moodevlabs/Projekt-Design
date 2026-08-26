@@ -28,6 +28,8 @@ export const queryKeys = {
   project: (id: string) => ['projects', 'detail', id] as const,
   projectOverview: (id: string) => ['projects', 'detail', id, 'overview'] as const,
   files: (filters?: unknown) => (filters ? (['files', filters] as const) : (['files'] as const)),
+  trash: (workspaceId?: string) =>
+    workspaceId ? (['trash', workspaceId] as const) : (['trash'] as const),
   storageUsage: (workspaceId?: string) =>
     workspaceId ? (['storage-usage', workspaceId] as const) : (['storage-usage'] as const),
   roomTypes: (workspaceId?: string) =>
