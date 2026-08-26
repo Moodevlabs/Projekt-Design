@@ -1360,6 +1360,17 @@ export const pl = {
     active: 'Aktywna',
     pastDue: 'Zaległa płatność',
     canceled: 'Anulowana',
+    /*
+     * Nagłówki stanu na ekranie subskrypcji. Osobne od `noSubscription`
+     * i `expiredNotice`, bo tamte są ZDANIAMI (wyjaśnieniem, co robić),
+     * a tu potrzebna jest krótka nazwa stanu do nagłówka.
+     */
+    expired: 'Dostęp wygasł',
+    inactive: 'Brak aktywnej subskrypcji',
+    /** „Stan dostępu" — nie „Status", bo mówimy o prawie do pracy, nie o rekordzie. */
+    accessLabel: 'Stan dostępu',
+    /** Nagłówek sekcji wyboru częstotliwości płatności. */
+    periodLabel: 'Jak chcesz płacić',
     buy: 'Aktywuj dostęp',
     manage: 'Zarządzaj płatnością',
     readOnlyBanner:
@@ -1406,9 +1417,13 @@ export const pl = {
     trialExplainer: 'Okres próbny to czas na sprawdzenie aplikacji — nie wymaga karty.',
     renewsAt: (date: string) => `Odnowienie: ${date}`,
     endsAt: (date: string) => `Dostęp do: ${date}`,
-    canceledNotice: 'Płatność anulowana — dostęp działa do końca opłaconego okresu.',
+    /*
+     * Wyjaśnienia stanu. Nie powtarzają nazwy stanu, bo stoją bezpośrednio pod
+     * nagłówkiem, który ją już podaje — mają mówić, CO Z TYM ZROBIĆ.
+     */
+    canceledNotice: 'Dostęp działa do końca opłaconego okresu.',
     pastDueNotice: 'Płatność się nie powiodła. Popraw dane karty, żeby nie stracić dostępu.',
-    expiredNotice: 'Dostęp wygasł. Twoje wyceny są bezpieczne — wróć do nich po opłaceniu.',
+    expiredNotice: 'Twoje wyceny są bezpieczne — wróć do nich po opłaceniu.',
     graceNotice: 'Ponawiamy płatność. Możesz pracować normalnie.',
     noSubscription: 'Brak informacji o płatności.',
 

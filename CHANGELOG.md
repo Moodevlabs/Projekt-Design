@@ -27,6 +27,12 @@ szarość, a kosztowało dwa pełnoekranowe przemalowania przy każdym przewini�
 Nowe konta dostają brand kit w barwach Toolier. **Istniejące zachowują swoje
 kolory na PDF bez zmian** — kolor oferty jest własnością studia, nie nasz.
 
+**Ekran subskrypcji przebudowany.** Stan dostępu przestał być kolorową
+odznaką — jest zdaniem, a przy okresie próbnym dokłada 14 tyknięć-dni, czyli
+ten sam znak co na pulpicie. Wybór częstotliwości płatności to teraz jeden
+cennik w dwóch kolumnach zamiast dwóch osobnych kart; korzystniejszą roczną
+znaczy waga przycisku i tło, a nie wstążka „najpopularniejsze".
+
 ### Naprawione
 
 **Ostrzeżenia bez tła.** Pasek „tryb tylko do odczytu", bloki „Uwaga" w Pomocy
