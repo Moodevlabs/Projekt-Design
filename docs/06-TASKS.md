@@ -615,6 +615,62 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   ⚠️ **Zamiast „2 miesiące gratis" jest „prawie dwa miesiące taniej"** — 999,99 / 98,99 = 10,1 miesiąca, więc oszczędność to 1,9 miesiąca, nie 2. Jeśli właściciel chce okrągłego hasła, to jeden string w `pl.billing.prices.yearlySaving`.
   ⚠️ **Panel Stripe niesprawdzony w tym zadaniu** — kod pyta o nowe `lookup_key`, ale ceny trzeba założyć ręcznie (kroki 1–5 w `03-BILLING.md` §1). Uwaga na sekrety `STRIPE_PRICE_MONTHLY`/`STRIPE_PRICE_YEARLY`: przypięte ID **wygrywa** z `lookup_key` i po cichu zostawiłoby starą kwotę.
 
+### Redesign Toolier 2026 — brąz / beż / papier (makieta + logotypy, 2026-08-26) — przed T-17
+
+> **Dlaczego przed T-17.** T-17 mówi wprost, że „docelowa kolorystyka przyjdzie na końcu budowy", a jego kryterium odbioru to podpisany instalator z ikonami aplikacji. Budowanie instalatora przed rebrandingiem znaczyłoby budowanie go dwa razy. Pełna specyfikacja: **`docs/08-REDESIGN-2026.md`** — tu jest tylko kolejność i kryteria odbioru. **Przeczytaj §0 (zmiana tezy), §2 (trzy pułapki typografii) i §6 (decyzje) przed startem pierwszego chunku.**
+>
+> Materiały: `reference/nowy wyglad.png`, `reference/logotypy/{sygnet,toolier napis,toolier logo}.svg`. Kolory bazowe: **`#33251e`** (brąz), **`#efece8`** (beż). Fonty: **Faculty Glyphic** (display) + **Inter** (interfejs).
+
+- [ ] **T-74 Fundament: tokeny i paleta, fonty** (08-REDESIGN §1, §2)
+  Wymiana `:root` w `globals.css` na ciepłą rampę (neutralne + szyna + funkcyjne), nowe cienie i promienie, przemapowanie bloku shadcn. `+ @fontsource/faculty-glyphic`, `− @fontsource-variable/instrument-sans`. Nowa utility `.label-caps`. Usunięcie `--field` i `body::before`.
+  ✅ `pnpm dev` — aplikacja jest ciepła i czytelna bez ani jednej zmiany w JSX.
+  ⚠️ **`.tabular` musi zostać odpięte od `--font-display`** — inaczej wszystkie kwoty przeskoczą do Faculty Glyphic, który nie ma gwarantowanych cyfr tabularnych. Kolumna pieniędzy zacznie skakać.
+  ⚠️ **Faculty Glyphic ma jedną wagę (400), nie ma wariantu variable.** Każde `font-display` + `font-semibold` w JSX da sztuczne pogrubienie. Hierarchia idzie przez stopień pisma i wersaliki.
+
+- [ ] **T-75 Logotypy jako komponenty + ikony aplikacji** (08-REDESIGN §4)
+  `src/assets/brand/{Sygnet,Wordmark,LogoLockup}.tsx` z `fill="currentColor"`. Podmiana liter „A" w `Sidebar.tsx` i `AuthLayout.tsx`. Favicon, `src-tauri/icons/` z sygnetu, ikona instalatora, `AppCredit` na nowe tokeny.
+  ✅ `grep -rnE '^\s*A\s*$' src --include=*.tsx` nic nie zwraca (dziś: `Sidebar.tsx:200`, `AuthLayout.tsx:35`); aplikacja w pasku zadań pokazuje Toolier.
+  ⚠️ Master ikony: **1024 PNG na beżu, nie na przezroczystości** — sygnet na ciemnym pasku zadań zniknąłby.
+  ⚠️ `logoDarkPath`/`logoLightPath` w brand kicie to logo **klienta** na jego PDF. Nie ruszać.
+
+- [ ] **T-76 Płaskość: koniec szkła** (08-REDESIGN §3)
+  `.glass` / `.glass-strong` / `.glass-dark` / `.card-surface` → `.surface-card` / `.surface-band` / `.rail`. Usunięcie tokenów `--glass-*`, masek `mask-composite` i trzech bloków `@supports not (backdrop-filter)`. Przepięcie 5 plików używających `glass`.
+  ✅ `grep -rn "backdrop-filter|glass" src/` zwraca zero.
+  ⚠️ **Kolejność:** przed T-77 i T-78. Odwrotnie znaczyłoby restylowanie komponentów dwa razy — raz na szkle, raz na płasko.
+
+- [ ] **T-77 Powłoka: szyna i pas** (08-REDESIGN §5, makieta)
+  Brązowa szyna z wersalikowymi etykietami, beżowy pas topbara, tytuł strony w Faculty Glyphic, CTA w ramce, awatar i kropka subskrypcji na brązie.
+  ✅ Zrzut pulpitu różni się od `reference/nowy wyglad.png` tylko tam, gdzie odstąpiliśmy świadomie (D-1…D-3, D-5).
+  ⚠️ **Makieta ma w menu „STUDIO" i nie ma „PULPIT" — nawigacji NIE zmieniamy** (D-5). To decyzja produktowa o tym, gdzie mieszka konfiguracja studia, a nie wizualna; osobne zadanie po redesignie.
+  ⚠️ **`nav-pill-stretch` do usunięcia** — animacja „kropli" należała do języka liquid glass; na płaskim brązie czyta się jak usterka. Sam przesuw zostaje.
+  ⚠️ Mechanizm jednej przejeżdżającej kulki zostaje — `Sidebar.test.tsx` go pilnuje.
+
+- [ ] **T-78 Kontrolki shadcn** (08-REDESIGN §5)
+  24 komponenty w `src/components/ui/` — warianty `button`, pola formularzy, `switch`, `badge`, `table`, `tabs`, warstwy nad treścią (`dialog`/`sheet`/`popover`/`dropdown`/`tooltip`/`command`/`sonner`).
+  ✅ Wszystkie stany (hover, focus-visible, disabled, invalid) sprawdzone na kanwie, na karcie i na beżowym pasie.
+  ⚠️ **`--ring` musi być brązowy i mieć ≥3:1 wobec obu podłoży.** Dzisiejszy `#9aa0aa` na beżu zniknie — a to jedyny wskaźnik fokusu dla klawiatury.
+  ⚠️ Zmieniać klasy w `cva`, nie przepisywać plików — `npx shadcn add` je kiedyś nadpisze.
+
+- [ ] **T-79 Statusy i barwy funkcyjne** (08-REDESIGN §1.3, §1.4)
+  Nowe `--status-*` w oliwce/ochrze/terakocie, `trial-tone.ts` z hexów na tokeny, trzy chłodne odcienie w `swatches.ts`. Hexy logo Google w `GoogleButton.tsx` **zostają**.
+  ✅ Pięć statusów obok siebie rozróżnialnych, także w symulacji deuteranopii.
+  ⚠️ `trial-tone.test.ts` asertuje wartości — aktualizacja razem ze zmianą.
+
+- [ ] **T-80 Ekrany treści** (08-REDESIGN §5)
+  Pulpit, klienci, projekty, rejestr wycen, edytor, biblioteka, szablony, pliki, ustawienia, pomoc, subskrypcja, auth, komponenty wspólne.
+  ✅ Klik przez wszystkie trasy z `routes.ts` bez elementu w chłodnej szarości.
+  ⚠️ **To chunk stylowania, nie refaktoru.** Jeśli przekroczy jeden PR — tnij po obszarach, nie po typach zmian. Pomysły na układ → `docs/IDEAS.md`.
+
+- [ ] **T-81 Dokument wyceny i PDF** (08-REDESIGN §5, 04-PDF)
+  `.quote-doc` i `src/pdf/theme.ts` w ciepłym atramencie; biel kartki zostaje biała. Domyślne `accentColor`/`bgColor` brand kitu — tylko dla nowych workspace'ów.
+  ✅ PDF na świeżym koncie ma brąz Toolier; PDF istniejącego klienta z własnym akcentem nie zmienia się ani o piksel.
+  ⚠️ **Kolor na PDF jest własnością klienta.** Zmiana `default()` w zodzie nie rusza istniejących wierszy — i dobrze. Nadpisanie ich wymagałoby migracji i osobnej decyzji (D-4).
+
+- [ ] **T-82 Domknięcie: dokumentacja, kontrast, build** (08-REDESIGN §5)
+  Przepisanie `docs/05-UI.md` §1–§2 (dziś podaje `#F2F4F8` i „literę «T» w czarnym kółku"), nagłówek tezy w `globals.css`, CHANGELOG, zrzuty do README, usunięcie martwych tokenów.
+  ✅ Audyt WCAG AA na **czterech** podłożach (szyna, pas, kanwa, karta): tekst ≥4,5:1, kontrolki i `focus-visible` ≥3:1. `pnpm build` i `pnpm tauri build` przechodzą.
+  ⚠️ Faculty Glyphic to nowy asset w łańcuchu Vite — sprawdzić, że wchodzi do bundla, a nie tylko do `pnpm dev`.
+
 - [ ] **T-17 Polish & release 1.0**
   Pusty stan onboardingu (3 kroki: logo → biblioteka → pierwsza wycena; po T-62: „przejrzyj bibliotekę przykładową"), obsługa błędów (ErrorBoundary, toasty), ikony aplikacji, `tauri build` Win+mac, podpisywanie (notarization macOS, cert Win — zanotuj w README co trzeba mieć), CHANGELOG.
   ✅ Instalator działa na czystej maszynie.
