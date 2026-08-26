@@ -191,9 +191,18 @@ export function Sidebar({ subscriptionOk = true }: { subscriptionOk?: boolean })
         tagline nie miałby prawa być czytelny. Hasło marki ma sens tam, gdzie
         widzi je ktoś, kto jeszcze nie jest w aplikacji. (08-REDESIGN D-2)
       */}
-      <div className={cn('mb-6 flex h-9 items-center', expanded ? 'w-full px-1' : 'justify-center')}>
+      {/*
+        `justify-center` obowiązuje w OBU stanach. Wcześniej stan rozwinięty
+        miał samo `w-full px-1`, więc wordmark był dosunięty do lewej krawędzi.
+
+        Wyśrodkowanie ramki wystarcza, żeby wyśrodkować litery: wordmark ma
+        ~17% pustego marginesu z każdej strony `viewBox`, ale symetrycznie.
+        Ten sam margines sprawia, że ramka jest zauważalnie większa niż to,
+        co widać — stąd `h-8` daje w rzeczywistości ~20 px wysokości liter.
+      */}
+      <div className="mb-6 flex h-10 w-full items-center justify-center">
         {expanded ? (
-          <Wordmark title={pl.app.name} className="text-rail-ink h-[18px] w-auto" />
+          <Wordmark title={pl.app.name} className="text-rail-ink h-8 w-auto" />
         ) : (
           <Sygnet title={pl.app.name} className="text-rail-ink h-7 w-auto" />
         )}
