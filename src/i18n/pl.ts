@@ -474,6 +474,10 @@ Pozdrawiam`,
     markRead: 'Oznacz jako przeczytane',
     unread: 'Nowe',
     anonymous: 'Klient',
+
+    // Powiadomienia Realtime (T-26).
+    acceptedToast: 'Klient zaakceptował ofertę.',
+    commentToast: 'Klient zostawił uwagi do oferty.',
   },
   editor: {
     preview: 'Podgląd',
