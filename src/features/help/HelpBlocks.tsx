@@ -51,14 +51,14 @@ export function HelpBlockView({ block }: { block: HelpBlock }) {
           className={cn(
             'flex gap-3 rounded-[var(--radius-control)] border px-4 py-3',
             warn
-              ? 'border-[var(--doc-terracotta)]/30 bg-[var(--doc-danger-wash)]'
+              ? 'border-danger/30 bg-danger-wash'
               : 'border-hair bg-surface-2',
           )}
         >
           <Icon
             className={cn(
               'mt-0.5 size-4 shrink-0',
-              warn ? 'text-[var(--doc-terracotta)]' : 'text-ink-soft',
+              warn ? 'text-danger' : 'text-ink-soft',
             )}
             aria-hidden
           />

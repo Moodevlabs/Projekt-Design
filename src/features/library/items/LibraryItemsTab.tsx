@@ -153,7 +153,7 @@ export function LibraryItemsTab() {
           <div
             className={cn(
               ROW_GRID,
-              'border-hair text-ink-soft border-b px-3 py-2 text-[10.5px] font-semibold tracking-[0.08em] uppercase',
+              'label-caps border-hair text-ink-soft border-b px-3 py-2',
             )}
           >
             <span>{pl.library.colService}</span>

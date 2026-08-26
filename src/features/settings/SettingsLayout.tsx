@@ -36,7 +36,7 @@ export function SettingsLayout() {
               cn(
                 'relative -mb-px px-3 py-2.5 text-sm transition-colors',
                 isActive
-                  ? 'text-ink border-b-2 border-[var(--doc-ink)] font-semibold'
+                  ? 'text-ink border-primary border-b-2 font-semibold'
                   : 'text-ink-soft hover:text-ink border-b-2 border-transparent',
               )
             }

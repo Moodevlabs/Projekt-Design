@@ -157,7 +157,7 @@ export function ProjectPage() {
 function Stat({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="min-w-24">
-      <p className="text-ink-soft text-xs tracking-wide uppercase">{label}</p>
+      <p className="label-caps text-ink-soft">{label}</p>
       <p className="text-ink mt-1 text-sm font-medium">{value}</p>
     </div>
   );

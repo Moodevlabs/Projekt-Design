@@ -81,14 +81,17 @@ export function OnboardingChecklist({ hasQuotes }: { hasQuotes: boolean }) {
               to={step.to}
               className={cn(
                 'border-hair group flex items-center gap-3 rounded-md border px-4 py-3 transition-colors',
-                step.done ? 'opacity-60' : 'hover:border-[var(--doc-sage)]',
+                // `--primary`, nie `--doc-sage`: to jest kafel PULPITU, a paleta
+                // `--doc-*` należy do kartki wyceny i jest nadpisywana brand
+                // kitem klienta. Checklista zmieniałaby kolor razem z jego logo.
+                step.done ? 'opacity-60' : 'hover:border-primary',
               )}
             >
               <span
                 className={cn(
                   'flex size-5 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold',
                   step.done
-                    ? 'bg-[var(--doc-sage)] text-white'
+                    ? 'bg-primary text-primary-foreground'
                     : 'border-hair text-ink-soft border',
                 )}
                 aria-hidden

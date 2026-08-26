@@ -44,7 +44,7 @@ export function MonthLedger({
 
   return (
     <section className="card-surface p-6" aria-label={monthTitle}>
-      <h2 className="text-ink-soft text-[11px] font-semibold tracking-[0.14em] uppercase">
+      <h2 className="label-caps text-ink-soft">
         {monthTitle}
       </h2>
 

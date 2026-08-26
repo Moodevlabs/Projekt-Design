@@ -26,7 +26,8 @@ export function TrialBar({ expanded }: { expanded: boolean }) {
     <Link
       to={routes.subscription}
       title={pl.billing.trialDaysLeft(days)}
-      className="mx-2 mb-2 flex items-center gap-2 rounded-[var(--radius-control)] bg-white/10 px-2 py-1.5 text-white/80 transition-colors hover:bg-white/15 hover:text-white"
+      // Ten pasek stoi W SZYNIE, więc jedzie na jej rampie, a nie na bieli.
+      className="bg-rail-ink/10 text-rail-ink-soft hover:bg-rail-ink/15 hover:text-rail-ink mx-2 mb-2 flex items-center gap-2 rounded-[var(--radius-control)] px-2 py-1.5 transition-colors"
     >
       <span className="tabular text-sm font-semibold">{days}</span>
       {expanded ? (

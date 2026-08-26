@@ -707,10 +707,18 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - **Nazwy kluczy w `swatches.ts` zostały bez zmian** — siedzą w bazie jako `library_categories.color`. Zmieniamy wygląd odcienia, nie jego tożsamość; przemianowanie wymagałoby migracji.
   ⚠️ `trial-tone.test.ts` asertował stare wartości — zaktualizowany razem ze zmianą. Test monotoniczności („im mniej dni, tym cieplejsza barwa") przechodzi na nowych kotwicach bez rozluźniania asercji.
 
-- [ ] **T-80 Ekrany treści** (08-REDESIGN §5)
-  Pulpit, klienci, projekty, rejestr wycen, edytor, biblioteka, szablony, pliki, ustawienia, pomoc, subskrypcja, auth, komponenty wspólne.
-  ✅ Klik przez wszystkie trasy z `routes.ts` bez elementu w chłodnej szarości.
-  ⚠️ **To chunk stylowania, nie refaktoru.** Jeśli przekroczy jeden PR — tnij po obszarach, nie po typach zmian. Pomysły na układ → `docs/IDEAS.md`.
+- [x] **T-80 Ekrany treści** (08-REDESIGN §5)
+  Pulpit, klienci, projekty, edytor, biblioteka, ustawienia, pomoc, subskrypcja, komponenty wspólne.
+  ✅ `grep -rE "#[0-9a-fA-F]{6}" src/features src/components src/app` zwraca tylko fallback natywnego `input[type=color]`. `grep "var(--doc-" ` poza dokumentem — zero.
+  **Znaleziony i naprawiony błąd sprzed redesignu:**
+  > - **Siedem komponentów CHROMU sięgało po tokeny `--doc-*`, które są zdefiniowane wyłącznie w scope `.quote-doc`.** Poza kartką wyceny `var()` nie rozwiązywał się do niczego, więc pasek „tryb tylko do odczytu" (`ReadOnlyBanner`), bloki „Uwaga" w pomocy (`HelpBlocks`) i ramka kasowania konta (`AccountSection`) renderowały się **bez tła**, a ich ikony ostrzegawcze dziedziczyły zwykły kolor tekstu zamiast terakoty. To nie regresja redesignu — tak było wcześniej, tyle że nikt tego nie zauważył, bo brakujące tło na chłodnej szarości wyglądało po prostu jak brak tła.
+  > - Doszły dwa tokeny chromu: `--danger-wash` i `--positive-wash`. Reszta przecieków przepięta na `--danger`, `--positive`, `--hair-strong`, `--primary`.
+  > - `OnboardingChecklist` na pulpicie używał `--doc-sage`. To szczególnie źle: paleta `--doc-*` jest **nadpisywana brand kitem klienta**, więc checklista onboardingowa zmieniałaby kolor razem z logo klienta.
+  **Zrobiono poza tym:**
+  > - `TrialBar` (stoi w szynie) z `bg-white/10 text-white/80` na rampę `--rail-*`.
+  > - `EditorTopbar`: przełącznik trybu i pole numeru z `border-white/60 bg-white/45` na tokeny — ten sam wzorzec, który liczył na szkło, co wyszukiwarka w topbarze.
+  > - Wersalikowe etykiety chromu ujednolicone na `.label-caps`: pulpit (3), pomoc (4), karta klienta, karta projektu, główka listy usług. Wcześniej były to **cztery różne** warianty tego samego wzorca (`text-[11px]/[10.5px]/text-xs`, `tracking-[0.14em]/[0.1em]/[0.08em]/wide`).
+  ⚠️ **To chunk stylowania, nie refaktoru.** Etykiety wersalikowe wewnątrz `.quote-doc` (edytor, dokumenty) **nie były ruszane** — należą do palety dokumentu i idą w T-81.
 
 - [ ] **T-81 Dokument wyceny i PDF** (08-REDESIGN §5, 04-PDF)
   `.quote-doc` i `src/pdf/theme.ts` w ciepłym atramencie; biel kartki zostaje biała. Domyślne `accentColor`/`bgColor` brand kitu — tylko dla nowych workspace'ów.

@@ -71,6 +71,18 @@
   --positive: #4a6340;
   --warning: #b07d2c;
   --danger: #a8402f;
+
+  /*
+   * Tła ostrzeżeń i potwierdzeń w CHROMIE.
+   *
+   * Istnieją, bo do T-80 siedem komponentów powłoki (ReadOnlyBanner,
+   * HelpBlocks, AccountSection, SubscriptionPage…) sięgało po `--doc-*` —
+   * a te są zdefiniowane WYŁĄCZNIE w scope `.quote-doc`. Poza kartką wyceny
+   * `var()` nie rozwiązywało się do niczego, więc pasek „tryb tylko do
+   * odczytu" i bloki „Uwaga" w pomocy renderowały się bez tła.
+   */
+  --danger-wash: #f7ece9;
+  --positive-wash: #eef0e9;
   /* Terakota rabatów była ciepła od początku — wpasowuje się bez ruchu. */
   --discount: #b9634a;
 
@@ -171,6 +183,8 @@
   --color-positive: var(--positive);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
+  --color-danger-wash: var(--danger-wash);
+  --color-positive-wash: var(--positive-wash);
   --color-discount: var(--discount);
 
   --color-background: var(--background);

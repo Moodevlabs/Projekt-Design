@@ -22,7 +22,7 @@ export function SubscriptionCard() {
 
   return (
     <section className="card-surface p-6" aria-busy={subscription.isLoading || undefined}>
-      <h2 className="text-ink-soft text-[11px] font-semibold tracking-[0.14em] uppercase">
+      <h2 className="label-caps text-ink-soft">
         {pl.billing.title}
       </h2>
 
