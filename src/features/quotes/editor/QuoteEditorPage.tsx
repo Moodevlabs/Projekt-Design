@@ -254,20 +254,31 @@ function EditorSurface({
   onReload: () => void;
   onRetry: () => void;
 }) {
-  const { body, mode, number, status, saveState, lastSavedAt, quoteId, version, lineageId } =
-    useEditorStore(
-      useShallow((state) => ({
-        body: state.body,
-        mode: state.mode,
-        number: state.number,
-        status: state.status,
-        saveState: state.saveState,
-        lastSavedAt: state.lastSavedAt,
-        quoteId: state.quoteId,
-        version: state.version,
-        lineageId: state.lineageId,
-      })),
-    );
+  const {
+    body,
+    mode,
+    number,
+    status,
+    saveState,
+    lastSavedAt,
+    quoteId,
+    version,
+    lineageId,
+    currency,
+  } = useEditorStore(
+    useShallow((state) => ({
+      body: state.body,
+      mode: state.mode,
+      number: state.number,
+      status: state.status,
+      saveState: state.saveState,
+      lastSavedAt: state.lastSavedAt,
+      quoteId: state.quoteId,
+      version: state.version,
+      lineageId: state.lineageId,
+      currency: state.currency,
+    })),
+  );
 
   // Akcje Zustanda sa stabilne, wiec zmemoizowane sekcje i wiersze nie
   // przerenderuja sie tylko dlatego, ze rodzic dostal nowy `body`.
@@ -464,7 +475,7 @@ function EditorSurface({
               body,
               number,
               issueDate,
-              currency: 'PLN',
+              currency,
               onExported: markAsSent.afterExport,
               archive: archive.target,
               version,
@@ -538,8 +549,7 @@ function EditorSurface({
           <VersionHistoryDialog
             lineageId={lineageId}
             currentId={quoteId}
-            /* Ta sama stala co w TotalsCard — wiele walut to osobne zadanie (T-24). */
-            currency="PLN"
+            currency={currency}
             open
             onOpenChange={setHistoryOpen}
           />
@@ -618,7 +628,7 @@ function EditorSurface({
               priceList: documents?.priceList ?? null,
               number,
               issueDate,
-              currency: 'PLN',
+              currency,
               archive: archive.target,
             });
           }}
@@ -697,7 +707,7 @@ function EditorSurface({
                       key={section.id}
                       section={section}
                       editing={editing}
-                      currency="PLN"
+                      currency={currency}
                       vatRate={body.vatRate}
                       pricesInclude={body.pricesInclude}
                       rooms={body.rooms}
@@ -736,7 +746,7 @@ function EditorSurface({
                 <div className="mt-10">
                   <DiscountsSection
                     body={body}
-                    currency="PLN"
+                    currency={currency}
                     editing={editing}
                     onAdd={addDiscount}
                     onToggle={toggleDiscount}
@@ -784,7 +794,7 @@ function EditorSurface({
               />
               <TotalsCard
                 body={body}
-                currency="PLN"
+                currency={currency}
                 issueDate={issueDate}
                 hourlyRateCents={workspaceRate}
               />

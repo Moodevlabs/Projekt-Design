@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { safeCurrency } from '@/domain/money';
 import { immer } from 'zustand/middleware/immer';
 import { current } from 'immer';
 import {
@@ -106,6 +107,12 @@ export interface EditorState {
   /** Linia wersji i numer wersji (T-57) — do badge'a i nazwy pliku PDF. */
   lineageId: string | null;
   version: number;
+  /**
+   * Waluta dokumentu (T-24) — kolumna `quotes.currency`, nie ustawienie
+   * workspace'u. Wycena, ktora poszla do klienta w euro, ma zostac w euro
+   * takze wtedy, gdy studio przestawi domyslna walute na zlote.
+   */
+  currency: string;
   number: string | null;
   status: QuoteStatus;
   body: QuoteBody | null;
@@ -308,6 +315,7 @@ const INITIAL = {
   projectId: null as string | null,
   lineageId: null as string | null,
   version: 1,
+  currency: 'PLN',
   number: null,
   status: 'draft' as QuoteStatus,
   body: null,
@@ -386,6 +394,7 @@ export const useEditorStore = create<EditorState>()(
         state.projectId = quote.projectId;
         state.lineageId = quote.lineageId;
         state.version = quote.version;
+        state.currency = safeCurrency(quote.currency);
         state.number = quote.number;
         state.status = quote.status;
         state.body = quote.body;

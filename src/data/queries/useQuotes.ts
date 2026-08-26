@@ -19,7 +19,7 @@ import {
 } from '@/data/repos/quotes.repo';
 import { ConflictError } from '@/data/repos/errors';
 import { queryKeys } from '@/data/query-keys';
-import { requireWorkspaceId, useWorkspaceId } from './useWorkspace';
+import { requireWorkspaceId, useWorkspace, useWorkspaceId } from './useWorkspace';
 import type { DocKind, QuoteStatus } from '@/domain/quote';
 import { createLogger } from '@/lib/logger';
 
@@ -58,13 +58,29 @@ export function useQuote(id: string) {
 
 export type CreateQuoteVars = Omit<CreateQuoteInput, 'workspaceId'>;
 
+/**
+ * Nowa wycena.
+ *
+ * **Walutę dobiera ten hook, a nie miejsca wywołania** (T-24). Wycenę zakłada
+ * się z pięciu ekranów; gdyby każdy musiał pamiętać o przekazaniu waluty,
+ * pierwszy zapomniany dałby ofertę w złotych w studiu rozliczającym się
+ * w euro — i wyszłoby to dopiero na dokumencie u klienta.
+ *
+ * Wartość jest **snapshotem**: przestawienie domyślnej waluty w ustawieniach
+ * nie rusza wycen, które już powstały.
+ */
 export function useCreateQuote() {
   const queryClient = useQueryClient();
   const workspaceId = useWorkspaceId();
+  const workspace = useWorkspace();
 
   return useMutation({
     mutationFn: (vars: CreateQuoteVars) =>
-      createQuote({ ...vars, workspaceId: requireWorkspaceId(workspaceId) }),
+      createQuote({
+        currency: workspace.data?.settings.currency,
+        ...vars,
+        workspaceId: requireWorkspaceId(workspaceId),
+      }),
     onSuccess: (quote) => {
       // Wrzucamy detal do cache, żeby przejście do edytora nie czekało na fetch.
       queryClient.setQueryData<Quote>(queryKeys.quote(quote.id), quote);
@@ -110,7 +126,6 @@ export function useDuplicateQuote() {
     },
   });
 }
-
 
 /**
  * „Nowa wersja" — kolejna propozycja w tej samej linii (T-57).

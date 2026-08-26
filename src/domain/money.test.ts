@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { formatMoney, formatMoneyRange, parseMoney, roundCents } from './money';
+import {
+  CURRENCIES,
+  formatMoney,
+  formatMoneyRange,
+  isCurrency,
+  parseMoney,
+  roundCents,
+  safeCurrency,
+} from './money';
 
 /** ICU wstawia spacje twarde/wąskie — porównujemy po normalizacji. */
 const norm = (value: string): string => value.replace(/[\s\u00A0\u202F]/g, ' ');
@@ -130,5 +138,57 @@ describe('formatMoneyRange — cennik usług dodatkowych (F6.2)', () => {
 
   it('szanuje walutę dokumentu', () => {
     expect(norm(formatMoneyRange(30_000, 120_000, '', 'EUR'))).toContain('€');
+  });
+});
+
+describe('waluty (T-24)', () => {
+  it('formatuje euro POLSKIM zapisem liczby', () => {
+    // Sedno decyzji: waluta sie zmienia, format liczby NIE. Przecinek
+    // dziesietny i symbol na koncu — a nie „€12,005.50" w polskim dokumencie.
+    expect(norm(formatMoney(1_200_550, 'EUR'))).toBe('12 005,50 \u20ac');
+  });
+
+  /**
+   * pl-PL (CLDR `min2`) nie grupuje liczb czterocyfrowych: „1200,50", ale
+   * „12 005,50". Wyglada na przeoczenie, a jest regula jezyka — i tak samo
+   * zachowuje sie `formatMoneyRange`, wiec cennik nie rozjezdza sie z oferta.
+   */
+  it('grupowanie min2 dziala tak samo w kazdej walucie', () => {
+    expect(norm(formatMoney(120_050, 'EUR'))).toBe('1200,50 \u20ac');
+    expect(norm(formatMoney(120_050, 'PLN'))).toBe('1200,50 z\u0142');
+  });
+
+  it('kazda waluta z listy formatuje sie bez wyjatku', () => {
+    for (const code of CURRENCIES) {
+      expect(() => formatMoney(100_00, code)).not.toThrow();
+    }
+  });
+
+  /**
+   * `Intl.NumberFormat` rzuca RangeError na niepoprawnym kodzie. Wycena
+   * z uszkodzona wartoscia w kolumnie ma sie OTWORZYC i dac poprawic,
+   * a nie wywalic edytora.
+   */
+  it('nieznany kod waluty cofa sie do zlotego zamiast rzucac', () => {
+    expect(() => formatMoney(100_00, 'PNL')).not.toThrow();
+    expect(norm(formatMoney(100_00, 'PNL'))).toBe(norm(formatMoney(100_00, 'PLN')));
+  });
+
+  it('safeCurrency przepuszcza znane i cofa nieznane', () => {
+    expect(safeCurrency('EUR')).toBe('EUR');
+    expect(safeCurrency('PNL')).toBe('PLN');
+    expect(safeCurrency(null)).toBe('PLN');
+    expect(safeCurrency(undefined)).toBe('PLN');
+    expect(safeCurrency('')).toBe('PLN');
+  });
+
+  it('isCurrency rozpoznaje wylacznie kody z zamknietej listy', () => {
+    expect(isCurrency('PLN')).toBe(true);
+    expect(isCurrency('JPY')).toBe(false);
+    expect(isCurrency('pln')).toBe(false);
+  });
+
+  it('przedzial cen tez idzie w wybranej walucie', () => {
+    expect(norm(formatMoneyRange(300_00, 1_200_00, '', 'EUR'))).toContain('€');
   });
 });

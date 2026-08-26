@@ -14,9 +14,10 @@ import {
 import { useUpdateWorkspaceSettings, useWorkspace } from '@/data/queries/useWorkspace';
 import { WorkspaceSettingsSchema, type WorkspaceSettings } from '@/domain/brand/schema';
 import { DEFAULT_NUMBER_PATTERN, generateQuoteNumber } from '@/domain/numbering';
+import { CURRENCIES } from '@/domain/money';
 import { pl } from '@/i18n/pl';
 
-const CURRENCIES = ['PLN', 'EUR', 'USD', 'GBP'] as const;
+// Lista mieszka w domenie (T-24) — ta sama, po ktorej waliduje `safeCurrency`.
 
 /**
  * Ustawienia workspace'u.
@@ -97,9 +98,7 @@ export function WorkspaceSettingsSection({ canWrite }: { canWrite: boolean }) {
         <Label htmlFor="pricesInclude">{pl.settings.pricesInclude}</Label>
         <Select
           value={draft.pricesInclude}
-          onValueChange={(value) =>
-            patch({ pricesInclude: value === 'gross' ? 'gross' : 'net' })
-          }
+          onValueChange={(value) => patch({ pricesInclude: value === 'gross' ? 'gross' : 'net' })}
           disabled={!canWrite}
         >
           <SelectTrigger id="pricesInclude">
@@ -218,7 +217,11 @@ export function WorkspaceSettingsSection({ canWrite }: { canWrite: boolean }) {
       </div>
 
       <div className="flex items-center gap-3">
-        <Button type="button" disabled={!canWrite || !dirty || !valid || update.isPending} onClick={save}>
+        <Button
+          type="button"
+          disabled={!canWrite || !dirty || !valid || update.isPending}
+          onClick={save}
+        >
           {pl.common.save}
         </Button>
         {dirty ? <span className="text-ink-soft text-xs">{pl.settings.unsaved}</span> : null}

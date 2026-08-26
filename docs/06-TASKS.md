@@ -1081,7 +1081,14 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - Import **nie odrzuca całego pliku** przez jeden zły wiersz: brak nazwy i duplikaty trafiają do listy problemów, reszta wchodzi. Import wykładający się na 300 kontaktach, bo w 47. brakuje nazwiska, jest bezużyteczny.
   > - Dwa kroki: podgląd („znaleziono 128 klientów, 3 wiersze bez nazwy") → zapis. Klienci już obecni w kartotece są pomijani (nazwa + telefon bez formatowania), bo import robi się zwykle więcej niż raz.
   > - 29 nowych testów jednostkowych (12 XLSX + 17 import).
-- [ ] T-24 Wiele walut i lokalizacja liczb
+- [x] **T-24 Wiele walut**
+  **Zrobione 2026-08-27:**
+  > - Ustawienie waluty i selektor były od T-16, ale **edytor i PDF miały `'PLN'` na sztywno w siedmiu miejscach** — studio rozliczające się w euro dostawało ofertę w złotych niezależnie od tego, co wybrało.
+  > - Lista walut przeniesiona do domeny i **zamknięta** (PLN, EUR, USD, GBP, CZK, CHF, SEK, NOK). Dowolny trzyliterowy kod przeszedłby przez `Intl`, ale wpisany z literówką dałby ofertę w walucie, której nie ma — a błąd wyszedłby dopiero u klienta, na dokumencie z kwotą.
+  > - `safeCurrency`: nieznany kod cofa się do złotego zamiast rzucać. `Intl` rzuca `RangeError`, a wycena z uszkodzoną wartością w kolumnie ma się **otworzyć i dać poprawić**, a nie wywalić edytora.
+  > - 🔑 **Format liczb zostaje polski niezależnie od waluty**: „12 005,50 €", a nie „€12,005.50". Dokument czyta ten, kto go wystawia — dlatego to zadanie dokłada wybór **waluty**, a nie wybór locale'u. Stąd też zmiana nazwy: „lokalizacja liczb" była fałszywą obietnicą.
+  > - Walutę dobiera `useCreateQuote`, **nie miejsca wywołania**. Wycenę zakłada się z pięciu ekranów; pierwszy, który by zapomniał, dałby złą ofertę. Wartość jest snapshotem — przestawienie domyślnej waluty nie rusza wycen, które już powstały.
+  > - Przypięte testem: `pl-PL` (CLDR `min2`) **nie grupuje** liczb czterocyfrowych — „1200,50", ale „12 005,50". Wygląda na przeoczenie, jest regułą języka.
 - [x] **T-67 Kosz na pliki** (30 dni; do 1.0 usunięcie w T-55 było natychmiastowe)
   **Zrobione 2026-08-27:**
   > - **Zmiana semantyki limitu — najważniejsza rzecz w tym zadaniu.** 0017 zwalniał miejsce już przy `deleted_at` i było to POPRAWNE, bo obiekt w Storage znikał w tej samej chwili. Z koszem bajty **zostają** (inaczej nie ma czego przywracać), więc zwalnianie limitu przy wyrzuceniu do kosza znaczyłoby, że workspace może zająć w Storage dowolnie dużo ponad 2 GiB — wystarczy wrzucać i kasować. Migracja `0027` przenosi zwolnienie miejsca na **trwałe usunięcie wiersza** i przelicza liczniki od zera (backfill).
