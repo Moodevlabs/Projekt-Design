@@ -342,14 +342,27 @@ Makieta: „+ NOWA WYCENA" jako prostokąt z obrysem. Rekomendacja: **ramka tylk
 **D-4 — Czy nowa paleta wchodzi do istniejących brand kitów?**
 Rekomendacja: **nie.** Zmieniamy tylko `default()` dla nowych workspace'ów. Kolor na PDF jest własnością klienta.
 
-**D-5 — Tryb ciemny (T-21, Faza 2).**
+**D-5 — Makieta ma w menu „STUDIO", którego w aplikacji nie ma. I nie ma „PULPIT", który jest.**
+Makieta: `KLIENCI · STUDIO · WYCENY · BIBLIOTEKA · SZABLONY` — a pod kreską `POMOC · USTAWIENIA`.
+Kod (`nav-items.ts`): `Pulpit · Klienci · Wyceny · Biblioteka · Szablony` — pod kreską `Pomoc · Ustawienia`.
+Czyli: **„Pulpit" zniknął z menu, „Studio" doszło** — przy czym tytuł strony na makiecie to nadal „PULPIT", więc sam pulpit istnieje i gdzieś jest osiągalny.
+
+To **jedyne miejsce, w którym makieta wykracza poza wymianę skóry** — reszta redesignu nie rusza nawigacji ani przepływów (§7). Trzy czytania:
+1. **„Studio" = nowa nazwa Pulpitu.** Hierarchia z `CLAUDE.md` brzmi STUDIO → KLIENT → PROJEKT, więc „Studio" jako ekran startowy workspace'u jest spójne z modelem. Ale wtedy tytuł strony na makiecie powinien brzmieć „STUDIO", a brzmi „PULPIT".
+2. **„Studio" = nowa pozycja** (ustawienia workspace'u, dane firmy, branding — dziś rozrzucone po Ustawieniach), a Pulpit przeniósł się pod logo / stał się stroną startową bez własnej pozycji w menu.
+3. **Makieta jest szkicem** i kolejność pozycji nie jest w niej wiążąca (na co wskazuje literówka „KLINECI" i placeholderowe prostokąty kart).
+
+Rekomendacja: **czytanie 3 — nawigacja zostaje bez zmian w T-74…T-82.** Powód: dodanie albo przemianowanie pozycji menu to decyzja produktowa o tym, gdzie mieszka konfiguracja studia, a nie decyzja wizualna; T-73 świadomie wydzielił Ustawienia od obszarów pracy i „Studio" wchodziłoby dokładnie w ten podział. Jeśli to ma być realna zmiana — **osobne zadanie po redesignie**, z rozstrzygnięciem, co konkretnie jest pod „Studio" i co zostaje w Ustawieniach.
+⚠️ **To jedyna decyzja z tej listy, przy której „brak odpowiedzi = rekomendacja" znaczy, że coś z makiety świadomie NIE powstanie.** Warto ją potwierdzić wprost.
+
+**D-6 — Tryb ciemny (T-21, Faza 2).**
 Nie robimy teraz, ale tokeny mają być tak nazwane, żeby dało się go dołożyć bez przepisywania: `--rail-*` to już gotowa ciemna rampa. Rekomendacja: **nie zaczynać**, tylko nie zabetonować.
 
 ---
 
 ## 7. Czego ten redesign NIE robi
 
-- Nie zmienia układu żadnego ekranu, nawigacji ani przepływu. Wymiana skóry, nie szkieletu.
+- Nie zmienia układu żadnego ekranu, nawigacji ani przepływu. Wymiana skóry, nie szkieletu. **Dotyczy to także pozycji „STUDIO" z makiety — patrz D-5.**
 - Nie dotyka `src/domain/`, `src/data/`, migracji, Edge Functions ani Stripe'a.
 - Nie dokłada bibliotek animacyjnych ani nowych zależności poza jednym fontem (`@fontsource/faculty-glyphic`); jedna wylatuje (`instrument-sans`).
 - Nie wprowadza trybu ciemnego (T-21).

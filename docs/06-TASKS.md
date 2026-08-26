@@ -640,7 +640,8 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
 
 - [ ] **T-77 Powłoka: szyna i pas** (08-REDESIGN §5, makieta)
   Brązowa szyna z wersalikowymi etykietami, beżowy pas topbara, tytuł strony w Faculty Glyphic, CTA w ramce, awatar i kropka subskrypcji na brązie.
-  ✅ Zrzut pulpitu różni się od `reference/nowy wyglad.png` tylko tam, gdzie odstąpiliśmy świadomie (D-1…D-3).
+  ✅ Zrzut pulpitu różni się od `reference/nowy wyglad.png` tylko tam, gdzie odstąpiliśmy świadomie (D-1…D-3, D-5).
+  ⚠️ **Makieta ma w menu „STUDIO" i nie ma „PULPIT" — nawigacji NIE zmieniamy** (D-5). To decyzja produktowa o tym, gdzie mieszka konfiguracja studia, a nie wizualna; osobne zadanie po redesignie.
   ⚠️ **`nav-pill-stretch` do usunięcia** — animacja „kropli" należała do języka liquid glass; na płaskim brązie czyta się jak usterka. Sam przesuw zostaje.
   ⚠️ Mechanizm jednej przejeżdżającej kulki zostaje — `Sidebar.test.tsx` go pilnuje.
 
