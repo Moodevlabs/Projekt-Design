@@ -5,17 +5,15 @@ import { useSubscription } from '@/data/queries/useSubscription';
 import type { Subscription, SubscriptionStatus } from '@/data/repos/subscription.repo';
 import { routes } from '@/app/routes';
 import { formatDate } from '@/lib/dates';
-import { trialTone } from './trial-tone';
+import { TrialTicks } from '@/features/billing/TrialTicks';
 import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
-
-const TRIAL_DAYS = 14;
-/** Poniżej tylu dni trial robi się „ostrzegawczy". */
 
 /**
  * Subskrypcja — cicha karta w prawej szynie. Zamiast generycznego paska
  * postępu: 14 tyknięć-dni (echo kropek TAK/NIE z bilansu) — pozostałe dni
- * pełne, zużyte wygaszone.
+ * pełne, zużyte wygaszone. Same tyknięcia żyją w `billing/TrialTicks`,
+ * bo używa ich też ekran subskrypcji.
  */
 export function SubscriptionCard() {
   const subscription = useSubscription();
@@ -55,7 +53,7 @@ function SubscriptionBody({ data }: { data: Subscription | null }) {
       {isTrial && daysLeft !== null ? (
         <>
           <p className="text-ink-soft mt-1 text-xs">{pl.dashboard.trialDaysLeft(daysLeft)}</p>
-          <TrialTicks daysLeft={daysLeft} />
+          <TrialTicks daysLeft={daysLeft} className="mt-3" />
         </>
       ) : data?.status === 'active' && data.currentPeriodEnd ? (
         <p className="text-ink-soft mt-1 text-xs">
@@ -67,29 +65,6 @@ function SubscriptionBody({ data }: { data: Subscription | null }) {
         <Link to={routes.subscription}>{isTrial ? pl.billing.buy : pl.billing.manage}</Link>
       </Button>
     </>
-  );
-}
-
-/**
- * 14 tyknięć-dni; informację niesie tekst wyżej, więc `aria-hidden`.
- *
- * Barwa pozostałych tyknięć wędruje od zieleni przez bursztyn do czerwieni
- * w miarę kurczenia się zapasu — patrz `trial-tone.ts`. Kolor jest drugim
- * sygnałem obok liczby dni, nie jedynym.
- */
-function TrialTicks({ daysLeft }: { daysLeft: number }) {
-  const tone = trialTone(daysLeft, TRIAL_DAYS);
-
-  return (
-    <div aria-hidden className="mt-3 flex gap-1">
-      {Array.from({ length: TRIAL_DAYS }, (_, index) => (
-        <span
-          key={index}
-          style={index < daysLeft ? { backgroundColor: tone } : undefined}
-          className={cn('h-1.5 flex-1 rounded-full', index >= daysLeft && 'bg-[var(--hair)]')}
-        />
-      ))}
-    </div>
   );
 }
 
