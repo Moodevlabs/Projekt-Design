@@ -409,9 +409,8 @@ wysłania do Twojego inwestora bez poprawek.
 
 **Najbliższe kroki**
 
-- Wysyłka oferty e-mailem prosto z aplikacji, z PDF-em w załączniku.
+- **Link dla klienta**: zamiast wysyłać PDF, wysyłasz adres, pod którym klient sam przełącza pozycje TAK/NIE, widzi kwotę na żywo i klika „Akceptuję" albo zostawia uwagi. Ty dostajesz powiadomienie w aplikacji.
 - Automatyczna aktualizacja aplikacji.
-- Tryb ciemny i rozszerzone skróty klawiszowe.
 - Pełna historia wersji z porównaniem pozycji i kwot.
 - Kosz na pliki (odzyskiwanie przez 30 dni).
 - Eksport XLSX i import klientów z CSV.
