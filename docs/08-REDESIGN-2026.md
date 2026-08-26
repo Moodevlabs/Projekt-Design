@@ -364,8 +364,8 @@ To **jedyne miejsce, w którym makieta wykracza poza wymianę skóry** — reszt
 Rekomendacja: **czytanie 3 — nawigacja zostaje bez zmian w T-74…T-82.** Powód: dodanie albo przemianowanie pozycji menu to decyzja produktowa o tym, gdzie mieszka konfiguracja studia, a nie decyzja wizualna; T-73 świadomie wydzielił Ustawienia od obszarów pracy i „Studio" wchodziłoby dokładnie w ten podział. Jeśli to ma być realna zmiana — **osobne zadanie po redesignie**, z rozstrzygnięciem, co konkretnie jest pod „Studio" i co zostaje w Ustawieniach.
 ⚠️ **To jedyna decyzja z tej listy, przy której „brak odpowiedzi = rekomendacja" znaczy, że coś z makiety świadomie NIE powstanie.** Warto ją potwierdzić wprost.
 
-**D-6 — Tryb ciemny (T-21, Faza 2).**
-Nie robimy teraz, ale tokeny mają być tak nazwane, żeby dało się go dołożyć bez przepisywania: `--rail-*` to już gotowa ciemna rampa. Rekomendacja: **nie zaczynać**, tylko nie zabetonować.
+**D-6 — Tryb ciemny (T-21, Faza 2). → ROZSTRZYGNIĘTE 2026-08-26: nie robimy go wcale.**
+Właściciel usunął tryb ciemny z planów. Ustalenie z tego chunku zostaje w mocy mimo to: tokeny są nazwane tak, że `--rail-*` to gotowa ciemna rampa. Nic nie jest zabetonowane, ale nikt tego nie kończy.
 
 ---
 

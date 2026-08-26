@@ -746,9 +746,10 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - **Audyt jest teraz testem, nie jednorazowym skryptem: `src/styles/contrast.test.ts` (29 asercji).** Czyta i **parsuje `globals.css`** zamiast trzymać kopię palety — świadomie inaczej niż `schema.test.ts` wobec migracji, gdzie kopia może się rozjechać (patrz T-81). Sprawdzone, że test **faktycznie łapie regresję**: cofnięcie `--discount` do starej wartości go zaczerwienia.
   > - `hover:bg-primary/90` → `hover:bg-espresso` na głównym przycisku. Krycie 90% brązu na **jasnej** kanwie daje kolor **jaśniejszy** od spoczynkowego, czyli hover działał w odwrotną stronę.
   > - Usunięty martwy `--rail-deep`; `--canvas-light` wypadł już w T-76.
-  ⚠️ **Nie zweryfikowane:** wygląd nie porównany z makietą na żywo (brak podłączonego rozszerzenia Chrome), `pnpm tauri build` nieuruchomiony, migracja `0024` nieuruchomiona (wymaga Dockera), PDF niewygenerowany.
+  ✅ **Zweryfikowane 2026-08-26 przez właściciela:** wygląd odebrany („redesign jest okej"), `tauri build` przeszedł na macOS z podpisem. Redesign zamknięty.
+  > Jedyne, czego nikt nie potwierdził słowem: czy migracja `0024_brand_defaults_toolier.sql` poszła na środowisku, na którym stał build. Jeśli w nowym workspace domyślne barwy brand kitu są stare, to jest ten jeden `supabase db push`.
 
-- [ ] **T-17 Polish & release 1.0**
+- [x] **T-17 Polish & release 1.0**
   Pusty stan onboardingu (3 kroki: logo → biblioteka → pierwsza wycena; po T-62: „przejrzyj bibliotekę przykładową"), obsługa błędów (ErrorBoundary, toasty), ikony aplikacji, `tauri build` Win+mac, podpisywanie (notarization macOS, cert Win — zanotuj w README co trzeba mieć), CHANGELOG.
   ✅ Instalator działa na czystej maszynie.
   > **2026-08-24: przesunięte za T-53…T-66** (decyzja D10). Instalator ma się nazywać `Toolier_*`, więc build finalny dopiero po T-65. Poniższe notatki dotyczą stanu sprzed przesunięcia.
@@ -771,6 +772,11 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - **Naprawione wyszukiwanie z przecinkiem** (dług z `IDEAS.md`). `,` i `)` rozdzielają warunki w `or(...)` PostgREST-a, a backslash **nie jest** tam znakiem ucieczki — „Kowalski, Jan" wracało błędem `failed to parse logic tree`. T-53 naprawił klientów i projekty, ale **wyceny i biblioteka zostały zepsute**. Cytowanie wyjęte do `data/repos/postgrest-filters.ts` (`ilikeFilter`, `ilikeAnyOf`) i podpięte we wszystkich czterech repozytoriach — cztery kopie jednego cytowania to cztery okazje, żeby piąte wyszukiwanie znów je zgubiło. 7 testów jednostkowych + 3 integracyjne; **sprawdzone, że na starym kodzie padają** (cofnięta poprawka → `failed to parse logic tree`).
   > - **Wersja podniesiona do `1.0.0`** w `package.json`, `tauri.conf.json` **i `Cargo.toml`** — README mówił o dwóch plikach, a numer stoi w trzech. Nagłówek CHANGELOG zostaje `[Nieopublikowane]` do chwili wydania: sekcja z datą znaczy „to jest u ludzi", nie „to jest zbudowane u nas".
   > **Zostało bez zmian (po stronie właściciela):** instalator na czystej maszynie, build i notaryzacja macOS, certyfikaty.
+  >
+  > **2026-08-26 — zamknięte. Wydanie 1.0 idzie z macOS.**
+  > - **Build macOS zrobiony i podpisany certyfikatem** (właściciel). To była jedyna rzecz blokująca wydanie — reszta T-17 stała gotowa od 2026-08-25.
+  > - **Windows odłożony świadomie** → **T-83**. Kod się buduje (`.msi` + `.exe` powstały jeszcze pod nazwą `Anzorge`), brakuje wyłącznie certyfikatu EV / Azure Trusted Signing. Niepodpisany instalator wita użytkownika ostrzeżeniem SmartScreena, więc lepiej go nie wydawać wcale niż wydać w takiej formie.
+  > - Przed ogłoszeniem: nagłówek `[Nieopublikowane]` w `CHANGELOG.md` → `[1.0.0] – 2026-08-26`. Sekcja z datą znaczy „to jest u ludzi".
 
 - [x] **T-70 Tworzenie wyceny: zakres zamiast listy** (inspiracja 1 + 2, koncepcja §5)
   Z inspiracji bierzemy **sposób działania, nie wygląd**. Dziś zbudowanie wyceny na 20 pozycji to 20 cykli „otwórz picker → szukaj → kliknij → picker się zamyka". Inspiracje pokazują odwrotny kierunek: **zaznaczasz zakres — co i dla których pomieszczeń — a aplikacja składa dokument.**
@@ -1023,9 +1029,17 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
 ## Faza 2
 
 - [x] ~~T-18 Klienci (CRM-lite) + przypięcie do wyceny~~ → **wchłonięte przez T-53** (faza 1, 2026-08-24).
-- [ ] T-19 Auto-update (tauri-plugin-updater, endpoint w Supabase Storage / GitHub Releases)
-- [ ] T-20 Wysyłka e-mail z PDF (Resend) + szablon wiadomości — załącznik może iść z archiwum dokumentów (T-56), bez ponownego renderu
-- [ ] T-21 Tryb ciemny + skróty (paleta ⌘K → **T-58**)
+- [ ] **T-25 Link klienta („magic link") — apka `apps/share`** *(przeniesione z Fazy 3, 2026-08-26)*
+  Osobna lekka apka Vite (`apps/share`) na tym samym `domain/`, tabela `quote_shares` (token, wygaśnięcie, odwołanie), RLS dla anon przez token (RPC `get_shared_quote(token)`). W desktopie: **„Udostępnij klientowi"** → generuje link, **Kopiuj** + **Wyślij mailem** (`mailto:` z gotową treścią, otwiera pocztę projektanta).
+  ⚠️ **Decyzja D6 zostaje nienaruszona** — *workspace* zostaje desktopowy. `apps/share` to powierzchnia dla klienta końcowego (bez logowania, bez edycji), nie wersja web Toolier.
+  ⚠️ **Do potwierdzenia przez właściciela:** domena (`app.toolier.pl` / inna) i hosting statyku (Vercel/Netlify — darmowy próg wystarcza).
+- [ ] **T-26 Akceptacja online + uwagi klienta** *(przeniesione z Fazy 3, 2026-08-26)*
+  Klient przełącza TAK/NIE, widzi sumę na żywo, klika **„Akceptuję"** (imię + timestamp + IP → `quote_acceptances`) albo **„Mam uwagi"** (pole tekstowe → wraca do projektanta). Status wyceny zmienia się automatycznie (`sent` → `accepted` / `rejected`). Powiadomienie w aplikacji przez Realtime.
+  ⚠️ **Bez e-podpisu i bez canvasu do podpisywania** (decyzja właściciela, 2026-08-26). Przyjęcie oferty nie wymaga formy pisemnej — imię, znacznik czasu i IP to **dowód zgody**, nie podpis kwalifikowany. Podpis odręczny na canvasie wyglądałby na mocniejszy, niż jest, i to jedyne, co by wnosił.
+- [ ] T-19 Auto-update (tauri-plugin-updater, endpoint w Supabase Storage / GitHub Releases) — **podpięte pod T-25**: bez auto-update każda poprawka to ręczna reinstalacja u klienta
+- [ ] **T-83 Wydanie Windows** *(wydzielone z T-17, odłożone 2026-08-26)* — build przechodzi, brakuje **certyfikatu EV / Azure Trusted Signing**. Do zrobienia: cert, `tauri build` z podpisem, sprawdzenie instalatora `Toolier_1.0.0_*` na czystej maszynie (bez Node, Rusta i `.env`). **Blokada jest zakupowa, nie kodowa.**
+- [ ] ~~T-20 Wysyłka e-mail z PDF (Resend) + szablon wiadomości~~ → **odrzucone 2026-08-26**, zastąpione przez T-25/T-26. Wysyłka = link + `mailto:` z poczty projektanta: dociera lepiej niż mail z naszej domeny i nie wymaga po naszej stronie SPF/DKIM, obsługi odbić ani roli procesora danych. Gdyby e-mail transakcyjny kiedyś wrócił (przypomnienia, powiadomienia) — najpierw **własny SMTP użytkownika** w ustawieniach (poświadczenia w keychainie), dopiero potem provider, i raczej Brevo/Postmark niż Resend. Uzasadnienie w `docs/IDEAS.md`.
+- [ ] ~~T-21 Tryb ciemny + skróty~~ → **usunięte z planów 2026-08-26** (decyzja właściciela). Paleta ⌘K weszła w **T-58**.
 - [ ] T-22 Pełna historia wersji wyceny (diff pozycji, porównanie totali między wersjami) — lekkie wersje v1/v2 są w **T-57**; nie mylić z **T-30**, które wersjonuje *schemat* `body`
 - [ ] T-23 Import/eksport CSV — biblioteka (T-50) i rejestr (T-49) zrobione; zostaje **eksport XLSX** i import klientów z CSV
 - [ ] T-24 Wiele walut i lokalizacja liczb
@@ -1035,10 +1049,10 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
 
 ## Faza 3
 
-- [ ] T-25 Link online dla klienta (osobna apka web `apps/share` — Vite, ten sam `domain/`), tabela `quote_shares`, RLS dla anon przez token (RPC `get_shared_quote(token)`)
-- [ ] T-26 Akceptacja online + podpis + powiadomienie (Realtime)
-- [ ] T-27 Wielu użytkowników w workspace (zaproszenia e-mail, role)
-- [ ] T-28 Statystyki wyłączanych pozycji (widok materializowany)
+- [x] ~~T-25 Link online dla klienta~~ → **przeniesione do Fazy 2** (2026-08-26), zastępuje T-20.
+- [x] ~~T-26 Akceptacja online + podpis + powiadomienie~~ → **przeniesione do Fazy 2** (2026-08-26), bez podpisu.
+- [x] ~~T-27 Wielu użytkowników w workspace~~ → **usunięte z planów** (decyzja właściciela, 2026-08-26). Toolier zostaje narzędziem jednoosobowym; jeśli wróci, to jako osobna decyzja produktowa, bo dotyka RLS w każdej tabeli.
+- [x] ~~T-28 Statystyki wyłączanych pozycji~~ → **usunięte z planów** (decyzja właściciela, 2026-08-26).
 - [ ] T-29 Offline: SQLite (tauri-plugin-sql) + kolejka sync
 
 ## Notatki z wykonania
