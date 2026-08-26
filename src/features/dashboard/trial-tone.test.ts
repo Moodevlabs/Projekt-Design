@@ -9,16 +9,16 @@ function redness(hex: string): number {
 }
 
 describe('trialTone', () => {
-  it('pełny zapas dni to zieleń', () => {
-    expect(trialTone(14, 14)).toBe('#2c7a51');
+  it('pełny zapas dni to oliwka', () => {
+    expect(trialTone(14, 14)).toBe('#4a6340');
   });
 
-  it('ostatni dzień to czerwień', () => {
-    expect(trialTone(0, 14)).toBe('#c0392b');
+  it('ostatni dzień to terakota', () => {
+    expect(trialTone(0, 14)).toBe('#a8402f');
   });
 
-  it('połowa zapasu to bursztyn', () => {
-    expect(trialTone(7, 14)).toBe('#de8b2c');
+  it('połowa zapasu to ochra', () => {
+    expect(trialTone(7, 14)).toBe('#b07d2c');
   });
 
   it('im mniej dni, tym cieplejsza barwa', () => {
@@ -34,7 +34,7 @@ describe('trialTone', () => {
   });
 
   it('zerowy okres próbny nie dzieli przez zero', () => {
-    expect(trialTone(0, 0)).toBe('#c0392b');
+    expect(trialTone(0, 0)).toBe('#a8402f');
   });
 
   it('zawsze zwraca poprawny zapis szesnastkowy', () => {

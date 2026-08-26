@@ -694,10 +694,18 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   ⚠️ **`--ring` brązowy i ≥3:1 wobec obu podłoży** — zrobione w T-74 (`#7d6555`).
   ⚠️ Zmieniać klasy w `cva`, nie przepisywać plików — `npx shadcn add` je kiedyś nadpisze.
 
-- [ ] **T-79 Statusy i barwy funkcyjne** (08-REDESIGN §1.3, §1.4)
-  Nowe `--status-*` w oliwce/ochrze/terakocie, `trial-tone.ts` z hexów na tokeny, trzy chłodne odcienie w `swatches.ts`. Hexy logo Google w `GoogleButton.tsx` **zostają**.
-  ✅ Pięć statusów obok siebie rozróżnialnych, także w symulacji deuteranopii.
-  ⚠️ `trial-tone.test.ts` asertuje wartości — aktualizacja razem ze zmianą.
+- [x] **T-79 Statusy i barwy funkcyjne** (08-REDESIGN §1.3, §1.4)
+  Nowe `--status-*` w oliwce/ochrze/terakocie, zestrojony `trial-tone.ts`, trzy chłodne odcienie w `swatches.ts`. Hexy logo Google w `GoogleButton.tsx` **zostały**.
+  ✅ `StatusMark` jedzie w całości na `var(--status-*)`, więc statusy przeszły już z T-74 — bez zmian w komponencie.
+  **Zrobiono:**
+  > - `trial-tone.ts`: `GREEN/AMBER/RED` → `OLIVE/OCHRE/TERRACOTTA` zestrojone z `--positive`/`--warning`/`--danger`.
+  > - `swatches.ts`: przestrojone **tylko trzy chłodne** odcienie (`sky`, `plum`, `slate`). `sand`, `sage`, `clay`, `moss` były ciepłe od początku i przeszły bez zmiany.
+  > - `GoogleButton` dostał komentarz ostrzegawczy nad znakiem — żeby przyszły sweep szukający hexów ich nie „naprawił".
+  > - Zweryfikowana regresja z §2: `Money` → `.tabular` → `--font-sans`. Kwoty są w Inter, nie w Faculty Glyphic.
+  **Na co uważać:**
+  > - **`trial-tone.ts` NIE dostał tokenów i to jest świadome.** Funkcja interpoluje kanały RGB w JavaScripcie i musi dostać konkretne liczby, a nie nazwę zmiennej CSS rozwiązywaną dopiero przez przeglądarkę. Trzy kotwice są kopiami wartości z `globals.css` — jest to zapisane w komentarzu przy nich i **muszą chodzić w parze**.
+  > - **Nazwy kluczy w `swatches.ts` zostały bez zmian** — siedzą w bazie jako `library_categories.color`. Zmieniamy wygląd odcienia, nie jego tożsamość; przemianowanie wymagałoby migracji.
+  ⚠️ `trial-tone.test.ts` asertował stare wartości — zaktualizowany razem ze zmianą. Test monotoniczności („im mniej dni, tym cieplejsza barwa") przechodzi na nowych kotwicach bez rozluźniania asercji.
 
 - [ ] **T-80 Ekrany treści** (08-REDESIGN §5)
   Pulpit, klienci, projekty, rejestr wycen, edytor, biblioteka, szablony, pliki, ustawienia, pomoc, subskrypcja, auth, komponenty wspólne.
