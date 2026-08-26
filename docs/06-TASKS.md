@@ -733,10 +733,20 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   ⚠️ **Kolor na PDF jest własnością klienta.** Migracja rusza tylko `default`, czyli to, co dostanie nowe konto. Istniejące wiersze zostają nietknięte — świadomie (D-4).
   ⚠️ **Nie zweryfikowane na żywo:** migracja nie była uruchomiona (`supabase db reset` wymaga wstającego Dockera), a PDF nie był wygenerowany. Testy jednostkowe PDF przechodzą.
 
-- [ ] **T-82 Domknięcie: dokumentacja, kontrast, build** (08-REDESIGN §5)
-  Przepisanie `docs/05-UI.md` §1–§2 (dziś podaje `#F2F4F8` i „literę «T» w czarnym kółku"), nagłówek tezy w `globals.css`, CHANGELOG, zrzuty do README, usunięcie martwych tokenów.
-  ✅ Audyt WCAG AA na **czterech** podłożach (szyna, pas, kanwa, karta): tekst ≥4,5:1, kontrolki i `focus-visible` ≥3:1. `pnpm build` i `pnpm tauri build` przechodzą.
-  ⚠️ Faculty Glyphic to nowy asset w łańcuchu Vite — sprawdzić, że wchodzi do bundla, a nie tylko do `pnpm dev`.
+- [x] **T-82 Domknięcie: dokumentacja, kontrast, build** (08-REDESIGN §5)
+  Przepisane `docs/05-UI.md` §1–§2, nagłówek tezy w `globals.css`, CHANGELOG, usunięte martwe tokeny.
+  ✅ Audyt WCAG AA: **30 par, 0 niezaliczonych**. `pnpm build` przechodzi, Faculty Glyphic i Inter są w `dist/assets/`.
+  **Audyt kontrastu wykrył pięć realnych niezgodności — nie było ich widać „na oko":**
+  > Ciepłe barwy przy tej samej *intuicyjnej* jasności mają niższą luminancję względną niż chłodne, więc paleta, która wyglądała dobrze, wpadała pod próg dopiero po przeliczeniu.
+  > - **`--discount` 4,25:1** — a to kolor **kwoty**, czyli tekstu niosącego pieniądze. Przyciemniony do `#b0563c`, czyli dokładnie tyle co `--doc-terracotta`: przy okazji jeden kolor mniej w systemie i rabat wygląda tak samo na ekranie i na wydruku.
+  > - **`--warning` 3,62:1** — ostrzeżenie bywa tekstem. Przyciemnione do `#9a6c24`. Odcinek statusu „szkic" **zostaje jaśniejszy**, bo tam ochra jest grafiką i obowiązuje próg 3:1.
+  > - **`--toggle-off` 1,44:1 w dwóch miejscach naraz.** Biały kciuk na torze i tor na białej karcie to matematycznie **ten sam** stosunek — jedna zmiana zamknęła oba. Nie było widać ani przełącznika na karcie, ani pozycji kciuka, czyli jedynego nośnika stanu.
+  > - **`--ink-faint` 2,87:1** — placeholdery poniżej progu 3:1.
+  **Zrobiono poza tym:**
+  > - **Audyt jest teraz testem, nie jednorazowym skryptem: `src/styles/contrast.test.ts` (29 asercji).** Czyta i **parsuje `globals.css`** zamiast trzymać kopię palety — świadomie inaczej niż `schema.test.ts` wobec migracji, gdzie kopia może się rozjechać (patrz T-81). Sprawdzone, że test **faktycznie łapie regresję**: cofnięcie `--discount` do starej wartości go zaczerwienia.
+  > - `hover:bg-primary/90` → `hover:bg-espresso` na głównym przycisku. Krycie 90% brązu na **jasnej** kanwie daje kolor **jaśniejszy** od spoczynkowego, czyli hover działał w odwrotną stronę.
+  > - Usunięty martwy `--rail-deep`; `--canvas-light` wypadł już w T-76.
+  ⚠️ **Nie zweryfikowane:** wygląd nie porównany z makietą na żywo (brak podłączonego rozszerzenia Chrome), `pnpm tauri build` nieuruchomiony, migracja `0024` nieuruchomiona (wymaga Dockera), PDF niewygenerowany.
 
 - [ ] **T-17 Polish & release 1.0**
   Pusty stan onboardingu (3 kroki: logo → biblioteka → pierwsza wycena; po T-62: „przejrzyj bibliotekę przykładową"), obsługa błędów (ErrorBoundary, toasty), ikony aplikacji, `tauri build` Win+mac, podpisywanie (notarization macOS, cert Win — zanotuj w README co trzeba mieć), CHANGELOG.

@@ -39,8 +39,10 @@
   /* #74645a, nie #7a6a5f: ta druga wartość ma na kanwie 4,59:1 — zdaje AA
      bez marginesu, a na --surface-2 już nie zdaje. Ta ma ≈5,0:1 wszędzie. */
   --ink-soft: #74645a;
-  /* Wyłącznie placeholdery i stany wyłączone. Nigdy nie niesie treści. */
-  --ink-faint: #a4968a;
+  /* Wyłącznie placeholdery i stany wyłączone. Nigdy nie niesie treści.
+     #9b8d80, nie #a4968a: ta druga miała na karcie 2,87:1 i nie dobijała
+     do progu 3:1 dla elementów interfejsu (audyt T-82). */
+  --ink-faint: #9b8d80;
   --hair: rgba(51, 37, 30, 0.12);
   --hair-strong: rgba(51, 37, 30, 0.2);
 
@@ -49,7 +51,6 @@
      w JSX jako `white/65` i `white/25` — dokładnie tak wyglądał Sidebar
      przed redesignem. Przy okazji: to gotowa baza pod tryb ciemny (T-21). */
   --rail: #33251e;
-  --rail-deep: #2a1e18;
   --rail-ink: #efece8;
   --rail-ink-soft: rgba(239, 236, 232, 0.62);
   --rail-hair: rgba(239, 236, 232, 0.14);
@@ -60,16 +61,26 @@
   --cta-fg: #efece8;
 
   /*
-   * Tor przełącznika w stanie WYŁĄCZONYM. Osobny token, bo `--input`
-   * (rgba brązu 20%) jest dobry jako ramka pola, ale jako tor daje
-   * ~#e0dad6 — a na nim biały kciuk niemal znika. Ten odcień jest solidny
-   * i o tyle ciemniejszy, że kciuk widać, a stan „włączony" (brąz) dalej
-   * odcina się jednoznacznie.
+   * Tor przełącznika w stanie WYŁĄCZONYM.
+   *
+   * Ciemniejszy, niż podpowiada odruch. Audyt T-82 pokazał, że jasny tor
+   * (`#ded6cf`) daje **1,44:1** — i to w DWÓCH miejscach naraz, bo biały
+   * kciuk na torze i tor na białej karcie to matematycznie ten sam stosunek.
+   * Przy takiej wartości nie widać ani samego przełącznika na karcie, ani
+   * pozycji kciuka, czyli jedynego nośnika stanu.
+   *
+   * `#94897f` daje 3,42:1 w obu tych parach jednocześnie. Czyta się ciemniej
+   * niż typowy „wyłączony", ale stan dalej jest jednoznaczny: tor włączony
+   * to brąz, różnica między nimi to 4,3:1, a kciuk widać zawsze.
    */
-  --toggle-off: #ded6cf;
+  --toggle-off: #94897f;
 
   --positive: #4a6340;
-  --warning: #b07d2c;
+  /* #9a6c24, nie #b07d2c: ostrzeżenie bywa TEKSTEM, a jaśniejsza ochra
+     miała na karcie 3,62:1 — poniżej progu 4,5:1 dla tekstu (audyt T-82).
+     Odcinek statusu „szkic" zostaje jaśniejszy, bo tam ochra jest grafiką
+     i obowiązuje próg 3:1. */
+  --warning: #9a6c24;
   --danger: #a8402f;
 
   /*
@@ -83,8 +94,14 @@
    */
   --danger-wash: #f7ece9;
   --positive-wash: #eef0e9;
-  /* Terakota rabatów była ciepła od początku — wpasowuje się bez ruchu. */
-  --discount: #b9634a;
+  /*
+   * Terakota rabatów. Przyciemniona z `#b9634a` do wartości identycznej
+   * z `--doc-terracotta`: stara miała na karcie **4,25:1**, a to jest kolor
+   * KWOTY — tekstu niosącego pieniądze, więc obowiązuje próg 4,5:1.
+   * Zrównanie z odcieniem dokumentu to przy okazji jeden kolor mniej
+   * w systemie: rabat wygląda tak samo na ekranie i na wydruku.
+   */
+  --discount: #b0563c;
 
   /*
    * Barwy statusu wyceny. Liczba odcinków niesie POSTĘP (szkic → wysłana →
@@ -172,7 +189,6 @@
   --color-hair-strong: var(--hair-strong);
   --color-toggle-off: var(--toggle-off);
   --color-rail: var(--rail);
-  --color-rail-deep: var(--rail-deep);
   --color-rail-ink: var(--rail-ink);
   --color-rail-ink-soft: var(--rail-ink-soft);
   --color-rail-hair: var(--rail-hair);
@@ -421,8 +437,8 @@
   /* Rabaty. Jedyna barwa w dokumencie — ujemna kwota musi się odróżniać
      od zwykłej pozycji także wtedy, gdy ktoś czyta wycenę pobieżnie. */
   --doc-terracotta: #b0563c;
-  --doc-toggle-off: #ded6cf;
-  --doc-price-off: #a4968a;
+  --doc-toggle-off: #94897f;
+  --doc-price-off: #9b8d80;
   --doc-danger-wash: #f7ece9;
 
   background: var(--doc-bg);
