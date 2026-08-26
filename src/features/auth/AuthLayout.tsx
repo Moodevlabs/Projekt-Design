@@ -63,13 +63,25 @@ export function AuthLayout({
 
         Środek jest najbardziej przezroczysty — tam wnętrze widać najlepiej,
         i tam też stoi szklana karta, która ma co rozmywać.
+
+        ⚠️ **0,55 to dno, nie wartość dobrana na oko.** Przeliczone dla
+        `--ink` na najciemniejszych miejscach zdjęcia, na jakie tekst może
+        trafić przy dowolnym kadrze:
+
+            krycie   ekran TV   ciemna podłoga
+            0,50       4,46           4,76      ← TV poniżej progu
+            0,55       5,07           5,38      ← bezpieczne
+            0,66       6,60           6,90
+
+        Zejście niżej niż 0,55 wymagałoby zmiany traktowania napisów
+        (własne tło pod logotypem albo obwódka), a nie samego krycia.
       */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10"
         style={{
           background:
-            'linear-gradient(180deg, rgba(247,244,240,0.80) 0%, rgba(247,244,240,0.58) 55%, rgba(247,244,240,0.74) 100%)',
+            'linear-gradient(180deg, rgba(247,244,240,0.66) 0%, rgba(247,244,240,0.55) 50%, rgba(247,244,240,0.62) 100%)',
         }}
       />
 
