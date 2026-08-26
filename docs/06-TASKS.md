@@ -621,11 +621,20 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
 >
 > Materiały: `reference/nowy wyglad.png`, `reference/logotypy/{sygnet,toolier napis,toolier logo}.svg`. Kolory bazowe: **`#33251e`** (brąz), **`#efece8`** (beż). Fonty: **Faculty Glyphic** (display) + **Inter** (interfejs).
 
-- [ ] **T-74 Fundament: tokeny i paleta, fonty** (08-REDESIGN §1, §2)
+- [x] **T-74 Fundament: tokeny i paleta, fonty** (08-REDESIGN §1, §2)
   Wymiana `:root` w `globals.css` na ciepłą rampę (neutralne + szyna + funkcyjne), nowe cienie i promienie, przemapowanie bloku shadcn. `+ @fontsource/faculty-glyphic`, `− @fontsource-variable/instrument-sans`. Nowa utility `.label-caps`. Usunięcie `--field` i `body::before`.
   ✅ `pnpm dev` — aplikacja jest ciepła i czytelna bez ani jednej zmiany w JSX.
+  **Zrobiono:**
+  > - **Fonty nie były w ogóle ładowane.** `@fontsource-variable/inter` i `instrument-sans` stały w `package.json`, ale **żaden plik ich nie importował** — w całym repo nie było ani jednego `@font-face`. `'Inter Variable'` w stosie CSS nie rozwiązywało się do niczego i aplikacja renderowała się w systemowym Segoe UI. Bez naprawy tego dołożenie Faculty Glyphic też byłoby niewidoczne. Import wszedł do `main.tsx` **przed** `globals.css`.
+  > - Pełna rampa z §1: marka (`--brown`, `--beige`, `--espresso`), podłoże, **osobna rampa szyny** (`--rail-*`) i statusy w oliwce/ochrze/terakocie.
+  > - `.tabular` **jawnie** na `--font-sans` (pułapka niżej), `h1/h2/.font-display` z `font-weight: 400` wymuszonym w `@layer base` — żeby utility wagi nie zrobiło syntetyku.
+  > - `--ring: #9aa0aa` → `#7d6555` (≈4,8:1 na kanwie, ≈5,4:1 na karcie). Stary chłodny szary na beżu praktycznie znikał, a to jedyny wskaźnik pozycji dla klawiatury.
+  > - Warstwa szkła **została** i ma przestrojone na ciepło wartości — znika w T-76. Ten chunk celowo nie rusza JSX-a.
+  **Na co uważać:**
+  > - **Cienie nazywają się w `:root` `--elevation-card`/`--elevation-sheet`, nie `--shadow-*`.** Blok `@theme inline` wystawia je Tailwindowi pod nazwą `--shadow-card`; token odwołujący się do samego siebie (`--shadow-card: var(--shadow-card)`) jest cyklem i wysypuje kompilację.
+  > - `--canvas-light` zostało **celowo** — używa go jeszcze poświata w `AuthLayout`. Znika razem z nią w T-76.
   ⚠️ **`.tabular` musi zostać odpięte od `--font-display`** — inaczej wszystkie kwoty przeskoczą do Faculty Glyphic, który nie ma gwarantowanych cyfr tabularnych. Kolumna pieniędzy zacznie skakać.
-  ⚠️ **Faculty Glyphic ma jedną wagę (400), nie ma wariantu variable.** Każde `font-display` + `font-semibold` w JSX da sztuczne pogrubienie. Hierarchia idzie przez stopień pisma i wersaliki.
+  ⚠️ **Faculty Glyphic ma jedną wagę (400), nie ma wariantu variable.** Każde `font-display` + `font-semibold` w JSX da sztuczne pogrubienie. Hierarchia idzie przez stopień pisma i wersaliki. Do posprzątania w T-77/T-80 (8 wystąpień).
 
 - [ ] **T-75 Logotypy jako komponenty + ikony aplikacji** (08-REDESIGN §4)
   `src/assets/brand/{Sygnet,Wordmark,LogoLockup}.tsx` z `fill="currentColor"`. Podmiana liter „A" w `Sidebar.tsx` i `AuthLayout.tsx`. Favicon, `src-tauri/icons/` z sygnetu, ikona instalatora, `AppCredit` na nowe tokeny.
