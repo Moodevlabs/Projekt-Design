@@ -19,7 +19,7 @@ const { useEditorStore } = await import('../editor.store');
 function item(partial: Partial<LibraryItem> & { id: string; name: string }): LibraryItem {
   return {
     workspaceId: 'ws',
-    category: 'Inne',
+    categoryName: 'Inne',
     categoryId: null,
     unit: 'lump' as const,
     unitLabel: null,
@@ -40,7 +40,7 @@ function item(partial: Partial<LibraryItem> & { id: string; name: string }): Lib
 const PER_ROOM = item({
   id: 'l3',
   name: 'Koncepcja funkcjonalna',
-  category: 'Układ',
+  categoryName: 'Układ',
   pricing: {
     mode: 'per_room',
     baseCents: 0,
@@ -102,8 +102,8 @@ describe('ScopePanel — dodawanie usług z tabeli (T-71)', () => {
     vi.clearAllMocks();
     useLibraryItems.mockReturnValue({
       data: [
-        item({ id: 'l1', name: 'Blat kuchenny', category: 'Kuchnia', unitPriceCents: 120_000 }),
-        item({ id: 'l2', name: 'Fronty', category: 'Kuchnia', unit: 'm2' }),
+        item({ id: 'l1', name: 'Blat kuchenny', categoryName: 'Kuchnia', unitPriceCents: 120_000 }),
+        item({ id: 'l2', name: 'Fronty', categoryName: 'Kuchnia', unit: 'm2' }),
         PER_ROOM,
       ],
     });
@@ -199,7 +199,7 @@ describe('ScopePanel — dodawanie usług z tabeli (T-71)', () => {
 
   it('bez usług liczonych za pomieszczenie nie ma ostrzeżenia', async () => {
     useLibraryItems.mockReturnValue({
-      data: [item({ id: 'l1', name: 'Blat kuchenny', category: 'Kuchnia' })],
+      data: [item({ id: 'l1', name: 'Blat kuchenny', categoryName: 'Kuchnia' })],
     });
     setup();
     otworz();

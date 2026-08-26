@@ -56,10 +56,7 @@ export function VariantField({ item, allItems, value, onChange }: VariantFieldPr
   return (
     <div className="flex items-center gap-2">
       <span className="text-ink-soft shrink-0 px-2 text-xs">{pl.library.variantOf}</span>
-      <Select
-        value={value ?? NONE}
-        onValueChange={(next) => onChange(next === NONE ? null : next)}
-      >
+      <Select value={value ?? NONE} onValueChange={(next) => onChange(next === NONE ? null : next)}>
         <SelectTrigger
           aria-label={`${pl.library.variantOfLabel}: ${item.name || pl.library.newItemName}`}
           className="text-ink-soft h-8 flex-1 text-xs"

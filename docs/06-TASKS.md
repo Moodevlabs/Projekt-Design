@@ -1099,7 +1099,15 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - Daty ustawiane **przy przejściu**: cofnięcie z „zakończony" na „w toku" zachowuje datę rozpoczęcia i kasuje datę zakończenia, bo ta druga przestała być prawdą.
   > - **To nie jest Gantt ani lista zadań** (koncepcja §17). Trzy stany i data. Test pilnujący listy zakładek projektu zaktualizowany świadomie, z komentarzem, dlaczego „Etapy" nie łamią zasady „harmonogram tylko w wycenie".
   > - 20 testów jednostkowych, migracja `0028` sprawdzona na czystym Postgresie.
-- [ ] T-69 Usunięcie kolumny `library_items.category` (tekst) po jednej wersji od T-59
+- [x] **T-69 Usunięcie kolumny `library_items.category`** (tekst) — po jednej wersji od T-59
+  **Zrobione 2026-08-27:**
+  > - **To nie było samo „drop column".** Kolumna była jeszcze *czytana* w pięciu miejscach interfejsu (karta usługi, wiersz listy, picker, panel zakresu, grupowanie w edytorze) i *pisana* z pola tekstowego z listą podpowiedzi.
+  > - Problem, który to kończy: ta sama informacja żyła w dwóch miejscach. Zmiana nazwy grupy w słowniku **nie docierała** do pozycji zapisanych wcześniej, a literówka w polu tekstowym zakładała „grupę", której nie było w słowniku — i pozycja znikała z filtrów.
+  > - `LibraryItem.category` → `categoryName`, **rozwiązywane ze słownika** przez osadzenie PostgREST-a (`select('*, library_categories(name)')`). Odczyt, nie zapis.
+  > - Karta usługi: **wybór ze słownika** zamiast wolnego tekstu. Brak grupy daje pusty ciąg, a nie „Inne" — nazwa zastępcza w danych to nazwa, która prędzej czy później wyląduje w PDF-ie jako prawdziwa grupa.
+  > - Migracja `0029` nie gubi danych: przed usunięciem kolumny dopina `category_id` po nazwie, a grupy nieobecne w słowniku zakłada (pomijając „Inne", bo to była wartość domyślna kolumny, a nie decyzja użytkownika).
+  > - ⚠️ **Złapane:** `seed_library_sample` z 0022 wstawia do tej kolumny. Ciało funkcji plpgsql sprawdza się przy **wywołaniu**, więc bez odtworzenia funkcji pierwsze nowe konto po tej migracji dostałoby błąd zamiast biblioteki przykładowej. Funkcja odtworzona w `0029`.
+  > - **Zweryfikowane na czystym Postgresie:** 0001–0029 przechodzą, kolumna zniknęła, indeks zastępczy stoi, seed daje 38 usług w 8 grupach — wszystkie z `category_id`.
 
 ## Faza 3
 

@@ -20,7 +20,7 @@ function libItem(partial: Partial<LibraryItem>): LibraryItem {
   return {
     id: 'lib-1',
     workspaceId: 'ws',
-    category: 'Wizualizacje',
+    categoryName: 'Wizualizacje',
     categoryId: null,
     unit: 'lump' as const,
     unitLabel: null,

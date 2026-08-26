@@ -61,7 +61,10 @@ export function GroupItemsList({ groupName, items, onChange }: GroupItemsListPro
         </ul>
       )}
 
-      <GroupItemPicker groupName={groupName} onPick={(snapshot) => onChange([...items, snapshot])} />
+      <GroupItemPicker
+        groupName={groupName}
+        onPick={(snapshot) => onChange([...items, snapshot])}
+      />
 
       <p className="text-ink-soft text-xs">{pl.library.groupItemsHint}</p>
     </div>

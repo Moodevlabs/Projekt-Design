@@ -29,7 +29,7 @@ const { PricingMatrixTab } = await import('./PricingMatrixTab');
 function item(partial: Partial<LibraryItem> & { id: string; name: string }): LibraryItem {
   return {
     workspaceId: 'ws',
-    category: 'Inne',
+    categoryName: 'Inne',
     categoryId: null,
     unit: 'lump' as const,
     unitLabel: null,
@@ -62,7 +62,12 @@ const PARAMETRYCZNA = item({
 const STALA = item({ id: '2', name: 'Nadzor', unitPriceCents: 25_000 });
 
 function mockItems(rows: LibraryItem[]) {
-  useLibraryItems.mockReturnValue({ data: rows, isLoading: false, isError: false, refetch: vi.fn() });
+  useLibraryItems.mockReturnValue({
+    data: rows,
+    isLoading: false,
+    isError: false,
+    refetch: vi.fn(),
+  });
 }
 
 beforeEach(() => {

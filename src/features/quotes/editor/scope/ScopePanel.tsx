@@ -86,16 +86,16 @@ export function ScopePanel({ pricing, onInsertItems, onInsertGroup }: ScopePanel
   // tam, gdzie wypadnie z porównania liter.
   const categories = useMemo(() => {
     const seen = new Set<string>();
-    for (const item of all) if (item.category) seen.add(item.category);
+    for (const item of all) if (item.categoryName) seen.add(item.categoryName);
     return [...seen];
   }, [all]);
 
   const visible = useMemo(() => {
     const phrase = search.trim().toLowerCase();
     return all.filter((item) => {
-      if (category !== null && item.category !== category) return false;
+      if (category !== null && item.categoryName !== category) return false;
       if (!phrase) return true;
-      return `${item.name} ${item.description} ${item.category}`.toLowerCase().includes(phrase);
+      return `${item.name} ${item.description} ${item.categoryName}`.toLowerCase().includes(phrase);
     });
   }, [all, category, search]);
 

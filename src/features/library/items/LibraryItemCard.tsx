@@ -13,6 +13,7 @@ import { draftSignature, itemSignature, toItemDraft, type ItemDraft } from './it
 import type { LibraryItem } from '@/data/repos/library.repo';
 import type { PricingRule } from '@/domain/quote';
 import { routes } from '@/app/routes';
+import { categoryLabel, type LibraryCategory } from '@/domain/library/schema';
 import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
 
@@ -28,7 +29,8 @@ type LibraryItemCardProps = {
   /** Cala biblioteka — do wyboru grupy wariantow (F1.4). */
   allItems: LibraryItem[];
   /** `id` wspólnej listy podpowiedzi kategorii (jedna na całą zakładkę). */
-  categoryListId: string;
+  /** Slownik grup (T-69) — zrodlo wyboru zamiast wolnego tekstu. */
+  categories: LibraryCategory[];
   onSave: (draft: ItemDraft) => void;
   onDelete: () => void;
   saving?: boolean;
@@ -46,7 +48,7 @@ type LibraryItemCardProps = {
 export function LibraryItemCard({
   item,
   allItems,
-  categoryListId,
+  categories,
   onSave,
   onDelete,
   saving = false,
@@ -79,7 +81,9 @@ export function LibraryItemCard({
     <article
       className={cn(
         'flex flex-col gap-3',
-        embedded ? 'bg-surface rounded-[var(--radius-control)] border-hair border p-4' : 'card-surface p-5',
+        embedded
+          ? 'bg-surface border-hair rounded-[var(--radius-control)] border p-4'
+          : 'card-surface p-5',
       )}
     >
       <header className="flex items-start justify-between gap-2">
@@ -153,14 +157,26 @@ export function LibraryItemCard({
       </div>
 
       <div className="flex items-center gap-2">
-        <Input
-          value={draft.category}
-          list={categoryListId}
+        {/*
+          Wybór ze SŁOWNIKA, nie wolny tekst (T-69).
+          Do 1.0 była tu lista podpowiedzi nad polem tekstowym — i to pole
+          zapisywało kolumnę `category`, niezależną od `category_id`. Literówka
+          zakładała nową „grupę", której nie było w słowniku, a zmiana nazwy
+          grupy nie docierała do pozycji zapisanych wcześniej.
+        */}
+        <select
+          value={draft.categoryId ?? ''}
           aria-label={`${pl.library.itemCategoryLabel}: ${label}`}
-          placeholder={pl.library.category}
-          onChange={(event) => patch({ category: event.target.value })}
-          className="text-ink-soft h-8 flex-1 px-2 text-xs"
-        />
+          onChange={(event) => patch({ categoryId: event.target.value || null })}
+          className="border-hair text-ink-soft h-8 flex-1 rounded-[var(--radius-control)] border px-2 text-xs"
+        >
+          <option value="">{pl.library.withoutCategory}</option>
+          {categories.map((category) => (
+            <option key={category.id} value={category.id}>
+              {categoryLabel(category)}
+            </option>
+          ))}
+        </select>
         <MoneyInput
           // Inline-edit ceny operuje liczbami; „wycena indywidualna" ustawia
           // się na pełnej stronie usługi (T-61), nie w szybkiej poprawce.

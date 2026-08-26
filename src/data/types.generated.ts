@@ -352,7 +352,6 @@ export type Database = {
       library_items: {
         Row: {
           active: boolean
-          category: string
           category_id: string | null
           created_at: string
           deleted_at: string | null
@@ -374,7 +373,6 @@ export type Database = {
         }
         Insert: {
           active?: boolean
-          category?: string
           category_id?: string | null
           created_at?: string
           deleted_at?: string | null
@@ -396,7 +394,6 @@ export type Database = {
         }
         Update: {
           active?: boolean
-          category?: string
           category_id?: string | null
           created_at?: string
           deleted_at?: string | null

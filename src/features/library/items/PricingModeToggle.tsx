@@ -25,7 +25,11 @@ export function PricingModeToggle({
   label: string;
 }) {
   return (
-    <div role="group" aria-label={label} className="border-hair flex rounded-[var(--radius-pill)] border p-0.5">
+    <div
+      role="group"
+      aria-label={label}
+      className="border-hair flex rounded-[var(--radius-pill)] border p-0.5"
+    >
       {MODES.map((mode) => {
         const active = mode.value === value;
         return (
@@ -37,7 +41,9 @@ export function PricingModeToggle({
             className={cn(
               'flex-1 rounded-[var(--radius-pill)] px-2 py-1 text-xs transition-colors',
               'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',
-              active ? 'bg-primary text-primary-foreground font-medium' : 'text-ink-soft hover:text-ink',
+              active
+                ? 'bg-primary text-primary-foreground font-medium'
+                : 'text-ink-soft hover:text-ink',
             )}
           >
             {mode.label}

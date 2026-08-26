@@ -7,7 +7,6 @@ import {
   deleteLibraryItem,
   deleteSampleLibrary,
   fetchLibraryUsage,
-  listLibraryCategories,
   listLibraryGroups,
   listLibraryItems,
   saveItemsToLibrary,
@@ -43,16 +42,6 @@ export function useLibraryItems(filters: LibraryItemFilters = {}) {
  */
 export function useAllLibraryItems() {
   return useLibraryItems();
-}
-
-export function useLibraryCategories() {
-  const workspaceId = useWorkspaceId();
-
-  return useQuery({
-    queryKey: queryKeys.libraryCategories(workspaceId),
-    queryFn: () => listLibraryCategories(requireWorkspaceId(workspaceId)),
-    enabled: Boolean(workspaceId),
-  });
 }
 
 /**

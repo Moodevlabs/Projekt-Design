@@ -16,7 +16,6 @@ import {
 export const LibraryItemSchema = z.object({
   id: z.string().uuid(),
   workspaceId: z.string().uuid(),
-  category: z.string().default('Inne'),
   kind: ItemKindSchema.default('item'),
   name: z.string().min(1),
   description: z.string().default(''),
@@ -182,15 +181,7 @@ export function libraryItemToSnapshot(
  * do wstawienia na raz). Dwa pojęcia zlewały się dotąd w jedno słowo; od T-59
  * rozchodzą się: grupa porządkuje, zestaw wstawia.
  */
-export const LIBRARY_COLORS = [
-  'sand',
-  'sage',
-  'sky',
-  'clay',
-  'plum',
-  'moss',
-  'slate',
-] as const;
+export const LIBRARY_COLORS = ['sand', 'sage', 'sky', 'clay', 'plum', 'moss', 'slate'] as const;
 export type LibraryColor = (typeof LIBRARY_COLORS)[number];
 
 export const LibraryCategorySchema = z.object({

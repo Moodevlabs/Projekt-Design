@@ -8,7 +8,7 @@ function item(partial: Partial<LibraryItem> = {}): LibraryItem {
   return {
     id: 'l1',
     workspaceId: 'ws',
-    category: 'Inne',
+    categoryName: 'Inne',
     categoryId: null,
     kind: 'item',
     name: 'Usługa',

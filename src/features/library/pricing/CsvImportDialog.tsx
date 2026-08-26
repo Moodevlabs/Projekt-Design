@@ -41,7 +41,12 @@ export function CsvImportDialog({
 
   const handleFile = async (file: File) => {
     const text = await file.text();
-    setParsed(parsePricingCsv(text, roomTypes.map((type) => type.slug)));
+    setParsed(
+      parsePricingCsv(
+        text,
+        roomTypes.map((type) => type.slug),
+      ),
+    );
   };
 
   const apply = () => {
@@ -121,11 +126,7 @@ export function CsvImportDialog({
           <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
             {pl.common.cancel}
           </Button>
-          <Button
-            type="button"
-            disabled={!matched || matched.matched.length === 0}
-            onClick={apply}
-          >
+          <Button type="button" disabled={!matched || matched.matched.length === 0} onClick={apply}>
             {pl.library.importCsvApply}
           </Button>
         </DialogFooter>

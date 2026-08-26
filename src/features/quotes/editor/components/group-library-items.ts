@@ -11,9 +11,9 @@ export function byCategory(
 ): [string, LibraryItem[]][] {
   const map = new Map<string, LibraryItem[]>();
   for (const item of items) {
-    const list = map.get(item.category) ?? [];
+    const list = map.get(item.categoryName) ?? [];
     list.push(item);
-    map.set(item.category, list);
+    map.set(item.categoryName, list);
   }
 
   const normalized = priority?.trim().toLowerCase();

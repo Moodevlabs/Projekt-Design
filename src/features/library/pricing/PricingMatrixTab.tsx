@@ -1,5 +1,12 @@
 import { useMemo, useState } from 'react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { MoneyInput } from '../components/MoneyInput';
 import { CsvImportDialog } from './CsvImportDialog';
 import { CardsSkeleton, LoadError } from '../components/LibraryStates';
@@ -126,7 +133,9 @@ export function PricingMatrixTab() {
                         <MoneyInput
                           // Brak wpisu znaczy „stawka domyślna” — pokazujemy to,
                           // co faktycznie się policzy.
-                          cents={pricing?.perRoomCents[type.id] ?? pricing?.defaultPerRoomCents ?? 0}
+                          cents={
+                            pricing?.perRoomCents[type.id] ?? pricing?.defaultPerRoomCents ?? 0
+                          }
                           onChange={(cents) =>
                             patchPricing(item, (current) => ({
                               ...current,

@@ -27,7 +27,7 @@ function libraryEntry(partial: Partial<LibraryItem> = {}): LibraryItem {
   return {
     id: SAVED_ID,
     workspaceId: 'ws',
-    category: 'Inne',
+    categoryName: 'Inne',
     categoryId: null,
     unit: 'lump' as const,
     unitLabel: null,

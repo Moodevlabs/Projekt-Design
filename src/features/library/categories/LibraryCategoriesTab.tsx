@@ -172,10 +172,7 @@ function CategoryRow({
   const [code, setCode] = useState(category.code);
 
   const commit = (patch: { name?: string; code?: string; color?: LibraryColor | null }) => {
-    update.mutate(
-      { id: category.id, patch },
-      { onError: (error) => toast.error(error.message) },
-    );
+    update.mutate({ id: category.id, patch }, { onError: (error) => toast.error(error.message) });
   };
 
   return (
@@ -220,10 +217,7 @@ function CategoryRow({
         className="min-w-40 flex-1"
       />
 
-      <CategoryColorPicker
-        value={category.color}
-        onChange={(color) => commit({ color })}
-      />
+      <CategoryColorPicker value={category.color} onChange={(color) => commit({ color })} />
 
       <span className="text-ink-soft w-24 text-right text-sm tabular-nums">
         {pl.library.itemCount(itemCount)}

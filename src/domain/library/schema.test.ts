@@ -20,7 +20,6 @@ describe('LibraryItemSchema', () => {
     ).toEqual({
       id: LI,
       workspaceId: WS,
-      category: 'Inne',
       kind: 'item',
       name: 'Projekt koncepcyjny',
       description: '',

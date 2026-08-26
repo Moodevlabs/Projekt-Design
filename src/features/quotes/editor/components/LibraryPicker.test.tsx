@@ -17,7 +17,7 @@ const { useEditorStore } = await import('../editor.store');
 function item(partial: Partial<LibraryItem> & { id: string; name: string }): LibraryItem {
   return {
     workspaceId: 'ws',
-    category: 'Inne',
+    categoryName: 'Inne',
     categoryId: null,
     unit: 'lump' as const,
     unitLabel: null,
@@ -37,9 +37,9 @@ function item(partial: Partial<LibraryItem> & { id: string; name: string }): Lib
 
 describe('byCategory', () => {
   const items = [
-    item({ id: '1', name: 'Nadzór', category: 'Nadzór' }),
-    item({ id: '2', name: 'Blat', category: 'Kuchnia' }),
-    item({ id: '3', name: 'Projekt', category: 'Projekt' }),
+    item({ id: '1', name: 'Nadzór', categoryName: 'Nadzór' }),
+    item({ id: '2', name: 'Blat', categoryName: 'Kuchnia' }),
+    item({ id: '3', name: 'Projekt', categoryName: 'Projekt' }),
   ];
 
   it('grupuje i sortuje kategorie alfabetycznie po polsku', () => {
@@ -65,7 +65,7 @@ describe('LibraryPicker', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     useLibraryItems.mockReturnValue({
-      data: [item({ id: 'l1', name: 'Blat kuchenny', category: 'Kuchnia', unitPriceCents: 120_000 })],
+      data: [item({ id: 'l1', name: 'Blat kuchenny', categoryName: 'Kuchnia', unitPriceCents: 120_000 })],
     });
     useLibraryGroups.mockReturnValue({ data: [] });
   });
@@ -160,9 +160,9 @@ describe('LibraryPicker — dobieranie bez zamykania (T-70)', () => {
     vi.clearAllMocks();
     useLibraryItems.mockReturnValue({
       data: [
-        item({ id: 'l1', name: 'Blat kuchenny', category: 'Kuchnia' }),
-        item({ id: 'l2', name: 'Fronty', category: 'Kuchnia' }),
-        item({ id: 'l3', name: 'Nadzór autorski', category: 'Nadzór' }),
+        item({ id: 'l1', name: 'Blat kuchenny', categoryName: 'Kuchnia' }),
+        item({ id: 'l2', name: 'Fronty', categoryName: 'Kuchnia' }),
+        item({ id: 'l3', name: 'Nadzór autorski', categoryName: 'Nadzór' }),
       ],
     });
     useLibraryGroups.mockReturnValue({ data: [] });
@@ -245,7 +245,7 @@ describe('LibraryPicker — dobieranie bez zamykania (T-70)', () => {
 
   it('pokazuje sposob wyceny obok nazwy', async () => {
     useLibraryItems.mockReturnValue({
-      data: [item({ id: 'l1', name: 'Wizualizacja', category: 'Wizualizacje', unit: 'm2' })],
+      data: [item({ id: 'l1', name: 'Wizualizacja', categoryName: 'Wizualizacje', unit: 'm2' })],
     });
     await otworz();
 

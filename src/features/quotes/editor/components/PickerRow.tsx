@@ -34,7 +34,7 @@ export function PickerRow({
 
   return (
     <CommandItem
-      value={`${item.name} ${item.description} ${item.category}`}
+      value={`${item.name} ${item.description} ${item.categoryName}`}
       onSelect={onPick}
       className="flex flex-col items-stretch gap-0.5 py-2"
     >

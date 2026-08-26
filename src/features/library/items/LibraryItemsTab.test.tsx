@@ -33,7 +33,7 @@ function baseItem(partial: Partial<LibraryItem> = {}): LibraryItem {
   return {
     id: 'item-1',
     workspaceId: 'ws',
-    category: 'Wykończenie',
+    categoryName: 'Wykończenie',
     categoryId: null,
     unit: 'lump' as const,
     unitLabel: null,
@@ -65,8 +65,24 @@ vi.mock('@/data/queries/useLibrary', () => ({
 vi.mock('@/data/queries/useLibraryCategories', () => ({
   useLibraryCategoryList: () => ({
     data: [
-      { id: 'cat-1', workspaceId: 'ws', name: 'Wykończenie', code: '', color: null, sortOrder: 0, isSample: false },
-      { id: 'cat-2', workspaceId: 'ws', name: 'Instalacje', code: '', color: null, sortOrder: 1, isSample: false },
+      {
+        id: 'cat-1',
+        workspaceId: 'ws',
+        name: 'Wykończenie',
+        code: '',
+        color: null,
+        sortOrder: 0,
+        isSample: false,
+      },
+      {
+        id: 'cat-2',
+        workspaceId: 'ws',
+        name: 'Instalacje',
+        code: '',
+        color: null,
+        sortOrder: 1,
+        isSample: false,
+      },
     ],
     isLoading: false,
   }),
@@ -216,7 +232,6 @@ describe('LibraryItemsTab — filtry', () => {
       name: pl.library.newItemName,
       categoryId: 'cat-2',
       // Kolumna tekstowa zostaje jako kopia do czasu T-69.
-      category: 'Instalacje',
     });
     expect(lastFilters().categoryId).toBe('cat-2');
   });
@@ -262,14 +277,18 @@ describe('LibraryItemsTab — zwijane wiersze (T-72)', () => {
     await expand(user, 'Fronty');
 
     expect(screen.queryByLabelText(fieldLabel(pl.library.itemNameLabel))).not.toBeInTheDocument();
-    expect(screen.getByLabelText(fieldLabel(pl.library.itemNameLabel, 'Fronty'))).toBeInTheDocument();
+    expect(
+      screen.getByLabelText(fieldLabel(pl.library.itemNameLabel, 'Fronty')),
+    ).toBeInTheDocument();
   });
 
   it('przelacznik „Aktywna" zmienia stan z listy, bez rozwijania', async () => {
     const user = userEvent.setup();
     render(<LibraryItemsTab />);
 
-    await user.click(screen.getByRole('switch', { name: pl.library.rowToggleActive('Blat kuchenny') }));
+    await user.click(
+      screen.getByRole('switch', { name: pl.library.rowToggleActive('Blat kuchenny') }),
+    );
 
     expect(updateMutate).toHaveBeenCalledTimes(1);
     expect(updateMutate.mock.calls[0]?.[0]).toEqual({ id: 'item-1', patch: { active: false } });
@@ -425,15 +444,16 @@ describe('LibraryItemsTab — kaskada do otwartej wyceny', () => {
     expect(screen.queryByText(pl.library.cascadeTitle)).not.toBeInTheDocument();
   });
 
-  it('nie pyta, gdy zmienilo sie wylacznie pole spoza kaskady (kategoria)', async () => {
+  it('nie pyta, gdy zmienilo sie wylacznie pole spoza kaskady (grupa)', async () => {
     const user = userEvent.setup();
     linkedCount.mockReturnValue(5);
     render(<LibraryItemsTab />);
     await expand(user);
 
+    // Od T-69 grupa to WYBOR ze slownika, nie pole tekstowe: nazwa nie jest
+    // juz kopiowana do wiersza, wiec nie da sie jej rozjechac ze slownikiem.
     const category = screen.getByLabelText(fieldLabel(pl.library.itemCategoryLabel));
-    await user.clear(category);
-    await user.type(category, 'Meble');
+    await user.selectOptions(category, 'cat-2');
     await user.click(screen.getByRole('button', { name: label(pl.library.saveItem) }));
 
     expect(updateMutate).toHaveBeenCalledTimes(1);
