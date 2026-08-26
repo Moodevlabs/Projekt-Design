@@ -331,7 +331,8 @@ export const pl = {
     copyRoomsSkip: 'Zacznij pusto',
 
     // Propozycja przestawienia statusu po akceptacji wyceny.
-    suggestInProgress: (name: string) => `Wycena zaakceptowana. Przestawić „${name}" na realizację?`,
+    suggestInProgress: (name: string) =>
+      `Wycena zaakceptowana. Przestawić „${name}" na realizację?`,
     suggestInProgressAction: 'Przestaw',
     statusChanged: 'Status projektu zmieniony',
   },
@@ -415,6 +416,64 @@ export const pl = {
     recentEmpty: 'Wyeksportowane PDF-y pojawią się tutaj.',
     seeAll: 'Zobacz wszystkie',
     hint: 'Archiwum pokazuje zapisany plik — nie renderuje go ponownie.',
+  },
+  /** Link dla klienta i akceptacja online (T-25/T-26). */
+  share: {
+    title: 'Udostępnij klientowi',
+    action: 'Udostępnij',
+    description:
+      'Klient otwiera link w przeglądarce, przełącza pozycje TAK/NIE i akceptuje albo zostawia uwagi. Nie musi zakładać konta.',
+    newLink: 'Utwórz link',
+    creating: 'Tworzenie…',
+    validFor: 'Ważny przez',
+    copy: 'Kopiuj link',
+    copied: 'Link skopiowany',
+    copyFailed: 'Nie udało się skopiować linku.',
+    sendByMail: 'Wyślij mailem',
+    revoke: 'Odwołaj',
+    revoked: 'Odwołany',
+    expired: 'Wygasł',
+    active: 'Aktywny',
+    noLinks: 'Nie udostępniono jeszcze tej wyceny.',
+    createFailed: 'Nie udało się utworzyć linku.',
+    revokeFailed: 'Nie udało się odwołać linku.',
+    revokeConfirm:
+      'Odwołany link przestaje działać natychmiast. Klient zobaczy komunikat, żeby poprosić o nowy.',
+    expiresAt: 'Wygasa',
+    neverExpires: 'Bezterminowy',
+    created: 'Utworzony',
+    views: 'Otwarcia',
+    neverOpened: 'Jeszcze nieotwarty',
+    openedTimes: (count: number) => (count === 1 ? 'Otwarty raz' : `Otwarty ${count} razy`),
+    lastOpened: 'Ostatnio',
+    /** Treść maila — projektant wysyła go ze swojej poczty (patrz IDEAS.md). */
+    mailSubject: (number: string) => `Oferta ${number}`,
+    mailBody: (url: string) =>
+      `Dzień dobry,
+
+przesyłam ofertę do wglądu:
+${url}
+
+Pod linkiem można zaznaczyć zakres i potwierdzić wybór albo zostawić uwagi.
+
+Pozdrawiam`,
+    baseUrlMissing:
+      'Nie ustawiono adresu strony ofert (VITE_SHARE_BASE_URL). Link powstanie, ale trzeba go złożyć ręcznie.',
+
+    // Akceptacja i uwagi (T-26).
+    acceptedTitle: 'Oferta zaakceptowana',
+    acceptedBy: (name: string) => `Zaakceptował(a): ${name}`,
+    acceptedScope: 'Zakres przyjęty przez klienta',
+    turnedOff: (count: number) =>
+      count === 1 ? 'Klient wyłączył 1 pozycję' : `Klient wyłączył ${count} pozycji`,
+    turnedOn: (count: number) =>
+      count === 1 ? 'Klient dobrał 1 pozycję' : `Klient dobrał ${count} pozycji`,
+    noChanges: 'Klient przyjął ofertę bez zmian w zakresie.',
+    comments: 'Uwagi klienta',
+    commentsEmpty: 'Klient nie zostawił jeszcze uwag.',
+    markRead: 'Oznacz jako przeczytane',
+    unread: 'Nowe',
+    anonymous: 'Klient',
   },
   editor: {
     preview: 'Podgląd',
@@ -958,8 +1017,7 @@ export const pl = {
     categoryNoColor: 'Bez koloru',
     categoryAdded: 'Dodano grupę',
     categoryDeleted: 'Usunięto grupę',
-    categoryHint:
-      'Grupy porządkują usługi w procesie projektowym. Kod („01") jest opcjonalny.',
+    categoryHint: 'Grupy porządkują usługi w procesie projektowym. Kod („01") jest opcjonalny.',
     categoriesEmptyTitle: 'Brak grup',
     categoriesEmptyDescription:
       'Grupa to dział albo etap: „Przygotowanie", „Projekt", „Nadzór". Usługi bez grupy dalej działają.',

@@ -9,6 +9,7 @@ import { QuoteDndProvider } from './dnd/QuoteDndProvider';
 import { useStableIds } from './dnd/useStableIds';
 import { useAutosave } from './useAutosave';
 import { EditorTopbar } from './components/EditorTopbar';
+import { ShareDialog } from './components/ShareDialog';
 import { QuoteHeader } from './components/QuoteHeader';
 import { SectionBlock } from './components/SectionBlock';
 import { TotalsCard } from './components/TotalsCard';
@@ -320,6 +321,7 @@ function EditorSurface({
   const schedule = useEditorStore((state) => state.schedule);
   const documents = useEditorStore((state) => state.documents);
   const [packageOpen, setPackageOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   const [tab, setTab] = useState<'quote' | 'schedule' | 'documents'>('quote');
   const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
   const [overwriteTemplateOpen, setOverwriteTemplateOpen] = useState(false);
@@ -519,7 +521,22 @@ function EditorSurface({
                 }
               : null
           }
+          onShare={() => setShareOpen(true)}
         />
+
+        {/*
+          Montujemy DOPIERO po otwarciu, a nie trzymamy zamknietego w drzewie:
+          zamkniety modal wolalby trzy zapytania (linki, uwagi, akceptacja)
+          przy kazdym wejsciu do edytora, a nikt na nie nie patrzy.
+        */}
+        {quoteId && shareOpen ? (
+          <ShareDialog
+            quoteId={quoteId}
+            quoteNumber={number}
+            open
+            onOpenChange={setShareOpen}
+          />
+        ) : null}
 
         <ReadOnlyBanner />
 
