@@ -552,30 +552,30 @@ export type Database = {
         Row: {
           accepted_at: string
           accepted_body: Json
+          enabled_item_ids: string[]
           id: string
           quote_id: string
           share_id: string | null
-          signature_path: string | null
           signer_ip: unknown
           signer_name: string | null
         }
         Insert: {
           accepted_at?: string
           accepted_body: Json
+          enabled_item_ids?: string[]
           id?: string
           quote_id: string
           share_id?: string | null
-          signature_path?: string | null
           signer_ip?: unknown
           signer_name?: string | null
         }
         Update: {
           accepted_at?: string
           accepted_body?: Json
+          enabled_item_ids?: string[]
           id?: string
           quote_id?: string
           share_id?: string | null
-          signature_path?: string | null
           signer_ip?: unknown
           signer_name?: string | null
         }
@@ -596,30 +596,87 @@ export type Database = {
           },
         ]
       }
+      quote_comments: {
+        Row: {
+          author_ip: unknown
+          author_name: string | null
+          created_at: string
+          id: string
+          message: string
+          quote_id: string
+          read_at: string | null
+          share_id: string | null
+        }
+        Insert: {
+          author_ip?: unknown
+          author_name?: string | null
+          created_at?: string
+          id?: string
+          message: string
+          quote_id: string
+          read_at?: string | null
+          share_id?: string | null
+        }
+        Update: {
+          author_ip?: unknown
+          author_name?: string | null
+          created_at?: string
+          id?: string
+          message?: string
+          quote_id?: string
+          read_at?: string | null
+          share_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_comments_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quote_comments_share_id_fkey"
+            columns: ["share_id"]
+            isOneToOne: false
+            referencedRelation: "quote_shares"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quote_shares: {
         Row: {
           created_at: string
           expires_at: string | null
+          first_viewed_at: string | null
           id: string
+          last_viewed_at: string | null
           quote_id: string
           revoked_at: string | null
           token: string
+          view_count: number
         }
         Insert: {
           created_at?: string
           expires_at?: string | null
+          first_viewed_at?: string | null
           id?: string
+          last_viewed_at?: string | null
           quote_id: string
           revoked_at?: string | null
-          token: string
+          token?: string
+          view_count?: number
         }
         Update: {
           created_at?: string
           expires_at?: string | null
+          first_viewed_at?: string | null
           id?: string
+          last_viewed_at?: string | null
           quote_id?: string
           revoked_at?: string | null
           token?: string
+          view_count?: number
         }
         Relationships: [
           {
@@ -1046,10 +1103,23 @@ export type Database = {
       }
     }
     Functions: {
+      accept_shared_quote: {
+        Args: {
+          p_enabled_ids: string[]
+          p_signer_name: string
+          p_token: string
+        }
+        Returns: Json
+      }
+      comment_shared_quote: {
+        Args: { p_author_name: string; p_message: string; p_token: string }
+        Returns: Json
+      }
       files_bump_usage: {
         Args: { delta: number; ws: string }
         Returns: undefined
       }
+      get_shared_quote: { Args: { p_token: string }; Returns: Json }
       is_member: { Args: { ws: string }; Returns: boolean }
       is_quote_member: { Args: { q: string }; Returns: boolean }
       is_workspace_owner: { Args: { ws: string }; Returns: boolean }
@@ -1063,8 +1133,30 @@ export type Database = {
       }
       next_quote_number: { Args: { ws: string }; Returns: string }
       quote_can_write: { Args: { q: string }; Returns: boolean }
+      request_ip: { Args: never; Returns: unknown }
+      resolve_share: {
+        Args: { p_token: string }
+        Returns: {
+          created_at: string
+          expires_at: string | null
+          first_viewed_at: string | null
+          id: string
+          last_viewed_at: string | null
+          quote_id: string
+          revoked_at: string | null
+          token: string
+          view_count: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "quote_shares"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       seed_library_sample: { Args: { ws: string }; Returns: undefined }
       seed_room_types: { Args: { ws: string }; Returns: undefined }
+      share_status: { Args: { p_token: string }; Returns: string }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
       storage_workspace_id: { Args: { object_name: string }; Returns: string }

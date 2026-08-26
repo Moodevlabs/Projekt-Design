@@ -44,6 +44,10 @@ export const queryKeys = {
     workspaceId ? (['library', 'sample', workspaceId] as const) : (['library', 'sample'] as const),
   libraryGroups: (workspaceId?: string) =>
     workspaceId ? (['library', 'groups', workspaceId] as const) : (['library', 'groups'] as const),
+  /** Linki klienta, uwagi i akceptacja — wszystko per wycena (T-25/T-26). */
+  shares: (quoteId: string) => ['quotes', 'detail', quoteId, 'shares'] as const,
+  quoteComments: (quoteId: string) => ['quotes', 'detail', quoteId, 'comments'] as const,
+  quoteAcceptance: (quoteId: string) => ['quotes', 'detail', quoteId, 'acceptance'] as const,
   templates: (workspaceId?: string) =>
     workspaceId ? (['templates', workspaceId] as const) : (['templates'] as const),
   template: (id: string) => ['templates', 'detail', id] as const,
