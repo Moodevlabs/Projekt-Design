@@ -1071,7 +1071,16 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   > - Kwoty liczy `calcQuoteTotals` na obu wersjach; znak różnicy jest treścią, nie ozdobą („+4 000 zł" i „4 000 zł" znaczą co innego w rozmowie o podwyżce).
   > - Okno w menu edytora, **znika przy jednej wersji**: pozycja menu, która zawsze prowadzi do „nie ma czego porównywać", jest gorsza niż jej brak.
   > - Zero migracji — obie wersje to zwykłe wiersze `quotes` z tym samym `lineage_id` (T-57). 11 testów jednostkowych.
-- [ ] T-23 Import/eksport CSV — biblioteka (T-50) i rejestr (T-49) zrobione; zostaje **eksport XLSX** i import klientów z CSV
+- [x] **T-23 Import/eksport CSV + XLSX** — biblioteka (T-50) i rejestr (T-49) były zrobione; doszedł eksport XLSX i import klientów
+  **Zrobione 2026-08-27:**
+  > - **XLSX bez nowej biblioteki.** `.xlsx` to ZIP z kilkoma XML-ami; SheetJS i ExcelJS potrafią sto razy więcej, niż potrzeba (formuły, style, odczyt) i ważą setki kilobajtów. `src/lib/xlsx.ts` pisze ZIP metodą **`store`** (bez kompresji) — deflate wymagałby biblioteki albo asynchronicznego `CompressionStream`, a eksport rejestru to kilkadziesiąt kilobajtów tekstu. Kod zostaje synchroniczny i testowalny.
+  > - **Po co XLSX, skoro CSV się otwiera:** w XLSX liczby są liczbami. W CSV Excel zgaduje typ kolumny i numer oferty `2026/08/0012` bywa czytany jako data.
+  > - Złapane przy pisaniu: `array.push(...data)` przepełnia stos przy kilkudziesięciu tysiącach elementów — a arkusz rejestru z kilkuset ofertami to setki kilobajtów XML-a. Błąd wyszedłby dopiero u kogoś z dużą bazą. Zastąpione buforem `ByteSink`; jest test na 4000 wierszy.
+  > - **Zweryfikowane niezależnie:** wygenerowany plik otwarty Pythonowym `zipfile` (inna implementacja ZIP-a) — wszystkie CRC poprawne, 501 wierszy, polskie znaki i ucieczki XML na miejscu.
+  > - **Import klientów zakłada plik z Excela KLIENTA, nie nasz format.** Separator wykrywany (`;` z Excela PL, `,` z Google Sheets, tabulator z CRM-ów) i wybierany po liczbie kolumn, nie po pierwszym trafieniu — „Kowalski, Jan;500100100" ma oba znaki. Nagłówki po synonimach i bez ogonków. Plik bez nagłówka też wchodzi.
+  > - Import **nie odrzuca całego pliku** przez jeden zły wiersz: brak nazwy i duplikaty trafiają do listy problemów, reszta wchodzi. Import wykładający się na 300 kontaktach, bo w 47. brakuje nazwiska, jest bezużyteczny.
+  > - Dwa kroki: podgląd („znaleziono 128 klientów, 3 wiersze bez nazwy") → zapis. Klienci już obecni w kartotece są pomijani (nazwa + telefon bez formatowania), bo import robi się zwykle więcej niż raz.
+  > - 29 nowych testów jednostkowych (12 XLSX + 17 import).
 - [ ] T-24 Wiele walut i lokalizacja liczb
 - [x] **T-67 Kosz na pliki** (30 dni; do 1.0 usunięcie w T-55 było natychmiastowe)
   **Zrobione 2026-08-27:**

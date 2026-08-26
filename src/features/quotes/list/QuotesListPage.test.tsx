@@ -120,10 +120,9 @@ describe('QuotesListPage', () => {
     mockResult([summary({ clientId: 'c1', clientName: 'Anna Kowalska' })]);
     renderPage();
 
-    expect(screen.getByRole('link', { name: pl.quotes.openClient('Anna Kowalska') })).toHaveAttribute(
-      'href',
-      '/klienci/c1',
-    );
+    expect(
+      screen.getByRole('link', { name: pl.quotes.openClient('Anna Kowalska') }),
+    ).toHaveAttribute('href', '/klienci/c1');
   });
 
   it('nazwa z samego snapshotu NIE jest linkiem — prowadzilby donikad', () => {

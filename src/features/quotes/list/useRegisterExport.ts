@@ -1,11 +1,18 @@
 import { toast } from 'sonner';
 import { useQuoteRegisterExport, type QuoteListFilters } from '@/data/queries/useQuotes';
 import { openPath, runningInTauri, saveFile } from '@/lib/tauri';
-import { registerCsv, registerFileName } from './register-csv';
+import { registerCsv, registerFileName, registerXlsx } from './register-csv';
 import { createLogger } from '@/lib/logger';
 import { pl } from '@/i18n/pl';
 
 const log = createLogger('register.export');
+
+export type ExportFormat = 'csv' | 'xlsx';
+
+const MIME: Record<ExportFormat, string> = {
+  csv: 'text/csv;charset=utf-8',
+  xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+};
 
 /**
  * Eksport rejestru ofert do CSV (F7.1).
@@ -17,7 +24,7 @@ const log = createLogger('register.export');
 export function useRegisterExport() {
   const pobierz = useQuoteRegisterExport();
 
-  const exportRegister = async (filters: QuoteListFilters) => {
+  const exportRegister = async (filters: QuoteListFilters, format: ExportFormat = 'csv') => {
     try {
       const rows = await pobierz.mutateAsync(filters);
       if (rows.length === 0) {
@@ -25,15 +32,16 @@ export function useRegisterExport() {
         return;
       }
 
-      const csv = registerCsv(rows);
-      const fileName = registerFileName(new Date().toISOString());
-      // `TextEncoder`, bo BOM i polskie znaki musza wyjsc jako UTF-8 bajtowo —
-      // `String` oddany do zapisu bez kodowania trafilby w systemowa strone
-      // kodowa i cala robota z BOM-em bylaby na nic.
-      const bytes = new TextEncoder().encode(csv);
+      const fileName = registerFileName(new Date().toISOString(), format);
+      // CSV: `TextEncoder`, bo BOM i polskie znaki musza wyjsc jako UTF-8
+      // bajtowo — `String` oddany do zapisu bez kodowania trafilby w systemowa
+      // strone kodowa i cala robota z BOM-em bylaby na nic.
+      // XLSX jest juz bajtami.
+      const bytes =
+        format === 'xlsx' ? registerXlsx(rows) : new TextEncoder().encode(registerCsv(rows));
 
       if (!runningInTauri()) {
-        downloadInBrowser(bytes, fileName);
+        downloadInBrowser(bytes, fileName, MIME[format]);
         toast.success(pl.quotes.registerExported(rows.length));
         return;
       }
@@ -41,7 +49,11 @@ export function useRegisterExport() {
       const { save } = await import('@tauri-apps/plugin-dialog');
       const target = await save({
         defaultPath: fileName,
-        filters: [{ name: 'CSV', extensions: ['csv'] }],
+        filters: [
+          format === 'xlsx'
+            ? { name: 'Excel', extensions: ['xlsx'] }
+            : { name: 'CSV', extensions: ['csv'] },
+        ],
       });
       if (!target) return;
 
@@ -58,8 +70,8 @@ export function useRegisterExport() {
   return { exportRegister, exporting: pobierz.isPending };
 }
 
-function downloadInBrowser(bytes: Uint8Array, fileName: string) {
-  const blob = new Blob([bytes], { type: 'text/csv;charset=utf-8' });
+function downloadInBrowser(bytes: Uint8Array, fileName: string, mime: string) {
+  const blob = new Blob([bytes], { type: mime });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;

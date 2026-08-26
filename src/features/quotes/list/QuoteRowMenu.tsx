@@ -113,7 +113,8 @@ export function QuoteRowMenu({
               title={pl.quotes.newVersionHint}
               onSelect={() => {
                 newVersion.mutate(quoteId, {
-                  onSuccess: (kopia) => toast.success(pl.quotes.versionCreated(`v${kopia.version}`)),
+                  onSuccess: (kopia) =>
+                    toast.success(pl.quotes.versionCreated(`v${kopia.version}`)),
                   onError: (error) => toast.error(error.message),
                 });
               }}

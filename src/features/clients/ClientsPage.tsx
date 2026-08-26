@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { EmptyState } from '@/components/shared';
 import { ClientsToolbar, type ClientStatusFilter } from './ClientsToolbar';
+import { ImportClientsDialog } from './ImportClientsDialog';
 import { ClientsTable } from './ClientsTable';
 import { ClientFormDialog } from './ClientFormDialog';
 import { useClients } from '@/data/queries/useClients';
@@ -16,6 +17,7 @@ export function ClientsPage() {
   const [sort, setSort] = useState<ClientSort>('activity_desc');
   const [search, setSearch] = useState('');
   const [formOpen, setFormOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [editing, setEditing] = useState<Client | null>(null);
 
   // Filtry idą do zapytania — szukanie i sortowanie robi Postgres. Lista
@@ -38,6 +40,8 @@ export function ClientsPage() {
 
   return (
     <div className="space-y-5">
+      <ImportClientsDialog open={importOpen} onOpenChange={setImportOpen} />
+
       <ClientsToolbar
         status={status}
         onStatusChange={setStatus}
@@ -47,6 +51,7 @@ export function ClientsPage() {
         onSortChange={setSort}
         count={rows.length}
         onAdd={openNew}
+        onImport={() => setImportOpen(true)}
       />
 
       {clients.isError ? (

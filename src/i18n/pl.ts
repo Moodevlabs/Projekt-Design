@@ -105,6 +105,9 @@ export const pl = {
     },
     exportRegister: 'Eksportuj rejestr (CSV)',
     registerExported: (count: number) => `Wyeksportowano ${count} pozycji rejestru`,
+    /** Warianty eksportu rejestru (T-23). XLSX pierwszy — liczby zostaja liczbami. */
+    exportXlsx: 'Excel (.xlsx)',
+    exportCsv: 'CSV dla Excela',
     registerEmpty: 'Nie ma czego eksportować — rejestr jest pusty.',
     sort: {
       label: 'Sortuj',
@@ -159,6 +162,30 @@ export const pl = {
     open: 'Otwórz wyszukiwarkę',
   },
   clients: {
+    // Import z CSV (T-23).
+    importAction: 'Importuj z CSV',
+    importTitle: 'Import klientów z pliku CSV',
+    importDescription:
+      'Wskaż plik wyeksportowany z Excela albo arkusza Google. Rozpoznajemy separator i nagłówki kolumn.',
+    importColumns:
+      'Rozpoznawane kolumny: Nazwa, Telefon, E-mail, Miasto, Adres, Notatki. Wystarczy sama nazwa — reszta jest opcjonalna.',
+    importPick: 'Wybierz plik',
+    importEmpty: 'Ten plik nie zawiera żadnych wierszy z danymi.',
+    importFound: (count: number) =>
+      count === 1 ? 'Znaleziono 1 klienta do dodania.' : `Znaleziono ${count} klientów do dodania.`,
+    importIssues: (count: number) =>
+      count === 1 ? '1 wiersz zostanie pominięty:' : `${count} wierszy zostanie pominiętych:`,
+    importLine: (line: number) => `wiersz ${line}`,
+    importNoName: 'brak nazwy klienta',
+    importDuplicate: 'powtórzony w pliku',
+    importMore: (count: number) => `…i jeszcze ${count}`,
+    importConfirm: (count: number) => `Dodaj ${count}`,
+    importing: 'Dodawanie…',
+    imported: (inserted: number, skipped: number) =>
+      skipped > 0
+        ? `Dodano ${inserted}, pominięto ${skipped} (już byli w kartotece).`
+        : `Dodano ${inserted} klientów.`,
+
     title: 'Klienci',
     new: 'Nowy klient',
     first: 'Dodaj pierwszego klienta',

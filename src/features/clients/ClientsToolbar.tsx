@@ -1,4 +1,4 @@
-import { Plus, Search, X } from 'lucide-react';
+import { Plus, Search, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -29,6 +29,7 @@ export interface ClientsToolbarProps {
   /** Licznik wyników — wzorzec 3a.1 z 05-UI: pigułki i liczba nad każdą listą. */
   count: number;
   onAdd: () => void;
+  onImport: () => void;
 }
 
 export function ClientsToolbar({
@@ -40,6 +41,7 @@ export function ClientsToolbar({
   onSortChange,
   count,
   onAdd,
+  onImport,
 }: ClientsToolbarProps) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
@@ -110,6 +112,13 @@ export function ClientsToolbar({
             ))}
           </SelectContent>
         </Select>
+
+        {/* Import stoi OBOK „Dodaj", nie w menu: to jest pierwsza rzecz, jaką
+            robi ktoś, kto przenosi się z Excela, i ma być widoczna. */}
+        <Button variant="outline" onClick={onImport}>
+          <Upload className="size-4" aria-hidden />
+          {pl.clients.importAction}
+        </Button>
 
         <Button onClick={onAdd}>
           <Plus className="size-4" aria-hidden />

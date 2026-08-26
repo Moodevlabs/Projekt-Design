@@ -82,9 +82,7 @@ export async function listClients(filters: ClientFilters): Promise<ClientOvervie
 
   const term = filters.search?.trim();
   if (term) {
-    query = query.or(
-      ilikeAnyOf(['name', 'email', 'phone', 'city'], term),
-    );
+    query = query.or(ilikeAnyOf(['name', 'email', 'phone', 'city'], term));
   }
 
   const rows = unwrap(
@@ -149,6 +147,71 @@ export async function createClient(input: CreateClientInput): Promise<Client> {
   const row = rows[0] as unknown as Row | undefined;
   if (!row) throw new RepoError('Nie udało się dodać klienta.');
   return mapClient(row);
+}
+
+export interface ImportClientsResult {
+  inserted: number;
+  /** Pominięte, bo taki klient (nazwa + telefon) już jest w kartotece. */
+  skipped: number;
+}
+
+/**
+ * Masowe dodanie klientów z importu CSV (T-23).
+ *
+ * **Pomijamy tych, którzy już są**, zamiast wstawiać duplikaty. Import robi
+ * się zwykle więcej niż raz (ktoś dosyła poprawiony arkusz) i podwojona
+ * kartoteka jest gorsza niż import, który nic nie zrobił.
+ *
+ * Dopasowanie po **nazwie + telefonie bez formatowania**: „500-100-100"
+ * i „500 100 100" to ten sam numer, a dwie rodziny Kowalskich to dwaj różni
+ * klienci. Sama nazwa byłaby za mocnym kryterium.
+ *
+ * Wstawiamy **jednym zapytaniem**. Trzysta osobnych insertów to trzysta rund
+ * do bazy i połowiczny import, gdy sieć padnie w środku.
+ */
+export async function importClients(
+  workspaceId: string,
+  drafts: readonly ClientDraft[],
+): Promise<ImportClientsResult> {
+  if (drafts.length === 0) return { inserted: 0, skipped: 0 };
+
+  const existing = unwrap(
+    await getSupabase()
+      .from('clients')
+      .select('name, phone')
+      .eq('workspace_id', workspaceId)
+      .is('deleted_at', null),
+    'Kartoteka klientów',
+  );
+
+  const key = (name: string, phone: string | null) =>
+    `${name.trim().toLowerCase()}|${(phone ?? '').replace(/[^0-9]/g, '')}`;
+
+  const known = new Set(
+    (existing as unknown as Array<{ name: string; phone: string | null }>).map((row) =>
+      key(row.name, row.phone),
+    ),
+  );
+
+  const fresh = drafts.filter((draft) => !known.has(key(draft.name, draft.phone)));
+  if (fresh.length === 0) return { inserted: 0, skipped: drafts.length };
+
+  const insert: TablesInsert<'clients'>[] = fresh.map((draft) => ({
+    workspace_id: workspaceId,
+    name: draft.name.trim(),
+    phone: toColumn(draft.phone),
+    email: toColumn(draft.email),
+    address: toColumn(draft.address),
+    city: toColumn(draft.city),
+    notes: toColumn(draft.notes),
+  }));
+
+  const rows = unwrap(
+    await getSupabase().from('clients').insert(insert).select('id'),
+    'Import klientów',
+  );
+
+  return { inserted: rows.length, skipped: drafts.length - fresh.length };
 }
 
 export type ClientPatch = Partial<ClientDraft>;
