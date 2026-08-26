@@ -10,6 +10,7 @@ import { useStableIds } from './dnd/useStableIds';
 import { useAutosave } from './useAutosave';
 import { EditorTopbar } from './components/EditorTopbar';
 import { ShareDialog } from './components/ShareDialog';
+import { VersionHistoryDialog } from './components/VersionHistoryDialog';
 import { QuoteHeader } from './components/QuoteHeader';
 import { SectionBlock } from './components/SectionBlock';
 import { TotalsCard } from './components/TotalsCard';
@@ -253,18 +254,20 @@ function EditorSurface({
   onReload: () => void;
   onRetry: () => void;
 }) {
-  const { body, mode, number, status, saveState, lastSavedAt, quoteId, version } = useEditorStore(
-    useShallow((state) => ({
-      body: state.body,
-      mode: state.mode,
-      number: state.number,
-      status: state.status,
-      saveState: state.saveState,
-      lastSavedAt: state.lastSavedAt,
-      quoteId: state.quoteId,
-      version: state.version,
-    })),
-  );
+  const { body, mode, number, status, saveState, lastSavedAt, quoteId, version, lineageId } =
+    useEditorStore(
+      useShallow((state) => ({
+        body: state.body,
+        mode: state.mode,
+        number: state.number,
+        status: state.status,
+        saveState: state.saveState,
+        lastSavedAt: state.lastSavedAt,
+        quoteId: state.quoteId,
+        version: state.version,
+        lineageId: state.lineageId,
+      })),
+    );
 
   // Akcje Zustanda sa stabilne, wiec zmemoizowane sekcje i wiersze nie
   // przerenderuja sie tylko dlatego, ze rodzic dostal nowy `body`.
@@ -322,6 +325,7 @@ function EditorSurface({
   const documents = useEditorStore((state) => state.documents);
   const [packageOpen, setPackageOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const [tab, setTab] = useState<'quote' | 'schedule' | 'documents'>('quote');
   const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
   const [overwriteTemplateOpen, setOverwriteTemplateOpen] = useState(false);
@@ -522,6 +526,7 @@ function EditorSurface({
               : null
           }
           onShare={() => setShareOpen(true)}
+          onVersionHistory={version > 1 ? () => setHistoryOpen(true) : null}
         />
 
         {/*
@@ -529,13 +534,19 @@ function EditorSurface({
           zamkniety modal wolalby trzy zapytania (linki, uwagi, akceptacja)
           przy kazdym wejsciu do edytora, a nikt na nie nie patrzy.
         */}
-        {quoteId && shareOpen ? (
-          <ShareDialog
-            quoteId={quoteId}
-            quoteNumber={number}
+        {quoteId && historyOpen && lineageId ? (
+          <VersionHistoryDialog
+            lineageId={lineageId}
+            currentId={quoteId}
+            /* Ta sama stala co w TotalsCard — wiele walut to osobne zadanie (T-24). */
+            currency="PLN"
             open
-            onOpenChange={setShareOpen}
+            onOpenChange={setHistoryOpen}
           />
+        ) : null}
+
+        {quoteId && shareOpen ? (
+          <ShareDialog quoteId={quoteId} quoteNumber={number} open onOpenChange={setShareOpen} />
         ) : null}
 
         <ReadOnlyBanner />

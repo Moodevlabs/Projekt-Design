@@ -1063,7 +1063,14 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
 - [ ] **T-83 Wydanie Windows** *(wydzielone z T-17, odłożone 2026-08-26)* — build przechodzi, brakuje **certyfikatu EV / Azure Trusted Signing**. Do zrobienia: cert, `tauri build` z podpisem, sprawdzenie instalatora `Toolier_1.0.0_*` na czystej maszynie (bez Node, Rusta i `.env`). **Blokada jest zakupowa, nie kodowa.**
 - [x] ~~T-20 Wysyłka e-mail z PDF (Resend) + szablon wiadomości~~ → **odrzucone 2026-08-26**, zastąpione przez T-25/T-26. Wysyłka = link + `mailto:` z poczty projektanta: dociera lepiej niż mail z naszej domeny i nie wymaga po naszej stronie SPF/DKIM, obsługi odbić ani roli procesora danych. Gdyby e-mail transakcyjny kiedyś wrócił (przypomnienia, powiadomienia) — najpierw **własny SMTP użytkownika** w ustawieniach (poświadczenia w keychainie), dopiero potem provider, i raczej Brevo/Postmark niż Resend. Uzasadnienie w `docs/IDEAS.md`.
 - [x] ~~T-21 Tryb ciemny + skróty~~ → **usunięte z planów 2026-08-26** (decyzja właściciela). Paleta ⌘K weszła w **T-58**.
-- [ ] T-22 Pełna historia wersji wyceny (diff pozycji, porównanie totali między wersjami) — lekkie wersje v1/v2 są w **T-57**; nie mylić z **T-30**, które wersjonuje *schemat* `body`
+- [x] **T-22 Pełna historia wersji wyceny** (diff pozycji, porównanie totali) — lekkie wersje v1/v2 są w **T-57**; nie mylić z **T-30**, które wersjonuje *schemat* `body`
+  **Zrobione 2026-08-27:**
+  > - 🔑 **Diff NIE MOŻE iść po `id`.** „Nowa wersja" powstaje przez `duplicateQuoteBody`, a ta **regeneruje identyfikatory** sekcji, grup i pozycji (żeby dwa dokumenty nie dzieliły kluczy). Porównanie po `id` pokazałoby, że w v2 usunięto wszystko i dodano wszystko od nowa — czyli dokładnie nic. Jest na to test, który zaczyna od sprawdzenia, że id faktycznie się różnią.
+  > - Dopasowanie po **tożsamości pozycji**, w trzech przebiegach od najpewniejszego: `libraryItemId` (przetrwa zmianę nazwy i przeniesienie) → ścieżka + nazwa → sama nazwa. Każdy przebieg bierze tylko pary **jednoznaczne**; przy dwóch kandydatach zostawia je następnemu. Zły domysł („to ta sama pozycja, tylko podrożała o 4000 zł") jest gorszy niż uczciwe „usunięto jedną, dodano drugą" — też jest na to test.
+  > - Rozpoznawane zmiany: nazwa, kwota, ilość, włączenie/wyłączenie, przeniesienie. **Wyłączenie to zmiana, nie usunięcie** — pozycja dalej jest w dokumencie, tylko nie liczy się do kwoty.
+  > - Kwoty liczy `calcQuoteTotals` na obu wersjach; znak różnicy jest treścią, nie ozdobą („+4 000 zł" i „4 000 zł" znaczą co innego w rozmowie o podwyżce).
+  > - Okno w menu edytora, **znika przy jednej wersji**: pozycja menu, która zawsze prowadzi do „nie ma czego porównywać", jest gorsza niż jej brak.
+  > - Zero migracji — obie wersje to zwykłe wiersze `quotes` z tym samym `lineage_id` (T-57). 11 testów jednostkowych.
 - [ ] T-23 Import/eksport CSV — biblioteka (T-50) i rejestr (T-49) zrobione; zostaje **eksport XLSX** i import klientów z CSV
 - [ ] T-24 Wiele walut i lokalizacja liczb
 - [x] **T-67 Kosz na pliki** (30 dni; do 1.0 usunięcie w T-55 było natychmiastowe)

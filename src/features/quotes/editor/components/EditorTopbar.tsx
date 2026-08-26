@@ -51,6 +51,7 @@ export function EditorTopbar({
   onNewVersion,
   creatingVersion,
   onShare,
+  onVersionHistory,
 }: {
   number: string | null;
   status: QuoteStatus;
@@ -93,6 +94,8 @@ export function EditorTopbar({
   creatingVersion: boolean;
   /** Link dla klienta (T-25). Osobny przycisk, nie pozycja w menu — patrz nizej. */
   onShare: () => void;
+  /** Historia wersji (T-22). `null` = wycena ma jedna wersje, nie ma czego porownywac. */
+  onVersionHistory: (() => void) | null;
 }) {
   return (
     <div className="surface-band relative z-10 flex h-[68px] shrink-0 items-center gap-4 px-7">
@@ -216,6 +219,11 @@ export function EditorTopbar({
               >
                 {pl.quotes.newVersion}
               </DropdownMenuItem>
+            ) : null}
+            {/* Znika przy jednej wersji: pozycja menu, ktora zawsze prowadzi
+                do „nie ma czego porownywac", jest gorsza niz jej brak. */}
+            {onVersionHistory ? (
+              <DropdownMenuItem onSelect={onVersionHistory}>{pl.versions.open}</DropdownMenuItem>
             ) : null}
             <DropdownMenuItem onSelect={onOpenLibrary}>{pl.library.title}</DropdownMenuItem>
             <DropdownMenuItem onSelect={onSaveAllToLibrary}>

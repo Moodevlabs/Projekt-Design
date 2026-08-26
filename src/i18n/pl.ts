@@ -1375,6 +1375,33 @@ Pozdrawiam`,
     packageSavedMany: (count: number) => `Zapisano ${count} dokumentów w wybranym folderze`,
   },
 
+  /** Historia wersji z porownaniem (T-22). */
+  versions: {
+    title: 'Historia wersji',
+    description: 'Co zmieniło się między wersjami tej oferty i o ile.',
+    onlyOne: 'Ta oferta ma na razie jedną wersję — nie ma czego porównywać.',
+    compareWith: 'Porównaj z',
+    totalsBefore: 'Poprzednia wersja',
+    totalsAfter: 'Ta wersja',
+    delta: 'Różnica',
+    noChanges: 'Wersje mają identyczny zakres i kwoty.',
+    added: (count: number) => (count === 1 ? 'Dodano 1 pozycję' : `Dodano ${count} pozycji`),
+    removed: (count: number) => (count === 1 ? 'Usunięto 1 pozycję' : `Usunięto ${count} pozycji`),
+    changed: (count: number) =>
+      count === 1 ? 'Zmieniono 1 pozycję' : `Zmieniono ${count} pozycji`,
+    unchangedCount: (count: number) => `${count} pozycji bez zmian`,
+    unchanged: (count: number) =>
+      count === 1 ? '1 pozycja bez zmian' : `${count} pozycji bez zmian`,
+    changeName: 'zmieniona nazwa',
+    changePrice: (before: string, after: string) => `kwota: ${before} → ${after}`,
+    changeQty: (before: number, after: number) => `ilość: ${before} → ${after}`,
+    changePath: (before: string, after: string) => `przeniesiona: ${before} → ${after}`,
+    turnedOn: 'włączona w tej wersji',
+    turnedOff: 'wyłączona w tej wersji',
+    /** Pozycja w menu edytora. */
+    open: 'Historia wersji',
+  },
+
   /** Auto-update aplikacji (T-19). */
   update: {
     title: 'Aktualizacje',

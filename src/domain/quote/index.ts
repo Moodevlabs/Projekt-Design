@@ -11,3 +11,4 @@ export * from './from-settings';
 export * from './room-label';
 export * from './versions';
 export * from './individual';
+export * from './diff';
