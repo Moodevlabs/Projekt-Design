@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { QuoteBodySchema, type Item, type QuoteBody } from '../quote/schema';
+import type { Item, QuoteBody } from '../quote/schema';
 
 /**
  * Link klienta („magic link") i akceptacja online — T-25 / T-26.
@@ -84,7 +84,15 @@ export const SharedQuoteSchema = z.object({
   status: z.string().default('sent'),
   currency: z.string().default('PLN'),
   validUntil: z.string().nullable().default(null),
-  body: QuoteBodySchema,
+  /**
+   * Dokument surowy — **celowo `unknown`, a nie `QuoteBodySchema`.**
+   *
+   * `QuoteBodySchema` opisuje wyłącznie bieżący `bodyVersion`, a w bazie
+   * siedzą też starsze. Walidacja tutaj odrzucałaby ofertę, którą klient ma
+   * prawo zobaczyć. Przepuszczenie przez `parseQuoteBody` (migracja → schemat)
+   * jest zadaniem odbiorcy i to on decyduje, co zrobić z niepowodzeniem.
+   */
+  body: z.unknown(),
 });
 export type SharedQuote = z.infer<typeof SharedQuoteSchema>;
 
@@ -151,6 +159,26 @@ export function expiryFromDays(days: number | null, now: Date = new Date()): str
 export function buildShareUrl(baseUrl: string, token: string): string {
   const trimmed = baseUrl.replace(/\/+$/, '');
   return `${trimmed}/q/${encodeURIComponent(token)}`;
+}
+
+/**
+ * Token z adresu `/q/{token}`.
+ *
+ * Bierzemy ostatni segment ŚCIEŻKI, a nie parametr zapytania: token w `?t=`
+ * trafia do nagłówka `Referer` przy żądaniu do obcego hosta i do historii
+ * przeglądarki w bardziej narażonej postaci. Zwraca `null`, gdy adres nie ma
+ * kształtu `/q/coś` — wtedy strona pokazuje „nie ma takiego linku" zamiast
+ * odpytywać bazę pustym tokenem.
+ */
+export function tokenFromPath(pathname: string): string | null {
+  const match = /^\/q\/([^/]+)\/?$/.exec(pathname);
+  if (!match?.[1]) return null;
+  try {
+    return decodeURIComponent(match[1]);
+  } catch {
+    // Uszkodzone kodowanie procentowe w adresie — traktujemy jak zły token.
+    return null;
+  }
 }
 
 /** Czy link jest dziś ważny (bez odpytywania bazy — do etykiet na liście). */

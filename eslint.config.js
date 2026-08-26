@@ -9,6 +9,7 @@ export default tseslint.config(
   {
     ignores: [
       'dist',
+      'dist-share',
       'coverage',
       'src-tauri/target',
       'src-tauri/gen',

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { calcQuoteTotals } from '../quote/calc';
 import { newGroup, newItem, newQuoteBody, newSection } from '../quote/factory';
+import { parseQuoteBody } from '../quote/schema';
 import {
   applyEnabledIds,
   buildShareUrl,
@@ -11,6 +12,7 @@ import {
   isShareActive,
   selectionDiff,
   shareState,
+  tokenFromPath,
   ShareSchema,
   SharedQuotePayloadSchema,
   type Share,
@@ -69,6 +71,29 @@ describe('buildShareUrl', () => {
 
   it('koduje token — base64url nie ma znaków spoza URL, ale nie zakładamy tego', () => {
     expect(buildShareUrl('https://x.pl', 'a/b+c')).toBe('https://x.pl/q/a%2Fb%2Bc');
+  });
+});
+
+describe('tokenFromPath', () => {
+  it('wyciaga token ze sciezki /q/{token}', () => {
+    expect(tokenFromPath('/q/abc-123')).toBe('abc-123');
+    expect(tokenFromPath('/q/abc-123/')).toBe('abc-123');
+  });
+
+  it('dekoduje kodowanie procentowe', () => {
+    expect(tokenFromPath('/q/a%2Fb')).toBe('a/b');
+  });
+
+  it('adres o innym ksztalcie daje null zamiast pustego tokenu', () => {
+    expect(tokenFromPath('/')).toBeNull();
+    expect(tokenFromPath('/q/')).toBeNull();
+    expect(tokenFromPath('/q')).toBeNull();
+    expect(tokenFromPath('/q/a/b')).toBeNull();
+    expect(tokenFromPath('/oferta/abc')).toBeNull();
+  });
+
+  it('uszkodzone kodowanie nie wywala strony', () => {
+    expect(tokenFromPath('/q/%E0%A4%A')).toBeNull();
   });
 });
 
@@ -179,7 +204,12 @@ describe('SharedQuotePayloadSchema', () => {
 
     expect(wynik.ok).toBe(true);
     if (wynik.ok) {
-      expect(wynik.quote.body.title).toBe('Dom 164 m²');
+      // `body` jest tu celowo `unknown` — schemat go nie waliduje, bo w bazie
+      // siedzą też starsze wersje dokumentu (patrz komentarz przy polu).
+      // Odbiorca puszcza go przez `parseQuoteBody`.
+      const przez_parser = parseQuoteBody(wynik.quote.body);
+      expect(przez_parser.ok).toBe(true);
+      if (przez_parser.ok) expect(przez_parser.body.title).toBe('Dom 164 m²');
       expect(wynik.brand.accentColor).toBe('#33251E');
     }
   });
