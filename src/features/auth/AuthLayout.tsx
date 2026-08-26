@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { LogoLockup } from '@/assets/brand/LogoLockup';
 import { pl } from '@/i18n/pl';
 
 /**
@@ -30,16 +31,14 @@ export function AuthLayout({
       />
 
       <div className="relative w-full max-w-[380px]">
-        <div className="mb-7 flex flex-col items-center gap-3.5">
-          <span className="bg-cta text-cta-fg font-display flex size-12 items-center justify-center rounded-full text-lg font-semibold shadow-[0_8px_24px_-8px_rgba(20,22,28,0.6)]">
-            A
-          </span>
-          <div className="text-center">
-            <p className="font-display text-ink text-[22px] leading-none font-semibold tracking-[-0.02em]">
-              {pl.app.name}
-            </p>
-            <p className="text-ink-soft mt-2 text-[13px]">{pl.app.tagline}</p>
-          </div>
+        {/*
+          Pełny lockup — jedyne miejsce, gdzie stoi w całości (08-REDESIGN D-2).
+          Nie ma pod nim `pl.app.name` ani `pl.app.tagline`: hasło „Tools for
+          Atelier" jest już w krzywych wewnątrz logotypu, więc dopisanie go
+          obok dałoby tagline dwa razy.
+        */}
+        <div className="mb-8 flex justify-center">
+          <LogoLockup title={`${pl.app.name} — ${pl.app.tagline}`} className="text-brown h-20 w-auto" />
         </div>
 
         <div className="card-surface glass-strong p-7">

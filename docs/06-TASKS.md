@@ -636,11 +636,21 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   ⚠️ **`.tabular` musi zostać odpięte od `--font-display`** — inaczej wszystkie kwoty przeskoczą do Faculty Glyphic, który nie ma gwarantowanych cyfr tabularnych. Kolumna pieniędzy zacznie skakać.
   ⚠️ **Faculty Glyphic ma jedną wagę (400), nie ma wariantu variable.** Każde `font-display` + `font-semibold` w JSX da sztuczne pogrubienie. Hierarchia idzie przez stopień pisma i wersaliki. Do posprzątania w T-77/T-80 (8 wystąpień).
 
-- [ ] **T-75 Logotypy jako komponenty + ikony aplikacji** (08-REDESIGN §4)
+- [x] **T-75 Logotypy jako komponenty + ikony aplikacji** (08-REDESIGN §4)
   `src/assets/brand/{Sygnet,Wordmark,LogoLockup}.tsx` z `fill="currentColor"`. Podmiana liter „A" w `Sidebar.tsx` i `AuthLayout.tsx`. Favicon, `src-tauri/icons/` z sygnetu, ikona instalatora, `AppCredit` na nowe tokeny.
-  ✅ `grep -rnE '^\s*A\s*$' src --include=*.tsx` nic nie zwraca (dziś: `Sidebar.tsx:200`, `AuthLayout.tsx:35`); aplikacja w pasku zadań pokazuje Toolier.
-  ⚠️ Master ikony: **1024 PNG na beżu, nie na przezroczystości** — sygnet na ciemnym pasku zadań zniknąłby.
-  ⚠️ `logoDarkPath`/`logoLightPath` w brand kicie to logo **klienta** na jego PDF. Nie ruszać.
+  ✅ `grep -rnE '^\s*A\s*$' src --include=*.tsx` nic nie zwraca; aplikacja w pasku zadań pokazuje Toolier.
+  **Zrobiono:**
+  > - Trzy komponenty wygenerowane skryptem z plików w `reference/logotypy/`, nie przepisane ręcznie. Skrypt zdejmuje `<defs>`/`<style>` z wpisanym na sztywno `fill: #33251e` i klasy `.cls-1` — bez tego logotyp na brązowej szynie byłby brązem na brązie.
+  > - Wzorzec dostępności: `title` opcjonalny. Jest → `role="img"` z tytułem; nie ma → `aria-hidden`. Logotyp stojący obok nazwy produktu w tekście nie ma być czytany dwa razy.
+  > - **Podział zgodny z D-2:** sygnet (szyna zwinięta) / napis (szyna rozwinięta) / pełny lockup (tylko logowanie).
+  > - `AuthLayout` stracił `pl.app.name` i `pl.app.tagline` spod logotypu — hasło „Tools for Atelier" jest już w krzywych w lockupie i wychodziło dwa razy.
+  > - **`tauri icon` przyjmuje SVG**, więc master to `src-tauri/app-icon.svg`, a nie PNG — jedno źródło, ostre w każdym rozmiarze, wersjonowalne w gicie.
+  > - `public/favicon.svg` + `<link rel="icon">` w `index.html` (wcześniej aplikacja nie miała favicona w ogóle).
+  **Na co uważać:**
+  > - **Ikona aplikacji jest pełnospadowym kwadratem**, bez zaokrągleń. Tak wygląda natywnie w kafelkach Windows, dla których `tauri icon` generuje `Square*Logo.png`. Zaokrąglenie „squircle" pod macOS to osobny krok przy budowie na macu (T-17) — dorobienie go teraz zepsułoby kafelki.
+  > - Favicon **ma** zaokrąglenie (nie trafia do kafelków) i też beżowe tło — pasek kart bywa ciemny.
+  ⚠️ Master ikony: **na beżu, nie na przezroczystości** — sygnet na ciemnym pasku zadań zniknąłby.
+  ⚠️ `logoDarkPath`/`logoLightPath` w brand kicie to logo **klienta** na jego PDF. Nie ruszane.
 
 - [ ] **T-76 Płaskość: koniec szkła** (08-REDESIGN §3)
   `.glass` / `.glass-strong` / `.glass-dark` / `.card-surface` → `.surface-card` / `.surface-band` / `.rail`. Usunięcie tokenów `--glass-*`, masek `mask-composite` i trzech bloków `@supports not (backdrop-filter)`. Przepięcie 5 plików używających `glass`.

@@ -11,6 +11,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/features/auth/auth-context';
+import { Sygnet } from '@/assets/brand/Sygnet';
+import { Wordmark } from '@/assets/brand/Wordmark';
 import {
   activeNavIndex,
   NAV_GROUPS,
@@ -195,15 +197,19 @@ export function Sidebar({ subscriptionOk = true }: { subscriptionOk?: boolean })
         'transition-[width] duration-[var(--dur-slide)] ease-[var(--ease-liquid)]',
       )}
     >
-      <div className={cn('mb-6 flex items-center', expanded ? 'w-full gap-3 px-1' : 'flex-col')}>
-        <span className="font-display text-ink flex size-9 shrink-0 items-center justify-center rounded-full bg-white text-sm font-semibold">
-          A
-        </span>
+      {/*
+        Zwinięta szyna dostaje sygnet, rozwinięta — sam napis. Pełny lockup
+        (napis + „WEB STUDIO FOR YOUR ATELIER" + rok) stoi WYŁĄCZNIE na ekranie
+        logowania: szyna zwęża się animacją do 76 px, w której trzywierszowy
+        tagline nie miałby prawa być czytelny. Hasło marki ma sens tam, gdzie
+        widzi je ktoś, kto jeszcze nie jest w aplikacji. (08-REDESIGN D-2)
+      */}
+      <div className={cn('mb-6 flex h-9 items-center', expanded ? 'w-full px-1' : 'justify-center')}>
         {expanded ? (
-          <span className="font-display flex-1 truncate text-[15px] font-semibold tracking-tight text-white">
-            {pl.app.name}
-          </span>
-        ) : null}
+          <Wordmark title={pl.app.name} className="text-rail-ink h-[18px] w-auto" />
+        ) : (
+          <Sygnet title={pl.app.name} className="text-rail-ink h-7 w-auto" />
+        )}
       </div>
 
       {/*
