@@ -5,6 +5,7 @@ import { ConflictError } from '@/data/repos/errors';
 import { onWindowCloseRequested, runningInTauri } from '@/lib/tauri';
 import { useEntitlement } from '@/features/billing/useEntitlement';
 import { toast } from 'sonner';
+import { enqueueChange } from '@/data/offline/outbox.repo';
 import { createLogger } from '@/lib/logger';
 import { pl } from '@/i18n/pl';
 
@@ -107,6 +108,30 @@ export function useAutosave() {
       } else {
         log.error('Autozapis nieudany', error);
         const message = error instanceof Error ? error.message : 'Nieznany błąd';
+
+        /*
+         * KOLEJKA OFFLINE (T-29).
+         *
+         * Nieudany zapis nie znaczy „zmiana przepadła": ląduje w lokalnej
+         * bazie i pójdzie, gdy sieć wróci. Kolejka koalescuje po dokumencie,
+         * więc godzina pisania bez sieci daje JEDEN wpis, nie setki.
+         *
+         * Świadomie kolejkujemy **każdy** nieudany zapis, nie tylko te przy
+         * `navigator.onLine === false`: rozróżnienie „nie ma sieci" od „serwer
+         * odmówił" bywa zawodne, a wpis, który nie miał trafić do kolejki,
+         * najwyżej wyśle się jeszcze raz. Odwrotna pomyłka kasuje pracę.
+         */
+        void enqueueChange({
+          kind: 'quote.save',
+          targetId: quoteId,
+          payload: { body, clientId, projectId, schedule, documents, ...(number ? { number } : {}) },
+          baseUpdatedAt: lastSeenUpdatedAt,
+        }).catch((queueError) => {
+          // Nawet kolejka może nie zadziałać (brak dysku, przeglądarka).
+          // Wtedy zostaje sam komunikat — ale o tym też trzeba wiedzieć.
+          log.error('Nie udalo sie zakolejkowac zapisu', queueError);
+        });
+
         useEditorStore.getState().markError(message);
         /*
          * POWÓD, nie tylko fakt. Wskaźnik przy numerze wyceny pokazuje ogólne

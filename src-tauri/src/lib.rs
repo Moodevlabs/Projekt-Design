@@ -13,7 +13,11 @@ pub fn run() {
             // ochrona tego kanału, więc klucz prywatny nie ma prawa trafić do repo.
             .plugin(tauri_plugin_updater::Builder::new().build())
             // Potrzebny do restartu po instalacji.
-            .plugin(tauri_plugin_process::init());
+            .plugin(tauri_plugin_process::init())
+            // Lokalna baza offline (T-29). Schemat zaklada aplikacja przy
+            // starcie — migracje wtyczki wymagalyby trzymania SQL-a w Rust,
+            // a caly stan offline zyje w warstwie `src/data/offline`.
+            .plugin(tauri_plugin_sql::Builder::new().build());
     }
 
     builder

@@ -1122,7 +1122,22 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
 - [x] ~~T-26 Akceptacja online + podpis + powiadomienie~~ → **przeniesione do Fazy 2** (2026-08-26), bez podpisu.
 - [x] ~~T-27 Wielu użytkowników w workspace~~ → **usunięte z planów** (decyzja właściciela, 2026-08-26). Toolier zostaje narzędziem jednoosobowym; jeśli wróci, to jako osobna decyzja produktowa, bo dotyka RLS w każdej tabeli.
 - [x] ~~T-28 Statystyki wyłączanych pozycji~~ → **usunięte z planów** (decyzja właściciela, 2026-08-26).
-- [ ] T-29 Offline: SQLite (tauri-plugin-sql) + kolejka sync
+- [x] **T-29 Offline: SQLite (tauri-plugin-sql) + kolejka sync**
+  **Zrobione 2026-08-27 — z JAWNIE WĘŻSZYM zakresem niż „tryb offline".**
+  > ### Co powstało
+  > - `tauri-plugin-sql` (tylko `sqlite`) + lokalna baza `toolier-offline.db`: kolejka wysyłki i podręczna kopia otwartych wycen. **To nie jest lustro schematu z Postgresa** — odwzorowanie całej bazy znaczyłoby dwa schematy i dwa zestawy migracji do utrzymania.
+  > - **Nieudany autozapis nie przepada**: ląduje w kolejce i idzie, gdy sieć wróci. Kolejka **koalescuje po dokumencie**, więc godzina pisania bez sieci daje jeden wpis, nie setki (autozapis leci co 800 ms).
+  > - 🔑 **Nigdy nie nadpisujemy po cichu.** Wpis niesie `baseUpdatedAt` — stan, który autor faktycznie widział. Przy koalescencji bierzemy go z **pierwszego** wpisu, nie z ostatniego: podmiana udawałaby, że autor widział też cudze zmiany. Gdy serwer ma nowszy stan, wpis **zatrzymuje się** i czeka na człowieka. Cicha wygrana ostatniego zapisu kasuje pracę, której nikt nie widział.
+  > - Konflikt **nie jest ponawiany** — ponowienie go nie naprawi, a każda próba oddala moment, w którym człowiek się o nim dowie. Błąd sieci owszem, wykładniczo, do 5 prób; potem wpis **zostaje** jako `failed`, a nie znika.
+  > - Łączność sprawdzamy **żądaniem do Supabase**, nie samym `navigator.onLine`: hotelowe Wi-Fi z ekranem logowania i VPN bez trasy to oba `onLine === true`.
+  > - Pasek stanu **milczy, gdy nie ma o czym mówić**. Pasek widoczny zawsze przestaje być zauważany dokładnie wtedy, gdy zaczyna mieć znaczenie.
+  > - Wysyłka po powrocie sieci idzie **sama i po kolei**: to nie jest nowa decyzja (te zmiany użytkownik już chciał zapisać), a równoległość dałaby wyścig o `updated_at`, czyli konflikt wygenerowany przez nas.
+  > ### Czego świadomie NIE ma
+  > - ⚠️ **To nie jest tryb offline-first.** Bez sieci nie da się założyć klienta, projektu ani nowej wyceny — do tego trzeba lokalnych identyfikatorów i mapowania ich na serwerowe. To osobne zadanie i osobna klasa problemów (scalanie, kolejność, kaskady).
+  > - Brak lokalnego lustra list (klienci, projekty, biblioteka). Offline otwiera się to, co było w podręcznej kopii.
+  > ### Weryfikacja
+  > - 15 testów jednostkowych kolejki (koalescencja, `baseUpdatedAt` z pierwszego wpisu, konflikt bez ponawiania, sufit prób), `cargo check` z wtyczką przechodzi, lint + typecheck czyste, 1414 testów zielonych.
+  > - ⚠️ **Nie zweryfikowane na żywo:** ścieżka SQLite wymaga uruchomionego Tauri (`pnpm tauri dev`) — w przeglądarce cała warstwa cicho nic nie robi z założenia. Nie było też testu z faktycznym zerwaniem sieci.
 
 ## Notatki z wykonania
 (dopisuj pod zadaniem po ukończeniu)

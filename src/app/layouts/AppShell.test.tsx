@@ -41,6 +41,19 @@ vi.mock('@/data/queries/useLibrary', () => ({
   useLibraryItems: () => ({ data: [] }),
 }));
 
+// Pasek offline (T-29) siedzi w powloce i pyta o kolejke wysylki oraz
+// lacznosc. To warstwa danych — `useOfflineQueue` ma wlasne testy domenowe.
+vi.mock('@/features/offline/useOfflineQueue', () => ({
+  useOfflineQueue: () => ({
+    online: true,
+    queue: [],
+    pendingCount: 0,
+    blockedCount: 0,
+    flushing: false,
+    flushNow: vi.fn(),
+  }),
+}));
+
 vi.mock('@/features/billing/useEntitlement', () => ({
   useEntitlement: () => ({ canWrite: true, reason: 'active', loading: true }),
 }));

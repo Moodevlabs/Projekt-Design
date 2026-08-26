@@ -2,6 +2,7 @@ import { Outlet, useMatches } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 import { WorkspaceGuard } from './WorkspaceGuard';
+import { OfflineBanner } from '@/features/offline/OfflineBanner';
 import { pl } from '@/i18n/pl';
 
 type RouteHandle = { title?: string; hideTopbar?: boolean };
@@ -25,6 +26,7 @@ export function AppShell() {
       <div className="relative flex h-full min-h-0">
         <Sidebar />
         <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
+          <OfflineBanner />
           <WorkspaceGuard>
             <Outlet />
           </WorkspaceGuard>
@@ -40,6 +42,8 @@ export function AppShell() {
           całkowicie — a nie prześwituje przez rozmycie jak wcześniej. */}
       <div className="relative flex min-w-0 flex-1 flex-col overflow-y-auto">
         <Topbar title={handle.title ?? pl.app.name} />
+        {/* Pod pasem, nad trescia — jak ReadOnlyBanner w edytorze. */}
+        <OfflineBanner />
         <main className="mx-auto w-full max-w-[1320px] px-7 pt-6 pb-12">
           <WorkspaceGuard>
             <Outlet />

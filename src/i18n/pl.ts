@@ -1402,6 +1402,28 @@ Pozdrawiam`,
     packageSavedMany: (count: number) => `Zapisano ${count} dokumentów w wybranym folderze`,
   },
 
+  /** Praca bez sieci i kolejka wysylki (T-29). */
+  offline: {
+    offline: 'Pracujesz bez połączenia. Zmiany zapisują się lokalnie.',
+    waitingOffline: (count: number) =>
+      count === 1
+        ? 'Brak połączenia. 1 zmiana czeka na wysłanie — nic nie przepadło.'
+        : `Brak połączenia. ${count} zmian czeka na wysłanie — nic nie przepadło.`,
+    waitingOnline: (count: number) =>
+      count === 1 ? 'Wysyłanie 1 zmiany…' : `Wysyłanie ${count} zmian…`,
+    blocked: (count: number) =>
+      count === 1
+        ? 'Jedna zmiana czeka na Twoją decyzję — wycena została zmieniona w innym miejscu.'
+        : `${count} zmian czeka na Twoją decyzję — wyceny zostały zmienione w innym miejscu.`,
+    retry: 'Wyślij teraz',
+    sent: (count: number) =>
+      count === 1 ? 'Wysłano zaległą zmianę.' : `Wysłano ${count} zaległych zmian.`,
+    conflicts: (count: number) =>
+      count === 1
+        ? 'Jedna zmiana nie weszła: wycena została zmieniona w innym miejscu.'
+        : `${count} zmian nie weszło: wyceny zostały zmienione w innym miejscu.`,
+  },
+
   /** Statusy realizacji etapow w projekcie (T-68). */
   stages: {
     tab: 'Etapy',
