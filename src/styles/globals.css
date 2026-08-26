@@ -59,6 +59,15 @@
   --cta: #33251e;
   --cta-fg: #efece8;
 
+  /*
+   * Tor przełącznika w stanie WYŁĄCZONYM. Osobny token, bo `--input`
+   * (rgba brązu 20%) jest dobry jako ramka pola, ale jako tor daje
+   * ~#e0dad6 — a na nim biały kciuk niemal znika. Ten odcień jest solidny
+   * i o tyle ciemniejszy, że kciuk widać, a stan „włączony" (brąz) dalej
+   * odcina się jednoznacznie.
+   */
+  --toggle-off: #ded6cf;
+
   --positive: #4a6340;
   --warning: #b07d2c;
   --danger: #a8402f;
@@ -149,6 +158,7 @@
   --color-ink-faint: var(--ink-faint);
   --color-hair: var(--hair);
   --color-hair-strong: var(--hair-strong);
+  --color-toggle-off: var(--toggle-off);
   --color-rail: var(--rail);
   --color-rail-deep: var(--rail-deep);
   --color-rail-ink: var(--rail-ink);
@@ -193,6 +203,20 @@
 
   --shadow-card: var(--elevation-card);
   --shadow-sheet: var(--elevation-sheet);
+
+  /*
+   * Nadpisanie STANDARDOWEJ skali cieni Tailwinda. Robimy to w jednym
+   * miejscu, bo inaczej każdy komponent shadcn (dialog, sheet, popover,
+   * dropdown, select, tooltip, input) niósłby domyślny cień w czerni —
+   * na ciepłym beżu czyta się on jak brud pod krawędzią, nie jak światło.
+   * Wszystkie warstwy w kolorze atramentu marki.
+   */
+  --shadow-2xs: 0 1px 1px rgba(51, 37, 30, 0.04);
+  --shadow-xs: 0 1px 2px rgba(51, 37, 30, 0.06);
+  --shadow-sm: 0 1px 2px rgba(51, 37, 30, 0.06), 0 1px 3px rgba(51, 37, 30, 0.07);
+  --shadow-md: 0 2px 4px -1px rgba(51, 37, 30, 0.06), 0 8px 16px -6px rgba(51, 37, 30, 0.14);
+  --shadow-lg: 0 4px 8px -2px rgba(51, 37, 30, 0.07), 0 16px 32px -12px rgba(51, 37, 30, 0.18);
+  --shadow-xl: 0 8px 16px -4px rgba(51, 37, 30, 0.08), 0 28px 56px -20px rgba(51, 37, 30, 0.22);
 
   /*
    * Inter niesie gęsty interfejs I LICZBY. Faculty Glyphic — wyłącznie

@@ -679,10 +679,19 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
   ⚠️ **Makieta ma w menu „STUDIO" i nie ma „PULPIT" — nawigacji NIE zmieniono** (D-5). To decyzja produktowa o tym, gdzie mieszka konfiguracja studia, a nie wizualna; osobne zadanie po redesignie.
   ⚠️ **Nie zweryfikowane wizualnie na żywo.** Rozszerzenie Chrome nie było podłączone w tej sesji, więc zrzutu pulpitu obok makiety nikt nie porównał. Sprawdzone pośrednio: dev server odpowiada 200, build przechodzi, a w zbudowanym CSS są `--brown:#33251e`, `--beige:#efece8`, `--ring:#7d6555` i `@font-face` Faculty Glyphic.
 
-- [ ] **T-78 Kontrolki shadcn** (08-REDESIGN §5)
-  24 komponenty w `src/components/ui/` — warianty `button`, pola formularzy, `switch`, `badge`, `table`, `tabs`, warstwy nad treścią (`dialog`/`sheet`/`popover`/`dropdown`/`tooltip`/`command`/`sonner`).
-  ✅ Wszystkie stany (hover, focus-visible, disabled, invalid) sprawdzone na kanwie, na karcie i na beżowym pasie.
-  ⚠️ **`--ring` musi być brązowy i mieć ≥3:1 wobec obu podłoży.** Dzisiejszy `#9aa0aa` na beżu zniknie — a to jedyny wskaźnik fokusu dla klawiatury.
+- [x] **T-78 Kontrolki shadcn** (08-REDESIGN §5)
+  24 komponenty w `src/components/ui/` — warianty `button`, pola formularzy, `switch`, `table`, `tabs`, warstwy nad treścią.
+  ✅ Zmiany wyłącznie w klasach `cva`; żaden plik shadcn nie został przepisany od zera.
+  **Zrobiono:**
+  > - **Skala cieni Tailwinda nadpisana w `@theme`** (`--shadow-xs`…`--shadow-xl`) na warianty w atramencie marki. To jedna zmiana, która ociepla **wszystkie** warstwy nad treścią naraz — dialog, sheet, popover, dropdown, select, tooltip, input. Alternatywą było dopisywanie własnego cienia w kilkunastu plikach.
+  > - Welon dialogów i sheetów z `bg-black/50` na `rgba(31,22,17,0.42)`. Czerń na ciepłym beżu odbarwia tło na sino i wygląda jak wygaszony ekran.
+  > - Pola (`input`, `textarea`, `select`) z `bg-transparent` na `bg-surface` — pole stojące bezpośrednio na kanwie nie miało czym pokazać, gdzie się zaczyna. Placeholdery na `--ink-faint`.
+  > - Główki tabel: beżowy pas + `.label-caps`. Tabela czyta się jako arkusz z nagłówkiem, nie jako lista z pogrubioną pierwszą linijką.
+  > - Aktywna zakładka na `bg-surface` zamiast `bg-background` — tor jest na `--surface-2`, a kanwa różni się od niego o trzy punkty jasności i zakładka nie miała czym się odciąć.
+  > - Usunięte martwe warianty `dark:` z komponentów, których dotykałem (trybu ciemnego nie ma — T-21).
+  **Na co uważać:**
+  > - **Przełącznik dostał własny token `--toggle-off`.** Domyślne `bg-input` to rgba brązu 20% — dobre jako ramka pola, ale jako tor daje ~`#e0dad6`, na którym biały kciuk niemal znika. Kciuk zmieniony z `bg-background` (ciepła kanwa) na czystą biel z tego samego powodu.
+  ⚠️ **`--ring` brązowy i ≥3:1 wobec obu podłoży** — zrobione w T-74 (`#7d6555`).
   ⚠️ Zmieniać klasy w `cva`, nie przepisywać plików — `npx shadcn add` je kiedyś nadpisze.
 
 - [ ] **T-79 Statusy i barwy funkcyjne** (08-REDESIGN §1.3, §1.4)

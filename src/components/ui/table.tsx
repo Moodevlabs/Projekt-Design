@@ -19,9 +19,11 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
 
 function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
   return (
+    // Główka na beżu — ten sam pas co topbar, więc tabela czyta się jako
+    // arkusz z nagłówkiem, a nie jako lista z pogrubioną pierwszą linijką.
     <thead
       data-slot="table-header"
-      className={cn("[&_tr]:border-b", className)}
+      className={cn("bg-beige [&_tr]:border-b", className)}
       {...props}
     />
   )
@@ -68,7 +70,8 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
     <th
       data-slot="table-head"
       className={cn(
-        "h-10 px-2 text-left align-middle font-medium whitespace-nowrap text-foreground [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+        // `.label-caps` — ten sam krój etykiety co w nawigacji i nad listami.
+        "label-caps text-ink-soft h-10 px-2 text-left align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
         className
       )}
       {...props}
