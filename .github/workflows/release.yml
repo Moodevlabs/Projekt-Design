@@ -1,0 +1,87 @@
+name: Wydanie
+
+# Ręcznie albo tagiem `v1.0.1`. Świadomie NIE na każdy push do `main`:
+# wydanie to decyzja, a nie skutek uboczny commita.
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Apple Silicon i Intel osobno — uniwersalna binarka podwaja rozmiar
+          # paczki, a updater i tak wybiera właściwą po `target`.
+          - platform: macos-latest
+            args: '--target aarch64-apple-darwin'
+          - platform: macos-latest
+            args: '--target x86_64-apple-darwin'
+          - platform: windows-latest
+            args: ''
+
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - run: pnpm install --frozen-lockfile
+
+      # Bramka jakości przed wydaniem. Wypuszczenie paczki, która nie
+      # przechodzi własnych testów, jest gorsze niż brak wydania.
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Klucz podpisujący aktualizacje. Bez niego `latest.json` powstanie
+          # bez podpisów, a aplikacja odrzuci taką aktualizację.
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          # Podpis i notaryzacja macOS.
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          # Frontend potrzebuje adresu Supabase i strony ofert już na etapie builda.
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_STRIPE_PUBLISHABLE_KEY: ${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY }}
+          VITE_SHARE_BASE_URL: ${{ secrets.VITE_SHARE_BASE_URL }}
+          VITE_APP_ENV: prod
+        with:
+          tagName: ${{ github.ref_type == 'tag' && github.ref_name || format('v{0}', 'dev') }}
+          releaseName: 'Toolier __VERSION__'
+          releaseBody: 'Lista zmian: CHANGELOG.md'
+          # Szkic, nie publikacja: `latest.json` staje się widoczny dla
+          # wszystkich aplikacji w chwili opublikowania wydania, więc ten
+          # moment ma wybrać człowiek.
+          releaseDraft: true
+          prerelease: false
+          includeUpdaterJson: true
+          args: ${{ matrix.args }}

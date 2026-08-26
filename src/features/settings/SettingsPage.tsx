@@ -6,6 +6,7 @@ import { WorkspaceSettingsSection } from './WorkspaceSettingsSection';
 import { AccountSection } from './AccountSection';
 import { StorageUsageSection } from '@/features/files/StorageUsageSection';
 import { SampleLibrarySection } from './SampleLibrarySection';
+import { UpdateSection } from './UpdateSection';
 import { pl } from '@/i18n/pl';
 
 /**
@@ -50,6 +51,7 @@ export function SettingsPage() {
           jedno miejsce do personalizacji, nie dwa. */}
       <SampleLibrarySection />
       <StorageUsageSection />
+      <UpdateSection />
       <AccountSection />
     </div>
   );

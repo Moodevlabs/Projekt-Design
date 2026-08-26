@@ -1351,6 +1351,24 @@ Pozdrawiam`,
     packageSavedMany: (count: number) => `Zapisano ${count} dokumentów w wybranym folderze`,
   },
 
+  /** Auto-update aplikacji (T-19). */
+  update: {
+    title: 'Aktualizacje',
+    idle: 'Sprawdź, czy jest nowa wersja Toolier.',
+    check: 'Sprawdź aktualizacje',
+    checking: 'Sprawdzanie…',
+    current: 'Masz najnowszą wersję.',
+    available: (version: string) => `Dostępna wersja ${version}.`,
+    install: 'Pobierz i zainstaluj',
+    downloading: 'Pobieranie…',
+    downloadingPercent: (percent: number) => `Pobieranie… ${percent}%`,
+    ready: 'Aktualizacja gotowa — uruchom ponownie, żeby ją włączyć.',
+    relaunch: 'Uruchom ponownie',
+    relaunchFailed: 'Nie udało się uruchomić ponownie. Zamknij i otwórz aplikację ręcznie.',
+    /** Powiadomienie z cichego sprawdzenia przy starcie. */
+    foundOnStart: (version: string) => `Jest nowa wersja Toolier (${version}).`,
+    goToSettings: 'Ustawienia',
+  },
   settings: {
     general: 'Ogólne',
     title: 'Ustawienia',

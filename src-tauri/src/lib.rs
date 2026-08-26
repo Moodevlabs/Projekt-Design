@@ -6,7 +6,14 @@ pub fn run() {
 
     #[cfg(desktop)]
     {
-        builder = builder.plugin(tauri_plugin_deep_link::init());
+        builder = builder
+            .plugin(tauri_plugin_deep_link::init())
+            // Updater sprawdza podpis paczki kluczem publicznym z tauri.conf.json.
+            // Bez poprawnego podpisu aktualizacja jest odrzucana — to jest cała
+            // ochrona tego kanału, więc klucz prywatny nie ma prawa trafić do repo.
+            .plugin(tauri_plugin_updater::Builder::new().build())
+            // Potrzebny do restartu po instalacji.
+            .plugin(tauri_plugin_process::init());
     }
 
     builder

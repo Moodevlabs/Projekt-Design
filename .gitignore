@@ -18,6 +18,11 @@ Thumbs.db
 src-tauri/target
 src-tauri/gen
 
+# Klucz prywatny do podpisywania aktualizacji (T-19). Jego wyciek = mozliwosc
+# podania sfalszowanej aktualizacji kazdemu uzytkownikowi Toolier.
+.tauri/updater.key
+.tauri/*.key
+
 supabase/.branches
 supabase/.temp
 

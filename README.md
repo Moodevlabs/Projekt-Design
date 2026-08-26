@@ -46,6 +46,50 @@ uruchomieniu instalatora.
 - **Reputacja SmartScreen buduje się osobno dla każdego certyfikatu** — po zmianie
   certyfikatu ostrzeżenia wracają na jakiś czas.
 
+### Auto-update (T-19)
+
+Aplikacja sprawdza aktualizacje przy starcie (cicho) i na żądanie
+w **Ustawieniach → Aktualizacje**. Nic nie instaluje się samo — restart
+w środku przygotowywania oferty byłby gorszy niż dzień zwłoki z poprawką.
+
+**Klucz podpisujący aktualizacje.** Para kluczy została wygenerowana
+2026-08-26 (`pnpm tauri signer generate`):
+
+- klucz **publiczny** siedzi w `src-tauri/tauri.conf.json` → `plugins.updater.pubkey`;
+- klucz **prywatny** leży w `.tauri/updater.key` i jest w `.gitignore`.
+
+> ⚠️ **Przenieś klucz prywatny do menedżera haseł i dodaj go jako sekret
+> `TAURI_SIGNING_PRIVATE_KEY` w GitHubie.** Utrata tego klucza znaczy, że
+> **żadna przyszła aktualizacja nie dotrze do zainstalowanych aplikacji** —
+> trzeba by wypuścić nowy instalator i poprosić wszystkich o ręczną
+> reinstalację. Jego wyciek jest gorszy: pozwala podać sfałszowaną
+> aktualizację każdemu użytkownikowi Toolier.
+>
+> Dopóki nie ma **żadnego** wydania, klucz można bezkarnie wygenerować od
+> nowa (`pnpm tauri signer generate -w .tauri/updater.key -f`) i podmienić
+> `pubkey`. Po pierwszym wydaniu to już nie jest możliwe bez zerwania
+> aktualizacji u ludzi, którzy je zainstalowali.
+
+**Skąd aplikacja bierze wersje.** `plugins.updater.endpoints` wskazuje na
+`latest.json` w najnowszym wydaniu GitHuba. Plik generuje się sam —
+`.github/workflows/release.yml` woła `tauri-action` z
+`includeUpdaterJson: true`.
+
+**Wydanie idzie tagiem:**
+
+```
+git tag v1.0.1 && git push origin v1.0.1
+```
+
+Workflow buduje macOS (arm64 + x86_64) i Windows, podpisuje i tworzy
+**szkic** wydania. `latest.json` staje się widoczny dla wszystkich aplikacji
+dopiero w chwili opublikowania — dlatego ten moment wybiera człowiek.
+
+Sekrety wymagane przez workflow: `TAURI_SIGNING_PRIVATE_KEY`,
+`TAURI_SIGNING_PRIVATE_KEY_PASSWORD` (puste, jeśli klucz bez hasła),
+komplet `APPLE_*`, oraz `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`,
+`VITE_STRIPE_PUBLISHABLE_KEY`, `VITE_SHARE_BASE_URL`.
+
 ### macOS — podpis i notaryzacja
 
 > Krok po kroku (certyfikat, hasło dla aplikacji, weryfikacja gotowego pliku):
