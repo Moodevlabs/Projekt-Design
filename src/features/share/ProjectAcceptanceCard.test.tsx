@@ -72,8 +72,8 @@ describe('ProjectAcceptanceCard', () => {
   it('pokazuje KTO i KIEDY przyjal oferte', () => {
     renderCard();
 
-    expect(screen.getByText(pl.share.acceptedTitle)).toBeInTheDocument();
-    expect(screen.getByText(/Anna Kowalska/)).toBeInTheDocument();
+    expect(screen.getByText(pl.share.acceptedEyebrow)).toBeInTheDocument();
+    expect(screen.getByText('Anna Kowalska')).toBeInTheDocument();
     expect(screen.getByText(/WYC\/2026\/08\/0012/)).toBeInTheDocument();
   });
 
@@ -95,21 +95,21 @@ describe('ProjectAcceptanceCard', () => {
     useQuoteAcceptance.mockReturnValue({ data: null });
     renderCard();
 
-    expect(screen.queryByText(pl.share.acceptedTitle)).not.toBeInTheDocument();
+    expect(screen.queryByText(pl.share.acceptedEyebrow)).not.toBeInTheDocument();
   });
 
   it('milczy, gdy projekt nie ma zaakceptowanej wyceny', () => {
     useQuotesList.mockReturnValue({ data: [] });
     renderCard();
 
-    expect(screen.queryByText(pl.share.acceptedTitle)).not.toBeInTheDocument();
+    expect(screen.queryByText(pl.share.acceptedEyebrow)).not.toBeInTheDocument();
   });
 
   it('akceptacja bez podanego imienia nie zostawia dziury w zdaniu', () => {
     useQuoteAcceptance.mockReturnValue({ data: acceptance({ signerName: null }) });
     renderCard();
 
-    expect(screen.getByText(new RegExp(pl.share.acceptedAnonymously))).toBeInTheDocument();
+    expect(screen.getByText(pl.share.acceptedAnonymously)).toBeInTheDocument();
   });
 
   it('liczy tylko NIEPRZECZYTANE uwagi', () => {

@@ -528,8 +528,13 @@ Pozdrawiam`,
 
     // Akceptacja i uwagi (T-26).
     acceptedTitle: 'Oferta zaakceptowana',
+    /** Oczko wersalikowe nad imieniem — mowi CO to jest, nie kto. */
+    acceptedEyebrow: 'Przyjęte przez klienta',
+    acceptedOn: (date: string, time: string) => `${date} o ${time}`,
+    commentsWithUnread: (total: number, unread: number) =>
+      `Uwagi klienta (${total}) · ${unread} nieprzeczytane`,
     acceptedBy: (name: string) => `Zaakceptował(a): ${name}`,
-    acceptedAnonymously: 'Klient przyjął ofertę',
+    acceptedAnonymously: 'Klient (bez podpisu)',
     unreadComments: (count: number) =>
       count === 1 ? '1 nieprzeczytana uwaga' : `${count} nieprzeczytanych uwag`,
     openQuote: 'Otwórz wycenę',
