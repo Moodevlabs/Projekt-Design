@@ -118,27 +118,26 @@ export function CalendarPage() {
       ) : null}
 
       {/*
-        Siatka jest WĘŻSZA niż reszta strony (`max-w-3xl`). Rozciągnięta na
-        pełną szerokość kolumny dawała kratki trzykrotnie szersze niż wyższe,
-        a numer dnia gubił się w pustym polu. Nagłówek, legenda i panel dnia
-        korzystają z pełnej szerokości, bo tam idzie tekst.
+        Siatka trzyma pełną szerokość kolumny — tę samą, co nagłówek, legenda
+        i panel dnia. Zwężona (próba z `max-w-3xl`) czytała się jak osobne
+        okno wstawione w środek ekranu, bo kończyła się w innym miejscu niż
+        wszystko pod nią i nad nią. Kratka szersza niż wyższa jest normalna
+        w widoku miesiąca; wysokość pilnuje `clamp` w `MonthGrid`.
       */}
-      <div className="mx-auto w-full max-w-3xl">
-        {isLoading ? (
-          <Skeleton
-            className="rounded-[var(--radius-card)]"
-            style={{ height: 'clamp(18rem, 54dvh, 29rem)' }}
-          />
-        ) : (
-          <MonthGrid
-            month={month}
-            today={today}
-            selected={selected}
-            byDay={byDay}
-            onSelect={selectDay}
-          />
-        )}
-      </div>
+      {isLoading ? (
+        <Skeleton
+          className="rounded-[var(--radius-card)]"
+          style={{ height: 'clamp(20rem, 60dvh, 34rem)' }}
+        />
+      ) : (
+        <MonthGrid
+          month={month}
+          today={today}
+          selected={selected}
+          byDay={byDay}
+          onSelect={selectDay}
+        />
+      )}
 
       <Legend />
 

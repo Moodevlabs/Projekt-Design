@@ -44,6 +44,11 @@ export interface MonthGridProps {
  * kontenera mierzonego względem wysokości okna (`dvh`), z ogranicznikami
  * `clamp`: na niskim oknie kurczy się, na wysokim przestaje rosnąć, bo dalsze
  * powiększanie pustych kratek niczego nie dodaje.
+ *
+ * Szerokość natomiast bierze CAŁĄ dostępną kolumnę. Zwężenie siatki poniżej
+ * szerokości pozostałych bloków strony wyglądało jak osobne okno wstawione
+ * w środek ekranu — kratka szersza niż wyższa jest w widoku miesiąca normalna,
+ * karta kończąca się w innym miejscu niż nagłówek i panel dnia nie jest.
  */
 export function MonthGrid({ month, today, selected, byDay, onSelect }: MonthGridProps) {
   const weeks = monthGrid(month);
@@ -68,7 +73,7 @@ export function MonthGrid({ month, today, selected, byDay, onSelect }: MonthGrid
 
       <div
         className="mt-0.5 grid grid-cols-7 grid-rows-6 gap-1 sm:gap-1.5"
-        style={{ height: 'clamp(16rem, 50dvh, 27rem)' }}
+        style={{ height: 'clamp(18rem, 56dvh, 32rem)' }}
       >
         {weeks.flat().map((day) => {
           const events = byDay.get(day) ?? [];
