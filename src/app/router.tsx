@@ -18,7 +18,9 @@ import { LibraryPage } from '@/features/library/LibraryPage';
 import { LibraryItemPage } from '@/features/library/items/LibraryItemPage';
 import { TemplatesPage } from '@/features/templates/TemplatesPage';
 import { BrandSettingsPage } from '@/features/brand/BrandSettingsPage';
-import { SettingsPage } from '@/features/settings/SettingsPage';
+import { SettingsAppPage } from '@/features/settings/SettingsAppPage';
+import { SettingsAccountPage } from '@/features/settings/SettingsAccountPage';
+import { TrashPage } from '@/features/files/TrashPage';
 import { SettingsLayout } from '@/features/settings/SettingsLayout';
 import { SubscriptionPage } from '@/features/billing/SubscriptionPage';
 import { HelpPage } from '@/features/help/HelpPage';
@@ -80,7 +82,11 @@ const routeTree = [
                 element: <LibraryItemPage />,
                 handle: { title: pl.library.title },
               },
-              { path: 'szablony', element: <TemplatesPage />, handle: { title: pl.templates.title } },
+              {
+                path: 'szablony',
+                element: <TemplatesPage />,
+                handle: { title: pl.templates.title },
+              },
               {
                 /*
                  * Alias sprzed T-58: Branding byl osobna pozycja sidebara.
@@ -96,10 +102,12 @@ const routeTree = [
                 element: <SettingsLayout />,
                 handle: { title: pl.settings.title },
                 children: [
-                  { index: true, element: <SettingsPage /> },
+                  { index: true, element: <SettingsAppPage /> },
                   { path: 'branding', element: <BrandSettingsPage /> },
+                  { path: 'konto', element: <SettingsAccountPage /> },
                 ],
               },
+              { path: 'kosz', element: <TrashPage />, handle: { title: pl.files.trashPageTitle } },
               { path: 'pomoc', element: <HelpPage />, handle: { title: pl.nav.help } },
               {
                 path: 'subskrypcja',

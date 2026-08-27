@@ -38,7 +38,7 @@ vi.mock('@/data/queries/useLibrary', () => ({
 vi.mock('@/data/queries/useFiles', () => ({
   useStorageUsage: () => ({ data: { usedBytes: 0, quotaBytes: 2147483648 }, isLoading: false }),
   // Kosz (T-67). Pusty, wiec sekcja i tak sie nie renderuje — ale hooki
-  // musza istniec, bo TrashSection wola je bezwarunkowo.
+  // musza istniec, bo StorageUsageSection pyta o kosz (dopisek o zajetosci).
   useTrash: () => ({ data: [], isLoading: false }),
   useRestoreFile: () => ({ mutate: vi.fn() }),
   useDeleteFilePermanently: () => ({ mutate: vi.fn(), mutateAsync: vi.fn() }),
@@ -53,13 +53,7 @@ vi.mock('sonner', () => ({
   toast: { error: toastError, success: vi.fn(), info: vi.fn() },
 }));
 
-vi.mock('./AccountSection', () => ({
-  // Sekcja konta ma wlasny ciezar (formularz hasla, Supabase) — tutaj testujemy
-  // ustawienia dokumentu i typy pomieszczen.
-  AccountSection: () => null,
-}));
-
-const { SettingsPage } = await import('./SettingsPage');
+const { SettingsAppPage } = await import('./SettingsAppPage');
 
 function roomType(name: string, slug: string, sortOrder = 0): RoomType {
   return { id: `rt-${slug}`, workspaceId: 'ws-1', name, slug, sortOrder };
@@ -88,11 +82,11 @@ beforeEach(() => {
   useRoomTypes.mockReturnValue({ isLoading: false, data: [roomType('Kuchnia', 'kuchnia')] });
 });
 
-describe('Ustawienia wycen', () => {
+describe('Ustawienia → Aplikacja: wyceny', () => {
   it('pokazuje na zywo, jak zadziala wzorzec numeracji', () => {
     // Wzorzec to skladnia z tokenami. Bez podgladu czlowiek dowiedzialby sie,
     // co wpisal, dopiero przy nastepnej wycenie — a wtedy numer jest nadany.
-    render(<SettingsPage />);
+    render(<SettingsAppPage />);
 
     const pole = screen.getByLabelText(pl.settings.numberPattern);
     // `fireEvent`, nie `user.type` — w składni userEvent `{` otwiera opis
@@ -105,7 +99,7 @@ describe('Ustawienia wycen', () => {
 
   it('zapis jest nieaktywny, dopoki nic nie zmieniono', async () => {
     const user = userEvent.setup();
-    render(<SettingsPage />);
+    render(<SettingsAppPage />);
 
     const zapisz = screen.getByRole('button', { name: pl.common.save });
     expect(zapisz).toBeDisabled();
@@ -117,7 +111,7 @@ describe('Ustawienia wycen', () => {
   it('nie zapisuje stawki VAT spoza zakresu', async () => {
     // 150% VAT-u to nie jest literowka, ktora ma trafic do dokumentu.
     const user = userEvent.setup();
-    render(<SettingsPage />);
+    render(<SettingsAppPage />);
 
     const vat = screen.getByLabelText(pl.settings.vatRate);
     await user.clear(vat);
@@ -129,7 +123,7 @@ describe('Ustawienia wycen', () => {
 
   it('zapisuje zmieniony komplet ustawien', async () => {
     const user = userEvent.setup();
-    render(<SettingsPage />);
+    render(<SettingsAppPage />);
 
     const vat = screen.getByLabelText(pl.settings.vatRate);
     await user.clear(vat);
@@ -145,39 +139,64 @@ describe('Ustawienia wycen', () => {
 
   it('przywracanie domyslnego wzorca pokazuje sie tylko, gdy jest co przywracac', async () => {
     const user = userEvent.setup();
-    const { unmount } = render(<SettingsPage />);
+    const { unmount } = render(<SettingsAppPage />);
     expect(
       screen.queryByRole('button', { name: pl.settings.numberPatternReset }),
     ).not.toBeInTheDocument();
     unmount();
 
     mockWorkspace({ numberPattern: 'OF/{seq}' });
-    render(<SettingsPage />);
+    render(<SettingsAppPage />);
     await user.click(screen.getByRole('button', { name: pl.settings.numberPatternReset }));
 
     expect(screen.getByLabelText(pl.settings.numberPattern)).toHaveValue(DEFAULT_NUMBER_PATTERN);
   });
 });
 
-describe('Ustawienia a wygasly dostep', () => {
+describe('Ustawienia → Aplikacja a wygasly dostep', () => {
   it('blokuje edycje ustawien, ale mowi, ze eksport dziala', () => {
     canWrite.value = false;
-    render(<SettingsPage />);
+    render(<SettingsAppPage />);
 
     expect(screen.getByText(pl.settings.readOnly)).toBeInTheDocument();
     expect(screen.getByLabelText(pl.settings.numberPattern)).toBeDisabled();
     expect(screen.getByRole('button', { name: pl.common.save })).toBeDisabled();
   });
-
 });
 
 describe('Typy pomieszczen (T-73)', () => {
   it('NIE sa w Ustawieniach — mieszkaja w Bibliotece → Pomieszczenia', () => {
     // Dwa miejsca do personalizacji tej samej listy to pytanie „ktore liczy".
-    render(<SettingsPage />);
+    render(<SettingsAppPage />);
     expect(screen.queryByText(pl.settings.roomTypes)).not.toBeInTheDocument();
     expect(
       screen.queryByPlaceholderText(pl.settings.roomTypeNamePlaceholder),
     ).not.toBeInTheDocument();
+  });
+});
+
+describe('podzial Ustawien (2026-08-27)', () => {
+  /**
+   * Do 2026-08-27 wszystko stalo w jednej kolumnie: ustawienia wycen, kosz,
+   * aktualizacje, haslo, eksport danych i kasowanie konta. Ten test pilnuje,
+   * zeby sprawy KONTA nie wrocily na karte „Aplikacja" — bo wtedy podzial
+   * przestaje cokolwiek porzadkowac.
+   */
+  it('sprawy konta NIE sa na karcie Aplikacja', () => {
+    render(<SettingsAppPage />);
+
+    expect(screen.queryByText(pl.settings.dangerZone)).not.toBeInTheDocument();
+    expect(screen.queryByText(pl.settings.access)).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: new RegExp(pl.settings.exportData, 'i') }),
+    ).not.toBeInTheDocument();
+  });
+
+  /** Kosz dostal wlasny ekran w szynie — w Ustawieniach nie ma po nim sladu. */
+  it('kosza NIE ma w Ustawieniach', () => {
+    render(<SettingsAppPage />);
+
+    expect(screen.queryByText(pl.files.trashTitle)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: pl.files.trashEmpty })).not.toBeInTheDocument();
   });
 });

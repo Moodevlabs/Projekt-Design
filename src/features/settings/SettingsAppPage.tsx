@@ -2,23 +2,25 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useWorkspace } from '@/data/queries/useWorkspace';
 import { useEntitlement } from '@/features/billing/useEntitlement';
-import { WorkspaceSettingsSection } from './WorkspaceSettingsSection';
-import { AccountSection } from './AccountSection';
 import { StorageUsageSection } from '@/features/files/StorageUsageSection';
-import { TrashSection } from '@/features/files/TrashSection';
-import { SampleLibrarySection } from './SampleLibrarySection';
-import { UpdateSection } from './UpdateSection';
 import { pl } from '@/i18n/pl';
 
+import { SampleLibrarySection } from './SampleLibrarySection';
+import { UpdateSection } from './UpdateSection';
+import { WorkspaceSettingsSection } from './WorkspaceSettingsSection';
+
 /**
- * Ustawienia workspace'u i konta.
+ * Ustawienia → Aplikacja.
  *
- * Ustawienia dokumentu są zablokowane bez aktywnego dostępu (to zapis), ale
- * **eksport danych i zmiana hasła zostają dostępne zawsze** — jedno jest
- * odczytem własnej pracy, drugie sprawą bezpieczeństwa konta. Odcinanie ich
- * za brak płatności byłoby trzymaniem człowieka za gardło.
+ * To, co dotyczy **narzędzia i dokumentów**, a nie osoby: domyślne wartości
+ * nowych wycen, biblioteka przykładowa, miejsce na pliki, aktualizacje.
+ *
+ * Kosza tu nie ma (2026-08-27) — dostał własny ekran w szynie. Kosz to nie
+ * ustawienie, tylko miejsce, w którym leżą czyjeś pliki; sekcja znikająca,
+ * gdy jest pusty, znaczyła, że człowiek szukający skasowanego pliku nie miał
+ * gdzie zajrzeć.
  */
-export function SettingsPage() {
+export function SettingsAppPage() {
   const workspace = useWorkspace();
   const canWrite = useEntitlement().canWrite;
 
@@ -41,6 +43,13 @@ export function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-4 pb-16">
+      <p className="text-ink-soft text-sm">{pl.settings.appIntro}</p>
+
+      {/*
+        Ostrzeżenie o trybie tylko do odczytu stoi WYŁĄCZNIE tutaj.
+        Na karcie „Konto" byłoby mylące: eksport danych i zmiana hasła
+        działają zawsze, także po wygaśnięciu dostępu (patrz AccountSection).
+      */}
       {!canWrite ? (
         <Alert>
           <AlertDescription>{pl.settings.readOnly}</AlertDescription>
@@ -52,11 +61,7 @@ export function SettingsPage() {
           jedno miejsce do personalizacji, nie dwa. */}
       <SampleLibrarySection />
       <StorageUsageSection />
-      {/* Kosz tuż pod paskiem zużycia: pliki w koszu NADAL zajmują limit,
-          więc odpowiedź na „czemu pasek nie drgnął" ma być w zasięgu wzroku. */}
-      <TrashSection />
       <UpdateSection />
-      <AccountSection />
     </div>
   );
 }

@@ -17,6 +17,8 @@ export const pl = {
     credit: 'Developed by AnzorgeDesign & Moodevlabs',
   },
   nav: {
+    /** Kosz na pliki — wlasna pozycja w szynie, nad Pomoca (2026-08-27). */
+    trash: 'Kosz',
     dashboard: 'Pulpit',
     quotes: 'Wyceny',
     clients: 'Klienci',
@@ -415,6 +417,17 @@ export const pl = {
     usageFull: 'Limit wyczerpany. Nie dodasz nowych plików, dopóki czegoś nie usuniesz.',
 
     // Kosz (T-67).
+    /** Wlasny ekran kosza (2026-08-27) — pokazuje sie takze pusty. */
+    trashNav: 'Kosz',
+    trashPageTitle: 'Kosz',
+    trashCount: (count: number) => (count === 1 ? '1 usunięty plik' : `${count} usuniętych plików`),
+    trashOccupies: (size: string, quota: string) =>
+      quota
+        ? `Zajmują ${size} z limitu ${quota}. Miejsce zwolni się dopiero po trwałym usunięciu.`
+        : `Zajmują ${size}. Miejsce zwolni się dopiero po trwałym usunięciu.`,
+    trashEmptyTitle2: 'Kosz jest pusty',
+    trashEmptyDescription2: (days: number) =>
+      `Usunięte pliki trafiają tutaj i czekają ${days} dni, zanim znikną na dobre. Do tego czasu można je przywrócić.`,
     trashTitle: 'Kosz',
     trashDescription: (days: number, size: string) =>
       `Usunięte pliki czekają tu ${days} dni, potem znikają na dobre. Zajmują ${size} — miejsce zwolni się dopiero po trwałym usunięciu.`,
@@ -436,7 +449,9 @@ export const pl = {
     trashEmptyFailed: (count: number) =>
       count === 1 ? 'Nie udało się usunąć 1 pliku.' : `Nie udało się usunąć ${count} plików.`,
     /** Dopisek pod paskiem zużycia, gdy w koszu coś leży. */
-    usageTrashNote: (size: string) => `W tym ${size} w koszu.`,
+    usageTrashNote: (size: string) =>
+      `W tym ${size} zajmują pliki w koszu — miejsce zwolni się po ich trwałym usunięciu.`,
+    usageTrashLink: 'Otwórz kosz',
   },
   documents: {
     tab: 'Dokumenty',
@@ -1493,6 +1508,16 @@ Pozdrawiam`,
     goToSettings: 'Ustawienia',
   },
   settings: {
+    // Podzial na trzy karty (2026-08-27): konto · branding · aplikacja.
+    tabAccount: 'Konto',
+    tabApp: 'Aplikacja',
+    accountIntro: 'Twój dostęp do aplikacji, subskrypcja i dane konta.',
+    appIntro: 'Domyślne wartości nowych wycen, miejsce na pliki i aktualizacje.',
+    access: 'Dostęp',
+    yourData: 'Twoje dane',
+    dangerZone: 'Strefa nieodwracalna',
+    manageSubscription: 'Zarządzaj',
+    subscriptionHint: 'Plan, płatności i faktury otwierają się na osobnym ekranie.',
     general: 'Ogólne',
     title: 'Ustawienia',
     sectionQuotes: 'Domyślne dla wycen',

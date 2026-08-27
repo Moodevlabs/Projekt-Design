@@ -229,7 +229,10 @@ export function Sidebar({ subscriptionOk = true }: { subscriptionOk?: boolean })
           >
             <div className="relative w-full" style={{ height: items.length * NAV_ROW_STEP }}>
               <ActiveIndicator index={inGroup ? localActive : -1} expanded={expanded} />
-              <div className="relative flex flex-col" style={{ gap: NAV_ROW_STEP - NAV_ROW_HEIGHT }}>
+              <div
+                className="relative flex flex-col"
+                style={{ gap: NAV_ROW_STEP - NAV_ROW_HEIGHT }}
+              >
                 {items.map((item, index) => (
                   <SidebarLink
                     key={item.to}
@@ -245,7 +248,9 @@ export function Sidebar({ subscriptionOk = true }: { subscriptionOk?: boolean })
         );
       })}
 
-      <div className={cn('mt-auto flex w-full flex-col gap-3 pt-4', expanded ? '' : 'items-center')}>
+      <div
+        className={cn('mt-auto flex w-full flex-col gap-3 pt-4', expanded ? '' : 'items-center')}
+      >
         <Tooltip>
           <TooltipTrigger asChild>
             <button
@@ -267,9 +272,7 @@ export function Sidebar({ subscriptionOk = true }: { subscriptionOk?: boolean })
               {expanded ? <span className="text-xs">{pl.nav.collapse}</span> : null}
             </button>
           </TooltipTrigger>
-          {expanded ? null : (
-            <TooltipContent side="right">{pl.nav.expand}</TooltipContent>
-          )}
+          {expanded ? null : <TooltipContent side="right">{pl.nav.expand}</TooltipContent>}
         </Tooltip>
 
         <TrialBar expanded={expanded} />

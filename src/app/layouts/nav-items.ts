@@ -6,6 +6,7 @@ import {
   LayoutTemplate,
   LifeBuoy,
   Settings,
+  Trash2,
   type LucideIcon,
 } from 'lucide-react';
 import { routes } from '@/app/routes';
@@ -37,15 +38,27 @@ export const NAV_ROW_STEP = NAV_ROW_HEIGHT + NAV_ROW_GAP;
  * konfiguracja, do ktorej wraca sie raz na kilka miesiecy. Pomoc stoi nad
  * nimi — poradnik ma byc pod reka, ale nie udawac kolejnego modulu.
  *
+ * Kosz stoi NAD Pomoca (2026-08-27). Byl sekcja Ustawien, ktora znikala,
+ * gdy byl pusty — czyli czlowiek szukajacy skasowanego pliku nie mial gdzie
+ * zajrzec i nie dowiadywal sie nawet, ze kosz istnieje. Jest pod kreska,
+ * a nie wsrod obszarow pracy, bo sie do niego ZAGLADA, a nie w nim pracuje.
+ *
  * Brandingu tu nie ma: wszedl do Ustawien jako pierwsza sekcja (T-58).
  * Trasa `/branding` dalej dziala jako alias, zeby nie lamac zapisanych linkow.
  */
 export const NAV_ITEMS: NavItem[] = [
-  { to: routes.dashboard, label: pl.nav.dashboard, icon: LayoutDashboard, end: true, group: 'main' },
+  {
+    to: routes.dashboard,
+    label: pl.nav.dashboard,
+    icon: LayoutDashboard,
+    end: true,
+    group: 'main',
+  },
   { to: routes.clients, label: pl.nav.clients, icon: Users, group: 'main' },
   { to: routes.quotes, label: pl.nav.quotes, icon: FileText, group: 'main' },
   { to: routes.library, label: pl.nav.library, icon: Library, group: 'main' },
   { to: routes.templates, label: pl.nav.templates, icon: LayoutTemplate, group: 'main' },
+  { to: routes.trash, label: pl.nav.trash, icon: Trash2, group: 'system' },
   { to: routes.help, label: pl.nav.help, icon: LifeBuoy, group: 'system' },
   { to: routes.settings, label: pl.nav.settings, icon: Settings, group: 'system' },
 ];

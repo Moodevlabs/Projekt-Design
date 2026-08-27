@@ -14,7 +14,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { ConfirmDialog } from '@/components/shared';
+import { ConfirmDialog, PageSection } from '@/components/shared';
 import { useAuth } from '@/features/auth/auth-context';
 import { NewPasswordFormSchema, type NewPasswordForm } from '@/features/auth/schema';
 import { authErrorMessage } from '@/features/auth/errors';
@@ -32,26 +32,39 @@ export function AccountSection() {
   const { session, signOut } = useAuth();
   const { exportData, exporting } = useExportData();
 
+  /*
+   * TRZY KARTY, nie jedna (przeprojektowanie 2026-08-27).
+   *
+   * Wcześniej dostęp, kopia danych i kasowanie konta stały w jednym pudełku,
+   * jedno pod drugim. „Zmień hasło" i „usuń konto nieodwracalnie" to nie są
+   * czynności tej samej wagi i nie powinny wyglądać tak samo — a kopia
+   * danych jest pomiędzy nimi jedynym wyjściem awaryjnym, więc ma być
+   * widoczna PRZED strefą nieodwracalną, a nie po.
+   */
   return (
-    <section className="card-surface space-y-5 p-5">
-      <div className="space-y-1">
-        <h2 className="text-ink text-sm font-semibold">{pl.settings.account}</h2>
-        <p className="text-ink-soft text-sm">{session?.user.email}</p>
-      </div>
+    <>
+      <PageSection title={pl.settings.access}>
+        <p className="text-ink-soft mb-4 text-sm">{session?.user.email}</p>
+        <PasswordForm />
+      </PageSection>
 
-      <PasswordForm />
-
-      <div className="border-hair space-y-2 border-t pt-4">
-        <Label>{pl.settings.exportData}</Label>
-        <p className="text-ink-soft text-xs">{pl.settings.exportDataHint}</p>
-        <Button type="button" variant="outline" disabled={exporting} onClick={() => void exportData()}>
+      <PageSection title={pl.settings.yourData}>
+        <p className="text-ink-soft mb-3 text-sm">{pl.settings.exportDataHint}</p>
+        <Button
+          type="button"
+          variant="outline"
+          disabled={exporting}
+          onClick={() => void exportData()}
+        >
           <Download className="size-4" aria-hidden />
           {exporting ? pl.settings.exportRunning : pl.settings.exportData}
         </Button>
-      </div>
+      </PageSection>
 
-      <DeleteAccount onDeleted={() => void signOut()} />
-    </section>
+      <PageSection title={pl.settings.dangerZone}>
+        <DeleteAccount onDeleted={() => void signOut()} />
+      </PageSection>
+    </>
   );
 }
 
@@ -146,7 +159,7 @@ function DeleteAccount({ onDeleted }: { onDeleted: () => void }) {
   };
 
   return (
-    <div className="space-y-2 rounded-[var(--radius-card)] border-hair-strong bg-danger-wash border p-4">
+    <div className="space-y-2">
       <Label htmlFor="deleteConfirmation">{pl.settings.deleteAccount}</Label>
       <p className="text-ink-soft text-xs">{pl.settings.deleteAccountHint}</p>
       <div className="flex flex-wrap items-center gap-2">
