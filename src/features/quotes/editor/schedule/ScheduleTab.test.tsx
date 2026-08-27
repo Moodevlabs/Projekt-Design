@@ -94,6 +94,21 @@ describe('ScheduleTab — zakładanie harmonogramu', () => {
   });
 });
 
+describe('ScheduleTab — zakladka tlumaczy, jak liczy (poprawka 7b)', () => {
+  it('nazywa zalozenia i mowi, co z nich wynika', () => {
+    render(<ScheduleTab editing />);
+
+    expect(screen.getByText(pl.editor.scheduleAssumptions)).toBeInTheDocument();
+    expect(screen.getByText(pl.editor.scheduleAssumptionsHint)).toBeInTheDocument();
+  });
+
+  it('rozwija skroty ARCH./INW. pod lista etapow, nie tylko w karcie wyniku', () => {
+    // Skrot przy kazdym wierszu potrzebuje rozwiniecia TAM, gdzie te wiersze sa.
+    render(<ScheduleTab editing />);
+    expect(screen.getByText(pl.editor.scheduleOwnerLegend)).toBeInTheDocument();
+  });
+});
+
 describe('ScheduleTab — wynik', () => {
   it('POMIESZCZENIA zmieniają wynik — kryterium odbioru T-44', () => {
     /*

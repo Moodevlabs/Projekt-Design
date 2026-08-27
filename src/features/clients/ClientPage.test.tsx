@@ -128,6 +128,9 @@ describe('ClientPage', () => {
     const tabs = screen.getAllByRole('tab').map((tab) => tab.textContent);
     expect(tabs).toEqual([
       pl.clients.tabProjects,
+      // Brief stoi PRZED wycenami (poprawka 9): w kolejnosci wspolpracy jest
+      // pierwszy — dopiero z jego odpowiedzi wiadomo, co wycenic.
+      pl.brief.tab,
       pl.clients.tabQuotes,
       pl.documents.tab,
       pl.files.tab,

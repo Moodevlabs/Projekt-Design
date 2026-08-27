@@ -797,22 +797,41 @@ Pozdrawiam`,
     extrasEntryDaysLabel: (name: string) => `Dni usługi: ${name}`,
     removeExtrasEntry: (name: string) => `Usuń z terminu: ${name}`,
     scheduleTitle: 'Szacowany termin',
+    /*
+     * ZAKŁADKA MÓWI, JAK LICZY (poprawka 7b, 2026-08-27).
+     *
+     * Wcześniej zaczynała się od paska czterech pól z etykietami w rodzaju
+     * „Dni rob./tydz. — wykonawca" i listy etapów bez główki. Wszystko było
+     * prawdziwe i nic nie tłumaczyło, skąd bierze się data na dole.
+     */
     scheduleIntro:
-      'Etapy z dniami po stronie wykonawcy i inwestora. Etapy zależne od pomieszczeń liczą się z tych samych pomieszczeń co wycena.',
-    scheduleStart: 'Start',
-    scheduleProviderWeek: 'Dni rob./tydz. — wykonawca',
-    scheduleClientWeek: 'Dni rob./tydz. — inwestor',
-    scheduleHolidays: 'Święta',
-    scheduleHolidaysPl: 'polskie',
-    scheduleHolidaysNone: 'pomijaj',
+      'Termin składa się z etapów. Każdy etap ma swoje dni i stronę, która je zużywa: pracownię albo inwestora. Etapy zależne od pomieszczeń biorą je z tej samej listy co wycena.',
+    scheduleAssumptions: 'Założenia',
+    scheduleAssumptionsHint:
+      'Z tych czterech wartości wychodzą daty w podsumowaniu obok. Bez daty startu policzymy same dni.',
+    scheduleStart: 'Start prac',
+    scheduleProviderWeek: 'Dni robocze / tydzień — pracownia',
+    scheduleClientWeek: 'Dni robocze / tydzień — inwestor',
+    scheduleHolidays: 'Dni wolne',
+    scheduleHolidaysPl: 'z polskimi świętami',
+    scheduleHolidaysNone: 'tylko weekendy',
+    /** Główka nad listą etapów — te same wersaliki co nad tabelami. */
+    scheduleColumnStage: 'Etap',
+    scheduleColumnOwner: 'Kto',
+    scheduleColumnDays: 'Dni',
+    scheduleOwnerLegend:
+      'ARCH. — czas pracowni, INW. — czas po stronie inwestora (decyzje, akceptacje, zbieranie inspiracji). Rozdzielamy je, bo to drugie najczęściej rozciąga termin, a najtrudniej je potem wytłumaczyć.',
     scheduleEmpty: 'Harmonogram powstanie po wejściu w tryb edycji.',
     scheduleNoRooms:
       'Brak pomieszczeń w wycenie — etapy zależne od pomieszczeń liczą teraz tylko dni bazowe.',
     scheduleResult: 'Wynik',
-    scheduleProviderDays: 'Dni robocze — wykonawca',
+    scheduleProviderDays: 'Dni robocze — pracownia',
     scheduleClientDays: 'Dni robocze — inwestor',
     scheduleEndOptimal: 'Optymalne zakończenie',
     scheduleEndLatest: 'Najpóźniejsze',
+    /** Dlaczego widełki, a nie jedna data — pytanie pada za każdym razem. */
+    scheduleRangeHint:
+      'Termin optymalny zakłada, że inwestor odpowiada od ręki. Najpóźniejszy dolicza jego dni w całości. Prawda leży pomiędzy — i dlatego podajemy widełki, a nie jedną datę.',
     scheduleNoStart: 'Podaj datę startu, żeby zobaczyć terminy.',
     scheduleCalendarHint: (optimal: number, latest: number) =>
       `W przeliczeniu na dni kalendarzowe: ${optimal}–${latest}.`,
@@ -1029,6 +1048,57 @@ Pozdrawiam`,
     backToList: 'Wyceny',
     itemsCount: (count: number) => `${count} poz.`,
   },
+  /*
+   * BRIEF KLIENTA (T-93, poprawka 9 z 2026-08-27).
+   *
+   * Pierwszy etap współpracy — wcześniejszy niż wycena, bo dopiero z briefu
+   * wiadomo, co właściwie wycenić.
+   */
+  brief: {
+    tab: 'Brief',
+    title: 'Brief klienta',
+    intro:
+      'Kwestionariusz do wypełnienia przez klienta, zanim zaczniecie projekt. Wysyłasz link — klient odpowiada bez zakładania konta, na raty, kiedy mu wygodnie.',
+    create: 'Wyślij brief',
+    creating: 'Tworzenie…',
+    createFailed: 'Nie udało się utworzyć briefu.',
+    empty: 'Ten klient nie dostał jeszcze briefu.',
+    linkLabel: 'Adres briefu dla klienta',
+    copy: 'Kopiuj link',
+    copied: 'Link skopiowany',
+    copyFailed: 'Nie udało się skopiować linku.',
+    sendByMail: 'Wyślij mailem',
+    revoke: 'Odwołaj link',
+    revokeConfirm:
+      'Odwołany link przestaje działać natychmiast. Odpowiedzi, które już przyszły, zostają.',
+    revoked: 'Odwołany',
+    expired: 'Wygasł',
+    waiting: 'Czeka na odpowiedzi',
+    open: 'Otwarty',
+    validFor: 'Ważny przez',
+    neverOpened: 'Klient jeszcze nie otworzył',
+    openedTimes: (count: number) => (count === 1 ? 'Otwarty raz' : `Otwarty ${count} razy`),
+    submittedOn: (date: string) => `Odesłany ${date}`,
+    progress: (answered: number, total: number) => `Wypełnione ${answered} z ${total}`,
+    noAnswerYet: 'Bez odpowiedzi',
+    answersTitle: 'Odpowiedzi klienta',
+    delete: 'Usuń brief',
+    deleteConfirm:
+      'Brief zniknie razem z odpowiedziami klienta. Tego nie da się cofnąć.',
+
+    /** Treść maila — projektant wysyła go ze swojej poczty, jak przy ofercie. */
+    mailSubject: 'Brief przed rozpoczęciem projektu',
+    mailBody: (url: string) =>
+      `Dzień dobry,
+
+zanim zaczniemy, prosimy o wypełnienie krótkiego briefu:
+${url}
+
+Nie trzeba zakładać konta ani odpowiadać za jednym razem — formularz zapamiętuje to, co już wpisane.
+
+Pozdrawiam`,
+  },
+
   dashboard: {
     activeProjects: 'Aktywni klienci i projekty',
     activeProjectsEmpty: 'Brak projektów w toku. Zacznij od dodania klienta.',

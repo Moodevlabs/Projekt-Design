@@ -42,6 +42,13 @@ export function ScheduleResultCard({ result }: { result: ScheduleResult }) {
                 <span className="tabular">{formatDate(new Date(result.endLatest))}</span>
               </p>
             ) : null}
+            {/*
+              Dlaczego dwie daty, a nie jedna. Pytanie pada za każdym razem,
+              a odpowiedź była dotąd wyłącznie w komentarzu w kodzie.
+            */}
+            <p className="text-ink-faint mt-2 text-[11px] leading-relaxed">
+              {pl.editor.scheduleRangeHint}
+            </p>
           </>
         ) : (
           // Bez daty startu nie zgadujemy terminow — ale dni i tak sa policzone.

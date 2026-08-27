@@ -108,6 +108,82 @@ export type Database = {
           },
         ]
       }
+      client_briefs: {
+        Row: {
+          answers: Json
+          client_id: string
+          created_at: string
+          expires_at: string | null
+          first_viewed_at: string | null
+          id: string
+          last_viewed_at: string | null
+          project_id: string | null
+          revoked_at: string | null
+          submitted_at: string | null
+          template: Json
+          token: string
+          updated_at: string
+          view_count: number
+          workspace_id: string
+        }
+        Insert: {
+          answers?: Json
+          client_id: string
+          created_at?: string
+          expires_at?: string | null
+          first_viewed_at?: string | null
+          id?: string
+          last_viewed_at?: string | null
+          project_id?: string | null
+          revoked_at?: string | null
+          submitted_at?: string | null
+          template?: Json
+          token?: string
+          updated_at?: string
+          view_count?: number
+          workspace_id: string
+        }
+        Update: {
+          answers?: Json
+          client_id?: string
+          created_at?: string
+          expires_at?: string | null
+          first_viewed_at?: string | null
+          id?: string
+          last_viewed_at?: string | null
+          project_id?: string | null
+          revoked_at?: string | null
+          submitted_at?: string | null
+          template?: Json
+          token?: string
+          updated_at?: string
+          view_count?: number
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_briefs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_briefs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_briefs_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           address: string | null
@@ -1127,8 +1203,16 @@ export type Database = {
         Args: { p_author_name: string; p_message: string; p_token: string }
         Returns: Json
       }
+      get_shared_brief: {
+        Args: { p_token: string }
+        Returns: Json
+      }
       reject_shared_quote: {
         Args: { p_reason?: string | null; p_signer_name: string; p_token: string }
+        Returns: Json
+      }
+      submit_shared_brief: {
+        Args: { p_answers: Json; p_token: string }
         Returns: Json
       }
       files_bump_usage: {

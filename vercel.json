@@ -3,7 +3,10 @@
   "buildCommand": "pnpm build:share",
   "outputDirectory": "dist-share",
   "installCommand": "pnpm install --frozen-lockfile",
-  "rewrites": [{ "source": "/q/(.*)", "destination": "/index.html" }],
+  "rewrites": [
+    { "source": "/q/(.*)", "destination": "/index.html" },
+    { "source": "/b/(.*)", "destination": "/index.html" }
+  ],
   "headers": [
     {
       "source": "/(.*)",
