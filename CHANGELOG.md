@@ -3,6 +3,21 @@
 Format wg [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/).
 Wersje zgodne z [SemVer](https://semver.org/lang/pl/).
 
+## [1.1.1] – 2026-08-27
+
+### Naprawione
+
+**Aktualizacje znów się zgłaszają.** Wydanie oznaczone jako v1.1.1 zawierało
+aplikację przedstawiającą się jako 1.1.0 — numer wersji siedzi
+w `tauri.conf.json`, a nie w nazwie tagu, i nie został podbity. Updater
+porównuje właśnie te numery, więc widział „1.1.0 wobec 1.1.0" i meldował, że
+wszystko jest aktualne. Wersja podbita w komplecie (`package.json`,
+`tauri.conf.json`, `Cargo.toml`), a build wydania od teraz **przerywa się**,
+gdy tag nie zgadza się z wersją w plikach.
+
+Poza tym wydanie niesie zmiany opisane niżej pod 1.1.0 — u nikogo się
+nie zainstalowały, bo aktualizacja ich nie zobaczyła.
+
 ## [1.1.0] – 2026-08-27
 
 ### Dodane
