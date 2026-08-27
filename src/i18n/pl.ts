@@ -648,7 +648,24 @@ Pozdrawiam`,
     // Pomieszczenia wyceny (cennik parametryczny).
     rooms: 'Pomieszczenia',
     roomsHint: 'Usługi liczone za pomieszczenie biorą stąd swoje składniki.',
-    roomsEmpty: 'Brak pomieszczeń. Dodaj je, jeśli wyceniasz za pomieszczenie.',
+
+    /*
+     * PANEL POMIESZCZEŃ MÓWI, PO CO JEST (poprawka 7, 2026-08-27).
+     *
+     * Wcześniej lista zaczynała się od pustego pola i dwóch kwadracików
+     * podpisanych „W" i „T". Legenda stała pod spodem, więc czytało się ją
+     * dopiero po tym, jak coś już się kliknęło.
+     */
+    roomsPurpose:
+      'Lista pomieszczeń objętych projektem. Usługi wyceniane „za pomieszczenie" mnożą przez nią swoją stawkę — reszta pozycji jej nie używa.',
+    roomsCount: (count: number) =>
+      count === 1 ? '1 pomieszczenie' : `${count} pomieszczeń`,
+    roomsColumnName: 'Pomieszczenie',
+    roomsColumnQty: 'Ile',
+    roomsSplit: (visual: number, technical: number) =>
+      `Do części wizualnej liczy się ${visual}, do technicznej ${technical}.`,
+    roomsEmpty:
+      'Brak pomieszczeń. Dodaj je tylko wtedy, gdy któraś usługa liczy się za pomieszczenie — inaczej lista nic nie zmienia.',
     addRoom: 'Dodaj pomieszczenie',
     newRoomName: 'Nowe pomieszczenie',
     roomNameLabel: (room: string) => `Nazwa pomieszczenia: ${room}`,
@@ -665,16 +682,16 @@ Pozdrawiam`,
     roomTechnical: (room: string) => `Część techniczna: ${room}`,
     roomVisualShort: 'W',
     roomTechnicalShort: 'T',
-    roomFlagsHint: 'W — część wizualna, T — techniczna. Decydują, co wchodzi do której usługi.',
-    /** Bloki per pomieszczenie w sekcji. */
-    addRoomBlocks: 'Rozpisz na pomieszczenia',
-    addRoomBlocksDone: (count: number) =>
-      count === 1 ? 'Dodano blok 1 pomieszczenia' : `Dodano bloki ${count} pomieszczeń`,
-    addRoomBlocksNothing: 'Wszystkie pomieszczenia mają już swoje bloki.',
-    addRoomBlocksNoRooms: 'Najpierw dodaj pomieszczenia w panelu obok.',
-    addItemToAllRooms: 'Do wszystkich pomieszczeń',
-    addItemToAllRoomsDone: (count: number) =>
-      count === 1 ? 'Dodano do 1 pomieszczenia' : `Dodano do ${count} pomieszczeń`,
+    roomFlagsHint:
+      'W — część wizualna (projekt aranżacji), T — techniczna (rysunki wykonawcze). Usługa liczona za pomieszczenie bierze tylko te pomieszczenia, które ma zaznaczone.',
+    /** Podpowiedź pod kursorem na kwadraciku — legenda nie zawsze jest widoczna. */
+    roomVisualTitle: 'Wlicza się do części wizualnej',
+    roomTechnicalTitle: 'Wlicza się do części technicznej',
+    /*
+     * Teksty „Rozpisz na pomieszczenia" i „Do wszystkich pomieszczeń" usunięte
+     * 2026-08-27 razem z przyciskami (poprawka 7) — obie akcje budowały
+     * strukturę dokumentu za autora. Same bloki pomieszczeń zostają.
+     */
     roomBlockLabel: (room: string, qty: number) => (qty > 1 ? `${room} ×${qty}` : room),
     roomBlockOff: 'pominięte',
 
@@ -809,8 +826,9 @@ Pozdrawiam`,
     workloadCommunication: 'Komunikacja projektowa',
     workloadCommunicationHint: 'Liczba zawarta w sumie poniżej.',
     workloadTotal: 'Razem',
-    itemTagCommunication: 'Komunikacja projektowa',
-    itemTagsLabel: (name: string) => `Etykiety pozycji: ${name}`,
+    // `itemTagCommunication` / `itemTagsLabel` zdjęte 2026-08-27 razem
+    // z przełącznikiem przy pozycji (poprawka 7). Wiersz „w tym komunikacja"
+    // w pracochłonności zostaje — dla wycen, w których etykietę już nadano.
     itemMinutesLabel: 'Minuty pracy',
     convertTitle: 'Przeliczyć wartości?',
     convertDescription: (rate: string) =>

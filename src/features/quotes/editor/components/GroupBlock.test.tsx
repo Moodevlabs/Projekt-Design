@@ -36,10 +36,8 @@ function setup(group: Group, editing = true) {
     onToggleItem: vi.fn(),
     onPatchItem: vi.fn(),
     onRemoveItem: vi.fn(),
-    onInsertItems: vi.fn(),
     onSaveItemToLibrary: vi.fn(),
     onSaveGroupToLibrary: vi.fn(),
-    onInsertItemToRoomBlocks: vi.fn(),
     variants: NO_VARIANTS,
     onVariantChange: vi.fn(),
     textInfo: { rooms: [], client: '' },
@@ -89,10 +87,8 @@ function setupWithRooms(group: Group, rooms: Room[]) {
         onToggleItem={vi.fn()}
         onPatchItem={vi.fn()}
         onRemoveItem={vi.fn()}
-        onInsertItems={vi.fn()}
         onSaveItemToLibrary={vi.fn()}
         onSaveGroupToLibrary={vi.fn()}
-        onInsertItemToRoomBlocks={vi.fn()}
       />
     </Dnd>,
   );

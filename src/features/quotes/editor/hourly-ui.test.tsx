@@ -1,5 +1,4 @@
-import { act, render, renderHook, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { newItem, newQuoteBody, newSection } from '@/domain/quote';
 import type { LibraryItem } from '@/data/repos/library.repo';
@@ -19,7 +18,7 @@ vi.mock('sonner', () => ({
   toast: { error: toastError, info: toastInfo, success: vi.fn() },
 }));
 
-const { LibraryPicker } = await import('./components/LibraryPicker');
+const { useInsertFromLibrary } = await import('./scope/useInsertFromLibrary');
 const { useEditorStore } = await import('./editor.store');
 const { usePricingBasisChange } = await import('./usePricingBasisChange');
 
@@ -57,42 +56,43 @@ beforeEach(() => {
 });
 
 describe('wstawianie z biblioteki między trybami', () => {
-  async function wstaw(pricing: { pricingBasis: 'amount' | 'time'; hourlyRateCents: number | null }) {
-    const onPickItem = vi.fn();
-    const user = userEvent.setup();
-    render(<LibraryPicker onPickItem={onPickItem} pricing={pricing} />);
-
-    await user.click(screen.getByRole('button', { name: pl.editor.fromLibrary }));
-    await user.click(await screen.findByText('Projekt koncepcyjny'));
-    return onPickItem;
+  /*
+   * Test szedł przez `LibraryPicker`, którego już nie ma (poprawka 7,
+   * 2026-08-27 — dobieranie usług robi wyłącznie panel „Dodaj usługi").
+   * Sprawdzana zasada jest jednak w HOOKU, wspólnym dla obu miejsc, więc
+   * pytamy o nią wprost, zamiast montować panel po to, żeby w niego kliknąć.
+   */
+  function wstaw(
+    pricing: { pricingBasis: 'amount' | 'time'; hourlyRateCents: number | null },
+    item = libItem(),
+  ) {
+    const { result } = renderHook(() => useInsertFromLibrary(pricing));
+    return result.current(item);
   }
 
-  it('PRZELICZA wpis godzinowy wstawiany do wyceny kwotowej', async () => {
+  it('PRZELICZA wpis godzinowy wstawiany do wyceny kwotowej', () => {
     /*
      * Sedno pułapki z T-40: „45" w bibliotece godzinowej to 45 MINUT.
      * Przepisane bez zmian dałoby w ofercie kwotowej 45 groszy — liczba
      * wygląda wiarygodnie, więc nikt by tego nie zauważył.
      */
-    const onPickItem = await wstaw({ pricingBasis: 'amount', hourlyRateCents: RATE });
+    const wstawiona = wstaw({ pricingBasis: 'amount', hourlyRateCents: RATE });
 
-    expect(onPickItem).toHaveBeenCalledTimes(1);
-    const wstawiona = onPickItem.mock.calls[0]?.[0] as { unitPriceCents: number };
-    expect(wstawiona.unitPriceCents).toBe(9_000);
+    expect(wstawiona?.unitPriceCents).toBe(9_000);
     expect(toastInfo).toHaveBeenCalledWith(pl.editor.libraryConvertedToAmount);
   });
 
-  it('ODMAWIA, gdy nie ma stawki — bez kursu wymiany nie ma przeliczenia', async () => {
-    const onPickItem = await wstaw({ pricingBasis: 'amount', hourlyRateCents: null });
+  it('ODMAWIA, gdy nie ma stawki — bez kursu wymiany nie ma przeliczenia', () => {
+    const wstawiona = wstaw({ pricingBasis: 'amount', hourlyRateCents: null });
 
-    expect(onPickItem).not.toHaveBeenCalled();
+    expect(wstawiona).toBeNull();
     expect(toastError).toHaveBeenCalledWith(pl.editor.libraryBasisMismatch);
   });
 
-  it('zgodne jednostki wstawia bez przeliczania i bez komunikatu', async () => {
-    const onPickItem = await wstaw({ pricingBasis: 'time', hourlyRateCents: RATE });
+  it('zgodne jednostki wstawia bez przeliczania i bez komunikatu', () => {
+    const wstawiona = wstaw({ pricingBasis: 'time', hourlyRateCents: RATE });
 
-    const wstawiona = onPickItem.mock.calls[0]?.[0] as { unitPriceCents: number };
-    expect(wstawiona.unitPriceCents).toBe(45);
+    expect(wstawiona?.unitPriceCents).toBe(45);
     expect(toastInfo).not.toHaveBeenCalled();
   });
 });

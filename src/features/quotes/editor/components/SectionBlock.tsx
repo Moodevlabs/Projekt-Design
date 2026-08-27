@@ -2,13 +2,13 @@ import { memo, useState } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { LayoutGrid, Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { InlineText } from './InlineText';
 import { ItemRow } from './ItemRow';
 import { GroupBlock } from './GroupBlock';
 import { AddLink } from './AddLink';
-import { LibraryPicker } from './LibraryPicker';
+
 import { DragHandle } from './DragHandle';
 import { ItemsColumnsHeader } from './ItemsColumnsHeader';
 import { useStableIds } from '../dnd/useStableIds';
@@ -54,13 +54,9 @@ export interface SectionBlockProps {
   onToggleItem: (itemId: string) => void;
   onPatchItem: (itemId: string, patch: Partial<Item>) => void;
   onRemoveItem: (itemId: string) => void;
-  onInsertItems: (sectionId: string, groupId: string | null, items: Item[]) => void;
-  onInsertGroup: (sectionId: string, group: Group) => void;
   onSaveItemToLibrary: (item: Item) => void;
   onSaveGroupToLibrary: (group: Group) => void;
   /** „Rozpisz na pomieszczenia” — po jednym bloku na każde pomieszczenie wyceny. */
-  onAddRoomBlocks: (sectionId: string) => void;
-  onInsertItemToRoomBlocks: (sectionId: string, item: Item) => void;
 }
 
 export const SectionBlock = memo(function SectionBlock({
@@ -84,12 +80,8 @@ export const SectionBlock = memo(function SectionBlock({
   onToggleItem,
   onPatchItem,
   onRemoveItem,
-  onInsertItems,
-  onInsertGroup,
   onSaveItemToLibrary,
   onSaveGroupToLibrary,
-  onAddRoomBlocks,
-  onInsertItemToRoomBlocks,
 }: SectionBlockProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   // Akcja ze store'u ma stałą referencję — nie przebija `memo` na bloku.
@@ -209,9 +201,18 @@ export const SectionBlock = memo(function SectionBlock({
       {editing ? (
         <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
           {/*
-            Główne wejście do budowania zakresu: panel z tabelą (T-71).
-            Linki obok zostają dla szybkich, pojedynczych ruchów — dopisanie
-            jednej pozycji do gotowej oferty to najczęstsza czynność (T-70).
+            DWA WEJŚCIA, nie cztery (poprawka 7, 2026-08-27).
+
+            „Dodaj usługi" otwiera panel z całą biblioteką — usługami
+            i zestawami, z wyszukiwarką i filtrem grup. Osobny picker
+            biblioteki stał obok i robił dokładnie to samo w węższym oknie,
+            więc pasek akcji zadawał pytanie „którym z dwóch sposobów chcesz
+            zrobić tę samą rzecz".
+
+            Zniknęło też „Rozpisz na pomieszczenia": zakładało bloki dla
+            każdego pomieszczenia naraz, czyli robiło strukturę dokumentu
+            za autora — i nikt nie umiał powiedzieć, co się właściwie stanie
+            po kliknięciu.
           */}
           <Button
             type="button"
@@ -224,15 +225,6 @@ export const SectionBlock = memo(function SectionBlock({
             {pl.editor.scopeOpen}
           </Button>
           <AddLink onClick={() => onAddItem(section.id, null)}>{pl.editor.addItemManual}</AddLink>
-          <LibraryPicker
-            pricing={pricing}
-            priorityCategory={section.title}
-            onPickItem={(item) => onInsertItems(section.id, null, [item])}
-            onPickGroup={(group) => onInsertGroup(section.id, group)}
-          />
-          <AddLink icon={LayoutGrid} onClick={() => onAddRoomBlocks(section.id)}>
-            {pl.editor.addRoomBlocks}
-          </AddLink>
         </div>
       ) : null}
 
@@ -265,10 +257,8 @@ export const SectionBlock = memo(function SectionBlock({
               onToggleItem={onToggleItem}
               onPatchItem={onPatchItem}
               onRemoveItem={onRemoveItem}
-              onInsertItems={onInsertItems}
               onSaveItemToLibrary={onSaveItemToLibrary}
               onSaveGroupToLibrary={onSaveGroupToLibrary}
-              onInsertItemToRoomBlocks={onInsertItemToRoomBlocks}
             />
           ))}
         </SortableContext>

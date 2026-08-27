@@ -507,84 +507,15 @@ describe('editor.store — pomieszczenia (T-35)', () => {
     expect(store().body?.sections[0]?.groups[0]?.items[0]?.roomId).toBeNull();
   });
 
-  it('rozpisuje sekcje na bloki pomieszczen', () => {
-    store().addRoom({ label: 'Kuchnia' });
-    store().addRoom({ label: 'Salon' });
-    const sectionId = store().body?.sections[0]?.id;
-    if (!sectionId) throw new Error('brak sekcji');
-
-    const przed = store().body?.sections[0]?.groups.length ?? 0;
-    store().addRoomBlocks(sectionId);
-
-    const grupy = store().body?.sections[0]?.groups ?? [];
-    expect(grupy).toHaveLength(przed + 2);
-
-    const bloki = grupy.filter((group) => group.roomId !== null);
-    expect(bloki.map((group) => group.name)).toEqual(['Kuchnia', 'Salon']);
-  });
-
-  it('powtorne rozpisanie nie dubluje blokow', () => {
-    store().addRoom({ label: 'Kuchnia' });
-    const sectionId = store().body?.sections[0]?.id;
-    if (!sectionId) throw new Error('brak sekcji');
-
-    store().addRoomBlocks(sectionId);
-    store().addRoomBlocks(sectionId);
-
-    const bloki = (store().body?.sections[0]?.groups ?? []).filter(
-      (group) => group.roomId !== null,
-    );
-    expect(bloki).toHaveLength(1);
-  });
-
-  it('rozpisanie bez pomieszczen niczego nie zmienia', () => {
-    const sectionId = store().body?.sections[0]?.id;
-    if (!sectionId) throw new Error('brak sekcji');
-
-    store().markSaved('2026-08-01T11:00:00Z', '2026-08-01T11:00:00Z');
-    store().addRoomBlocks(sectionId);
-
-    // Brak zmiany nie moze brudzic dokumentu — inaczej autozapis leci po nic.
-    expect(store().saveState).toBe('saved');
-  });
-
-  it('wstawia pozycje do wszystkich blokow, kazda z wlasnym id', () => {
-    store().addRoom({ label: 'Kuchnia' });
-    store().addRoom({ label: 'Salon' });
-    const sectionId = store().body?.sections[0]?.id;
-    if (!sectionId) throw new Error('brak sekcji');
-    store().addRoomBlocks(sectionId);
-
-    store().insertItemToRoomBlocks(sectionId, newItem({ name: 'Wizualizacje', unitPriceCents: 1 }));
-
-    const bloki = (store().body?.sections[0]?.groups ?? []).filter(
-      (group) => group.roomId !== null,
-    );
-    expect(bloki.every((group) => group.items.at(-1)?.name === 'Wizualizacje')).toBe(true);
-
-    // Wspolna referencja znaczylaby, ze edycja jednej pozycji zmienia wszystkie.
-    const ids = bloki.map((group) => group.items.at(-1)?.id);
-    expect(new Set(ids).size).toBe(bloki.length);
-
-    // Kazda kopia jest przypieta do SWOJEGO pomieszczenia.
-    expect(bloki.every((group) => group.items.at(-1)?.roomId === group.roomId)).toBe(true);
-  });
-
-  it('wstawianie do blokow pomija zwykle grupy', () => {
-    store().addRoom({ label: 'Kuchnia' });
-    const sectionId = store().body?.sections[0]?.id;
-    if (!sectionId) throw new Error('brak sekcji');
-    store().addRoomBlocks(sectionId);
-
-    const zwyklaGrupa = store().body?.sections[0]?.groups.find((group) => group.roomId === null);
-    const przed = zwyklaGrupa?.items.length ?? 0;
-
-    store().insertItemToRoomBlocks(sectionId, newItem({ name: 'Wizualizacje' }));
-
-    const po = store().body?.sections[0]?.groups.find((group) => group.roomId === null)?.items
-      .length;
-    expect(po).toBe(przed);
-  });
+  /*
+   * Testy `addRoomBlocks` / `insertItemToRoomBlocks` usuniete razem z tymi
+   * akcjami (poprawka 7, 2026-08-27). „Rozpisz na pomieszczenia" zakladalo
+   * bloki dla wszystkich pomieszczen naraz, a „Do wszystkich pomieszczen"
+   * wstawialo jedna usluge do kazdego z nich — obie budowaly strukture
+   * dokumentu za autora i po zadnej z nich nie dalo sie przewidziec, co
+   * dokladnie sie stanie. Bloki pomieszczen dalej istnieja; zaklada sie je
+   * pojedynczo, przez „Dodaj uslugi" z wybranym celem.
+   */
 
   it('usuniecie nieistniejacego pomieszczenia nie rusza pozycji', () => {
     store().addRoom({ label: 'Kuchnia' });
