@@ -6,6 +6,7 @@ import {
   gridRange,
   groupByDay,
   isSameMonth,
+  isSunday,
   isWeekend,
   kindsOfDay,
   monthGrid,
@@ -13,6 +14,7 @@ import {
   shiftMonth,
   shortTime,
   todayIso,
+  weekdayIndex,
 } from './month';
 import type { CalendarEvent } from './schema';
 
@@ -81,10 +83,21 @@ describe('arytmetyka miesięcy', () => {
     expect(isSameMonth('2026-09-30', { year: 2026, month: 9 })).toBe(true);
   });
 
-  it('rozpoznaje weekend', () => {
+  it('liczy dzień tygodnia od poniedziałku', () => {
+    // 7 września 2026 to poniedziałek — pierwsza kolumna siatki.
+    expect(weekdayIndex('2026-09-07')).toBe(0);
+    expect(weekdayIndex('2026-09-12')).toBe(5); // sobota
+    expect(weekdayIndex('2026-09-13')).toBe(6); // niedziela
+  });
+
+  it('rozpoznaje weekend, a niedzielę osobno', () => {
     expect(isWeekend('2026-09-05')).toBe(true); // sobota
     expect(isWeekend('2026-09-06')).toBe(true); // niedziela
     expect(isWeekend('2026-09-07')).toBe(false); // poniedziałek
+
+    // Niedziela jest w polskich kalendarzach czerwona, sobota tylko wygaszona.
+    expect(isSunday('2026-09-06')).toBe(true);
+    expect(isSunday('2026-09-05')).toBe(false);
   });
 
   it('bierze dzisiejszy dzień z czasu lokalnego', () => {
