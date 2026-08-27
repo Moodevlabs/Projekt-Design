@@ -95,6 +95,8 @@ vi.mock('@/data/queries/useShares', () => ({
   useQuoteAcceptance: () => ({ data: null }),
   useQuoteComments: () => ({ data: [] }),
   useMarkCommentRead: () => ({ mutate: vi.fn() }),
+  // Od poprawki 7a os „Na czym stoimy" pyta tez o linki.
+  useShares: () => ({ data: [], isLoading: false }),
 }));
 
 vi.mock('@/data/queries/useBrandKit', () => ({

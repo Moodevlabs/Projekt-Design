@@ -558,6 +558,38 @@ Pozdrawiam`,
     // Powiadomienia Realtime (T-26).
     acceptedToast: 'Klient zaakceptował ofertę.',
     commentToast: 'Klient zostawił uwagi do oferty.',
+
+    /*
+     * ŚCIEŻKA DECYZJI (poprawka 7a, 2026-08-27).
+     *
+     * Do tej pory o tym, co się dzieje z ofertą, mówiły trzy rozsypane
+     * elementy: pigułka statusu, wiersz „otwarty 4 razy" w oknie udostępniania
+     * i osobna karta akceptacji. Każdy z nich był prawdziwy i żaden nie
+     * odpowiadał na pytanie „na czym stoimy". Oś odpowiada.
+     */
+    pathTitle: 'Na czym stoimy',
+    pathSent: 'Oferta wysłana',
+    pathSentPending: 'Jeszcze nie wysłana',
+    pathSentHint: 'Utwórz link albo oznacz wycenę jako wysłaną.',
+    pathOpened: 'Klient otworzył link',
+    pathOpenedPending: 'Klient jeszcze nie otworzył',
+    pathOpenedHint: 'Dopóki link nie zostanie otwarty, nie ma na co czekać.',
+    pathComments: (count: number) =>
+      count === 1 ? '1 uwaga od klienta' : `${count} uwagi/uwag od klienta`,
+    pathCommentsNone: 'Bez uwag',
+    pathDecisionPending: 'Czekamy na decyzję',
+    pathDecisionPendingHint: 'Klient może zaakceptować ofertę, odrzucić ją albo zgłosić uwagi.',
+    pathAccepted: 'Klient przyjął ofertę',
+    pathRejected: 'Klient odrzucił ofertę',
+    pathRejectedReason: (reason: string) => `Powód: ${reason}`,
+    pathNoReason: 'Klient nie podał powodu.',
+    /** Ręczna zmiana statusu zniknęła — mówimy o tym wprost, raz. */
+    pathManualNote:
+      'Akceptację i odmowę zapisuje wyłącznie klient, pod linkiem. Dzięki temu data i zakres są jego odpowiedzią, a nie naszym domysłem.',
+
+    // Które pozycje klient odznaczył — nazwami, nie liczbą.
+    turnedOffTitle: 'Klient odznaczył',
+    turnedOnTitle: 'Klient dobrał',
   },
   editor: {
     preview: 'Podgląd',

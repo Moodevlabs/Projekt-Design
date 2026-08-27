@@ -240,6 +240,7 @@ function ExistingQuoteEditor({ quoteId }: { quoteId: string }) {
   return (
     <EditorSurface
       createdAt={quote.data?.createdAt ?? new Date().toISOString()}
+      sentAt={quote.data?.sentAt ?? null}
       onReload={() => void quote.refetch()}
       onRetry={saveNow}
     />
@@ -248,10 +249,13 @@ function ExistingQuoteEditor({ quoteId }: { quoteId: string }) {
 
 function EditorSurface({
   createdAt,
+  sentAt,
   onReload,
   onRetry,
 }: {
   createdAt: string;
+  /** `quotes.sent_at` — pierwszy krok ścieżki decyzji klienta (poprawka 7a). */
+  sentAt: string | null;
   onReload: () => void;
   onRetry: () => void;
 }) {
@@ -742,7 +746,7 @@ function EditorSurface({
                 otwarciu modala; kto nie wiedzial, ze tam jest, nie dowiadywal
                 sie o niej wcale. Karta milczy, dopoki nie ma czego pokazac.
               */}
-              {quoteId ? <QuoteFeedback quoteId={quoteId} /> : null}
+              {quoteId ? <QuoteFeedback quoteId={quoteId} sentAt={sentAt} /> : null}
 
               {editing ? <DocumentsCard /> : null}
 

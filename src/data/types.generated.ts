@@ -558,8 +558,10 @@ export type Database = {
         Row: {
           accepted_at: string
           accepted_body: Json
+          decision: string
           enabled_item_ids: string[]
           id: string
+          reason: string | null
           quote_id: string
           share_id: string | null
           signer_ip: unknown
@@ -578,8 +580,10 @@ export type Database = {
         Update: {
           accepted_at?: string
           accepted_body?: Json
+          decision?: string
           enabled_item_ids?: string[]
           id?: string
+          reason?: string | null
           quote_id?: string
           share_id?: string | null
           signer_ip?: unknown
@@ -1121,6 +1125,10 @@ export type Database = {
       }
       comment_shared_quote: {
         Args: { p_author_name: string; p_message: string; p_token: string }
+        Returns: Json
+      }
+      reject_shared_quote: {
+        Args: { p_reason?: string | null; p_signer_name: string; p_token: string }
         Returns: Json
       }
       files_bump_usage: {

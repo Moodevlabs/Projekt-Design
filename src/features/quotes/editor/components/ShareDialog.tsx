@@ -12,7 +12,6 @@ import {
 } from '@/components/ui/dialog';
 import {
   useCreateShare,
-  useQuoteAcceptance,
   useQuoteComments,
   useRevokeShare,
   useShares,
@@ -56,7 +55,6 @@ interface Props {
 export function ShareDialog({ quoteId, quoteNumber, open, onOpenChange }: Props) {
   const shares = useShares(open ? quoteId : undefined);
   const comments = useQuoteComments(open ? quoteId : undefined);
-  const acceptance = useQuoteAcceptance(open ? quoteId : undefined);
   const create = useCreateShare(quoteId);
   const revoke = useRevokeShare(quoteId);
 
@@ -78,11 +76,12 @@ export function ShareDialog({ quoteId, quoteNumber, open, onOpenChange }: Props)
           <DialogDescription>{pl.share.description}</DialogDescription>
         </DialogHeader>
 
-        <QuoteFeedbackCard
-          acceptance={acceptance.data ?? null}
-          comments={comments.data ?? []}
-          quoteId={quoteId}
-        />
+        {/*
+          Akceptacja przeniosła się do osi „Na czym stoimy" w prawej kolumnie
+          edytora (poprawka 7a) — tutaj zostają same uwagi, bo to jedyna
+          rzecz, którą czyta się w kontekście linku.
+        */}
+        <QuoteFeedbackCard comments={comments.data ?? []} quoteId={quoteId} />
 
         {/* Wybór ważności i przycisk w jednym rzędzie — to jedna czynność,
             a nie formularz do wypełniania. */}

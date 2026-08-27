@@ -3,17 +3,23 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { applyEnabledIds, enabledItemIds, type SharedQuotePayload } from '@/domain/share/schema';
 import { parseQuoteBody, type QuoteBody } from '@/domain/quote/schema';
 
+import { parseScheduleBody } from '@/domain/schedule';
+import { parseQuoteDocuments } from '@/domain/documents';
+
 import {
   acceptSharedQuote,
   commentSharedQuote,
   fetchSharedQuote,
   isConfigured,
+  rejectSharedQuote,
   signedLogoUrl,
   tokenFromPath,
 } from './api';
 import { DecisionPanel } from './components/DecisionPanel';
 import { REJECTION_TEXT } from './messages';
 import { QuoteDocument } from './components/QuoteDocument';
+import { ScheduleBlock } from './components/ScheduleBlock';
+import { DocumentsBlock } from './components/DocumentsBlock';
 import { Summary } from './components/Summary';
 
 type Screen =
@@ -121,6 +127,34 @@ export function App() {
     [enabled, token],
   );
 
+  const handleReject = useCallback(
+    async (signerName: string, reason: string) => {
+      if (!token) return;
+      setBusy(true);
+      setActionError(null);
+      try {
+        const result = await rejectSharedQuote(token, signerName, reason);
+        if (result.ok) {
+          setScreen({
+            kind: 'done',
+            title: 'Dziękujemy za odpowiedź.',
+            message:
+              'Projektant wie, że nie skorzystasz z tej oferty. Jeśli coś się zmieni, odezwij się — przygotuje nową.',
+          });
+        } else {
+          setActionError(REJECTION_TEXT[result.reason]);
+        }
+      } catch (error) {
+        setActionError(
+          error instanceof Error ? error.message : 'Nie udało się zapisać odpowiedzi.',
+        );
+      } finally {
+        setBusy(false);
+      }
+    },
+    [token],
+  );
+
   const handleComment = useCallback(
     async (authorName: string, message: string) => {
       if (!token) return;
@@ -167,6 +201,13 @@ export function App() {
   const body = screen.body;
   const chosen = applyEnabledIds(body, [...enabled]);
   const closed = acceptance !== null;
+  const rejected = acceptance?.decision === 'rejected';
+
+  // Termin i dokumenty parsujemy tak samo miękko jak `body`: zapis zrobiony
+  // nowszą wersją aplikacji nie ma prawa wywrócić oferty. `null` znaczy
+  // „ta wycena ich nie ma" i jest w pełni normalnym stanem.
+  const schedule = parseScheduleBody(screen.payload.schedule);
+  const documents = parseQuoteDocuments(screen.payload.documents);
 
   return (
     <div
@@ -194,7 +235,13 @@ export function App() {
             <p className="mt-4 text-sm leading-relaxed whitespace-pre-line">{body.intro}</p>
           ) : null}
 
-          {closed ? (
+          {closed && rejected ? (
+            <p className="border-hair text-ink-soft mt-6 rounded-lg border px-4 py-3 text-sm">
+              Ta oferta została zamknięta
+              {acceptance.signerName ? ` przez: ${acceptance.signerName}` : ''}. Jeśli coś się
+              zmieniło, poproś projektanta o nową.
+            </p>
+          ) : closed ? (
             <p className="border-accent/25 bg-accent/5 mt-6 rounded-lg border px-4 py-3 text-sm">
               Oferta została zaakceptowana
               {acceptance.signerName ? ` przez: ${acceptance.signerName}` : ''}. Zakres poniżej
@@ -220,9 +267,20 @@ export function App() {
             <Summary body={chosen} currency={quote.currency} />
           </div>
 
+          {/*
+            Termin i zakres współpracy PRZED przyciskiem decyzji, nie za nim:
+            to są rzeczy, na podstawie których klient decyduje, a nie dodatki
+            do przeczytania później (poprawka 7a).
+          */}
+          {schedule ? <ScheduleBlock schedule={schedule} rooms={body.rooms} /> : null}
+          {documents ? (
+            <DocumentsBlock documents={documents} currency={quote.currency} />
+          ) : null}
+
           {closed ? null : (
             <DecisionPanel
               onAccept={handleAccept}
+              onReject={handleReject}
               onComment={handleComment}
               busy={busy}
               error={actionError}

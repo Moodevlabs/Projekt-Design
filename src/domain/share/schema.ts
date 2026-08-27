@@ -53,7 +53,17 @@ export const QuoteCommentSchema = z.object({
 });
 export type QuoteComment = z.infer<typeof QuoteCommentSchema>;
 
-/** Zapis akceptacji — dowód, że klient przyjął ofertę w danym kształcie. */
+/**
+ * Co klient odpowiedział (migracja 0033, poprawka 7a).
+ *
+ * Do 2026-08-27 tabela `quote_acceptances` znała tylko jedną odpowiedź, więc
+ * odmowa nie miała gdzie się zapisać — status `rejected` ustawiał ręcznie
+ * projektant, czyli system przechowywał jego domysł zamiast decyzji klienta.
+ */
+export const DecisionSchema = z.enum(['accepted', 'rejected']);
+export type Decision = z.infer<typeof DecisionSchema>;
+
+/** Zapis decyzji — dowód, co i w jakim kształcie klient odpowiedział. */
 export const AcceptanceSchema = z.object({
   id: z.string().uuid(),
   quoteId: z.string().uuid(),
@@ -63,6 +73,10 @@ export const AcceptanceSchema = z.object({
   signerName: z.string().nullable().default(null),
   signerIp: z.string().nullable().default(null),
   acceptedAt: z.string(),
+  /** `accepted` dla wierszy sprzed 0033 — wtedy innej odpowiedzi nie było. */
+  decision: DecisionSchema.catch('accepted').default('accepted'),
+  /** Powód odmowy, jeśli klient go podał. `null` przy akceptacji. */
+  reason: z.string().nullable().default(null),
 });
 export type Acceptance = z.infer<typeof AcceptanceSchema>;
 
@@ -104,12 +118,26 @@ export const SharedQuotePayloadSchema = z.discriminatedUnion('ok', [
   z.object({
     ok: z.literal(true),
     quote: SharedQuoteSchema,
+    /**
+     * Termin i dokumenty towarzyszące (poprawka 7a, 2026-08-27).
+     *
+     * `unknown` z tego samego powodu co `body`: to zapisy dokumentów, które
+     * mają własne wersje i migracje. Walidacja tutaj odrzucałaby harmonogram,
+     * który klient ma prawo zobaczyć.
+     *
+     * `null` jest normalnym stanem — większość ofert obejdzie się bez terminu.
+     */
+    schedule: z.unknown().nullable().default(null),
+    documents: z.unknown().nullable().default(null),
     brand: SharedBrandSchema,
     share: z.object({ expiresAt: z.string().nullable().default(null) }),
     acceptance: z
       .object({
         signerName: z.string().nullable().default(null),
         acceptedAt: z.string(),
+        /** `accepted` dla wpisów sprzed migracji 0033. */
+        decision: DecisionSchema.catch('accepted').default('accepted'),
+        reason: z.string().nullable().default(null),
       })
       .nullable()
       .default(null),
@@ -119,7 +147,11 @@ export const SharedQuotePayloadSchema = z.discriminatedUnion('ok', [
 export type SharedQuotePayload = z.infer<typeof SharedQuotePayloadSchema>;
 
 export const ShareActionResultSchema = z.discriminatedUnion('ok', [
-  z.object({ ok: z.literal(true), acceptedAt: z.string().optional() }),
+  z.object({
+    ok: z.literal(true),
+    acceptedAt: z.string().optional(),
+    rejectedAt: z.string().optional(),
+  }),
   z.object({ ok: z.literal(false), reason: ShareActionRejectionSchema }),
 ]);
 export type ShareActionResult = z.infer<typeof ShareActionResultSchema>;
@@ -256,6 +288,37 @@ export function applyEnabledIds(body: QuoteBody, ids: readonly string[]): QuoteB
  * („klient wyłączył 3 pozycje"). Zwraca id, nie nazwy: nazwę bierze się
  * z dokumentu, który i tak trzeba mieć pod ręką.
  */
+/**
+ * To samo, ale NAZWAMI (poprawka 7a, 2026-08-27).
+ *
+ * „Klient wyłączył 3 pozycje" nie mówi nic, na czym da się oprzeć rozmowę.
+ * „Wyłączył: Wizualizacje 3D, Nadzór autorski, Projekt oświetlenia" mówi
+ * wszystko — i to jest pierwsza rzecz, o którą projektant pyta, kiedy widzi,
+ * że oferta wróciła okrojona.
+ *
+ * Pozycje bez nazwy pomijamy: pusty myślnik na liście jest gorszy niż jego
+ * brak, a nazwana pozycja to jedyna, o której da się cokolwiek powiedzieć.
+ */
+export function selectionDiffNames(
+  original: QuoteBody,
+  chosen: readonly string[],
+): { turnedOff: string[]; turnedOn: string[] } {
+  const diff = selectionDiff(original, chosen);
+  const names = new Map<string, string>();
+
+  for (const section of original.sections) {
+    for (const item of section.items) names.set(item.id, item.name);
+    for (const group of section.groups) {
+      for (const item of group.items) names.set(item.id, item.name);
+    }
+  }
+
+  const resolve = (ids: string[]) =>
+    ids.map((id) => names.get(id) ?? '').filter((name) => name.trim().length > 0);
+
+  return { turnedOff: resolve(diff.turnedOff), turnedOn: resolve(diff.turnedOn) };
+}
+
 export function selectionDiff(
   original: QuoteBody,
   chosen: readonly string[],
