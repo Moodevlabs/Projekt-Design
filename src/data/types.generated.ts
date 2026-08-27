@@ -184,6 +184,63 @@ export type Database = {
           },
         ]
       }
+      site_visits: {
+        Row: {
+          attendees: string
+          checks: Json
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string
+          project_id: string
+          rooms: Json
+          updated_at: string
+          visited_at: string
+          workspace_id: string
+        }
+        Insert: {
+          attendees?: string
+          checks?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string
+          project_id: string
+          rooms?: Json
+          updated_at?: string
+          visited_at?: string
+          workspace_id: string
+        }
+        Update: {
+          attendees?: string
+          checks?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string
+          project_id?: string
+          rooms?: Json
+          updated_at?: string
+          visited_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_visits_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_visits_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           address: string | null
@@ -257,6 +314,7 @@ export type Database = {
           project_id: string | null
           quote_id: string | null
           quote_version: number | null
+          site_visit_id: string | null
           size_bytes: number
           storage_path: string
           updated_at: string
@@ -275,6 +333,7 @@ export type Database = {
           project_id?: string | null
           quote_id?: string | null
           quote_version?: number | null
+          site_visit_id?: string | null
           size_bytes: number
           storage_path: string
           updated_at?: string
@@ -293,6 +352,7 @@ export type Database = {
           project_id?: string | null
           quote_id?: string | null
           quote_version?: number | null
+          site_visit_id?: string | null
           size_bytes?: number
           storage_path?: string
           updated_at?: string

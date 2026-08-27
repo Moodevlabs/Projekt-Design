@@ -21,6 +21,14 @@ export const FileSchema = z.object({
   clientId: z.string().uuid(),
   projectId: z.string().uuid().nullable().default(null),
   quoteId: z.string().uuid().nullable().default(null),
+  /**
+   * Zdjęcie z wizji lokalnej (T-94, poprawka 10).
+   *
+   * Plik zostaje zwykłym plikiem projektu — to jest tylko wskazanie, przy
+   * której wizycie powstał. Skasowanie wizji zeruje pole, ale nie rusza
+   * pliku: archiwum klienta trzyma bajty, nie kontekst.
+   */
+  siteVisitId: z.string().uuid().nullable().default(null),
   kind: FileKindSchema.default('upload'),
   docType: DocTypeSchema.nullable().default(null),
   quoteVersion: z.number().int().nullable().default(null),

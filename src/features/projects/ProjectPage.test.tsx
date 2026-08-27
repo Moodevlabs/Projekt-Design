@@ -137,7 +137,7 @@ describe('ProjectPage', () => {
     expect(links[0]).toHaveAttribute('href', '/klienci/c1');
   });
 
-  it('ma zakladki Wyceny, Etapy, Dokumenty, Pliki i Notatki — i tylko te', () => {
+  it('ma zakladki Wyceny, Wizja lokalna, Etapy, Dokumenty, Pliki i Notatki — i tylko te', () => {
     // „Termin" jest zakladka WYCENY, nie projektu — harmonogram dotyczy
     // konkretnej oferty i duplikowanie go tutaj daloby dwa zrodla tej samej daty.
     //
@@ -153,6 +153,10 @@ describe('ProjectPage', () => {
     const tabs = screen.getAllByRole('tab').map((tab) => tab.textContent);
     expect(tabs).toEqual([
       pl.projects.tabQuotes,
+      // „Wizja lokalna" (T-94) tez nie lamie zasady: to notatka ze STANU
+      // ZASTANEGO — obmiar, instalacje, zdjecia — a nie drugi harmonogram
+      // ani lista zadan. Dotyczy MIEJSCA, wiec zyje przy teczce.
+      pl.siteVisit.tab,
       pl.stages.tab,
       pl.documents.tab,
       pl.files.tab,

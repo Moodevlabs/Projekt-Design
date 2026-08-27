@@ -40,7 +40,12 @@ function rejectionMessage(name: string, reason: RejectionReason): string {
  * polsku — Storage odrzuci to samo, ale po angielsku i bez nazwy pliku
  * (pułapka z T-12).
  */
-export function useFileUpload(target: { clientId: string; projectId?: string | null }) {
+export function useFileUpload(target: {
+  clientId: string;
+  projectId?: string | null;
+  /** Zdjecia z wizji lokalnej (T-94) — plik zostaje plikiem projektu. */
+  siteVisitId?: string | null;
+}) {
   const upload = useUploadFile();
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const [dragging, setDragging] = useState(false);
@@ -68,6 +73,7 @@ export function useFileUpload(target: { clientId: string; projectId?: string | n
           await upload.mutateAsync({
             clientId: target.clientId,
             projectId: target.projectId ?? null,
+            siteVisitId: target.siteVisitId ?? null,
             name: candidate.name,
             mime: candidate.mime,
             bytes: candidate.bytes,
@@ -86,7 +92,7 @@ export function useFileUpload(target: { clientId: string; projectId?: string | n
       setProgress(null);
       if (sent > 0) toast.success(pl.files.uploaded(sent));
     },
-    [upload, target.clientId, target.projectId],
+    [upload, target.clientId, target.projectId, target.siteVisitId],
   );
 
   /** Droga przeglądarki: obiekty `File` z inputa albo z `dataTransfer`. */

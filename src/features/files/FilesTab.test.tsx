@@ -45,6 +45,7 @@ function file(partial: Partial<StoredFile> = {}): StoredFile {
     clientId: 'c1',
     projectId: null,
     quoteId: null,
+    siteVisitId: null,
     kind: 'upload',
     docType: null,
     quoteVersion: null,

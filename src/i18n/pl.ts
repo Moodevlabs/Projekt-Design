@@ -1099,6 +1099,76 @@ Nie trzeba zakładać konta ani odpowiadać za jednym razem — formularz zapami
 Pozdrawiam`,
   },
 
+  /*
+   * WIZJA LOKALNA (T-94, poprawka 10 z 2026-08-27).
+   *
+   * Pierwsza wizyta na miejscu: obmiar, spis instalacji, zdjęcia stanu
+   * zastanego. Jedyny zapis tego, jak było, zanim ktokolwiek czegokolwiek
+   * dotknął — i dlatego wraca się do niej przez cały projekt.
+   */
+  siteVisit: {
+    tab: 'Wizja lokalna',
+    title: 'Wizja lokalna',
+    intro:
+      'Notatka ze stanu zastanego: obmiar, instalacje, zdjęcia, ustalenia. Wizji może być kilka — druga po wyburzeniach, trzecia przed montażem.',
+    add: 'Nowa wizja',
+    empty: 'Nie ma jeszcze żadnej wizji lokalnej.',
+    emptyHint: 'Zapisz obmiar i stan zastany, zanim ekipa cokolwiek ruszy.',
+    date: 'Data wizyty',
+    attendees: 'Obecni',
+    attendeesPlaceholder: 'projektant, inwestor, kierownik budowy',
+    notes: 'Notatka z wizji',
+    notesPlaceholder: 'Obserwacje, ustalenia, ryzyka. Co wymaga decyzji inwestora.',
+    delete: 'Usuń wizję',
+    deleteConfirm:
+      'Wizja zniknie razem z obmiarem i notatką. Zdjęcia zostaną w plikach projektu.',
+
+    // Obmiar.
+    rooms: 'Obmiar',
+    roomsHint:
+      'Wymiary w centymetrach — powierzchnia liczy się sama. Pomieszczenie bez kompletu wymiarów nie wchodzi do sumy.',
+    roomsEmpty: 'Brak obmiaru.',
+    addRoom: 'Dodaj pomieszczenie',
+    roomName: 'Pomieszczenie',
+    roomNamePlaceholder: 'Salon',
+    roomLength: 'Dł. (cm)',
+    roomWidth: 'Szer. (cm)',
+    roomHeight: 'Wys. (cm)',
+    roomArea: 'Pow.',
+    roomNote: 'Uwagi',
+    roomNoteLabel: (room: string) => `Uwagi: ${room}`,
+    removeRoom: (room: string) => `Usuń z obmiaru: ${room}`,
+    areaTotal: (m2: number) => `Zmierzona powierzchnia: ${m2} m²`,
+    noArea: 'brak',
+
+    // Spis instalacji.
+    checks: 'Do sprawdzenia',
+    checksHint:
+      'Lista jest punktem wyjścia — pozycje można dopisać i usunąć. „Nie ustalono" to prawidłowa odpowiedź: znaczy „byłem i nie dało się sprawdzić".',
+    addCheck: 'Dodaj pozycję',
+    checkNote: 'Uwaga',
+    checkNoteLabel: (label: string) => `Uwaga: ${label}`,
+    removeCheck: (label: string) => `Usuń pozycję: ${label}`,
+    unresolved: (count: number) =>
+      count === 1 ? '1 pozycja nieustalona' : `${count} pozycji nieustalonych`,
+    allResolved: 'Wszystko ustalone',
+    state: {
+      ok: 'Jest, OK',
+      replace: 'Do wymiany',
+      missing: 'Brak',
+      unknown: 'Nie ustalono',
+    },
+
+    // Zdjęcia.
+    photos: 'Zdjęcia',
+    photosHint: 'Trafiają też do plików projektu — tutaj są przypięte do tej wizyty.',
+    addPhotos: 'Dodaj zdjęcia',
+    photosEmpty: 'Brak zdjęć z tej wizyty.',
+    uploading: 'Wysyłanie…',
+    uploadFailed: 'Nie udało się wysłać pliku.',
+    saved: 'Zapisano wizję lokalną',
+  },
+
   dashboard: {
     activeProjects: 'Aktywni klienci i projekty',
     activeProjectsEmpty: 'Brak projektów w toku. Zacznij od dodania klienta.',

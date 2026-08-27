@@ -33,6 +33,7 @@ function doc(partial: Partial<StoredFile> = {}): StoredFile {
     clientId: 'c1',
     projectId: null,
     quoteId: 'q1',
+    siteVisitId: null,
     kind: 'generated',
     docType: 'quote',
     quoteVersion: null,

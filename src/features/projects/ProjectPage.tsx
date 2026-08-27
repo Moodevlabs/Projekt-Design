@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ProjectStagesTab } from './ProjectStagesTab';
+import { SiteVisitTab } from '@/features/site-visit/SiteVisitTab';
 import { ProjectAcceptanceCard } from '@/features/share/ProjectAcceptanceCard';
 import { EmptyState, Money } from '@/components/shared';
 import { ProjectFormDialog } from './ProjectFormDialog';
@@ -131,6 +132,11 @@ export function ProjectPage() {
       <Tabs defaultValue="quotes" className="space-y-4">
         <TabsList aria-label={pl.projects.title}>
           <TabsTrigger value="quotes">{pl.projects.tabQuotes}</TabsTrigger>
+          {/*
+            Wizja lokalna zaraz po wycenach: to pierwsza rzecz, którą robi się
+            NA MIEJSCU, i wraca się do niej przez cały projekt (poprawka 10).
+          */}
+          <TabsTrigger value="visit">{pl.siteVisit.tab}</TabsTrigger>
           <TabsTrigger value="stages">{pl.stages.tab}</TabsTrigger>
           <TabsTrigger value="documents">{pl.documents.tab}</TabsTrigger>
           <TabsTrigger value="files">{pl.files.tab}</TabsTrigger>
@@ -139,6 +145,9 @@ export function ProjectPage() {
 
         <TabsContent value="quotes">
           <ProjectQuotesTab project={data} client={client.data ?? null} />
+        </TabsContent>
+        <TabsContent value="visit">
+          <SiteVisitTab clientId={data.clientId} projectId={data.id} />
         </TabsContent>
         <TabsContent value="stages">
           <ProjectStagesTab projectId={data.id} stageProgress={data.stageProgress} />
