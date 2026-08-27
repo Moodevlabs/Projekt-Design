@@ -3,7 +3,66 @@
 Format wg [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/).
 Wersje zgodne z [SemVer](https://semver.org/lang/pl/).
 
-## [Nieopublikowane]
+## [1.1.0] – 2026-08-27
+
+### Dodane
+
+**Link dla klienta — oferta, którą inwestor przekliknie sam.**
+Zamiast wysyłać martwy PDF, wysyłasz adres. Klient otwiera ofertę
+w przeglądarce, przełącza pozycje TAK/NIE, widzi kwotę na żywo i albo
+akceptuje (imię + data), albo zostawia uwagi. Ty dostajesz powiadomienie
+w aplikacji, a status wyceny zmienia się sam.
+
+Link ma termin ważności, licznik otwarć i da się go odwołać. Wysyłasz go
+**ze swojej poczty** — przycisk otwiera Twój program pocztowy z gotową
+treścią. Świadomie bez wysyłki z naszego serwera: mail od znanego nadawcy
+dochodzi lepiej niż z obcej domeny.
+
+Bez podpisu elektronicznego. Imię, znacznik czasu i adres IP to dowód zgody
+na zakres — przyjęcie oferty nie wymaga formy pisemnej.
+
+**Automatyczna aktualizacja aplikacji.** Toolier sprawdza po cichu przy
+starcie, czy jest nowsza wersja, i pokazuje ją w Ustawieniach. Nic nie
+instaluje się samo: restart w środku przygotowywania oferty byłby gorszy niż
+dzień zwłoki z poprawką.
+
+**Kosz na pliki.** Usunięty plik trafia do kosza na 30 dni, zamiast znikać
+od razu. Kosz ma własny ekran w pasku bocznym i pokazuje, ile miejsca trzymają
+usunięte pliki — bo limit zwalnia się dopiero po trwałym usunięciu.
+
+**Porównanie wersji wyceny.** Widać, co zmieniło się między v1 a v2: które
+pozycje doszły, zniknęły, podrożały albo zostały wyłączone, i o ile różni się
+kwota. Pozycje dopasowują się po tożsamości, nie po identyfikatorze, więc
+porównanie działa też po przebudowie dokumentu.
+
+**Etapy realizacji w projekcie.** Trzy stany na etap (nierozpoczęty · w toku ·
+zakończony) z datami i paskiem postępu. Etapy pochodzą z harmonogramu
+zaakceptowanej wyceny — nie ma drugiego miejsca, w którym trzeba je utrzymywać.
+
+**Eksport rejestru do Excela (.xlsx).** W odróżnieniu od CSV liczby zostają
+liczbami — Excel przestaje zamieniać numer oferty na datę.
+
+**Import klientów z pliku CSV.** Rozpoznaje separator i nagłówki z arkusza
+klienta, pokazuje podgląd przed zapisem i pomija duplikaty. Wiersz bez nazwy
+nie przerywa importu pozostałych.
+
+**Wiele walut.** Wybór waluty workspace'u wchodzi teraz do nowych wycen,
+edytora i wszystkich PDF-ów. Format liczb zostaje polski niezależnie od waluty.
+
+**Praca bez sieci.** Nieudany autozapis nie przepada — trafia do lokalnej
+kolejki i idzie, gdy połączenie wróci. Pasek u góry mówi, ile zmian czeka.
+Gdy w międzyczasie ktoś zmienił dokument, zapis się zatrzymuje i pyta,
+zamiast po cichu nadpisywać.
+
+### Zmienione
+
+**Ustawienia podzielone na trzy karty:** Aplikacja, Branding, Konto. Wcześniej
+wszystko stało w jednej kolumnie — ustawienia wycen, kosz, aktualizacje, hasło
+i kasowanie konta jedno pod drugim.
+
+**Grupy w bibliotece mają jedno źródło.** Nazwa grupy przy usłudze jest
+rozwiązywana ze słownika, a nie kopiowana do wiersza — zmiana nazwy dociera
+teraz do wszystkich usług, także zapisanych wcześniej.
 
 ### Zmienione
 
