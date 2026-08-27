@@ -102,6 +102,49 @@ describe('useAutosave', () => {
     expect(useEditorStore.getState().lastSeenUpdatedAt).toBe('2026-08-01T11:00:00Z');
   });
 
+  /*
+   * REGRESJA Z 2026-08-27 — zgloszona przez wlasciciela.
+   *
+   * „Zbuduj wycene, dodaj etapy i termin, udostepnij od razu — link ma sama
+   * wycene. Wyjdz z edytora, wejdz znowu, udostepnij — link ma komplet."
+   *
+   * Przyczyna: subskrypcja autozapisu porownywala tylko `body`, `number`,
+   * `clientId` i `projectId`. Harmonogram i dokumenty ustawialy `dirty`, ale
+   * NIE planowaly zapisu — lezaly w pamieci do odmontowania edytora.
+   */
+  it('ZMIANA HARMONOGRAMU planuje zapis — nie czeka na wyjscie z edytora', async () => {
+    vi.mocked(saveQuote).mockResolvedValue(makeQuote());
+    renderHook(() => useAutosave(), { wrapper });
+
+    act(() => useEditorStore.getState().ensureSchedule(null));
+    expect(saveQuote).not.toHaveBeenCalled();
+
+    await act(async () => {
+      vi.advanceTimersByTime(AUTOSAVE_DELAY_MS);
+      await Promise.resolve();
+    });
+
+    expect(saveQuote).toHaveBeenCalledTimes(1);
+    // Harmonogram MUSI byc w tym, co poszlo na serwer — inaczej link dla
+    // klienta dalej pokaze sama wycene.
+    expect(vi.mocked(saveQuote).mock.calls[0]?.[0]?.schedule).not.toBeNull();
+  });
+
+  it('ZMIANA DOKUMENTOW planuje zapis — ta sama zasada co harmonogram', async () => {
+    vi.mocked(saveQuote).mockResolvedValue(makeQuote());
+    renderHook(() => useAutosave(), { wrapper });
+
+    act(() => useEditorStore.getState().ensureStagesDoc(null));
+
+    await act(async () => {
+      vi.advanceTimersByTime(AUTOSAVE_DELAY_MS);
+      await Promise.resolve();
+    });
+
+    expect(saveQuote).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(saveQuote).mock.calls[0]?.[0]?.documents).not.toBeNull();
+  });
+
   it('kazda kolejna zmiana resetuje debounce — zapis leci po OSTATNIEJ, nie po pierwszej', async () => {
     vi.mocked(saveQuote).mockResolvedValue(makeQuote());
     renderHook(() => useAutosave(), { wrapper });
