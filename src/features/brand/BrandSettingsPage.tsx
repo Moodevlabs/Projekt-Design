@@ -304,9 +304,7 @@ export function BrandSettingsPage() {
                 variant="ghost"
                 size="icon-sm"
                 aria-label={pl.brand.removeContact(index)}
-                onClick={() =>
-                  patch({ contacts: draft.contacts.filter((_, at) => at !== index) })
-                }
+                onClick={() => patch({ contacts: draft.contacts.filter((_, at) => at !== index) })}
               >
                 <Trash2 aria-hidden />
               </Button>
@@ -400,11 +398,7 @@ export function BrandSettingsPage() {
           {!colorsValid ? (
             <span className="text-discount mr-auto text-sm">{pl.brand.invalidColor}</span>
           ) : null}
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() => setDraft(brandKit.data ?? null)}
-          >
+          <Button type="button" variant="ghost" onClick={() => setDraft(brandKit.data ?? null)}>
             {pl.common.cancel}
           </Button>
           <Button type="button" disabled={update.isPending || !colorsValid} onClick={save}>

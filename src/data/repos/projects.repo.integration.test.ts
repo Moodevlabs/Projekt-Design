@@ -63,7 +63,10 @@ afterAll(async () => {
   await getSupabase().auth.signOut();
 });
 
-async function makeProject(name: string, extra: Partial<ReturnType<typeof emptyProjectDraft>> = {}) {
+async function makeProject(
+  name: string,
+  extra: Partial<ReturnType<typeof emptyProjectDraft>> = {},
+) {
   const project = await createProject({
     ...emptyProjectDraft(),
     workspaceId,
@@ -218,8 +221,8 @@ describe('projects.repo — teczki inwestycji', () => {
     ).toContain('Poddasze nad garazem');
 
     // Widok niesie `client_name`, wiec da sie znalezc teczke po inwestorze.
-    expect(
-      (await listProjects({ workspaceId, search: 'Test Projekty' })).length,
-    ).toBeGreaterThan(0);
+    expect((await listProjects({ workspaceId, search: 'Test Projekty' })).length).toBeGreaterThan(
+      0,
+    );
   });
 });

@@ -43,7 +43,7 @@ export function SiteVisitTab({ clientId, projectId }: { clientId: string; projec
   return (
     <div className="space-y-4">
       <section className="card-surface flex flex-wrap items-start justify-between gap-3 p-5">
-        <div className="min-w-0 max-w-prose">
+        <div className="max-w-prose min-w-0">
           <h2 className="text-ink text-sm font-semibold">{pl.siteVisit.title}</h2>
           <p className="text-ink-soft mt-1 text-sm">{pl.siteVisit.intro}</p>
         </div>

@@ -94,7 +94,9 @@ describe('komunikacja projektowa', () => {
 
   it('bez oznaczonych pozycji daje zero, a nie całą sumę', () => {
     const bezTagow = newQuoteBody({
-      sections: [newSection({ title: 'X', items: [newItem({ name: 'A', unitPriceCents: 6_000 })] })],
+      sections: [
+        newSection({ title: 'X', items: [newItem({ name: 'A', unitPriceCents: 6_000 })] }),
+      ],
     });
 
     expect(calcWorkload(bezTagow, RATE).communicationMinutes).toBe(0);

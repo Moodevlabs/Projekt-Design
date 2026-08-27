@@ -9,6 +9,7 @@ import { RegisterPage } from '@/features/auth/RegisterPage';
 import { ResetPasswordPage } from '@/features/auth/ResetPasswordPage';
 import { NewPasswordPage } from '@/features/auth/NewPasswordPage';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
+import { CalendarPage } from '@/features/calendar/CalendarPage';
 import { QuotesListPage } from '@/features/quotes/list/QuotesListPage';
 import { QuoteEditorPage } from '@/features/quotes/editor/QuoteEditorPage';
 import { ClientsPage } from '@/features/clients/ClientsPage';
@@ -45,6 +46,11 @@ const routeTree = [
             element: <AppShell />,
             children: [
               { index: true, element: <DashboardPage />, handle: { title: pl.dashboard.title } },
+              {
+                path: 'kalendarz',
+                element: <CalendarPage />,
+                handle: { title: pl.calendar.title },
+              },
               { path: 'wyceny', element: <QuotesListPage />, handle: { title: pl.quotes.title } },
               {
                 path: 'wyceny/nowa',

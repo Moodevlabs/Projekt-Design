@@ -1,6 +1,8 @@
 /** Jedyne miejsce z definicją ścieżek — komponenty nie hardkodują stringów URL. */
 export const routes = {
   dashboard: '/',
+  /** Kalendarz terminów (T-98). */
+  calendar: '/kalendarz',
   quotes: '/wyceny',
   quote: (id: string) => `/wyceny/${id}`,
   quoteNew: '/wyceny/nowa',

@@ -61,6 +61,15 @@ export const queryKeys = {
   shares: (quoteId: string) => ['quotes', 'detail', quoteId, 'shares'] as const,
   quoteComments: (quoteId: string) => ['quotes', 'detail', quoteId, 'comments'] as const,
   quoteAcceptance: (quoteId: string) => ['quotes', 'detail', quoteId, 'acceptance'] as const,
+  /**
+   * Kalendarz (T-98) — osobno notatki i osobno odczyty z reszty aplikacji.
+   * Prefiks `['calendar','notes']` unieważnia wszystkie miesiące naraz: notatka
+   * przeniesiona na inny dzień potrafi wyjść poza widoczny zakres.
+   */
+  calendarNotes: (range?: unknown) =>
+    range ? (['calendar', 'notes', range] as const) : (['calendar', 'notes'] as const),
+  calendarEvents: (range?: unknown) =>
+    range ? (['calendar', 'events', range] as const) : (['calendar', 'events'] as const),
   templates: (workspaceId?: string) =>
     workspaceId ? (['templates', workspaceId] as const) : (['templates'] as const),
   template: (id: string) => ['templates', 'detail', id] as const,

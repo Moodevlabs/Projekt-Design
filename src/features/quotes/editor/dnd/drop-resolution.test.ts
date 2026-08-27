@@ -44,7 +44,11 @@ describe('locateItem / locateGroup', () => {
 
 describe('resolveDrop — pozycje', () => {
   it('przenosi pozycję na inną pozycję w tej samej liście', () => {
-    const intent = resolveDrop(body, { kind: 'item', itemId: 'g2' }, { kind: 'item', itemId: 'g1' });
+    const intent = resolveDrop(
+      body,
+      { kind: 'item', itemId: 'g2' },
+      { kind: 'item', itemId: 'g1' },
+    );
     expect(intent).toEqual({
       kind: 'item',
       args: { itemId: 'g2', toSectionId: 'A', toGroupId: 'G1', toIndex: 0 },
@@ -52,7 +56,11 @@ describe('resolveDrop — pozycje', () => {
   });
 
   it('przenosi pozycję z grupy do luźnych pozycji innej sekcji', () => {
-    const intent = resolveDrop(body, { kind: 'item', itemId: 'g1' }, { kind: 'section', sectionId: 'B' });
+    const intent = resolveDrop(
+      body,
+      { kind: 'item', itemId: 'g1' },
+      { kind: 'section', sectionId: 'B' },
+    );
     expect(intent).toEqual({
       kind: 'item',
       args: { itemId: 'g1', toSectionId: 'B', toGroupId: null, toIndex: 0 },
@@ -72,7 +80,11 @@ describe('resolveDrop — pozycje', () => {
   });
 
   it('upuszczenie na nagłówek grupy wrzuca pozycję na jej koniec', () => {
-    const intent = resolveDrop(body, { kind: 'item', itemId: 'a1' }, { kind: 'group', groupId: 'G1' });
+    const intent = resolveDrop(
+      body,
+      { kind: 'item', itemId: 'a1' },
+      { kind: 'group', groupId: 'G1' },
+    );
     expect(intent).toEqual({
       kind: 'item',
       args: { itemId: 'a1', toSectionId: 'A', toGroupId: 'G1', toIndex: 2 },
@@ -80,7 +92,9 @@ describe('resolveDrop — pozycje', () => {
   });
 
   it('upuszczenie na samą siebie nic nie robi', () => {
-    expect(resolveDrop(body, { kind: 'item', itemId: 'a1' }, { kind: 'item', itemId: 'a1' })).toBeNull();
+    expect(
+      resolveDrop(body, { kind: 'item', itemId: 'a1' }, { kind: 'item', itemId: 'a1' }),
+    ).toBeNull();
   });
 
   it('upuszczenie na własne miejsce nic nie robi — inaczej samo kliknięcie brudziłoby dokument', () => {
@@ -114,8 +128,15 @@ describe('resolveDrop — pozycje', () => {
 
 describe('resolveDrop — grupy', () => {
   it('zmienia kolejność grup w sekcji', () => {
-    const intent = resolveDrop(body, { kind: 'group', groupId: 'G2' }, { kind: 'group', groupId: 'G1' });
-    expect(intent).toEqual({ kind: 'group', args: { groupId: 'G2', toSectionId: 'A', toIndex: 0 } });
+    const intent = resolveDrop(
+      body,
+      { kind: 'group', groupId: 'G2' },
+      { kind: 'group', groupId: 'G1' },
+    );
+    expect(intent).toEqual({
+      kind: 'group',
+      args: { groupId: 'G2', toSectionId: 'A', toIndex: 0 },
+    });
   });
 
   it('przenosi grupę do pustej sekcji', () => {
@@ -124,34 +145,55 @@ describe('resolveDrop — grupy', () => {
       { kind: 'group', groupId: 'G1' },
       { kind: 'section-groups', sectionId: 'B' },
     );
-    expect(intent).toEqual({ kind: 'group', args: { groupId: 'G1', toSectionId: 'B', toIndex: 0 } });
+    expect(intent).toEqual({
+      kind: 'group',
+      args: { groupId: 'G1', toSectionId: 'B', toIndex: 0 },
+    });
   });
 
   it('upuszczenie grupy na siebie nic nie robi', () => {
-    expect(resolveDrop(body, { kind: 'group', groupId: 'G1' }, { kind: 'group', groupId: 'G1' })).toBeNull();
+    expect(
+      resolveDrop(body, { kind: 'group', groupId: 'G1' }, { kind: 'group', groupId: 'G1' }),
+    ).toBeNull();
   });
 });
 
 describe('resolveDrop — sekcje', () => {
   it('zamienia sekcje miejscami', () => {
-    const intent = resolveDrop(body, { kind: 'section', sectionId: 'B' }, { kind: 'section', sectionId: 'A' });
+    const intent = resolveDrop(
+      body,
+      { kind: 'section', sectionId: 'B' },
+      { kind: 'section', sectionId: 'A' },
+    );
     expect(intent).toEqual({ kind: 'section', args: { sectionId: 'B', toIndex: 0 } });
   });
 
   it('sekcja upuszczona nad własną zawartością nie rusza się', () => {
-    expect(resolveDrop(body, { kind: 'section', sectionId: 'A' }, { kind: 'item', itemId: 'a1' })).toBeNull();
+    expect(
+      resolveDrop(body, { kind: 'section', sectionId: 'A' }, { kind: 'item', itemId: 'a1' }),
+    ).toBeNull();
   });
 
   it('sekcja upuszczona nad cudzą zawartością ląduje w tamtym miejscu', () => {
-    const intent = resolveDrop(body, { kind: 'section', sectionId: 'A' }, { kind: 'section-groups', sectionId: 'B' });
+    const intent = resolveDrop(
+      body,
+      { kind: 'section', sectionId: 'A' },
+      { kind: 'section-groups', sectionId: 'B' },
+    );
     expect(intent).toEqual({ kind: 'section', args: { sectionId: 'A', toIndex: 1 } });
   });
 });
 
 describe('resolveDrop — nieznane id', () => {
   it('nie wywala się i nie proponuje ruchu', () => {
-    expect(resolveDrop(body, { kind: 'item', itemId: 'x' }, { kind: 'item', itemId: 'a1' })).toBeNull();
-    expect(resolveDrop(body, { kind: 'group', groupId: 'x' }, { kind: 'group', groupId: 'G1' })).toBeNull();
-    expect(resolveDrop(body, { kind: 'section', sectionId: 'x' }, { kind: 'section', sectionId: 'A' })).toBeNull();
+    expect(
+      resolveDrop(body, { kind: 'item', itemId: 'x' }, { kind: 'item', itemId: 'a1' }),
+    ).toBeNull();
+    expect(
+      resolveDrop(body, { kind: 'group', groupId: 'x' }, { kind: 'group', groupId: 'G1' }),
+    ).toBeNull();
+    expect(
+      resolveDrop(body, { kind: 'section', sectionId: 'x' }, { kind: 'section', sectionId: 'A' }),
+    ).toBeNull();
   });
 });

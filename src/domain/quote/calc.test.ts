@@ -244,7 +244,9 @@ describe('calcSectionTotals / calcGroupTotals', () => {
   });
 
   it('sekcja z kontekstem brutto', () => {
-    expect(calcSectionTotals(section, AMOUNT_BASIS, { vatRate: 23, pricesInclude: 'gross' })).toMatchObject({
+    expect(
+      calcSectionTotals(section, AMOUNT_BASIS, { vatRate: 23, pricesInclude: 'gross' }),
+    ).toMatchObject({
       grossCents: 5000,
       netCents: 4065,
       vatCents: 935,

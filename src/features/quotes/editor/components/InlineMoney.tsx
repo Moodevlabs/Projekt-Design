@@ -98,7 +98,7 @@ export function InlineMoney({
       }}
       className={cn(
         'tabular w-full rounded-[var(--radius-control)] bg-transparent px-2 py-1 text-right',
-        'focus:bg-surface-2 focus:outline-none focus-visible:ring-ring focus-visible:ring-2',
+        'focus:bg-surface-2 focus-visible:ring-ring focus:outline-none focus-visible:ring-2',
         readOnly && 'cursor-default focus:bg-transparent',
         className,
       )}

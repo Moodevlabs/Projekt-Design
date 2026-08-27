@@ -98,7 +98,10 @@ export function SiteVisitCard({
         >
           <ChevronDown
             aria-hidden
-            className={cn('text-ink-soft size-4 shrink-0 transition-transform', open && 'rotate-180')}
+            className={cn(
+              'text-ink-soft size-4 shrink-0 transition-transform',
+              open && 'rotate-180',
+            )}
           />
           <span className="min-w-0">
             <span className="text-ink block text-sm font-medium">

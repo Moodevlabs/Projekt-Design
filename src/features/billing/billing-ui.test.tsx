@@ -49,7 +49,10 @@ function renderWithRouter(ui: React.ReactElement) {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  invoke.mockResolvedValue({ data: { url: 'https://checkout.stripe.com/c/pay/test' }, error: null });
+  invoke.mockResolvedValue({
+    data: { url: 'https://checkout.stripe.com/c/pay/test' },
+    error: null,
+  });
   mockSub({});
 });
 

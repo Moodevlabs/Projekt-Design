@@ -96,12 +96,7 @@ export function SchedulePdfDocument({
           <Timeframe result={result} schedule={schedule} theme={theme} />
 
           {kolumny.length > 0 && wiersze.length > 0 ? (
-            <RoomMatrix
-              rooms={wiersze}
-              stages={kolumny}
-              theme={theme}
-              allRooms={rooms}
-            />
+            <RoomMatrix rooms={wiersze} stages={kolumny} theme={theme} allRooms={rooms} />
           ) : null}
 
           {caloscProjektu.length > 0 ? (
@@ -166,7 +161,11 @@ function Timeframe({
       }}
       wrap={false}
     >
-      <Cell label={pl.pdf.scheduleStart} value={formatDate(new Date(schedule.startDate))} theme={theme} />
+      <Cell
+        label={pl.pdf.scheduleStart}
+        value={formatDate(new Date(schedule.startDate))}
+        theme={theme}
+      />
       <Cell
         label={pl.editor.scheduleEndOptimal}
         value={result.endOptimal ? formatDate(new Date(result.endOptimal)) : '—'}
@@ -210,18 +209,12 @@ function RoomMatrix({
 
       {/* Naglowek powtarza sie na kazdej stronie — bez tego druga strona
           tabeli to kolumny znaczkow bez wyjasnienia, czym sa. */}
-      <View
-        style={[styles.row, { borderBottomWidth: 1, borderColor: theme.ink }]}
-        fixed
-      >
+      <View style={[styles.row, { borderBottomWidth: 1, borderColor: theme.ink }]} fixed>
         <Text style={[styles.roomCell, { fontSize: 7.5, color: theme.inkSoft }]}>
           {pl.editor.rooms}
         </Text>
         {stages.map((stage) => (
-          <Text
-            key={stage.id}
-            style={[styles.markCell, { fontSize: 7, color: theme.inkSoft }]}
-          >
+          <Text key={stage.id} style={[styles.markCell, { fontSize: 7, color: theme.inkSoft }]}>
             {stage.name}
           </Text>
         ))}
@@ -267,13 +260,7 @@ function RoomMatrix({
   );
 }
 
-function Summary({
-  result,
-  theme,
-}: {
-  result: ReturnType<typeof calcSchedule>;
-  theme: PdfTheme;
-}) {
+function Summary({ result, theme }: { result: ReturnType<typeof calcSchedule>; theme: PdfTheme }) {
   return (
     <View style={{ marginTop: 20, alignSelf: 'flex-end', width: 260 }} wrap={false}>
       <Line

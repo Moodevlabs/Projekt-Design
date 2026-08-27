@@ -164,10 +164,7 @@ describe('templates.repo — CRUD', () => {
 
     // Tak wygladaja dokumenty zapisane, zanim wprowadzilismy `bodyVersion`.
     const { bodyVersion: _bezWersji, ...body } = template.body!;
-    await getSupabase()
-      .from('quote_templates')
-      .update({ body })
-      .eq('id', template.id);
+    await getSupabase().from('quote_templates').update({ body }).eq('id', template.id);
 
     const wczytany = await getTemplate(template.id);
     expect(wczytany.bodyError).toBeNull();

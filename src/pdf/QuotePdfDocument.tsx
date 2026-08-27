@@ -124,7 +124,8 @@ export function QuotePdfDocument({
    */
   const pricing = pricingContextOf(body);
   const textInfo = documentTextInfo(body, formatDate(validUntil));
-  const describeItem = (item: Item) => renderText(item.description, itemTextContext(textInfo, item));
+  const describeItem = (item: Item) =>
+    renderText(item.description, itemTextContext(textInfo, item));
   const docText = (template: string) => renderText(template, quoteTextContext(textInfo));
   const money = (cents: number) => formatMoney(cents, currency);
 
@@ -165,11 +166,7 @@ export function QuotePdfDocument({
 
           <View style={styles.metaGrid}>
             <Meta label={pl.editor.investor} value={body.client.name} theme={theme} />
-            <Meta
-              label={pl.editor.validity}
-              value={formatDate(validUntil)}
-              theme={theme}
-            />
+            <Meta label={pl.editor.validity} value={formatDate(validUntil)} theme={theme} />
             <Meta label={pl.editor.phone} value={body.client.phone} theme={theme} />
             <Meta label={pl.editor.email} value={body.client.email} theme={theme} />
           </View>
@@ -435,7 +432,10 @@ function ItemLine({
   const off = !item.enabled;
 
   return (
-    <View style={[styles.row, { borderBottomWidth: 0.5, borderBottomColor: theme.hair }]} wrap={false}>
+    <View
+      style={[styles.row, { borderBottomWidth: 0.5, borderBottomColor: theme.hair }]}
+      wrap={false}
+    >
       <View style={styles.rowMain}>
         <Text
           style={{

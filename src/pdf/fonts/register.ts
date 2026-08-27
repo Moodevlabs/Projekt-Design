@@ -38,7 +38,11 @@ export const FONT_FILES: Record<FontFamily, { normal: string; bold: string }> = 
  * Pliki fontów wciągnięte przez Vite. `eager: false` nie miałoby sensu —
  * rejestracja musi znać URL-e od razu, zanim ruszy render.
  */
-const files = import.meta.glob<string>('./*.ttf', { eager: true, query: '?url', import: 'default' });
+const files = import.meta.glob<string>('./*.ttf', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+});
 
 /** Kroje, dla których pliki faktycznie leżą w repo. */
 const registered = new Set<FontFamily>();

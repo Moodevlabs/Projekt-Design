@@ -26,9 +26,7 @@ export function RecentQuotes({
   return (
     <section className="card-surface p-6" aria-busy={loading || undefined}>
       <header className="mb-3 flex items-baseline justify-between gap-4">
-        <h2 className="label-caps text-ink-soft">
-          {pl.dashboard.recentQuotes}
-        </h2>
+        <h2 className="label-caps text-ink-soft">{pl.dashboard.recentQuotes}</h2>
         <Button variant="ghost" size="sm" asChild>
           <Link to={routes.quotes}>{pl.common.all}</Link>
         </Button>

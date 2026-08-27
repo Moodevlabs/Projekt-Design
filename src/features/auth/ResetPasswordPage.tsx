@@ -62,7 +62,11 @@ export function ResetPasswordPage() {
         </p>
       ) : (
         <Form {...form}>
-          <form onSubmit={(event) => void form.handleSubmit(onSubmit)(event)} className="space-y-4" noValidate>
+          <form
+            onSubmit={(event) => void form.handleSubmit(onSubmit)(event)}
+            className="space-y-4"
+            noValidate
+          >
             <FormField
               control={form.control}
               name="email"

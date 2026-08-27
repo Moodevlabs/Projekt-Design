@@ -181,7 +181,9 @@ describe('parseQuoteBody z migracja', () => {
           groups: [
             newGroup({
               name: 'Kuchnia',
-              items: [newItem({ name: 'Rabat w grupie', kind: 'discount', unitPriceCents: 10_000 })],
+              items: [
+                newItem({ name: 'Rabat w grupie', kind: 'discount', unitPriceCents: 10_000 }),
+              ],
             }),
           ],
         }),
@@ -241,7 +243,9 @@ describe('parseQuoteBody z migracja', () => {
     const stara = newQuoteBody({
       sections: [
         newSection({
-          items: [newItem({ name: 'Rabat', kind: 'discount', unitPriceCents: 1_000, enabled: false })],
+          items: [
+            newItem({ name: 'Rabat', kind: 'discount', unitPriceCents: 1_000, enabled: false }),
+          ],
         }),
       ],
     });

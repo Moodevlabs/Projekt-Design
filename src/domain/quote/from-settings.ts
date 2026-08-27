@@ -24,8 +24,7 @@ export function quoteBodyFromSettings(
     pricingBasis: settings.defaultPricingBasis,
     // Stawkę kopiujemy tylko do wyceny godzinowej: w kwotowej byłaby liczbą
     // bez zastosowania, która myli przy późniejszym przełączeniu trybu.
-    hourlyRateCents:
-      settings.defaultPricingBasis === 'time' ? settings.hourlyRateCents : null,
+    hourlyRateCents: settings.defaultPricingBasis === 'time' ? settings.hourlyRateCents : null,
     ...overrides,
   });
 }

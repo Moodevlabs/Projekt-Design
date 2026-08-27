@@ -16,13 +16,7 @@ import { useDeleteFile } from '@/data/queries/useFiles';
 import { isPreviewableImage, type StoredFile } from '@/domain/files/schema';
 import { pl } from '@/i18n/pl';
 
-export function FileRowMenu({
-  file,
-  onPreview,
-}: {
-  file: StoredFile;
-  onPreview: () => void;
-}) {
+export function FileRowMenu({ file, onPreview }: { file: StoredFile; onPreview: () => void }) {
   const [renameOpen, setRenameOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const { download, busy } = useFileDownload();

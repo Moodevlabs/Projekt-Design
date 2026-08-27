@@ -145,7 +145,7 @@ function FlagToggle({
         'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',
         active
           ? 'bg-[var(--doc-sage)] text-white'
-          : 'border-hair text-[var(--doc-ink-soft)] border',
+          : 'border-hair border text-[var(--doc-ink-soft)]',
       )}
     >
       {short}

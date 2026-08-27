@@ -233,69 +233,71 @@ export const ItemRow = memo(function ItemRow({
       ) : null}
 
       <div className="flex min-w-[86px] flex-col items-end">
-      <div
-        className={cn(
-          'flex items-center justify-end gap-0.5 text-[14.5px]',
-          isDiscount
-            ? item.enabled
-              ? 'text-[var(--doc-terracotta)]'
-              : 'text-[var(--doc-price-off)]'
-            : item.enabled
-              ? 'text-[var(--doc-ink-soft)]'
-              : 'text-[var(--doc-price-off)]',
-        )}
-      >
-        {isDiscount ? <span aria-hidden>−</span> : null}
-        {editing && parametric === null && godzinowa ? (
-          /*
-           * W trybie godzinowym edytuje się MINUTY, a kwota jest wynikiem.
-           * Pole ze złotówkami sugerowałoby, że da się ją wpisać wprost —
-           * a wpisana kwota i tak przeliczyłaby się z powrotem na minuty
-           * i wróciła zaokrąglona.
-           */
-          <span className="flex items-center gap-1.5">
-            <input
-              type="number"
-              min={0}
-              step={5}
-              value={item.unitPriceCents ?? 0}
-              aria-label={pl.editor.itemMinutesLabel}
-              onChange={(event) => {
-                const next = Number.parseInt(event.target.value, 10);
-                onPatch(item.id, { unitPriceCents: Number.isInteger(next) && next >= 0 ? next : 0 });
-              }}
-              className="inline-field price-field amount w-[64px] px-1 py-[2px] text-right text-[14.5px]"
-            />
-            <span className="text-[12px] text-[var(--doc-ink-soft)]">min</span>
-            <span aria-hidden className="text-[12px] text-[var(--doc-ink-soft)]">
-              →
+        <div
+          className={cn(
+            'flex items-center justify-end gap-0.5 text-[14.5px]',
+            isDiscount
+              ? item.enabled
+                ? 'text-[var(--doc-terracotta)]'
+                : 'text-[var(--doc-price-off)]'
+              : item.enabled
+                ? 'text-[var(--doc-ink-soft)]'
+                : 'text-[var(--doc-price-off)]',
+          )}
+        >
+          {isDiscount ? <span aria-hidden>−</span> : null}
+          {editing && parametric === null && godzinowa ? (
+            /*
+             * W trybie godzinowym edytuje się MINUTY, a kwota jest wynikiem.
+             * Pole ze złotówkami sugerowałoby, że da się ją wpisać wprost —
+             * a wpisana kwota i tak przeliczyłaby się z powrotem na minuty
+             * i wróciła zaokrąglona.
+             */
+            <span className="flex items-center gap-1.5">
+              <input
+                type="number"
+                min={0}
+                step={5}
+                value={item.unitPriceCents ?? 0}
+                aria-label={pl.editor.itemMinutesLabel}
+                onChange={(event) => {
+                  const next = Number.parseInt(event.target.value, 10);
+                  onPatch(item.id, {
+                    unitPriceCents: Number.isInteger(next) && next >= 0 ? next : 0,
+                  });
+                }}
+                className="inline-field price-field amount w-[64px] px-1 py-[2px] text-right text-[14.5px]"
+              />
+              <span className="text-[12px] text-[var(--doc-ink-soft)]">min</span>
+              <span aria-hidden className="text-[12px] text-[var(--doc-ink-soft)]">
+                →
+              </span>
+              <span className="amount">{formatMoney(valueCents, currency)}</span>
             </span>
+          ) : item.unitPriceCents === null ? (
+            /*
+             * „Wycena indywidualna" (T-60) — pozycja jest w ofercie, ale ceny
+             * nie ma i NIE wchodzi do sumy. Zero w tym miejscu znaczyłoby
+             * „gratis", a to zupełnie co innego niż „ustalimy osobno".
+             */
+            <span className="text-[13px] text-[var(--doc-ink-soft)] italic">
+              {pl.editor.individualPrice}
+            </span>
+          ) : editing && parametric === null ? (
+            <InlineMoney
+              cents={item.unitPriceCents}
+              currency={currency}
+              onCommit={(unitPriceCents) => onPatch(item.id, { unitPriceCents })}
+              ariaLabel={pl.editor.itemPriceLabel}
+              className="price-field inline-field amount w-[76px] text-[14.5px]"
+            />
+          ) : (
+            // Cena pozycji parametrycznej WYNIKA z reguły, więc nie ma tu czego
+            // edytować — pole do wpisania kwoty sugerowałoby, że da się ją
+            // nadpisać, a wpisana wartość nie miałaby żadnego wpływu na wynik.
             <span className="amount">{formatMoney(valueCents, currency)}</span>
-          </span>
-        ) : item.unitPriceCents === null ? (
-          /*
-           * „Wycena indywidualna" (T-60) — pozycja jest w ofercie, ale ceny
-           * nie ma i NIE wchodzi do sumy. Zero w tym miejscu znaczyłoby
-           * „gratis", a to zupełnie co innego niż „ustalimy osobno".
-           */
-          <span className="text-[13px] text-[var(--doc-ink-soft)] italic">
-            {pl.editor.individualPrice}
-          </span>
-        ) : editing && parametric === null ? (
-          <InlineMoney
-            cents={item.unitPriceCents}
-            currency={currency}
-            onCommit={(unitPriceCents) => onPatch(item.id, { unitPriceCents })}
-            ariaLabel={pl.editor.itemPriceLabel}
-            className="price-field inline-field amount w-[76px] text-[14.5px]"
-          />
-        ) : (
-          // Cena pozycji parametrycznej WYNIKA z reguły, więc nie ma tu czego
-          // edytować — pole do wpisania kwoty sugerowałoby, że da się ją
-          // nadpisać, a wpisana wartość nie miałaby żadnego wpływu na wynik.
-          <span className="amount">{formatMoney(valueCents, currency)}</span>
-        )}
-      </div>
+          )}
+        </div>
 
         {parametric ? (
           // Skąd ta kwota. Bez tego pozycja liczona za pomieszczenie pokazuje
@@ -347,4 +349,3 @@ export const ItemRow = memo(function ItemRow({
     </div>
   );
 });
-

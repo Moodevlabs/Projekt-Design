@@ -20,6 +20,7 @@ export const pl = {
     /** Kosz na pliki — wlasna pozycja w szynie, nad Pomoca (2026-08-27). */
     trash: 'Kosz',
     dashboard: 'Pulpit',
+    calendar: 'Kalendarz',
     quotes: 'Wyceny',
     clients: 'Klienci',
     library: 'Biblioteka',
@@ -157,6 +158,100 @@ export const pl = {
     duplicated: 'Utworzono kopię wyceny',
     archivedToast: 'Wycena usunięta',
     loadError: 'Nie udało się wczytać wycen.',
+  },
+  /*
+   * KALENDARZ TERMINÓW (T-98).
+   *
+   * Jeden widok na daty rozproszone po aplikacji — plus notatka dzienna,
+   * jedyny byt, który w kalendarzu powstaje. Nie jest to kalendarz spotkań
+   * ani system zarządzania pracą (CLAUDE.md, „Czego NIE robić").
+   */
+  calendar: {
+    title: 'Kalendarz',
+    intro:
+      'Zestawienie terminów prowadzonych inwestycji: rozpoczęcia projektów, wizje lokalne, ważność ofert i terminy wynikające z harmonogramów. Wybór dnia otwiera jego szczegóły pod kalendarzem.',
+    today: 'Dziś',
+    previousMonth: 'Poprzedni miesiąc',
+    nextMonth: 'Następny miesiąc',
+    monthLabel: (month: string, year: number) => `${month} ${year}`,
+    weekdays: ['pon.', 'wt.', 'śr.', 'czw.', 'pt.', 'sob.', 'niedz.'],
+    weekdaysFull: ['poniedziałek', 'wtorek', 'środa', 'czwartek', 'piątek', 'sobota', 'niedziela'],
+    months: [
+      'styczeń',
+      'luty',
+      'marzec',
+      'kwiecień',
+      'maj',
+      'czerwiec',
+      'lipiec',
+      'sierpień',
+      'wrzesień',
+      'październik',
+      'listopad',
+      'grudzień',
+    ],
+    /** Dopełniacz — „12 września 2026", nie „12 wrzesień 2026". */
+    monthsGenitive: [
+      'stycznia',
+      'lutego',
+      'marca',
+      'kwietnia',
+      'maja',
+      'czerwca',
+      'lipca',
+      'sierpnia',
+      'września',
+      'października',
+      'listopada',
+      'grudnia',
+    ],
+    dayLabel: (day: number, month: string, year: number, weekday: string) =>
+      `${weekday}, ${day} ${month} ${year}`,
+    loadError: 'Nie udało się wczytać kalendarza.',
+
+    legend: 'Oznaczenia',
+    kind: {
+      note: 'Notatka',
+      deadline: 'Termin z harmonogramu',
+      project_start: 'Rozpoczęcie projektu',
+      site_visit: 'Wizja lokalna',
+      quote_validity: 'Upływ ważności oferty',
+    },
+
+    // Panel dnia.
+    dayEmpty: 'Brak wpisów w tym dniu.',
+    dayEmptyHint: 'Notatkę można dodać w polu poniżej.',
+    eventsTitle: 'Wpisy dnia',
+    open: 'Otwórz',
+    monthSummary: (count: number) => {
+      if (count === 0) return 'Brak wpisów w tym miesiącu';
+      if (count === 1) return '1 wpis w tym miesiącu';
+      const ones = count % 10;
+      const tens = count % 100;
+      const few = ones >= 2 && ones <= 4 && !(tens >= 12 && tens <= 14);
+      return `${count} ${few ? 'wpisy' : 'wpisów'} w tym miesiącu`;
+    },
+
+    // Notatki.
+    noteAdd: 'Dodaj notatkę',
+    notePlaceholder: 'Treść notatki, na przykład: montaż zabudowy kuchennej',
+    noteTimeLabel: 'Godzina (opcjonalnie)',
+    noteTextLabel: 'Treść notatki',
+    noteSave: 'Zapisz notatkę',
+    noteSaved: 'Notatka zapisana',
+    noteFailed: 'Nie udało się zapisać notatki.',
+    noteDelete: 'Usuń notatkę',
+    noteDeleteConfirm: 'Notatka zostanie usunięta. Operacji nie można cofnąć.',
+    noteDone: 'Oznacz jako wykonane',
+    noteEmpty: 'Notatka wymaga treści.',
+    /** Liczba wpisów dnia — czytana także przez czytnik ekranu w siatce. */
+    eventCount: (count: number) => {
+      if (count === 1) return '1 wpis';
+      const ones = count % 10;
+      const tens = count % 100;
+      const few = ones >= 2 && ones <= 4 && !(tens >= 12 && tens <= 14);
+      return `${count} ${few ? 'wpisy' : 'wpisów'}`;
+    },
   },
   search: {
     title: 'Szukaj',

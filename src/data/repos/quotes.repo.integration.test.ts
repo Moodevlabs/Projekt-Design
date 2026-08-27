@@ -56,8 +56,7 @@ beforeAll(async () => {
   });
   if (error) {
     throw new Error(
-      'Nie udalo sie zalogowac uzytkownikiem z seeda. Czy `pnpm db:start` dziala? ' +
-        error.message,
+      'Nie udalo sie zalogowac uzytkownikiem z seeda. Czy `pnpm db:start` dziala? ' + error.message,
     );
   }
 

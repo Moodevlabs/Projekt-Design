@@ -23,13 +23,7 @@ function PanelNaStorze() {
   const removeRoom = useEditorStore((state) => state.removeRoom);
 
   return (
-    <RoomsPanel
-      rooms={rooms}
-      editing
-      onAdd={addRoom}
-      onPatch={updateRoom}
-      onRemove={removeRoom}
-    />
+    <RoomsPanel rooms={rooms} editing onAdd={addRoom} onPatch={updateRoom} onRemove={removeRoom} />
   );
 }
 

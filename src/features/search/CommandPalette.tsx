@@ -78,89 +78,93 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
           sito po `value` ukrywaloby wyniki, ktore serwer wlasnie znalazl.
         */}
         <Command shouldFilter={false}>
-      <CommandInput value={search} onValueChange={setSearch} placeholder={pl.search.placeholder} />
-      <CommandList>
-        <CommandEmpty>{pl.search.empty}</CommandEmpty>
+          <CommandInput
+            value={search}
+            onValueChange={setSearch}
+            placeholder={pl.search.placeholder}
+          />
+          <CommandList>
+            <CommandEmpty>{pl.search.empty}</CommandEmpty>
 
-        <CommandGroup heading={pl.search.actions}>
-          <CommandItem value="__new-client__" onSelect={() => go(routes.clients)}>
-            <Plus className="size-4" aria-hidden />
-            {pl.clients.new}
-          </CommandItem>
-          <CommandItem value="__new-quote__" onSelect={() => go(routes.quoteNew)}>
-            <Plus className="size-4" aria-hidden />
-            {pl.quotes.new}
-          </CommandItem>
-        </CommandGroup>
-
-        {(clients.data ?? []).length > 0 ? (
-          <CommandGroup heading={pl.nav.clients}>
-            {(clients.data ?? []).slice(0, LIMIT).map((client) => (
-              <CommandItem
-                key={client.id}
-                value={`client-${client.id}`}
-                onSelect={() => go(routes.client(client.id))}
-              >
-                <Users className="size-4" aria-hidden />
-                <span className="min-w-0 flex-1 truncate">{client.name}</span>
-                {client.city ? (
-                  <span className="text-ink-soft text-xs">{client.city}</span>
-                ) : null}
+            <CommandGroup heading={pl.search.actions}>
+              <CommandItem value="__new-client__" onSelect={() => go(routes.clients)}>
+                <Plus className="size-4" aria-hidden />
+                {pl.clients.new}
               </CommandItem>
-            ))}
-          </CommandGroup>
-        ) : null}
-
-        {(projects.data ?? []).length > 0 ? (
-          <CommandGroup heading={pl.projects.title}>
-            {(projects.data ?? []).map((project) => (
-              <CommandItem
-                key={project.id}
-                value={`project-${project.id}`}
-                onSelect={() => go(routes.project(project.clientId, project.id))}
-              >
-                <FolderOpen className="size-4" aria-hidden />
-                <span className="min-w-0 flex-1 truncate">{project.name}</span>
-                <span className="text-ink-soft truncate text-xs">{project.clientName}</span>
+              <CommandItem value="__new-quote__" onSelect={() => go(routes.quoteNew)}>
+                <Plus className="size-4" aria-hidden />
+                {pl.quotes.new}
               </CommandItem>
-            ))}
-          </CommandGroup>
-        ) : null}
+            </CommandGroup>
 
-        {(quotes.data ?? []).length > 0 ? (
-          <CommandGroup heading={pl.nav.quotes}>
-            {(quotes.data ?? []).slice(0, LIMIT).map((quote) => (
-              <CommandItem
-                key={quote.id}
-                value={`quote-${quote.id}`}
-                onSelect={() => go(routes.quote(quote.id))}
-              >
-                <FileText className="size-4" aria-hidden />
-                <span className="min-w-0 flex-1 truncate">{quote.title}</span>
-                <span className="text-ink-soft text-xs whitespace-nowrap">
-                  {quote.number ?? pl.quotes.noNumber}
-                  {showsVersion(quote.version) ? ` · ${versionLabel(quote.version)}` : ''}
-                </span>
-              </CommandItem>
-            ))}
-          </CommandGroup>
-        ) : null}
+            {(clients.data ?? []).length > 0 ? (
+              <CommandGroup heading={pl.nav.clients}>
+                {(clients.data ?? []).slice(0, LIMIT).map((client) => (
+                  <CommandItem
+                    key={client.id}
+                    value={`client-${client.id}`}
+                    onSelect={() => go(routes.client(client.id))}
+                  >
+                    <Users className="size-4" aria-hidden />
+                    <span className="min-w-0 flex-1 truncate">{client.name}</span>
+                    {client.city ? (
+                      <span className="text-ink-soft text-xs">{client.city}</span>
+                    ) : null}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            ) : null}
 
-        {(library.data ?? []).length > 0 ? (
-          <CommandGroup heading={pl.library.title}>
-            {(library.data ?? []).slice(0, LIMIT).map((item) => (
-              <CommandItem
-                key={item.id}
-                value={`library-${item.id}`}
-                onSelect={() => go(routes.library)}
-              >
-                <Library className="size-4" aria-hidden />
-                <span className="min-w-0 flex-1 truncate">{item.name}</span>
-              </CommandItem>
-            ))}
-          </CommandGroup>
-        ) : null}
-        </CommandList>
+            {(projects.data ?? []).length > 0 ? (
+              <CommandGroup heading={pl.projects.title}>
+                {(projects.data ?? []).map((project) => (
+                  <CommandItem
+                    key={project.id}
+                    value={`project-${project.id}`}
+                    onSelect={() => go(routes.project(project.clientId, project.id))}
+                  >
+                    <FolderOpen className="size-4" aria-hidden />
+                    <span className="min-w-0 flex-1 truncate">{project.name}</span>
+                    <span className="text-ink-soft truncate text-xs">{project.clientName}</span>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            ) : null}
+
+            {(quotes.data ?? []).length > 0 ? (
+              <CommandGroup heading={pl.nav.quotes}>
+                {(quotes.data ?? []).slice(0, LIMIT).map((quote) => (
+                  <CommandItem
+                    key={quote.id}
+                    value={`quote-${quote.id}`}
+                    onSelect={() => go(routes.quote(quote.id))}
+                  >
+                    <FileText className="size-4" aria-hidden />
+                    <span className="min-w-0 flex-1 truncate">{quote.title}</span>
+                    <span className="text-ink-soft text-xs whitespace-nowrap">
+                      {quote.number ?? pl.quotes.noNumber}
+                      {showsVersion(quote.version) ? ` · ${versionLabel(quote.version)}` : ''}
+                    </span>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            ) : null}
+
+            {(library.data ?? []).length > 0 ? (
+              <CommandGroup heading={pl.library.title}>
+                {(library.data ?? []).slice(0, LIMIT).map((item) => (
+                  <CommandItem
+                    key={item.id}
+                    value={`library-${item.id}`}
+                    onSelect={() => go(routes.library)}
+                  >
+                    <Library className="size-4" aria-hidden />
+                    <span className="min-w-0 flex-1 truncate">{item.name}</span>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            ) : null}
+          </CommandList>
         </Command>
       </DialogContent>
     </Dialog>

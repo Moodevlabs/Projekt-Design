@@ -15,7 +15,9 @@ let client: ToolierClient | null = null;
 
 export function getSupabase(): ToolierClient {
   if (!isConfigured) {
-    throw new Error('Brak konfiguracji Supabase — uzupełnij VITE_SUPABASE_URL i VITE_SUPABASE_ANON_KEY w .env');
+    throw new Error(
+      'Brak konfiguracji Supabase — uzupełnij VITE_SUPABASE_URL i VITE_SUPABASE_ANON_KEY w .env',
+    );
   }
   client ??= createClient<Database>(env.supabaseUrl, env.supabaseAnonKey, {
     auth: {

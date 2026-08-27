@@ -21,7 +21,9 @@ export class ConflictError extends RepoError {
 
 /** Zapis odrzucony przez RLS — najczęściej wygasł dostęp (tryb tylko do odczytu). */
 export class ReadOnlyError extends RepoError {
-  constructor(message = 'Dostęp wygasł — zapis jest zablokowany. Wyceny możesz dalej przeglądać i eksportować.') {
+  constructor(
+    message = 'Dostęp wygasł — zapis jest zablokowany. Wyceny możesz dalej przeglądać i eksportować.',
+  ) {
     super(message);
     this.name = 'ReadOnlyError';
   }

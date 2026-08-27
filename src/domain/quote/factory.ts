@@ -68,7 +68,9 @@ export function newRoom(partial: Partial<Room> = {}): Room {
     ...(partial.label === undefined ? {} : { label: partial.label }),
     ...(partial.qty === undefined ? {} : { qty: partial.qty }),
     // Sprawdzamy `undefined`, a nie prawdziwość — świadome `false` musi przetrwać.
-    ...(partial.includedInVisual === undefined ? {} : { includedInVisual: partial.includedInVisual }),
+    ...(partial.includedInVisual === undefined
+      ? {}
+      : { includedInVisual: partial.includedInVisual }),
     ...(partial.includedInTechnical === undefined
       ? {}
       : { includedInTechnical: partial.includedInTechnical }),

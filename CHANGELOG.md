@@ -3,6 +3,46 @@
 Format wg [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/).
 Wersje zgodne z [SemVer](https://semver.org/lang/pl/).
 
+## [Niewydane]
+
+### Dodane
+
+**Treść briefu jest edytowalna.** Zestaw pytań przestał być stałą wpisaną
+w aplikację. Ustawienia → Brief udostępniają edytor: sekcje, pytania, ich
+kolejność, podpowiedzi i rodzaje pól (krótka odpowiedź, opis, wybór jednej
+albo wielu opcji, liczba). Szablonów może być kilka — osobny dla mieszkania,
+lokalu usługowego czy pojedynczego pomieszczenia — a jeden z nich oznacza się
+jako domyślny.
+
+Wystawienie briefu pozwala wskazać szablon i termin ważności linku, po czym
+kopiuje adres do schowka. Reguła snapshotu pozostaje bez zmian: brief zapisuje
+własną kopię pytań w chwili wystawienia, więc późniejsza edycja szablonu nie
+zmienia dokumentów już przekazanych inwestorom. Migracja `0037`.
+
+**Kalendarz terminów.** Nowa pozycja nawigacji z widokiem miesięcznym, który
+zestawia daty rozproszone dotąd po czterech ekranach: rozpoczęcia projektów,
+wizje lokalne, upływ ważności ofert i terminy wynikające z harmonogramów wycen.
+Kratka dnia niesie po jednym oznaczeniu na rodzaj zdarzenia; wybór dnia otwiera
+panel pod kalendarzem z pełną treścią wpisów i odnośnikami do właściwych
+ekranów. W panelu dodaje się notatki dzienne — z opcjonalną godziną, do
+oznaczenia jako wykonane. Migracja `0038`.
+
+Kalendarz nie jest terminarzem spotkań: bez zaproszeń, uczestników, zdarzeń
+cyklicznych, powiadomień i wykresu Gantta.
+
+### Zmienione
+
+**Język aplikacji.** Wszystkie opisy funkcji, komunikaty i podręcznik pomocy
+przepisano z rejestru potocznego na profesjonalny: forma bezosobowa zamiast
+zwrotów w drugiej osobie, terminologia branżowa (inwestor, pracownia,
+opracowanie, zakres prac) i zwrot grzecznościowy „Państwo" w treściach
+kierowanych do klienta — na stronie oferty, w briefie i w korespondencji.
+Zmieniono również domyślne pytania briefu.
+
+Przy okazji poprawiono dwa zdania, które przestały być prawdą: podręcznik nadal
+twierdził, że usunięty plik znika bezpowrotnie, choć kosz istnieje od wersji
+z lipca, i nie wspominał o czterech kartach Ustawień.
+
 ## [1.1.1] – 2026-08-27
 
 ### Naprawione

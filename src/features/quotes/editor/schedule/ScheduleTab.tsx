@@ -78,46 +78,46 @@ export function ScheduleTab({ editing }: { editing: boolean }) {
           <p className="text-ink-soft mt-1 text-[12.5px]">{pl.editor.scheduleAssumptionsHint}</p>
 
           <div className="mt-3 flex flex-wrap items-center gap-5">
-          <label className="flex flex-col gap-1 text-[11px] font-semibold tracking-[0.09em] text-[var(--doc-sage)] uppercase">
-            {pl.editor.scheduleStart}
-            <input
-              type="date"
-              value={schedule.startDate ?? ''}
-              disabled={!editing}
-              aria-label={pl.editor.scheduleStart}
-              onChange={(event) => patchSchedule({ startDate: event.target.value || null })}
-              className="inline-field text-ink w-[150px] bg-transparent px-2 py-1 text-[14px] font-normal normal-case"
+            <label className="flex flex-col gap-1 text-[11px] font-semibold tracking-[0.09em] text-[var(--doc-sage)] uppercase">
+              {pl.editor.scheduleStart}
+              <input
+                type="date"
+                value={schedule.startDate ?? ''}
+                disabled={!editing}
+                aria-label={pl.editor.scheduleStart}
+                onChange={(event) => patchSchedule({ startDate: event.target.value || null })}
+                className="inline-field text-ink w-[150px] bg-transparent px-2 py-1 text-[14px] font-normal normal-case"
+              />
+            </label>
+
+            <WeekField
+              label={pl.editor.scheduleProviderWeek}
+              value={schedule.providerWorkdaysPerWeek}
+              editing={editing}
+              onChange={(providerWorkdaysPerWeek) => patchSchedule({ providerWorkdaysPerWeek })}
             />
-          </label>
+            <WeekField
+              label={pl.editor.scheduleClientWeek}
+              value={schedule.clientWorkdaysPerWeek}
+              editing={editing}
+              onChange={(clientWorkdaysPerWeek) => patchSchedule({ clientWorkdaysPerWeek })}
+            />
 
-          <WeekField
-            label={pl.editor.scheduleProviderWeek}
-            value={schedule.providerWorkdaysPerWeek}
-            editing={editing}
-            onChange={(providerWorkdaysPerWeek) => patchSchedule({ providerWorkdaysPerWeek })}
-          />
-          <WeekField
-            label={pl.editor.scheduleClientWeek}
-            value={schedule.clientWorkdaysPerWeek}
-            editing={editing}
-            onChange={(clientWorkdaysPerWeek) => patchSchedule({ clientWorkdaysPerWeek })}
-          />
-
-          <label className="flex flex-col gap-1 text-[11px] font-semibold tracking-[0.09em] text-[var(--doc-sage)] uppercase">
-            {pl.editor.scheduleHolidays}
-            <select
-              value={schedule.holidays}
-              disabled={!editing}
-              aria-label={pl.editor.scheduleHolidays}
-              onChange={(event) =>
-                patchSchedule({ holidays: event.target.value === 'none' ? 'none' : 'PL' })
-              }
-              className="inline-field text-ink bg-transparent px-2 py-1 text-[14px] font-normal normal-case"
-            >
-              <option value="PL">{pl.editor.scheduleHolidaysPl}</option>
-              <option value="none">{pl.editor.scheduleHolidaysNone}</option>
-            </select>
-          </label>
+            <label className="flex flex-col gap-1 text-[11px] font-semibold tracking-[0.09em] text-[var(--doc-sage)] uppercase">
+              {pl.editor.scheduleHolidays}
+              <select
+                value={schedule.holidays}
+                disabled={!editing}
+                aria-label={pl.editor.scheduleHolidays}
+                onChange={(event) =>
+                  patchSchedule({ holidays: event.target.value === 'none' ? 'none' : 'PL' })
+                }
+                className="inline-field text-ink bg-transparent px-2 py-1 text-[14px] font-normal normal-case"
+              >
+                <option value="PL">{pl.editor.scheduleHolidaysPl}</option>
+                <option value="none">{pl.editor.scheduleHolidaysNone}</option>
+              </select>
+            </label>
           </div>
         </section>
 

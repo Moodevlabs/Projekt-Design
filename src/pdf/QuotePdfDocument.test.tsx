@@ -10,7 +10,14 @@ import {
 } from './document-content';
 import { buildPdfTheme } from './theme';
 import { defaultBrandKit } from '@/domain/brand/schema';
-import { newGroup, newItem, newQuoteBody, newSection, type QuoteBody, type Room } from '@/domain/quote';
+import {
+  newGroup,
+  newItem,
+  newQuoteBody,
+  newSection,
+  type QuoteBody,
+  type Room,
+} from '@/domain/quote';
 import { newId } from '@/domain/id';
 
 function room(partial: Partial<Room> & { label: string }): Room {

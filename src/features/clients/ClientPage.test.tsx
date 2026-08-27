@@ -5,7 +5,9 @@ import type { ClientOverview } from '@/domain/client/schema';
 import { pl } from '@/i18n/pl';
 
 const useClientOverview = vi.hoisted(() => vi.fn());
-const useQuotesList = vi.hoisted(() => vi.fn(() => ({ data: [], isLoading: false, isError: false })));
+const useQuotesList = vi.hoisted(() =>
+  vi.fn(() => ({ data: [], isLoading: false, isError: false })),
+);
 const mutationStub = vi.hoisted(() => () => ({ mutate: vi.fn(), isPending: false }));
 const asyncMutationStub = vi.hoisted(() => () => ({
   mutateAsync: vi.fn(() => Promise.resolve()),

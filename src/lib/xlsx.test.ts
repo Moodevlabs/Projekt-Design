@@ -81,7 +81,9 @@ describe('buildXlsx — struktura pliku', () => {
 
   it('tekst idzie jako inlineStr, liczba jako liczba', () => {
     const sheet = readZip(plik).get('xl/worksheets/sheet1.xml')!;
-    expect(sheet).toContain('<c r="A2" t="inlineStr"><is><t xml:space="preserve">Kowalscy</t></is></c>');
+    expect(sheet).toContain(
+      '<c r="A2" t="inlineStr"><is><t xml:space="preserve">Kowalscy</t></is></c>',
+    );
     // Bez `t="inlineStr"` — inaczej Excel potraktowalby kwote jak tekst
     // i nie dalo by sie jej zsumowac.
     expect(sheet).toContain('<c r="B2"><v>1234</v></c>');

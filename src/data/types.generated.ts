@@ -108,6 +108,67 @@ export type Database = {
           },
         ]
       }
+      calendar_notes: {
+        Row: {
+          at_time: string | null
+          client_id: string | null
+          created_at: string
+          day: string
+          done: boolean
+          id: string
+          project_id: string | null
+          text: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          at_time?: string | null
+          client_id?: string | null
+          created_at?: string
+          day: string
+          done?: boolean
+          id?: string
+          project_id?: string | null
+          text?: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          at_time?: string | null
+          client_id?: string | null
+          created_at?: string
+          day?: string
+          done?: boolean
+          id?: string
+          project_id?: string | null
+          text?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_notes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_notes_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_notes_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       brief_templates: {
         Row: {
           created_at: string

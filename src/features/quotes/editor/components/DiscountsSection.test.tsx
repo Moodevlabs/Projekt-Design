@@ -102,9 +102,7 @@ describe('DiscountsSection', () => {
 
   it('zmiana zakresu czysci wskazania poprzedniego', async () => {
     const user = userEvent.setup();
-    const { onPatch } = setup([
-      discount({ name: 'Rabat', scope: 'items', itemIds: ['a', 'b'] }),
-    ]);
+    const { onPatch } = setup([discount({ name: 'Rabat', scope: 'items', itemIds: ['a', 'b'] })]);
 
     await user.selectOptions(screen.getByLabelText(pl.editor.discountScopeLabel('Rabat')), 'quote');
 

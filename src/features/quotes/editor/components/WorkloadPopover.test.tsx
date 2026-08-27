@@ -15,7 +15,9 @@ function wycena(pricingBasis: 'amount' | 'time' = 'amount') {
     sections: [
       newSection({
         title: 'Projekt',
-        items: [newItem({ name: 'Koncepcja', unitPriceCents: pricingBasis === 'time' ? 120 : 24_000 })],
+        items: [
+          newItem({ name: 'Koncepcja', unitPriceCents: pricingBasis === 'time' ? 120 : 24_000 }),
+        ],
       }),
       newSection({
         title: 'Nadzór',

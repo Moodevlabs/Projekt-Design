@@ -210,15 +210,7 @@ function SelectionChanges({ acceptance }: { acceptance: Acceptance }) {
   );
 }
 
-function NameList({
-  title,
-  names,
-  tone,
-}: {
-  title: string;
-  names: string[];
-  tone: 'off' | 'on';
-}) {
+function NameList({ title, names, tone }: { title: string; names: string[]; tone: 'off' | 'on' }) {
   return (
     <div>
       <p className="label-caps text-ink-soft">{title}</p>
@@ -229,8 +221,7 @@ function NameList({
               aria-hidden
               className="mt-[6px] size-1.5 shrink-0 rounded-full"
               style={{
-                background:
-                  tone === 'off' ? 'var(--status-rejected)' : 'var(--status-accepted)',
+                background: tone === 'off' ? 'var(--status-rejected)' : 'var(--status-accepted)',
               }}
             />
             <span className={tone === 'off' ? 'text-ink-soft line-through' : 'text-ink'}>

@@ -124,9 +124,7 @@ export function RoomsPanel({
           if (!open) setPendingRemove(null);
         }}
         title={pl.editor.removeRoomTitle}
-        description={pl.editor.removeRoomDescription(
-          pendingRemove?.label || pl.editor.newRoomName,
-        )}
+        description={pl.editor.removeRoomDescription(pendingRemove?.label || pl.editor.newRoomName)}
         confirmLabel={pl.common.delete}
         destructive
         onConfirm={() => {

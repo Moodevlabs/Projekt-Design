@@ -199,7 +199,9 @@ describe('quoteItemToLibrarySnapshot', () => {
   });
 
   it('wynik przechodzi walidację snapshotu', () => {
-    expect(LibraryItemSnapshotSchema.safeParse(quoteItemToLibrarySnapshot(item)).success).toBe(true);
+    expect(LibraryItemSnapshotSchema.safeParse(quoteItemToLibrarySnapshot(item)).success).toBe(
+      true,
+    );
   });
 });
 

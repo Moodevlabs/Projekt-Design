@@ -100,9 +100,7 @@ describe('deliverPdf — jedno wyjscie dla wszystkich eksportow', () => {
     archiveGeneratedPdf.mockRejectedValueOnce(new Error('brak sieci'));
     await deliverPdf(args());
 
-    const opcje = toastError.mock.calls[0]?.[1] as
-      | { action?: { onClick: () => void } }
-      | undefined;
+    const opcje = toastError.mock.calls[0]?.[1] as { action?: { onClick: () => void } } | undefined;
     opcje?.action?.onClick();
     await Promise.resolve();
 

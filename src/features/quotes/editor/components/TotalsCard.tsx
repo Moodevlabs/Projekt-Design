@@ -1,6 +1,11 @@
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { calcWorkload, calcQuoteTotals, calcSectionBreakdown, type QuoteBody } from '@/domain/quote';
+import {
+  calcWorkload,
+  calcQuoteTotals,
+  calcSectionBreakdown,
+  type QuoteBody,
+} from '@/domain/quote';
 import { formatMoney } from '@/domain/money';
 import { formatMinutes } from '@/domain/time';
 import { WorkloadPopover } from './WorkloadPopover';
@@ -65,9 +70,7 @@ export function TotalsCard({
   const workload = calcWorkload(body);
 
   return (
-    <aside
-      className={cn('card-surface px-6 py-5')}
-    >
+    <aside className={cn('card-surface px-6 py-5')}>
       <div className="mb-2 flex justify-end">
         <WorkloadPopover body={body} fallbackRateCents={hourlyRateCents} />
       </div>

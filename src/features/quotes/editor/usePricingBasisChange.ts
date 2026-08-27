@@ -50,9 +50,7 @@ export function usePricingBasisChange() {
       setPricingBasis(pending, convert);
 
       if (convert) {
-        toast.success(
-          pending === 'time' ? pl.editor.convertedToTime : pl.editor.convertedToAmount,
-        );
+        toast.success(pending === 'time' ? pl.editor.convertedToTime : pl.editor.convertedToAmount);
       }
       setPending(null);
     },

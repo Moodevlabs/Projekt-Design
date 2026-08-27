@@ -22,7 +22,8 @@ export interface LibraryCascade {
 export function useLibraryCascade(): LibraryCascade {
   return useMemo(
     () => ({
-      linkedCount: (libraryItemId) => countLinkedItems(useEditorStore.getState().body, libraryItemId),
+      linkedCount: (libraryItemId) =>
+        countLinkedItems(useEditorStore.getState().body, libraryItemId),
       apply: (libraryItemId, patch) =>
         useEditorStore.getState().applyLibraryUpdate(libraryItemId, patch),
     }),

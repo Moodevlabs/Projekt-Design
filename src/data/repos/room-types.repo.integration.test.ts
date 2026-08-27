@@ -5,12 +5,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { getSupabase } from '@/data/supabase';
 import { getCurrentWorkspace } from './workspace.repo';
-import {
-  createRoomType,
-  deleteRoomType,
-  listRoomTypes,
-  updateRoomType,
-} from './room-types.repo';
+import { createRoomType, deleteRoomType, listRoomTypes, updateRoomType } from './room-types.repo';
 
 const DEMO_EMAIL = 'demo@toolier.local';
 const DEMO_PASSWORD = 'demo1234';

@@ -32,13 +32,7 @@ import { cn } from '@/lib/utils';
  * Cała karta jest odnośnikiem do teczki. Menu z akcjami stoi POZA nim —
  * inaczej „Archiwizuj" wchodziłoby w klienta zamiast go archiwizować.
  */
-export function ClientCard({
-  client,
-  onEdit,
-}: {
-  client: ClientOverview;
-  onEdit: () => void;
-}) {
+export function ClientCard({ client, onEdit }: { client: ClientOverview; onEdit: () => void }) {
   const avatar = useClientAvatarUrl(client.avatarPath);
 
   return (

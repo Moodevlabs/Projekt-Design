@@ -59,7 +59,11 @@ export function ClientCard() {
 
   // Lista do wyboru — filtruje Postgres, tak jak na `/klienci`. Zarchiwizowani
   // też są: stary klient wraca po latach i wtedy chodzi o TĘ SAMĄ teczkę.
-  const clients = useClients({ search: search.trim() || undefined, status: 'all', sort: 'name_asc' });
+  const clients = useClients({
+    search: search.trim() || undefined,
+    status: 'all',
+    sort: 'name_asc',
+  });
   const attached = useClient(clientId);
   // Projekty należą do klienta, więc bez klienta nie ma czego pokazywać —
   // `enabled` w hooku pilnuje, żeby zapytanie w ogóle nie poleciało.
@@ -123,11 +127,7 @@ export function ClientCard() {
                 <CommandEmpty>{pl.editor.clientEmpty}</CommandEmpty>
                 <CommandGroup>
                   {(clients.data ?? []).map((client) => (
-                    <CommandItem
-                      key={client.id}
-                      value={client.id}
-                      onSelect={() => pick(client)}
-                    >
+                    <CommandItem key={client.id} value={client.id} onSelect={() => pick(client)}>
                       <Check
                         className={cn(
                           'size-4',
@@ -232,12 +232,7 @@ export function ClientCard() {
         )}
       </section>
 
-      <ClientFormDialog
-        open={formOpen}
-        onOpenChange={setFormOpen}
-        client={null}
-        onSaved={pick}
-      />
+      <ClientFormDialog open={formOpen} onOpenChange={setFormOpen} client={null} onSaved={pick} />
     </>
   );
 }

@@ -40,13 +40,7 @@ function nameLabel(data: DragData): string {
  * Ruch w pionie jest wymuszony modyfikatorem: dokument jest jedną kolumną,
  * więc swoboda w poziomie tylko utrudniałaby trafienie w cel.
  */
-export function QuoteDndProvider({
-  enabled,
-  children,
-}: {
-  enabled: boolean;
-  children: ReactNode;
-}) {
+export function QuoteDndProvider({ enabled, children }: { enabled: boolean; children: ReactNode }) {
   const moveItem = useEditorStore((state) => state.moveItem);
   const moveGroup = useEditorStore((state) => state.moveGroup);
   const moveSection = useEditorStore((state) => state.moveSection);
@@ -90,8 +84,7 @@ export function QuoteDndProvider({
   );
 
   const announcements: Announcements = {
-    onDragStart: ({ active }) =>
-      pl.editor.dnd.start(nameLabel(active.data.current as DragData)),
+    onDragStart: ({ active }) => pl.editor.dnd.start(nameLabel(active.data.current as DragData)),
     onDragOver: ({ active, over }) =>
       over
         ? pl.editor.dnd.over(nameLabel(active.data.current as DragData), String(over.id))

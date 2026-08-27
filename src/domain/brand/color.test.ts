@@ -50,10 +50,7 @@ describe('contrastRatio', () => {
   });
 
   it('jest symetryczny', () => {
-    expect(contrastRatio('#21201C', '#FAF7F1')).toBeCloseTo(
-      contrastRatio('#FAF7F1', '#21201C'),
-      5,
-    );
+    expect(contrastRatio('#21201C', '#FAF7F1')).toBeCloseTo(contrastRatio('#FAF7F1', '#21201C'), 5);
   });
 });
 

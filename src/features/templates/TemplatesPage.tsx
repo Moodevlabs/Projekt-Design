@@ -8,11 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { TemplateCard } from './TemplateCard';
 import { useCreateQuote } from '@/data/queries/useQuotes';
 import { scheduleFromTemplate } from '@/domain/schedule';
-import {
-  useDeleteTemplate,
-  useRenameTemplate,
-  useTemplates,
-} from '@/data/queries/useTemplates';
+import { useDeleteTemplate, useRenameTemplate, useTemplates } from '@/data/queries/useTemplates';
 import type { Template } from '@/data/repos/templates.repo';
 import { routes } from '@/app/routes';
 import { pl } from '@/i18n/pl';
@@ -107,9 +103,7 @@ export function TemplatesPage() {
           if (!open) setPendingDelete(null);
         }}
         title={pl.templates.removeTitle}
-        description={
-          pendingDelete ? pl.templates.removeDescription(pendingDelete.name) : undefined
-        }
+        description={pendingDelete ? pl.templates.removeDescription(pendingDelete.name) : undefined}
         confirmLabel={pl.common.delete}
         destructive
         onConfirm={() => {

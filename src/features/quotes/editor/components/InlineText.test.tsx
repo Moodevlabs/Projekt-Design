@@ -55,7 +55,9 @@ describe('InlineText', () => {
 
 describe('InlineText — podgląd', () => {
   it('renderuje tekst, a nie pole formularza', () => {
-    render(<InlineText value="anna.nowak@example.com" onCommit={vi.fn()} readOnly ariaLabel="E-mail" />);
+    render(
+      <InlineText value="anna.nowak@example.com" onCommit={vi.fn()} readOnly ariaLabel="E-mail" />,
+    );
 
     // Długie wartości muszą się zawijać — `readonly` input by je uciął.
     expect(screen.getByLabelText('E-mail')).toHaveTextContent('anna.nowak@example.com');

@@ -79,23 +79,24 @@ export function withoutExtra(schedule: ScheduleBody, extraId: string): ScheduleB
 
   const extras = stage.extras.filter((extra) => extra.id !== extraId);
   if (extras.length === 0) {
-    return { ...schedule, stages: schedule.stages.filter((candidate) => candidate.id !== stage.id) };
+    return {
+      ...schedule,
+      stages: schedule.stages.filter((candidate) => candidate.id !== stage.id),
+    };
   }
 
   return {
     ...schedule,
     stages: schedule.stages.map((candidate) =>
-      candidate.id === stage.id ? { ...candidate, extras, baseDays: extrasDays(extras) } : candidate,
+      candidate.id === stage.id
+        ? { ...candidate, extras, baseDays: extrasDays(extras) }
+        : candidate,
     ),
   };
 }
 
 /** Harmonogram ze zmienioną liczbą dni jednego składnika. */
-export function withExtraDays(
-  schedule: ScheduleBody,
-  extraId: string,
-  days: number,
-): ScheduleBody {
+export function withExtraDays(schedule: ScheduleBody, extraId: string, days: number): ScheduleBody {
   const stage = findExtrasStage(schedule);
   if (!stage) return schedule;
 
@@ -106,7 +107,9 @@ export function withExtraDays(
   return {
     ...schedule,
     stages: schedule.stages.map((candidate) =>
-      candidate.id === stage.id ? { ...candidate, extras, baseDays: extrasDays(extras) } : candidate,
+      candidate.id === stage.id
+        ? { ...candidate, extras, baseDays: extrasDays(extras) }
+        : candidate,
     ),
   };
 }

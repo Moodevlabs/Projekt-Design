@@ -148,15 +148,20 @@ describe('Sidebar — rozwijanie', () => {
 });
 
 describe('Sidebar — kolejnosc i zakres (T-58)', () => {
-  it('kolejnosc z 05-UI §2: Pulpit · Klienci · Wyceny · Biblioteka · Szablony | Kosz · Pomoc · Ustawienia', () => {
+  it('kolejnosc: Pulpit · Klienci · Kalendarz · Wyceny · Biblioteka · Szablony | Kosz · Pomoc · Ustawienia', () => {
     // Klienci PRZED wycenami: od T-53 to oni sa osia aplikacji.
     //
     // Kosz doszedl 2026-08-27 NAD Pomoca. Byl sekcja Ustawien, ktora znikala,
     // gdy byl pusty — czyli czlowiek szukajacy skasowanego pliku nie mial
     // gdzie zajrzec. Stoi pod kreska, bo sie do niego ZAGLADA, a nie pracuje.
+    //
+    // Kalendarz doszedl w T-98 miedzy Klientami a Wycenami: to widok na
+    // terminy tego, co juz w aplikacji jest, wiec stoi przy osi klientow,
+    // a nie wsrod miejsc, w ktorych powstaje dokument.
     expect(NAV_ITEMS.map((item) => item.label)).toEqual([
       pl.nav.dashboard,
       pl.nav.clients,
+      pl.nav.calendar,
       pl.nav.quotes,
       pl.nav.library,
       pl.nav.templates,
@@ -166,6 +171,7 @@ describe('Sidebar — kolejnosc i zakres (T-58)', () => {
     ]);
     // Kosz, Pomoc i Ustawienia sa w osobnej grupie, pod kreska (T-73).
     expect(NAV_ITEMS.map((item) => item.group)).toEqual([
+      'main',
       'main',
       'main',
       'main',

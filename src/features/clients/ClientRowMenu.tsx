@@ -15,13 +15,7 @@ import { useNewQuoteForClient } from './useNewQuoteForClient';
 import type { ClientOverview } from '@/domain/client/schema';
 import { pl } from '@/i18n/pl';
 
-export function ClientRowMenu({
-  client,
-  onEdit,
-}: {
-  client: ClientOverview;
-  onEdit: () => void;
-}) {
+export function ClientRowMenu({ client, onEdit }: { client: ClientOverview; onEdit: () => void }) {
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const setStatus = useSetClientStatus();

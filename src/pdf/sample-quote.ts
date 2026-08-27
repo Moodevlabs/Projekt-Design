@@ -30,7 +30,10 @@ export function sampleQuoteBody(): QuoteBody {
           newItem({ name: 'Koncepcja układu', unitPriceCents: 120_000 }),
           newItem({ name: 'Wizualizacja 3D', qty: 2, unitPriceCents: 35_000 }),
           // Wyłączona pozycja ma w PDF inny kolor — to widać tylko na przykładzie.
-          { ...newItem({ name: 'Nadzór autorski (opcja)', unitPriceCents: 80_000 }), enabled: false },
+          {
+            ...newItem({ name: 'Nadzór autorski (opcja)', unitPriceCents: 80_000 }),
+            enabled: false,
+          },
         ],
         groups: [
           newGroup({

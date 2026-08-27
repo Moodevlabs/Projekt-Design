@@ -242,7 +242,9 @@ export const GroupBlock = memo(function GroupBlock({
           <AddLink icon={Plus} onClick={() => openScope({ sectionId, groupId: group.id })}>
             {pl.editor.scopeOpen}
           </AddLink>
-          <AddLink onClick={() => onAddItem(sectionId, group.id)}>{pl.editor.addItemManual}</AddLink>
+          <AddLink onClick={() => onAddItem(sectionId, group.id)}>
+            {pl.editor.addItemManual}
+          </AddLink>
         </div>
       ) : null}
 
