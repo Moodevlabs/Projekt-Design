@@ -117,17 +117,28 @@ export function CalendarPage() {
         </Alert>
       ) : null}
 
-      {isLoading ? (
-        <Skeleton className="h-96 rounded-[var(--radius-card)]" />
-      ) : (
-        <MonthGrid
-          month={month}
-          today={today}
-          selected={selected}
-          byDay={byDay}
-          onSelect={selectDay}
-        />
-      )}
+      {/*
+        Siatka jest WĘŻSZA niż reszta strony (`max-w-3xl`). Rozciągnięta na
+        pełną szerokość kolumny dawała kratki trzykrotnie szersze niż wyższe,
+        a numer dnia gubił się w pustym polu. Nagłówek, legenda i panel dnia
+        korzystają z pełnej szerokości, bo tam idzie tekst.
+      */}
+      <div className="mx-auto w-full max-w-3xl">
+        {isLoading ? (
+          <Skeleton
+            className="rounded-[var(--radius-card)]"
+            style={{ height: 'clamp(18rem, 54dvh, 29rem)' }}
+          />
+        ) : (
+          <MonthGrid
+            month={month}
+            today={today}
+            selected={selected}
+            byDay={byDay}
+            onSelect={selectDay}
+          />
+        )}
+      </div>
 
       <Legend />
 

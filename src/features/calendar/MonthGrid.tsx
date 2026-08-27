@@ -1,8 +1,10 @@
 import {
   isSameMonth,
+  isSunday,
   isWeekend,
   kindsOfDay,
   monthGrid,
+  weekdayIndex,
   type CalendarEvent,
   type IsoDay,
   type MonthRef,
@@ -33,19 +35,28 @@ export interface MonthGridProps {
  *
  * Kropka na rodzaj, nie na zdarzenie — trzy terminy tego samego rodzaju nie
  * niosą więcej niż jeden, a zajmują trzy razy tyle miejsca (`kindsOfDay`).
+ *
+ * ## Wysokość bierze się z OKNA, nie z proporcji kratki
+ *
+ * Kratki kwadratowe (pierwsza wersja) rosły razem z szerokością: przy szerokim
+ * oknie sześć wierszy dawało blisko tysiąc pikseli i panel dnia lądował pod
+ * krawędzią ekranu. Siatka ma teraz sześć wierszy równej wysokości wewnątrz
+ * kontenera mierzonego względem wysokości okna (`dvh`), z ogranicznikami
+ * `clamp`: na niskim oknie kurczy się, na wysokim przestaje rosnąć, bo dalsze
+ * powiększanie pustych kratek niczego nie dodaje.
  */
 export function MonthGrid({ month, today, selected, byDay, onSelect }: MonthGridProps) {
   const weeks = monthGrid(month);
 
   return (
-    <div className="card-surface overflow-hidden p-3 sm:p-4">
+    <div className="card-surface p-2 sm:p-3">
       <div className="grid grid-cols-7 gap-1 sm:gap-1.5">
         {pl.calendar.weekdays.map((label, index) => (
           <div
             key={label}
             className={cn(
-              'label-caps text-ink-faint px-1 pb-1.5 text-center',
-              index >= 5 && 'text-ink-faint/70',
+              'label-caps px-1 pb-1.5 text-center',
+              index === 6 ? 'text-[var(--status-rejected)]' : 'text-ink-faint',
             )}
           >
             <abbr title={pl.calendar.weekdaysFull[index]} className="no-underline">
@@ -53,12 +64,18 @@ export function MonthGrid({ month, today, selected, byDay, onSelect }: MonthGrid
             </abbr>
           </div>
         ))}
+      </div>
 
+      <div
+        className="mt-0.5 grid grid-cols-7 grid-rows-6 gap-1 sm:gap-1.5"
+        style={{ height: 'clamp(16rem, 50dvh, 27rem)' }}
+      >
         {weeks.flat().map((day) => {
           const events = byDay.get(day) ?? [];
           const outside = !isSameMonth(day, month);
           const isToday = day === today;
           const isSelected = day === selected;
+          const sunday = isSunday(day);
 
           return (
             <button
@@ -68,18 +85,29 @@ export function MonthGrid({ month, today, selected, byDay, onSelect }: MonthGrid
               aria-label={dayAriaLabel(day, events.length)}
               onClick={() => onSelect(day)}
               className={cn(
-                'group border-hair relative flex aspect-square flex-col items-center justify-start rounded-[var(--radius-control)] border border-transparent px-1 pt-1.5 pb-1 transition-colors',
+                'group border-hair flex min-h-0 flex-col items-center justify-start rounded-[var(--radius-control)] border border-transparent px-1 pt-1 pb-0.5 transition-colors',
                 'hover:border-hair-strong hover:bg-surface-2',
-                outside && 'text-ink-faint',
-                !outside && isWeekend(day) && 'text-ink-soft',
+                // Weekend dostaje własne tło — kolumny sobotnia i niedzielna
+                // mają być rozpoznawalne bez czytania główki.
+                isWeekend(day) && 'bg-surface-2/60',
                 isSelected && 'border-primary bg-surface-2',
               )}
             >
               <span
                 className={cn(
-                  'tabular flex size-6 items-center justify-center rounded-full text-xs',
+                  // Numer i kropki kurczą się razem z kratką: przy niskim oknie
+                  // wiersz ma około 40 px i element stałej wielkości przyciąłby
+                  // oznaczenia zdarzeń.
+                  'tabular flex size-5 shrink-0 items-center justify-center rounded-full text-[11px] sm:size-6 sm:text-xs',
                   isToday && 'bg-primary text-primary-foreground font-semibold',
-                  !isToday && !outside && 'text-ink',
+                  // Niedziela na czerwono, sobota tylko przygaszona — konwencja
+                  // polskich kalendarzy. Dzień spoza miesiąca traci nasycenie,
+                  // ale nie kolor: 30 listopada widziany w grudniu ma nadal
+                  // być rozpoznawalny jako niedziela.
+                  !isToday && sunday && 'text-[var(--status-rejected)]',
+                  !isToday && !sunday && !outside && 'text-ink',
+                  !isToday && !sunday && outside && 'text-ink-faint',
+                  !isToday && outside && 'opacity-60',
                 )}
               >
                 {Number(day.slice(8, 10))}
@@ -89,7 +117,7 @@ export function MonthGrid({ month, today, selected, byDay, onSelect }: MonthGrid
                 Kropki stoją pod numerem i nie zmieniają wysokości kratki:
                 miesiąc z jednym gęstym dniem nie ma prawa rozpychać siatki.
               */}
-              <span className="mt-1 flex h-2 items-center justify-center gap-0.5">
+              <span className="mt-0.5 flex h-2 shrink-0 items-center justify-center gap-0.5 sm:mt-1">
                 {kindsOfDay(events).map((kind) => (
                   <span
                     key={kind}
@@ -113,13 +141,7 @@ function dayAriaLabel(day: IsoDay, count: number): string {
     dayOfMonth ?? 1,
     pl.calendar.monthsGenitive[(month ?? 1) - 1] ?? '',
     year ?? 0,
-    weekdayName(day),
+    pl.calendar.weekdaysFull[weekdayIndex(day)] ?? '',
   );
   return count === 0 ? label : `${label} — ${pl.calendar.eventCount(count)}`;
-}
-
-function weekdayName(day: IsoDay): string {
-  const date = new Date(`${day}T00:00:00Z`);
-  const index = (date.getUTCDay() + 6) % 7;
-  return pl.calendar.weekdaysFull[index] ?? '';
 }

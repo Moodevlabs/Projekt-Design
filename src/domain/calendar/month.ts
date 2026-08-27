@@ -95,10 +95,31 @@ export function isSameMonth(day: IsoDay, ref: MonthRef): boolean {
   return month.year === ref.year && month.month === ref.month;
 }
 
+/**
+ * Dzień tygodnia liczony od PONIEDZIAŁKU: 0 = poniedziałek, 6 = niedziela.
+ *
+ * `Date.getUTCDay()` liczy od niedzieli, więc każde miejsce, które chce
+ * kolumny siatki albo nazwę dnia, musiałoby powtarzać to samo przesunięcie —
+ * i wystarczy pomylić się raz, żeby kalendarz zaczął się w niedzielę.
+ */
+export function weekdayIndex(day: IsoDay): number {
+  return (parseIsoDate(day).getUTCDay() + 6) % 7;
+}
+
 /** Sobota albo niedziela — do wygaszenia kratki, nie do blokowania czegokolwiek. */
 export function isWeekend(day: IsoDay): boolean {
-  const weekday = parseIsoDate(day).getUTCDay();
-  return weekday === 0 || weekday === 6;
+  return weekdayIndex(day) >= 5;
+}
+
+/**
+ * Niedziela osobno od soboty.
+ *
+ * W polskich kalendarzach niedziela jest czerwona, a sobota tylko wygaszona —
+ * to nie ozdobnik, tylko utrwalona konwencja: dzień ustawowo wolny od pracy
+ * czyta się inaczej niż dzień wolny umownie.
+ */
+export function isSunday(day: IsoDay): boolean {
+  return weekdayIndex(day) === 6;
 }
 
 /**
