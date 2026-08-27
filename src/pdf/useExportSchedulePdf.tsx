@@ -38,7 +38,15 @@ export function useExportSchedulePdf() {
   const [exporting, setExporting] = useState(false);
 
   const exportSchedule = useCallback(
-    async ({ schedule, rooms, number, issueDate, validDays = 7, archive, version }: ExportScheduleArgs) => {
+    async ({
+      schedule,
+      rooms,
+      number,
+      issueDate,
+      validDays = 7,
+      archive,
+      version,
+    }: ExportScheduleArgs) => {
       if (!schedule) {
         // Bez harmonogramu nie ma czego drukowac — mowimy, gdzie go ustawic,
         // zamiast wypuszczac pusty dokument.

@@ -39,7 +39,7 @@ export function App() {
 
   useEffect(() => {
     if (!isConfigured) {
-      setScreen({ kind: 'error', message: 'Strona nie jest skonfigurowana.' });
+      setScreen({ kind: 'error', message: 'Strona nie została poprawnie skonfigurowana.' });
       return;
     }
     if (!token) {
@@ -66,7 +66,8 @@ export function App() {
         if (!parsed.ok) {
           setScreen({
             kind: 'error',
-            message: 'Nie udało się otworzyć tej oferty. Poproś projektanta o nowy link.',
+            message:
+              'Otwarcie oferty nie powiodło się. Prosimy o kontakt z pracownią w celu otrzymania nowego adresu.',
           });
           return;
         }
@@ -82,7 +83,7 @@ export function App() {
         if (cancelled) return;
         setScreen({
           kind: 'error',
-          message: error instanceof Error ? error.message : 'Nie udało się wczytać oferty.',
+          message: error instanceof Error ? error.message : 'Wczytanie oferty nie powiodło się.',
         });
       }
     })();
@@ -111,15 +112,16 @@ export function App() {
         if (result.ok) {
           setScreen({
             kind: 'done',
-            title: 'Dziękujemy — oferta zaakceptowana.',
-            message: 'Projektant dostał powiadomienie. Odezwie się z kolejnymi krokami.',
+            title: 'Oferta została zaakceptowana. Dziękujemy.',
+            message:
+              'Pracownia otrzymała powiadomienie i skontaktuje się w sprawie dalszych kroków.',
           });
         } else {
           setActionError(REJECTION_TEXT[result.reason]);
         }
       } catch (error) {
         setActionError(
-          error instanceof Error ? error.message : 'Nie udało się zapisać akceptacji.',
+          error instanceof Error ? error.message : 'Zapisanie akceptacji nie powiodło się.',
         );
       } finally {
         setBusy(false);
@@ -138,16 +140,16 @@ export function App() {
         if (result.ok) {
           setScreen({
             kind: 'done',
-            title: 'Dziękujemy za odpowiedź.',
+            title: 'Dziękujemy za przekazanie decyzji.',
             message:
-              'Projektant wie, że nie skorzystasz z tej oferty. Jeśli coś się zmieni, odezwij się — przygotuje nową.',
+              'Pracownia została poinformowana o decyzji. W razie zmiany okoliczności prosimy o kontakt — przygotujemy nową propozycję.',
           });
         } else {
           setActionError(REJECTION_TEXT[result.reason]);
         }
       } catch (error) {
         setActionError(
-          error instanceof Error ? error.message : 'Nie udało się zapisać odpowiedzi.',
+          error instanceof Error ? error.message : 'Zapisanie odpowiedzi nie powiodło się.',
         );
       } finally {
         setBusy(false);
@@ -166,14 +168,16 @@ export function App() {
         if (result.ok) {
           setScreen({
             kind: 'done',
-            title: 'Uwagi wysłane.',
-            message: 'Projektant je zobaczy i wróci do Ciebie z poprawioną ofertą.',
+            title: 'Uwagi zostały przesłane.',
+            message: 'Pracownia zapozna się z uwagami i przekaże skorygowaną ofertę.',
           });
         } else {
           setActionError(REJECTION_TEXT[result.reason]);
         }
       } catch (error) {
-        setActionError(error instanceof Error ? error.message : 'Nie udało się wysłać uwag.');
+        setActionError(
+          error instanceof Error ? error.message : 'Przesłanie uwag nie powiodło się.',
+        );
       } finally {
         setBusy(false);
       }
@@ -285,9 +289,7 @@ export function App() {
             do przeczytania później (poprawka 7a).
           */}
           {schedule ? <ScheduleBlock schedule={schedule} rooms={body.rooms} /> : null}
-          {documents ? (
-            <DocumentsBlock documents={documents} currency={quote.currency} />
-          ) : null}
+          {documents ? <DocumentsBlock documents={documents} currency={quote.currency} /> : null}
 
           {closed ? null : (
             <DecisionPanel

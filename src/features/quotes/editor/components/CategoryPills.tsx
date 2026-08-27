@@ -30,7 +30,11 @@ export function CategoryPills({
       aria-label={pl.library.categories}
       className={cn('border-hair flex gap-1 overflow-x-auto border-b px-2 py-1.5', className)}
     >
-      <Pill label={pl.editor.pickerAllCategories} active={value === null} onClick={() => onChange(null)} />
+      <Pill
+        label={pl.editor.pickerAllCategories}
+        active={value === null}
+        onClick={() => onChange(null)}
+      />
       {categories.map((category) => (
         <Pill
           key={category}
@@ -43,15 +47,7 @@ export function CategoryPills({
   );
 }
 
-function Pill({
-  label,
-  active,
-  onClick,
-}: {
-  label: string;
-  active: boolean;
-  onClick: () => void;
-}) {
+function Pill({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
   return (
     <button
       type="button"

@@ -96,7 +96,9 @@ export function calcSchedule(schedule: ScheduleBody, rooms: Room[]): ScheduleRes
   }));
 
   const sum = (owner: ScheduleStage['owner']) =>
-    perStage.filter((stage) => stage.owner === owner).reduce((total, stage) => total + stage.days, 0);
+    perStage
+      .filter((stage) => stage.owner === owner)
+      .reduce((total, stage) => total + stage.days, 0);
 
   const providerDays = sum('provider');
   const clientDays = sum('client');

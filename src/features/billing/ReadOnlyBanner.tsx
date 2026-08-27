@@ -20,8 +20,8 @@ export function ReadOnlyBanner() {
   if (entitlement.loading || entitlement.canWrite) return null;
 
   return (
-    <div className="flex flex-wrap items-center gap-3 border-b border-hair-strong bg-danger-wash px-7 py-2.5">
-      <Lock className="size-4 shrink-0 text-danger" aria-hidden />
+    <div className="border-hair-strong bg-danger-wash flex flex-wrap items-center gap-3 border-b px-7 py-2.5">
+      <Lock className="text-danger size-4 shrink-0" aria-hidden />
       <p className="text-ink min-w-0 flex-1 text-[13px]">{pl.billing.readOnlyBanner}</p>
       <Button type="button" size="sm" asChild>
         <Link to={routes.subscription}>{pl.billing.buy}</Link>

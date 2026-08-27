@@ -28,7 +28,9 @@ export function DragHandle({
     >
       <svg viewBox="0 0 24 24" className="size-[14px]" aria-hidden focusable="false">
         {[6, 12, 18].map((y) =>
-          [8, 16].map((x) => <circle key={`${x}-${y}`} cx={x} cy={y} r="1.6" fill="currentColor" />),
+          [8, 16].map((x) => (
+            <circle key={`${x}-${y}`} cx={x} cy={y} r="1.6" fill="currentColor" />
+          )),
         )}
       </svg>
     </button>

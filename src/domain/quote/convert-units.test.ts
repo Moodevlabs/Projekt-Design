@@ -84,7 +84,13 @@ describe('convertPricingRule', () => {
   it('bez stawki zwraca null', () => {
     expect(
       convertPricingRule(
-        { mode: 'per_room', baseCents: 30, perRoomCents: {}, defaultPerRoomCents: 0, roomScope: 'all' },
+        {
+          mode: 'per_room',
+          baseCents: 30,
+          perRoomCents: {},
+          defaultPerRoomCents: 0,
+          roomScope: 'all',
+        },
         'time',
         'amount',
         null,
@@ -98,7 +104,13 @@ describe('convertItemUnits', () => {
     const item = newItem({
       name: 'Projekt',
       unitPriceCents: 45,
-      pricing: { mode: 'per_room', baseCents: 30, perRoomCents: {}, defaultPerRoomCents: 15, roomScope: 'all' },
+      pricing: {
+        mode: 'per_room',
+        baseCents: 30,
+        perRoomCents: {},
+        defaultPerRoomCents: 15,
+        roomScope: 'all',
+      },
     });
 
     const wynik = convertItemUnits(item, 'time', 'amount', RATE);
@@ -129,7 +141,13 @@ describe('convertItemUnits', () => {
     const item = newItem({
       name: 'Projekt',
       unitPriceCents: 45,
-      pricing: { mode: 'per_room', baseCents: 30, perRoomCents: {}, defaultPerRoomCents: 0, roomScope: 'all' },
+      pricing: {
+        mode: 'per_room',
+        baseCents: 30,
+        perRoomCents: {},
+        defaultPerRoomCents: 0,
+        roomScope: 'all',
+      },
     });
 
     expect(convertItemUnits(item, 'time', 'amount', null)).toBeNull();

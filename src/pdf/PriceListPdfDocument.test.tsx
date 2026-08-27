@@ -5,6 +5,7 @@ import { priceListFileName } from './file-name';
 import { buildPdfTheme } from './theme';
 import { defaultBrandKit } from '@/domain/brand/schema';
 import { newPriceListDoc, newPriceListItem, type PriceListDoc } from '@/domain/documents';
+import { formatMoneyRange } from '@/domain/money';
 
 function render(doc: PriceListDoc) {
   return renderToBuffer(
@@ -30,18 +31,26 @@ describe('PriceListPdfDocument — render', () => {
     expect(Buffer.from(bytes).subarray(0, 5).toString()).toBe('%PDF-');
   });
 
-  it('pozycja z przedziałem daje więcej treści niż z jedną ceną', async () => {
-    const jedna = await render(
-      newPriceListDoc({
-        items: [newPriceListItem({ name: 'Rzut', priceMinCents: 30_000 })],
-      }),
-    );
-    const przedzial = await render(
+  /*
+   * Widełki sprawdzamy na TEKŚCIE komórki, a nie na rozmiarze pliku.
+   * Porównanie długości bufora przechodziło przypadkiem: PDF jest
+   * skompresowany, więc dłuższy napis potrafi dać krótszy plik, a test
+   * wywracał się przy zmianie zupełnie innego zdania w dokumencie (T-97).
+   */
+  it('pozycja z przedziałem drukuje oba końce widełek', async () => {
+    const jedna = formatMoneyRange(30_000, null, '', 'PLN');
+    const przedzial = formatMoneyRange(30_000, 120_000, '', 'PLN');
+
+    expect(przedzial).not.toBe(jedna);
+    expect(przedzial).toContain('300');
+    expect(przedzial).toContain('1');
+
+    const bytes = await render(
       newPriceListDoc({
         items: [newPriceListItem({ name: 'Rzut', priceMinCents: 30_000, priceMaxCents: 120_000 })],
       }),
     );
-    expect(przedzial.length).toBeGreaterThan(jedna.length);
+    expect(Buffer.from(bytes).subarray(0, 5).toString()).toBe('%PDF-');
   });
 
   it('przypis trafia do pliku', async () => {

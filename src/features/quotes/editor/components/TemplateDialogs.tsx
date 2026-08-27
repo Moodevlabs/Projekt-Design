@@ -156,7 +156,9 @@ export function OverwriteTemplateDialog({
         <DialogHeader>
           <DialogTitle>{pl.templates.overwriteTitle}</DialogTitle>
           <DialogDescription>
-            {selected ? pl.templates.overwriteDescription(selected.name) : pl.templates.overwriteEmpty}
+            {selected
+              ? pl.templates.overwriteDescription(selected.name)
+              : pl.templates.overwriteEmpty}
           </DialogDescription>
         </DialogHeader>
 

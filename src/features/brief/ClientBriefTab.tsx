@@ -5,14 +5,20 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ConfirmDialog, EmptyState } from '@/components/shared';
-import { useBriefs, useCreateBrief, useDeleteBrief, useRevokeBrief } from '@/data/queries/useBriefs';
+import {
+  useBriefs,
+  useCreateBrief,
+  useDeleteBrief,
+  useRevokeBrief,
+} from '@/data/queries/useBriefs';
 import {
   buildBriefUrl,
   countAnswered,
   countQuestions,
-  DEFAULT_BRIEF_EXPIRY_DAYS,
   type Brief,
+  type BriefTemplate,
 } from '@/domain/brief';
+import { NewBriefDialog } from './NewBriefDialog';
 import { env } from '@/lib/env';
 import { openExternal } from '@/lib/tauri';
 import { formatDate, formatDateTime } from '@/lib/dates';
@@ -37,28 +43,46 @@ import { cn } from '@/lib/utils';
 export function ClientBriefTab({ clientId }: { clientId: string }) {
   const briefs = useBriefs(clientId);
   const create = useCreateBrief(clientId);
+  const [newOpen, setNewOpen] = useState(false);
 
   const rows = briefs.data ?? [];
 
-  const handleCreate = () => {
-    create.mutate(
-      { expiryDays: DEFAULT_BRIEF_EXPIRY_DAYS },
-      { onError: () => toast.error(pl.brief.createFailed) },
-    );
+  const handleCreate = (input: { expiryDays: number | null; template: BriefTemplate }) => {
+    create.mutate(input, {
+      onSuccess: (brief) => {
+        setNewOpen(false);
+        // Link kopiujemy od razu: wystawienie briefu ma jeden cel — przekazać
+        // adres klientowi — a szukanie go potem w liście jest krokiem, którego
+        // nie musi być.
+        const url = env.shareBaseUrl ? buildBriefUrl(env.shareBaseUrl, brief.token) : brief.token;
+        void navigator.clipboard
+          .writeText(url)
+          .then(() => toast.success(pl.brief.copied))
+          .catch(() => undefined);
+      },
+      onError: () => toast.error(pl.brief.createFailed),
+    });
   };
 
   return (
     <div className="space-y-4">
       <section className="card-surface flex flex-wrap items-start justify-between gap-3 p-5">
-        <div className="min-w-0 max-w-prose">
+        <div className="max-w-prose min-w-0">
           <h2 className="text-ink text-sm font-semibold">{pl.brief.title}</h2>
           <p className="text-ink-soft mt-1 text-sm">{pl.brief.intro}</p>
         </div>
-        <Button onClick={handleCreate} disabled={create.isPending}>
+        <Button onClick={() => setNewOpen(true)} disabled={create.isPending}>
           <Send className="size-4" aria-hidden />
           {create.isPending ? pl.brief.creating : pl.brief.create}
         </Button>
       </section>
+
+      <NewBriefDialog
+        open={newOpen}
+        onOpenChange={setNewOpen}
+        pending={create.isPending}
+        onSubmit={handleCreate}
+      />
 
       {briefs.isLoading ? (
         <Skeleton className="h-32 rounded-[var(--radius-card)]" />
@@ -161,7 +185,9 @@ function BriefRow({ brief, clientId }: { brief: Brief; clientId: string }) {
 
       <div className="text-ink-faint mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs">
         <span>{formatDate(brief.createdAt)}</span>
-        {brief.expiresAt ? <span>{`${pl.brief.validFor}: ${formatDate(brief.expiresAt)}`}</span> : null}
+        {brief.expiresAt ? (
+          <span>{`${pl.brief.validFor}: ${formatDate(brief.expiresAt)}`}</span>
+        ) : null}
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-2">

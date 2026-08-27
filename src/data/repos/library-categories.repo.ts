@@ -105,7 +105,11 @@ export async function deleteLibraryCategory(id: string): Promise<void> {
   const supabase = getSupabase();
 
   unwrap(
-    await supabase.from('library_items').update({ category_id: null }).eq('category_id', id).select('id'),
+    await supabase
+      .from('library_items')
+      .update({ category_id: null })
+      .eq('category_id', id)
+      .select('id'),
     'Odpięcie usług od grupy',
   );
 
@@ -130,7 +134,11 @@ export async function reorderLibraryCategories(ids: readonly string[]): Promise<
   const supabase = getSupabase();
   for (const [index, id] of ids.entries()) {
     unwrap(
-      await supabase.from('library_categories').update({ sort_order: index }).eq('id', id).select('id'),
+      await supabase
+        .from('library_categories')
+        .update({ sort_order: index })
+        .eq('id', id)
+        .select('id'),
       'Kolejność grup',
     );
   }

@@ -80,9 +80,7 @@ describe('DecisionPath — os decyzji klienta (poprawka 7a)', () => {
   it('kroki, ktore jeszcze nie zaszly, ZOSTAJA na liscie', () => {
     // Sedno przebudowy: lista pokazujaca tylko to, co sie stalo, nie mowi,
     // na co sie czeka.
-    render(
-      <DecisionPath sentAt={null} shares={[share()]} comments={[]} acceptance={null} />,
-    );
+    render(<DecisionPath sentAt={null} shares={[share()]} comments={[]} acceptance={null} />);
 
     expect(screen.getByText(pl.share.pathOpenedPending)).toBeInTheDocument();
     expect(screen.getByText(pl.share.pathDecisionPending)).toBeInTheDocument();

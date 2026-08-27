@@ -1,10 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import {
-  getBrandImageUrl,
-  removeBrandImage,
-  uploadBrandImage,
-} from '@/data/repos/brand.repo';
+import { getBrandImageUrl, removeBrandImage, uploadBrandImage } from '@/data/repos/brand.repo';
 import { updateWorkspaceSettings, type Workspace } from '@/data/repos/workspace.repo';
 import { queryKeys } from '@/data/query-keys';
 import { requireWorkspaceId, useWorkspace, useWorkspaceId } from './useWorkspace';

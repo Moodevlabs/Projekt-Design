@@ -62,13 +62,7 @@ const VISUALS: Record<QuoteStatus, StatusVisual> = {
   },
 };
 
-export function StatusMark({
-  status,
-  className,
-}: {
-  status: QuoteStatus;
-  className?: string;
-}) {
+export function StatusMark({ status, className }: { status: QuoteStatus; className?: string }) {
   const visual = VISUALS[status];
 
   return (

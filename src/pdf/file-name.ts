@@ -38,11 +38,7 @@ function versionPart(version: number | undefined): string {
   return version && version > 1 ? `-v${version}` : '';
 }
 
-export function quoteFileName(
-  number: string | null,
-  clientName: string,
-  version?: number,
-): string {
+export function quoteFileName(number: string | null, clientName: string, version?: number): string {
   // Ukośniki z numeru zamieniamy na myślniki — inaczej system uznałby je za
   // ścieżkę i zapis padłby (albo, co gorsza, trafił w inny katalog).
   const numberPart = number ? slug(number) : 'wycena';

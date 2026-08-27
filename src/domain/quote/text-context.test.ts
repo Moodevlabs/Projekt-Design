@@ -105,7 +105,10 @@ describe('spójność podglądu z PDF', () => {
 
     const info = documentTextInfo(BODY, '31.01.2026');
     const zPodgladu = renderText(item.description, itemTextContext(info, item));
-    const zPdf = renderText(item.description, itemTextContext(documentTextInfo(BODY, '31.01.2026'), item));
+    const zPdf = renderText(
+      item.description,
+      itemTextContext(documentTextInfo(BODY, '31.01.2026'), item),
+    );
 
     expect(zPodgladu).toBe(zPdf);
     expect(zPodgladu).toBe(

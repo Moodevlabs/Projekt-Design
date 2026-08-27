@@ -21,7 +21,10 @@ export function ScheduleResultCard({ result }: { result: ScheduleResult }) {
       </p>
 
       <div className="space-y-2">
-        <Line label={pl.editor.scheduleProviderDays} value={pl.editor.stageDays(result.providerDays)} />
+        <Line
+          label={pl.editor.scheduleProviderDays}
+          value={pl.editor.stageDays(result.providerDays)}
+        />
         <Line label={pl.editor.scheduleClientDays} value={pl.editor.stageDays(result.clientDays)} />
       </div>
 

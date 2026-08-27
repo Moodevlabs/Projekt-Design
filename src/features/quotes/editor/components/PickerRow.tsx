@@ -74,7 +74,7 @@ export function PickerRow({
              */
             <button
               type="button"
-              className="text-ink hover:text-[var(--doc-sage)] shrink-0 underline underline-offset-2"
+              className="text-ink shrink-0 underline underline-offset-2 hover:text-[var(--doc-sage)]"
               onMouseDown={(event) => {
                 event.preventDefault();
                 event.stopPropagation();

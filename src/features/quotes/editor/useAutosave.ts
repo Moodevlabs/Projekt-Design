@@ -124,7 +124,14 @@ export function useAutosave() {
         void enqueueChange({
           kind: 'quote.save',
           targetId: quoteId,
-          payload: { body, clientId, projectId, schedule, documents, ...(number ? { number } : {}) },
+          payload: {
+            body,
+            clientId,
+            projectId,
+            schedule,
+            documents,
+            ...(number ? { number } : {}),
+          },
           baseUpdatedAt: lastSeenUpdatedAt,
         }).catch((queueError) => {
           // Nawet kolejka może nie zadziałać (brak dysku, przeglądarka).

@@ -60,7 +60,11 @@ export function LoginPage() {
       ) : null}
 
       <Form {...form}>
-        <form onSubmit={(event) => void form.handleSubmit(onSubmit)(event)} className="space-y-4" noValidate>
+        <form
+          onSubmit={(event) => void form.handleSubmit(onSubmit)(event)}
+          className="space-y-4"
+          noValidate
+        >
           <FormField
             control={form.control}
             name="email"
@@ -102,7 +106,11 @@ export function LoginPage() {
             </Alert>
           ) : null}
 
-          <Button type="submit" className="w-full" disabled={!isConfigured || form.formState.isSubmitting}>
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={!isConfigured || form.formState.isSubmitting}
+          >
             {form.formState.isSubmitting ? pl.common.loading : pl.auth.login}
           </Button>
         </form>

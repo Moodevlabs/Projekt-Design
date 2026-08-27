@@ -5,10 +5,7 @@ import type { LibraryItem } from '@/data/repos/library.repo';
  * do kontekstu (nazwa grupy albo tytuł sekcji). Trik z prototypu: wstawiając
  * pozycję do „Kuchni" najczęściej szuka się właśnie kuchennych.
  */
-export function byCategory(
-  items: LibraryItem[],
-  priority?: string,
-): [string, LibraryItem[]][] {
+export function byCategory(items: LibraryItem[], priority?: string): [string, LibraryItem[]][] {
   const map = new Map<string, LibraryItem[]>();
   for (const item of items) {
     const list = map.get(item.categoryName) ?? [];

@@ -46,10 +46,10 @@ describe('BrandSettingsPage', () => {
     render(<BrandSettingsPage />);
     // Zdanie niesie tez ostrzezenie o braku wgranego pliku, stad dopasowanie
     // po fragmencie, a nie po calym ciagu.
-    expect(screen.getByText(/Teraz na nagłówku stoi znak jasny/)).toBeInTheDocument();
+    expect(screen.getByText(/stosowany jest obecnie znak jasny/)).toBeInTheDocument();
 
     await user.click(screen.getByRole('radio', { name: pl.brand.headerLogoDark }));
-    expect(screen.getByText(/Teraz na nagłówku stoi znak ciemny/)).toBeInTheDocument();
+    expect(screen.getByText(/stosowany jest obecnie znak ciemny/)).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: pl.common.save }));
     const patch = updateMutate.mock.calls[0]?.[0] as BrandKit;
@@ -117,9 +117,7 @@ describe('BrandSettingsPage', () => {
     await user.click(screen.getByRole('button', { name: pl.common.save }));
 
     const patch = updateMutate.mock.calls[0]?.[0] as BrandKit;
-    expect(patch.openingHours).toEqual([
-      { label: 'poniedziałek – piątek', hours: '8.00 – 16.00' },
-    ]);
+    expect(patch.openingHours).toEqual([{ label: 'poniedziałek – piątek', hours: '8.00 – 16.00' }]);
   });
 
   it('przy czterech wierszach nie da sie dodac piatego', () => {

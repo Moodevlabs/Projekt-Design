@@ -34,9 +34,7 @@ describe('ilikeFilter', () => {
 
 describe('ilikeAnyOf', () => {
   it('skleja kolumny przecinkiem', () => {
-    expect(ilikeAnyOf(['number', 'title'], 'abc')).toBe(
-      'number.ilike."%abc%",title.ilike."%abc%"',
-    );
+    expect(ilikeAnyOf(['number', 'title'], 'abc')).toBe('number.ilike."%abc%",title.ilike."%abc%"');
   });
 
   it('przecinek z frazy nie miesza sie z separatorem kolumn', () => {

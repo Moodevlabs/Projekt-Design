@@ -77,12 +77,13 @@ export function PricingBasisCard({
 
           {body.hourlyRateCents ? (
             <p className="text-ink-soft text-xs">
-              {pl.editor.workload}: <span className="tabular">{formatMinutes(workload.minutesTotal)}</span>
+              {pl.editor.workload}:{' '}
+              <span className="tabular">{formatMinutes(workload.minutesTotal)}</span>
             </p>
           ) : (
             // Bez stawki wszystkie kwoty wychodzą zerowe — trzeba powiedzieć
             // dlaczego, bo inaczej wygląda to jak zepsuta wycena.
-            <p className="text-[var(--doc-terracotta)] text-xs">{pl.editor.hourlyRateMissing}</p>
+            <p className="text-xs text-[var(--doc-terracotta)]">{pl.editor.hourlyRateMissing}</p>
           )}
         </div>
       ) : null}

@@ -32,11 +32,11 @@ export function ScheduleBlock({
 
       <dl className="border-hair mt-3 grid grid-cols-2 gap-3 rounded-lg border p-4 text-sm sm:grid-cols-3">
         <div>
-          <dt className="text-ink-soft text-xs">Praca pracowni</dt>
+          <dt className="text-ink-soft text-xs">Po stronie pracowni</dt>
           <dd className="tabular mt-0.5">{dni(result.providerDays)}</dd>
         </div>
         <div>
-          <dt className="text-ink-soft text-xs">Po Twojej stronie</dt>
+          <dt className="text-ink-soft text-xs">Po stronie inwestora</dt>
           <dd className="tabular mt-0.5">{dni(result.clientDays)}</dd>
         </div>
         {result.endLatest ? (
@@ -46,7 +46,7 @@ export function ScheduleBlock({
           </div>
         ) : (
           <div>
-            <dt className="text-ink-soft text-xs">Łącznie kalendarzowo</dt>
+            <dt className="text-ink-soft text-xs">Łącznie w dniach kalendarzowych</dt>
             <dd className="tabular mt-0.5">około {result.calendarDaysLatest} dni</dd>
           </div>
         )}
@@ -63,7 +63,7 @@ export function ScheduleBlock({
                 właśnie te dni najczęściej się rozciągają.
               */}
               {stage.owner === 'client' ? (
-                <span className="text-ink-soft ml-2 text-xs">(po Twojej stronie)</span>
+                <span className="text-ink-soft ml-2 text-xs">(po stronie inwestora)</span>
               ) : null}
             </span>
             <span className="tabular text-ink-soft shrink-0 text-xs">{dni(stage.days)}</span>
@@ -77,8 +77,8 @@ export function ScheduleBlock({
         </p>
       ) : (
         <p className="text-ink-soft mt-3 text-xs">
-          Termin liczony w dniach roboczych od startu prac — data startu ustala się przy
-          podpisaniu umowy.
+          Termin liczony w dniach roboczych od startu prac — data startu ustala się przy podpisaniu
+          umowy.
         </p>
       )}
     </section>

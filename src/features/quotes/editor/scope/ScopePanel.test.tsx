@@ -88,7 +88,11 @@ function setup() {
   const onInsertItems = vi.fn();
   const onInsertGroup = vi.fn();
   render(
-    <ScopePanel pricing={AMOUNT_BASIS} onInsertItems={onInsertItems} onInsertGroup={onInsertGroup} />,
+    <ScopePanel
+      pricing={AMOUNT_BASIS}
+      onInsertItems={onInsertItems}
+      onInsertGroup={onInsertGroup}
+    />,
   );
   return { onInsertItems, onInsertGroup, user: userEvent.setup() };
 }
@@ -138,7 +142,9 @@ describe('ScopePanel — dodawanie usług z tabeli (T-71)', () => {
     const { onInsertItems, user } = setup();
     otworz();
 
-    await user.click(await screen.findByRole('button', { name: pl.editor.scopeAddLabel('Blat kuchenny') }));
+    await user.click(
+      await screen.findByRole('button', { name: pl.editor.scopeAddLabel('Blat kuchenny') }),
+    );
     await user.click(screen.getByRole('button', { name: pl.editor.scopeAddLabel('Fronty') }));
 
     expect(onInsertItems).toHaveBeenCalledTimes(2);
@@ -160,7 +166,9 @@ describe('ScopePanel — dodawanie usług z tabeli (T-71)', () => {
     const { user } = setup();
     otworz();
 
-    await user.click(await screen.findByRole('button', { name: pl.editor.scopeAddLabel('Blat kuchenny') }));
+    await user.click(
+      await screen.findByRole('button', { name: pl.editor.scopeAddLabel('Blat kuchenny') }),
+    );
     await user.click(screen.getByRole('button', { name: pl.editor.pickerDone }));
     expect(useScopePanel.getState().open).toBe(false);
 
@@ -233,7 +241,9 @@ describe('ScopePanel — dodawanie usług z tabeli (T-71)', () => {
     otworz();
 
     await user.click(await screen.findByRole('tab', { name: pl.editor.scopeTabSets }));
-    await user.click(screen.getByRole('button', { name: pl.editor.scopeAddLabel('Kuchnia — pakiet') }));
+    await user.click(
+      screen.getByRole('button', { name: pl.editor.scopeAddLabel('Kuchnia — pakiet') }),
+    );
 
     expect(onInsertGroup).toHaveBeenCalledTimes(1);
     const grupa = onInsertGroup.mock.calls[0]?.[1] as { name: string; items: { qty: number }[] };

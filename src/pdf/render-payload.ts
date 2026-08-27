@@ -23,6 +23,4 @@ export interface PdfRenderPayload {
 }
 
 /** Wiadomość od workera: gotowy plik albo powód, dla którego go nie ma. */
-export type PdfWorkerResponse =
-  | { ok: true; bytes: ArrayBuffer }
-  | { ok: false; error: string };
+export type PdfWorkerResponse = { ok: true; bytes: ArrayBuffer } | { ok: false; error: string };

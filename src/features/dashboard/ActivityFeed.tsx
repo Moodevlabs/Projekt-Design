@@ -159,7 +159,9 @@ export function ActivityFeed() {
           onClick={() => setShowOlder((open) => !open)}
           className="text-ink-soft hover:text-ink mt-3 text-xs underline underline-offset-4 transition-colors"
         >
-          {showOlder ? pl.dashboard.activityHideOlder : pl.dashboard.activityShowOlder(older.length)}
+          {showOlder
+            ? pl.dashboard.activityHideOlder
+            : pl.dashboard.activityShowOlder(older.length)}
         </button>
       ) : null}
     </section>

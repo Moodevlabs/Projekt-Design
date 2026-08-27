@@ -10,13 +10,7 @@
  */
 
 export type SubscriptionStatus =
-  | 'trialing'
-  | 'active'
-  | 'past_due'
-  | 'canceled'
-  | 'incomplete'
-  | 'unpaid'
-  | 'paused';
+  'trialing' | 'active' | 'past_due' | 'canceled' | 'incomplete' | 'unpaid' | 'paused';
 
 /** Wiersz `subscriptions` w kształcie, jakiego potrzebuje reguła. */
 export interface SubscriptionState {

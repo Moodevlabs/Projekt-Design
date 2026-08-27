@@ -20,13 +20,7 @@ export interface QuoteHeaderProps {
  * zostawało kilkadziesiąt pikseli i dłuższe adresy e-mail się nie mieściły.
  * Ułożenie pionowe oddaje wartości całą szerokość kolumny.
  */
-function MetaField({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
+function MetaField({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="min-w-0">
       <p className="text-[10.5px] font-semibold tracking-[0.09em] text-[var(--doc-sage)] uppercase">
@@ -48,7 +42,8 @@ export function QuoteHeader({
   const hasDescription = body.projectDescription.trim().length > 0;
   // Placeholdery we wstępie i opisie projektu (F4.2) — w podglądzie
   // podstawione, w edycji surowe.
-  const docText = (template: string) => renderText(template, quoteTextContext(documentTextInfo(body)));
+  const docText = (template: string) =>
+    renderText(template, quoteTextContext(documentTextInfo(body)));
 
   return (
     <header>
@@ -154,23 +149,23 @@ export function QuoteHeader({
 
       {editing || body.intro ? (
         <div className="mt-5 flex items-start gap-1">
-        <InlineText
-          value={body.intro}
-          onCommit={(intro) => onPatch({ intro })}
-          readOnly={!editing}
-          display={docText(body.intro)}
-          multiline
-          placeholder={pl.editor.introPlaceholder}
-          ariaLabel={pl.editor.introPlaceholder}
-          className="inline-field max-w-[560px] text-[14.5px] leading-[1.6] text-[var(--doc-ink-soft)]"
-        />
-        {editing ? (
-          <PlaceholderMenu
+          <InlineText
             value={body.intro}
-            onInsert={(intro) => onPatch({ intro })}
-            className="mt-1"
+            onCommit={(intro) => onPatch({ intro })}
+            readOnly={!editing}
+            display={docText(body.intro)}
+            multiline
+            placeholder={pl.editor.introPlaceholder}
+            ariaLabel={pl.editor.introPlaceholder}
+            className="inline-field max-w-[560px] text-[14.5px] leading-[1.6] text-[var(--doc-ink-soft)]"
           />
-        ) : null}
+          {editing ? (
+            <PlaceholderMenu
+              value={body.intro}
+              onInsert={(intro) => onPatch({ intro })}
+              className="mt-1"
+            />
+          ) : null}
         </div>
       ) : null}
 

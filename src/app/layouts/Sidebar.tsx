@@ -230,7 +230,9 @@ export function Sidebar() {
         'rail z-10 flex shrink-0 flex-col py-5',
         expanded ? 'px-4' : 'items-center px-[15px]',
         'transition-[width] duration-[var(--dur-slide)] ease-[var(--ease-liquid)]',
-        overlay ? 'absolute inset-y-0 left-0 z-30 shadow-[8px_0_28px_rgba(51,37,30,0.28)]' : 'relative',
+        overlay
+          ? 'absolute inset-y-0 left-0 z-30 shadow-[8px_0_28px_rgba(51,37,30,0.28)]'
+          : 'relative',
       )}
     >
       {/*

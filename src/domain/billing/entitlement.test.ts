@@ -26,10 +26,7 @@ describe('entitlementFor — trial', () => {
   });
 
   it('ostatni dzien triala to wciaz prawo zapisu', () => {
-    const result = entitlementFor(
-      sub({ status: 'trialing', trialEndsAt: at(0.5) }),
-      NOW,
-    );
+    const result = entitlementFor(sub({ status: 'trialing', trialEndsAt: at(0.5) }), NOW);
     expect(result.canWrite).toBe(true);
     expect(result.daysLeft).toBe(1);
   });
@@ -74,17 +71,15 @@ describe('entitlementFor — abonament', () => {
 
   it('`past_due` po oknie laski blokuje', () => {
     expect(
-      entitlementFor(
-        sub({ status: 'past_due', currentPeriodEnd: at(-(GRACE_DAYS + 1)) }),
-        NOW,
-      ).canWrite,
+      entitlementFor(sub({ status: 'past_due', currentPeriodEnd: at(-(GRACE_DAYS + 1)) }), NOW)
+        .canWrite,
     ).toBe(false);
   });
 
   it('`past_due` bez daty okresu blokuje', () => {
-    expect(
-      entitlementFor(sub({ status: 'past_due', currentPeriodEnd: null }), NOW).canWrite,
-    ).toBe(false);
+    expect(entitlementFor(sub({ status: 'past_due', currentPeriodEnd: null }), NOW).canWrite).toBe(
+      false,
+    );
   });
 
   it('anulowana subskrypcja ma wlasny powod', () => {

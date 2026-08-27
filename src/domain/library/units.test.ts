@@ -118,9 +118,7 @@ describe('cena „indywidualna" w obliczeniach', () => {
   it('WYLACZONA pozycja indywidualna nie liczy sie do dopisku', () => {
     // Nie jest czescia oferty, wiec nie ma o czym uprzedzac.
     const body = newQuoteBody({
-      sections: [
-        newSection({ items: [newItem({ unitPriceCents: null, enabled: false })] }),
-      ],
+      sections: [newSection({ items: [newItem({ unitPriceCents: null, enabled: false })] })],
     });
     expect(countIndividualItems(body)).toBe(0);
   });

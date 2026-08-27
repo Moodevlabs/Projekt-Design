@@ -38,10 +38,7 @@ function DemoQuote() {
   const total = useCountUp(DEMO_TOTAL_CENTS);
 
   return (
-    <div
-      aria-hidden
-      className="card-surface mt-8 w-full max-w-sm p-5 text-left"
-    >
+    <div aria-hidden className="card-surface mt-8 w-full max-w-sm p-5 text-left">
       <DemoRow name={pl.dashboard.demoItemConcept} cents={320_000} on />
       <DemoRow name={pl.dashboard.demoItemViz} cents={180_000} on />
       <DemoRow name={pl.dashboard.demoItemSupervision} cents={90_000} on={false} />
@@ -73,10 +70,7 @@ function DemoRow({ name, cents, on }: { name: string; cents: number; on: boolean
         >
           {on ? pl.dashboard.demoYes : pl.dashboard.demoNo}
         </span>
-        <Money
-          cents={cents}
-          className={on ? 'text-ink text-sm' : 'text-ink-soft/60 text-sm'}
-        />
+        <Money cents={cents} className={on ? 'text-ink text-sm' : 'text-ink-soft/60 text-sm'} />
       </span>
     </div>
   );

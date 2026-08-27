@@ -194,14 +194,18 @@ describe('ItemVariantSelect', () => {
   });
 
   it('pokazuje wybrany wariant, a nie pierwszy z listy', () => {
-    render(<ItemVariantSelect variants={[WIZ_3D, WIZ_360]} currentId="wiz-360" onChange={vi.fn()} />);
+    render(
+      <ItemVariantSelect variants={[WIZ_3D, WIZ_360]} currentId="wiz-360" onChange={vi.fn()} />,
+    );
     expect(screen.getByLabelText(pl.editor.itemVariantLabel)).toHaveTextContent('Wizualizacja 360');
   });
 
   it('podaje w górę komplet pól wariantu', async () => {
     const onChange = vi.fn();
     const user = userEvent.setup();
-    render(<ItemVariantSelect variants={[WIZ_3D, WIZ_360]} currentId="wiz-3d" onChange={onChange} />);
+    render(
+      <ItemVariantSelect variants={[WIZ_3D, WIZ_360]} currentId="wiz-3d" onChange={onChange} />,
+    );
 
     await user.click(screen.getByLabelText(pl.editor.itemVariantLabel));
     await user.click(screen.getByRole('option', { name: 'Wizualizacja 360' }));

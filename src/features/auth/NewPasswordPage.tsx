@@ -47,7 +47,11 @@ export function NewPasswordPage() {
   return (
     <AuthLayout title="Nowe hasło" description="Ustaw hasło, którym będziesz się logować.">
       <Form {...form}>
-        <form onSubmit={(event) => void form.handleSubmit(onSubmit)(event)} className="space-y-4" noValidate>
+        <form
+          onSubmit={(event) => void form.handleSubmit(onSubmit)(event)}
+          className="space-y-4"
+          noValidate
+        >
           <FormField
             control={form.control}
             name="password"

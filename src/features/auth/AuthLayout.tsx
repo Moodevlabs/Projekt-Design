@@ -99,9 +99,7 @@ export function AuthLayout({
           razem z tą pod logotypem: rozmyte tło nie ma już ostrej faktury,
           od której trzeba było odklejać napis.
         */}
-        {footer ? (
-          <div className="text-ink relative mt-5 text-center text-sm">{footer}</div>
-        ) : null}
+        {footer ? <div className="text-ink relative mt-5 text-center text-sm">{footer}</div> : null}
       </div>
     </div>
   );

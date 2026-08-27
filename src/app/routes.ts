@@ -1,6 +1,8 @@
 /** Jedyne miejsce z definicją ścieżek — komponenty nie hardkodują stringów URL. */
 export const routes = {
   dashboard: '/',
+  /** Kalendarz terminów (T-98). */
+  calendar: '/kalendarz',
   quotes: '/wyceny',
   quote: (id: string) => `/wyceny/${id}`,
   quoteNew: '/wyceny/nowa',
@@ -18,6 +20,8 @@ export const routes = {
   help: '/pomoc',
   settings: '/ustawienia',
   settingsBranding: '/ustawienia/branding',
+  /** Szablony briefu (T-96) — edytor formularza, nie sekcja „Aplikacji”. */
+  settingsBrief: '/ustawienia/brief',
   settingsAccount: '/ustawienia/konto',
   subscription: '/subskrypcja',
   login: '/logowanie',

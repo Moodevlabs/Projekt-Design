@@ -78,8 +78,8 @@ describe('useMarkAsSentPrompt', () => {
   it('po udanym zapisie przestawia status w store', () => {
     // Store trzyma status niezaleznie od cache zapytan — bez tego pasek
     // edytora pokazywalby dalej „szkic" az do przeladowania strony.
-    setStatusMutate.mockImplementation(
-      (_vars: unknown, options?: { onSuccess?: () => void }) => options?.onSuccess?.(),
+    setStatusMutate.mockImplementation((_vars: unknown, options?: { onSuccess?: () => void }) =>
+      options?.onSuccess?.(),
     );
     zaladuj('draft');
     const { result } = renderHook(() => useMarkAsSentPrompt());

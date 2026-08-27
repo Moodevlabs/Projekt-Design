@@ -32,9 +32,7 @@ export function ItemToggle({
         'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
         // Włączony przełącznik idzie w pełny atrament — na białym dokumencie
         // przygaszona szarość czytałaby się jak stan nieaktywny.
-        checked || indeterminate
-          ? 'bg-[var(--doc-ink)]'
-          : 'bg-[var(--doc-toggle-off)]',
+        checked || indeterminate ? 'bg-[var(--doc-ink)]' : 'bg-[var(--doc-toggle-off)]',
         className,
       )}
     >

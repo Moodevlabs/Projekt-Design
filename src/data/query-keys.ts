@@ -49,11 +49,27 @@ export const queryKeys = {
   /** Linki klienta, uwagi i akceptacja — wszystko per wycena (T-25/T-26). */
   /** Briefy klienta (T-93) — pod kluczem klienta, bo to jego dokument. */
   briefs: (clientId: string) => ['clients', 'detail', clientId, 'briefs'] as const,
+  /**
+   * Szablony briefu (T-96) — konfiguracja pracowni, więc pod workspace'em,
+   * a nie pod klientem. Osobny prefiks: unieważnienie briefów jednego klienta
+   * nie ma powodu zrzucać listy szablonów.
+   */
+  briefTemplates: (workspaceId?: string) =>
+    workspaceId ? (['brief-templates', workspaceId] as const) : (['brief-templates'] as const),
   /** Wizje lokalne projektu (T-94). */
   siteVisits: (projectId: string) => ['projects', 'detail', projectId, 'site-visits'] as const,
   shares: (quoteId: string) => ['quotes', 'detail', quoteId, 'shares'] as const,
   quoteComments: (quoteId: string) => ['quotes', 'detail', quoteId, 'comments'] as const,
   quoteAcceptance: (quoteId: string) => ['quotes', 'detail', quoteId, 'acceptance'] as const,
+  /**
+   * Kalendarz (T-98) — osobno notatki i osobno odczyty z reszty aplikacji.
+   * Prefiks `['calendar','notes']` unieważnia wszystkie miesiące naraz: notatka
+   * przeniesiona na inny dzień potrafi wyjść poza widoczny zakres.
+   */
+  calendarNotes: (range?: unknown) =>
+    range ? (['calendar', 'notes', range] as const) : (['calendar', 'notes'] as const),
+  calendarEvents: (range?: unknown) =>
+    range ? (['calendar', 'events', range] as const) : (['calendar', 'events'] as const),
   templates: (workspaceId?: string) =>
     workspaceId ? (['templates', workspaceId] as const) : (['templates'] as const),
   template: (id: string) => ['templates', 'detail', id] as const,

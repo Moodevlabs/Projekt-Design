@@ -9,9 +9,7 @@ import type { Group, Item, QuoteBody, Room } from '@/domain/quote';
 
 /** Wiersz „Pomieszczenia: …" z nagłówka (F1.5). Pusty, gdy pomieszczeń nie ma. */
 export function roomsSummaryLine(rooms: Room[]): string {
-  return rooms
-    .map((room) => (room.qty > 1 ? `${room.label} x${room.qty}` : room.label))
-    .join(', ');
+  return rooms.map((room) => (room.qty > 1 ? `${room.label} x${room.qty}` : room.label)).join(', ');
 }
 
 /** Pozycje widoczne w dokumencie — z uwzględnieniem `showDisabledItems`. */
@@ -39,9 +37,7 @@ export function shouldPrintGroup(group: Group, rooms: Room[], showDisabled: bool
 
 /** Nagłówek bloku: etykieta pomieszczenia z ilością albo nazwa zwykłej grupy. */
 export function groupHeading(group: Group, rooms: Room[]): string {
-  const room = group.roomId
-    ? rooms.find((candidate) => candidate.id === group.roomId)
-    : undefined;
+  const room = group.roomId ? rooms.find((candidate) => candidate.id === group.roomId) : undefined;
 
   if (!room) return group.name;
   return room.qty > 1 ? `${room.label} x${room.qty}` : room.label;

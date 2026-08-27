@@ -9,6 +9,7 @@ import { RegisterPage } from '@/features/auth/RegisterPage';
 import { ResetPasswordPage } from '@/features/auth/ResetPasswordPage';
 import { NewPasswordPage } from '@/features/auth/NewPasswordPage';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
+import { CalendarPage } from '@/features/calendar/CalendarPage';
 import { QuotesListPage } from '@/features/quotes/list/QuotesListPage';
 import { QuoteEditorPage } from '@/features/quotes/editor/QuoteEditorPage';
 import { ClientsPage } from '@/features/clients/ClientsPage';
@@ -20,6 +21,7 @@ import { TemplatesPage } from '@/features/templates/TemplatesPage';
 import { BrandSettingsPage } from '@/features/brand/BrandSettingsPage';
 import { SettingsAppPage } from '@/features/settings/SettingsAppPage';
 import { SettingsAccountPage } from '@/features/settings/SettingsAccountPage';
+import { BriefTemplatesPage } from '@/features/brief/templates/BriefTemplatesPage';
 import { TrashPage } from '@/features/files/TrashPage';
 import { SettingsLayout } from '@/features/settings/SettingsLayout';
 import { SubscriptionPage } from '@/features/billing/SubscriptionPage';
@@ -44,6 +46,11 @@ const routeTree = [
             element: <AppShell />,
             children: [
               { index: true, element: <DashboardPage />, handle: { title: pl.dashboard.title } },
+              {
+                path: 'kalendarz',
+                element: <CalendarPage />,
+                handle: { title: pl.calendar.title },
+              },
               { path: 'wyceny', element: <QuotesListPage />, handle: { title: pl.quotes.title } },
               {
                 path: 'wyceny/nowa',
@@ -104,6 +111,7 @@ const routeTree = [
                 children: [
                   { index: true, element: <SettingsAppPage /> },
                   { path: 'branding', element: <BrandSettingsPage /> },
+                  { path: 'brief', element: <BriefTemplatesPage /> },
                   { path: 'konto', element: <SettingsAccountPage /> },
                 ],
               },

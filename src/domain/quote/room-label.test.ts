@@ -57,9 +57,9 @@ describe('nextRoomLabel', () => {
   it('przejście na „własne" zostawia nazwę, zamiast ją czyścić', () => {
     // Człowiek chce wtedy zwykle dopisać coś swojego; puste pole kazałoby mu
     // zaczynać od zera.
-    expect(zmiana({ currentLabel: 'Kuchnia', previousTypeName: 'Kuchnia', nextTypeName: null })).toBe(
-      'Kuchnia',
-    );
+    expect(
+      zmiana({ currentLabel: 'Kuchnia', previousTypeName: 'Kuchnia', nextTypeName: null }),
+    ).toBe('Kuchnia');
   });
 
   it('pusta nazwa dostaje nazwę typu', () => {

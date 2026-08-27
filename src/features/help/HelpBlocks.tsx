@@ -50,16 +50,11 @@ export function HelpBlockView({ block }: { block: HelpBlock }) {
         <aside
           className={cn(
             'flex gap-3 rounded-[var(--radius-control)] border px-4 py-3',
-            warn
-              ? 'border-danger/30 bg-danger-wash'
-              : 'border-hair bg-surface-2',
+            warn ? 'border-danger/30 bg-danger-wash' : 'border-hair bg-surface-2',
           )}
         >
           <Icon
-            className={cn(
-              'mt-0.5 size-4 shrink-0',
-              warn ? 'text-danger' : 'text-ink-soft',
-            )}
+            className={cn('mt-0.5 size-4 shrink-0', warn ? 'text-danger' : 'text-ink-soft')}
             aria-hidden
           />
           <div className="min-w-0">

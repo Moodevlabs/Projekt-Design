@@ -207,7 +207,7 @@ export function ScopePanel({ pricing, onInsertItems, onInsertGroup }: ScopePanel
             /*
              * JEDNO ostrzeżenie nad listą, nie przy każdym wierszu. Tekst
              * mówi, jak to działa (05-UI §3a pkt 5) i daje skrót — po dodaniu
-                 * pomieszczenia znika samo.
+             * pomieszczenia znika samo.
              */
             <div
               role="status"
@@ -277,7 +277,9 @@ export function ScopePanel({ pricing, onInsertItems, onInsertGroup }: ScopePanel
               )}
             </>
           ) : (sets.data ?? []).length === 0 ? (
-            <p className="text-ink-soft px-3 py-8 text-center text-sm">{pl.editor.scopeSetsEmpty}</p>
+            <p className="text-ink-soft px-3 py-8 text-center text-sm">
+              {pl.editor.scopeSetsEmpty}
+            </p>
           ) : (
             <ul>
               {(sets.data ?? []).map((set) => (

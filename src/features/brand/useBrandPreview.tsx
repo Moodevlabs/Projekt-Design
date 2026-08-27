@@ -54,14 +54,19 @@ export function useBrandPreview(draft: BrandKit | null, logoDataUrl: string | nu
         try {
           // Generator ładujemy dynamicznie — to kilkaset kilobajtów, których
           // nie ma po co wciągać do ekranu, gdzie nikt nie otworzy podglądu.
-          const [{ pdf }, { QuotePdfDocument }, { buildPdfTheme }, { isPdfFontRegistered, registerPdfFonts }, { sampleQuoteBody }] =
-            await Promise.all([
-              import('@react-pdf/renderer'),
-              import('@/pdf/QuotePdfDocument'),
-              import('@/pdf/theme'),
-              import('@/pdf/fonts/register'),
-              import('@/pdf/sample-quote'),
-            ]);
+          const [
+            { pdf },
+            { QuotePdfDocument },
+            { buildPdfTheme },
+            { isPdfFontRegistered, registerPdfFonts },
+            { sampleQuoteBody },
+          ] = await Promise.all([
+            import('@react-pdf/renderer'),
+            import('@/pdf/QuotePdfDocument'),
+            import('@/pdf/theme'),
+            import('@/pdf/fonts/register'),
+            import('@/pdf/sample-quote'),
+          ]);
 
           registerPdfFonts();
           const fontsOk = isPdfFontRegistered(draft.fontFamily);

@@ -26,9 +26,7 @@ describe('detectSeparator', () => {
 
 describe('parseClientsCsv — naglowki', () => {
   it('rozpoznaje polskie naglowki i mapuje kolumny', () => {
-    const wynik = parseClientsCsv(
-      'Nazwa;Telefon;E-mail;Miasto\nKowalscy;500100100;a@b.pl;Kraków',
-    );
+    const wynik = parseClientsCsv('Nazwa;Telefon;E-mail;Miasto\nKowalscy;500100100;a@b.pl;Kraków');
     expect(wynik.hadHeader).toBe(true);
     expect(wynik.rows).toHaveLength(1);
     expect(wynik.rows[0]).toMatchObject({

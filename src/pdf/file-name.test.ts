@@ -1,10 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  priceListFileName,
-  quoteFileName,
-  scheduleFileName,
-  stagesFileName,
-} from './file-name';
+import { priceListFileName, quoteFileName, scheduleFileName, stagesFileName } from './file-name';
 
 describe('quoteFileName', () => {
   it('sklada numer i nazwisko klienta', () => {

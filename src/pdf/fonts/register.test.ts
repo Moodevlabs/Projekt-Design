@@ -3,9 +3,8 @@ import { beforeAll, describe, expect, it, vi } from 'vitest';
 const register = vi.hoisted(() => vi.fn());
 vi.mock('@react-pdf/renderer', () => ({ Font: { register } }));
 
-const { FONT_FILES, allPdfFontsRegistered, isPdfFontRegistered, registerPdfFonts } = await import(
-  './register'
-);
+const { FONT_FILES, allPdfFontsRegistered, isPdfFontRegistered, registerPdfFonts } =
+  await import('./register');
 
 beforeAll(() => {
   registerPdfFonts();
@@ -33,10 +32,14 @@ describe('rejestracja fontów', () => {
     // `@react-pdf` nie syntezuje pogrubienia: bez osobnego pliku 700 nagłówki
     // wyszłyby w zwykłej grubości, mimo `fontWeight: 700` w stylach.
     for (const [family] of Object.entries(FONT_FILES)) {
-      const call = register.mock.calls.find(([args]) => (args as { family: string }).family === family);
+      const call = register.mock.calls.find(
+        ([args]) => (args as { family: string }).family === family,
+      );
       expect(call, family).toBeDefined();
 
-      const wagi = (call?.[0] as { fonts: { fontWeight: number }[] }).fonts.map((f) => f.fontWeight);
+      const wagi = (call?.[0] as { fonts: { fontWeight: number }[] }).fonts.map(
+        (f) => f.fontWeight,
+      );
       expect(wagi, family).toEqual([400, 700]);
     }
   });

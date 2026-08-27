@@ -50,7 +50,7 @@ export function StageExtrasList({
                 type="button"
                 aria-label={pl.editor.removeExtrasEntry(extra.name)}
                 onClick={() => onRemove(extra.id)}
-                className="text-ink-soft hover:text-[var(--doc-terracotta)] flex size-[22px] shrink-0 items-center justify-center rounded-full transition-colors"
+                className="text-ink-soft flex size-[22px] shrink-0 items-center justify-center rounded-full transition-colors hover:text-[var(--doc-terracotta)]"
               >
                 <Trash2 className="size-[13px]" aria-hidden />
               </button>

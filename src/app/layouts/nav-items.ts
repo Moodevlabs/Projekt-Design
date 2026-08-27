@@ -1,4 +1,5 @@
 import {
+  CalendarDays,
   LayoutDashboard,
   FileText,
   Users,
@@ -55,6 +56,9 @@ export const NAV_ITEMS: NavItem[] = [
     group: 'main',
   },
   { to: routes.clients, label: pl.nav.clients, icon: Users, group: 'main' },
+  // Kalendarz (T-98) stoi PO klientach i wycenach: to widok na terminy tego,
+  // co już w aplikacji jest, a nie miejsce, w którym powstaje praca.
+  { to: routes.calendar, label: pl.nav.calendar, icon: CalendarDays, group: 'main' },
   { to: routes.quotes, label: pl.nav.quotes, icon: FileText, group: 'main' },
   { to: routes.library, label: pl.nav.library, icon: Library, group: 'main' },
   { to: routes.templates, label: pl.nav.templates, icon: LayoutTemplate, group: 'main' },

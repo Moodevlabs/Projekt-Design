@@ -18,7 +18,9 @@ describe('buildPdfTheme', () => {
   it('na jasnym akcencie bierze CIEMNY wariant logo', () => {
     // Jasne logo na jasnym tle znikneloby.
     expect(buildPdfTheme({ ...defaultBrandKit(), accentColor: '#FAF7F1' }).headerLogo).toBe('dark');
-    expect(buildPdfTheme({ ...defaultBrandKit(), accentColor: '#21201C' }).headerLogo).toBe('light');
+    expect(buildPdfTheme({ ...defaultBrandKit(), accentColor: '#21201C' }).headerLogo).toBe(
+      'light',
+    );
   });
 
   it('jawny wybor uzytkownika wygrywa z regula kontrastu (poprawka 3)', () => {

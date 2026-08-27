@@ -110,11 +110,7 @@ export function InlineText({
     return (
       <div
         aria-label={ariaLabel}
-        className={cn(
-          shared.className,
-          'break-words',
-          multiline && 'whitespace-pre-wrap',
-        )}
+        className={cn(shared.className, 'break-words', multiline && 'whitespace-pre-wrap')}
       >
         {shown}
       </div>
