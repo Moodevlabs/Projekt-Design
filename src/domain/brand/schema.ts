@@ -149,6 +149,19 @@ export const WorkspaceSettingsSchema = z.object({
    * „avatar workspace'u" i „avatar użytkownika" to ta sama rzecz.
    */
   avatarPath: z.string().nullable().default(null),
+  /**
+   * Do kiedy pasek „Co nowego u klientów" jest odhaczony (2026-08-27).
+   *
+   * Zdarzenia starsze niż ten znacznik **nie znikają** — przestają się tylko
+   * pokazywać domyślnie. To jest różnica między „wyczyść" a „skasuj":
+   * akceptacja oferty jest faktem i nie ma prawa zniknąć dlatego, że ktoś
+   * kliknął przycisk. Stąd też odsłonięcie ich z powrotem jednym kliknięciem.
+   *
+   * W `settings`, a nie w localStorage: odhaczenie zrobione na laptopie ma
+   * obowiązywać także na drugim komputerze — inaczej ten sam komunikat wraca
+   * przy każdej zmianie maszyny.
+   */
+  activitySeenAt: z.string().nullable().default(null),
 });
 export type WorkspaceSettings = z.infer<typeof WorkspaceSettingsSchema>;
 

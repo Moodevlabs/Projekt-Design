@@ -97,6 +97,8 @@ describe('WorkspaceSettingsSchema', () => {
       priceListTemplate: null,
       // Zdjecie uzytkownika (poprawka 4) — brak zdjecia znaczy inicjaly.
       avatarPath: null,
+      // Znacznik odhaczenia paska „Co nowego" — `null` = nic nie odhaczone.
+      activitySeenAt: null,
     });
   });
 

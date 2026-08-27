@@ -30,7 +30,21 @@ function AvatarImage({
   return (
     <AvatarPrimitive.Image
       data-slot="avatar-image"
-      className={cn("aspect-square size-full", className)}
+      /*
+       * `object-cover object-center` — BEZ TEGO ZDJĘCIA SĄ ROZCIĄGANE.
+       *
+       * Domyślne `object-fit` dla `<img>` to `fill`: obraz jest naciągany do
+       * rozmiaru pudełka, więc zdjęcie poziome w kwadratowym kółku robiło się
+       * spłaszczone, a pionowe — wyciągnięte. `aspect-square size-full`
+       * ustawiało tylko kształt ramki i nie mówiło nic o tym, co zrobić
+       * z proporcjami obrazu w środku.
+       *
+       * `cover` skaluje z zachowaniem proporcji i przycina nadmiar, `center`
+       * bierze przycięcie ze ŚRODKA kadru — tam, gdzie na zdjęciu portretowym
+       * jest twarz. Domyślne `50% 50%` robi to samo, ale zapisujemy je wprost:
+       * to jest decyzja, a nie przypadek.
+       */
+      className={cn("aspect-square size-full object-cover object-center", className)}
       {...props}
     />
   )
