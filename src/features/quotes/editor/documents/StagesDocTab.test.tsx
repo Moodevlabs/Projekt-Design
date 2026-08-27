@@ -80,17 +80,21 @@ describe('StagesDocTab — etapy poza zakresem', () => {
     }
   });
 
-  it('odznaczenie etapu brudzi dokument i zostaje w treści', async () => {
+  it('przełączenie etapu brudzi dokument, a etap ZOSTAJE w treści', async () => {
+    // Od 2026-08-27 szablon startuje odznaczony, więc pierwszy klik zaznacza.
+    // Sedno testu jest niezmienne: etap poza zakresem nie znika z dokumentu —
+    // na tym polega jego wartość dla inwestora.
     const user = userEvent.setup();
     zaladuj();
     render(<StagesDocTab editing />);
 
     const etap = dokument()?.entries[0];
     if (!etap) throw new Error('brak etapu');
+    const przed = etap.included;
 
     await user.click(screen.getByLabelText(pl.editor.stageEntryIncluded(etap.name)));
 
-    expect(dokument()?.entries[0]?.included).toBe(false);
+    expect(dokument()?.entries[0]?.included).toBe(!przed);
     expect(useEditorStore.getState().saveState).toBe('dirty');
     expect(screen.getByLabelText(pl.editor.stageEntryIncluded(etap.name))).toBeInTheDocument();
   });

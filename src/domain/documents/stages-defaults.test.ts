@@ -22,12 +22,17 @@ describe('szablon etapów współpracy', () => {
     expect(wszystkie.size).toBe(38);
   });
 
-  it('etapy poza standardowym zakresem startują odznaczone', () => {
-    // Nadzór i kompletacja to osobne umowy — dokument ma o tym mówić wprost,
-    // a nie milczeć, dopóki inwestor sam nie zapyta.
-    const poza = defaultStageEntries().filter((entry) => !entry.included);
-    expect(poza.length).toBeGreaterThan(0);
-    expect(poza.every((entry) => entry.sectionLabel === 'Nadzór i realizacja')).toBe(true);
+  it('CAŁY szablon startuje odznaczony', () => {
+    /*
+     * Zmiana z 2026-08-27. Wcześniej większość etapów miała „ptaszek", więc
+     * dokument od pierwszego otwarcia twierdził, że oferta obejmuje niemal
+     * wszystko — łącznie z tym, czego nikt nie zamawiał. Sens tego dokumentu
+     * jest odwrotny: pokazać, co robimy i czego NIE robimy, a to wymaga
+     * świadomego zaznaczenia zakresu.
+     */
+    const wpisy = defaultStageEntries();
+    expect(wpisy.length).toBeGreaterThan(0);
+    expect(wpisy.every((entry) => !entry.included)).toBe(true);
   });
 
   it('szablon workspace nadpisuje domyślny', () => {

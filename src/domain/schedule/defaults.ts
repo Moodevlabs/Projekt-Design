@@ -12,8 +12,22 @@ import {
  * To **punkt wyjścia do edycji**, a nie prawda o czyimś procesie. Liczby są
  * z arkusza klienta; każdy workspace nadpisuje je u siebie
  * (`workspaces.settings.scheduleTemplate`). Pusty harmonogram byłby gorszy:
- * nikt nie zaczyna planowania od czystej kartki, a jedenaście wierszy do
- * skreślenia jest łatwiejsze niż jedenaście do wymyślenia.
+ * nikt nie zaczyna planowania od czystej kartki, a trzynaście wierszy do
+ * odhaczenia jest łatwiejsze niż trzynaście do wymyślenia.
+ *
+ * ## Wszystkie etapy startują ODZNACZONE (2026-08-27)
+ *
+ * Do tej pory szablon dawał komplet z zaznaczonymi „ptaszkami". Wyglądało to
+ * tak, jakby wycena obejmowała już wszystko — łącznie z etapami, których
+ * nikt nie zamawiał — a termin pokazywał sumę dni policzoną z całości.
+ * Domyślne „tak" przy trzynastu pozycjach naraz jest myląca: człowiek widzi
+ * gotową listę i nie czyta jej, bo wygląda na wynik, a nie na propozycję.
+ *
+ * Teraz lista jest propozycją wprost: zaznaczasz to, co wchodzi w zakres.
+ * Termin startuje od zera i rośnie razem z tym, na co się umówiliście.
+ *
+ * ⚠️ Dotyczy **nowych** harmonogramów. Wyceny, które już mają zapisany
+ * harmonogram, zostają bez zmian — `enabled` siedzi w ich `quotes.schedule`.
  *
  * `id` powstają przy każdym wywołaniu, bo etap jest bytem konkretnej wyceny —
  * dwa dokumenty nie mogą dzielić identyfikatora.
@@ -33,7 +47,7 @@ const SZABLON: StageTemplate[] = [
     perRoomDays: {},
     defaultPerRoomDays: 0,
     roomScope: 'none',
-    enabled: true,
+    enabled: false,
     linkedItemTags: [],
   },
   {
@@ -43,7 +57,7 @@ const SZABLON: StageTemplate[] = [
     perRoomDays: {},
     defaultPerRoomDays: 0.5,
     roomScope: 'all',
-    enabled: true,
+    enabled: false,
     linkedItemTags: [],
   },
   {
@@ -53,7 +67,7 @@ const SZABLON: StageTemplate[] = [
     perRoomDays: {},
     defaultPerRoomDays: 0,
     roomScope: 'none',
-    enabled: true,
+    enabled: false,
     linkedItemTags: [],
   },
   {
@@ -63,7 +77,7 @@ const SZABLON: StageTemplate[] = [
     perRoomDays: {},
     defaultPerRoomDays: 0,
     roomScope: 'none',
-    enabled: true,
+    enabled: false,
     linkedItemTags: [],
   },
   {
@@ -73,7 +87,7 @@ const SZABLON: StageTemplate[] = [
     perRoomDays: {},
     defaultPerRoomDays: 0,
     roomScope: 'none',
-    enabled: true,
+    enabled: false,
     linkedItemTags: ['meeting'],
   },
   {
@@ -83,7 +97,7 @@ const SZABLON: StageTemplate[] = [
     perRoomDays: {},
     defaultPerRoomDays: 0,
     roomScope: 'none',
-    enabled: true,
+    enabled: false,
     linkedItemTags: [],
   },
   {
@@ -93,7 +107,7 @@ const SZABLON: StageTemplate[] = [
     perRoomDays: {},
     defaultPerRoomDays: 0,
     roomScope: 'visual',
-    enabled: true,
+    enabled: false,
     linkedItemTags: [],
   },
   {
@@ -103,7 +117,7 @@ const SZABLON: StageTemplate[] = [
     perRoomDays: {},
     defaultPerRoomDays: 2,
     roomScope: 'visual',
-    enabled: true,
+    enabled: false,
     linkedItemTags: ['visualization'],
   },
   {
@@ -113,7 +127,7 @@ const SZABLON: StageTemplate[] = [
     perRoomDays: {},
     defaultPerRoomDays: 1,
     roomScope: 'visual',
-    enabled: true,
+    enabled: false,
     linkedItemTags: [],
   },
   {
@@ -123,7 +137,7 @@ const SZABLON: StageTemplate[] = [
     perRoomDays: {},
     defaultPerRoomDays: 1.5,
     roomScope: 'technical',
-    enabled: true,
+    enabled: false,
     linkedItemTags: [],
   },
   {
@@ -133,7 +147,7 @@ const SZABLON: StageTemplate[] = [
     perRoomDays: {},
     defaultPerRoomDays: 0,
     roomScope: 'none',
-    enabled: true,
+    enabled: false,
     linkedItemTags: [],
   },
   {
@@ -143,7 +157,7 @@ const SZABLON: StageTemplate[] = [
     perRoomDays: {},
     defaultPerRoomDays: 0,
     roomScope: 'none',
-    enabled: true,
+    enabled: false,
     linkedItemTags: ['communication'],
   },
 ];
@@ -179,6 +193,9 @@ export function newStage(partial: Partial<ScheduleStage> = {}): ScheduleStage {
     perRoomDays: {},
     defaultPerRoomDays: 0,
     roomScope: 'none',
+    // Etap dodany RĘCZNIE startuje zaznaczony — kliknięcie „Dodaj etap" jest
+    // już świadomą decyzją, że coś wchodzi w zakres. Odznaczone są wyłącznie
+    // pozycje z gotowego szablonu, których nikt nie wybierał (SZABLON wyżej).
     enabled: true,
     linkedItemTags: [],
     kind: 'normal',
