@@ -1,9 +1,13 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CheckCircle2, Eye, MessageSquare, XCircle } from 'lucide-react';
+import { CheckCheck, CheckCircle2, Eye, MessageSquare, XCircle } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { toast } from 'sonner';
 
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useActivity } from '@/data/queries/useActivity';
+import { useUpdateWorkspaceSettings, useWorkspace } from '@/data/queries/useWorkspace';
 import type { ActivityEvent, ActivityKind } from '@/data/repos/activity.repo';
 import { routes } from '@/app/routes';
 import { formatRelativeDay } from '@/lib/dates';
@@ -47,8 +51,41 @@ const TONES: Record<ActivityKind, string> = {
  */
 export function ActivityFeed() {
   const activity = useActivity(LIMIT);
-  const rows = activity.data ?? [];
-  const unread = rows.filter((event) => event.unread).length;
+  const workspace = useWorkspace().data;
+  const updateSettings = useUpdateWorkspaceSettings();
+  const [showOlder, setShowOlder] = useState(false);
+
+  const all = activity.data ?? [];
+  const seenAt = workspace?.settings.activitySeenAt ?? null;
+
+  /*
+   * Podział na „nowe" i „odhaczone" liczymy po znaczniku czasu, a nie po
+   * fladze na wierszu: zdarzenia przychodzą z trzech różnych tabel i tylko
+   * uwaga ma własne `read_at`. Jeden znacznik na workspace obsługuje
+   * wszystkie trzy rodzaje i nie wymaga zapisu przy każdym wierszu.
+   */
+  const fresh = seenAt ? all.filter((event) => event.at > seenAt) : all;
+  const older = seenAt ? all.filter((event) => event.at <= seenAt) : [];
+  const rows = showOlder ? all : fresh;
+  const unread = fresh.filter((event) => event.unread).length;
+
+  const clear = () => {
+    if (!workspace) return;
+    // Znacznik bierzemy z NAJNOWSZEGO zdarzenia, nie z `now()`. Zdarzenie,
+    // które przyszło w trakcie patrzenia na listę, ale jeszcze się nie
+    // dociągnęło, zostałoby odhaczone bez pokazania.
+    const newest = all[0]?.at ?? new Date().toISOString();
+    updateSettings.mutate(
+      { ...workspace.settings, activitySeenAt: newest },
+      {
+        onSuccess: () => {
+          setShowOlder(false);
+          toast.success(pl.dashboard.activityCleared);
+        },
+        onError: (error) => toast.error(error.message),
+      },
+    );
+  };
 
   if (activity.isLoading) {
     return (
@@ -66,32 +103,75 @@ export function ActivityFeed() {
 
   return (
     <section className="card-surface mb-6 p-5" aria-label={pl.dashboard.activityTitle}>
-      <header className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+      <header className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <h2 className="label-caps text-ink-soft">{pl.dashboard.activityTitle}</h2>
-        <p className={cn('text-xs', unread > 0 ? 'text-ink' : 'text-ink-soft')}>
-          {unread > 0 ? pl.dashboard.activityUnread(unread) : pl.dashboard.activityUpToDate}
-        </p>
+
+        <div className="flex items-center gap-3">
+          <p className={cn('text-xs', unread > 0 ? 'text-ink' : 'text-ink-soft')}>
+            {unread > 0 ? pl.dashboard.activityUnread(unread) : pl.dashboard.activityUpToDate}
+          </p>
+
+          {/*
+            „Odhacz" pokazuje się tylko wtedy, gdy jest co odhaczać. Przycisk
+            widoczny nad pustą listą byłby zaproszeniem do klikania w nic.
+          */}
+          {fresh.length > 0 ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              disabled={updateSettings.isPending}
+              onClick={clear}
+            >
+              <CheckCheck className="size-3.5" aria-hidden />
+              {pl.dashboard.activityClear}
+            </Button>
+          ) : null}
+        </div>
       </header>
 
       {rows.length === 0 ? (
-        <p className="text-ink-soft text-sm">{pl.dashboard.activityEmpty}</p>
+        <p className="text-ink-soft text-sm">
+          {all.length === 0 ? pl.dashboard.activityEmpty : pl.dashboard.activityUpToDate}
+        </p>
       ) : (
         <ul className="flex flex-col">
           {rows.map((event) => (
-            <ActivityRow key={event.id} event={event} />
+            <ActivityRow
+              key={event.id}
+              event={event}
+              // Odhaczone wiersze są przygaszone także wtedy, gdy się je
+              // odsłoni — inaczej nie dałoby się ich odróżnić od nowych.
+              muted={seenAt !== null && event.at <= seenAt}
+            />
           ))}
         </ul>
       )}
+
+      {/*
+        Odsłonięcie odhaczonych. To jest gwarancja, że „Odhacz wszystko" nie
+        jest przyciskiem, po którym coś przepada — a bez niej nikt nie
+        kliknąłby go drugi raz.
+      */}
+      {older.length > 0 ? (
+        <button
+          type="button"
+          onClick={() => setShowOlder((open) => !open)}
+          className="text-ink-soft hover:text-ink mt-3 text-xs underline underline-offset-4 transition-colors"
+        >
+          {showOlder ? pl.dashboard.activityHideOlder : pl.dashboard.activityShowOlder(older.length)}
+        </button>
+      ) : null}
     </section>
   );
 }
 
-function ActivityRow({ event }: { event: ActivityEvent }) {
+function ActivityRow({ event, muted = false }: { event: ActivityEvent; muted?: boolean }) {
   const Icon = ICONS[event.kind];
   const quoteLabel = [event.quoteNumber, event.quoteTitle].filter(Boolean).join(' · ');
 
   return (
-    <li className="border-hair border-b last:border-0">
+    <li className={cn('border-hair border-b last:border-0', muted && 'opacity-55')}>
       <Link
         to={routes.quote(event.quoteId)}
         className="hover:bg-surface-2/60 -mx-2 flex items-start gap-3 rounded-[var(--radius-control)] px-2 py-2.5 transition-colors"

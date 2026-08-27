@@ -219,6 +219,15 @@ export const pl = {
     noCity: '—',
     noValue: '—',
 
+    // Karta klienta (powiększona 2026-08-27).
+    cardProjects: 'Teczki',
+    cardQuotes: 'Wyceny',
+    cardAccepted: 'Zaakceptowane',
+    /** Ostatnia aktywność jako zdanie, nie jako etykieta kolumny. */
+    cardActivity: (when: string) => `Ostatnio: ${when}`,
+    cardNoActivity: 'Bez ruchu',
+    cardOpen: 'Otwórz teczkę',
+
     status: {
       active: 'Aktywny',
       archived: 'Zarchiwizowany',
@@ -1188,6 +1197,19 @@ Pozdrawiam`,
       count === 1 ? '1 nowa uwaga' : `${count} nowych uwag`,
     activityUnreadMark: 'nieprzeczytane',
     activityEmpty: 'Nic się jeszcze nie wydarzyło — pierwszy wysłany link pojawi się tutaj.',
+
+    /*
+     * CZYSZCZENIE PASKA (2026-08-27).
+     *
+     * „Odhacz", a nie „Wyczyść": zdarzenia nie znikają, tylko przestają się
+     * pokazywać. Akceptacja oferty jest faktem i nie ma prawa zniknąć dlatego,
+     * że ktoś kliknął przycisk — stąd odsłonięcie jednym kliknięciem.
+     */
+    activityClear: 'Odhacz wszystko',
+    activityCleared: 'Odhaczone. Nowe zdarzenia pojawią się tutaj.',
+    activityShowOlder: (count: number) =>
+      count === 1 ? 'Pokaż 1 odhaczone' : `Pokaż ${count} odhaczonych`,
+    activityHideOlder: 'Ukryj odhaczone',
     activitySomeone: 'Klient',
     activityAccepted: (who: string) => `${who} przyjął ofertę`,
     activityRejected: (who: string) => `${who} odrzucił ofertę`,

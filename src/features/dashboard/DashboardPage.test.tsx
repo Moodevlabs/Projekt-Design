@@ -17,6 +17,16 @@ vi.mock('@/data/queries/useBrandKit', () => ({ useBrandKit }));
 vi.mock('@/data/queries/useLibrary', () => ({ useAllLibraryItems }));
 vi.mock('@/data/queries/useActivity', () => ({ useActivity }));
 
+// Pasek „Co nowego" czyta znacznik odhaczenia z ustawien workspace'u
+// i zapisuje go tam z powrotem (przycisk „Odhacz wszystko").
+const updateSettings = vi.hoisted(() => vi.fn());
+const seenAt = vi.hoisted(() => ({ value: null as string | null }));
+vi.mock('@/data/queries/useWorkspace', () => ({
+  useWorkspace: () => ({ data: { id: 'ws', settings: { activitySeenAt: seenAt.value } } }),
+  useWorkspaceId: () => 'ws',
+  useUpdateWorkspaceSettings: () => ({ mutate: updateSettings, isPending: false }),
+}));
+
 // Blok „Aktywni klienci i projekty" (T-58) pyta o teczki.
 vi.mock('@/data/queries/useProjects', () => ({
   useProjects: () => ({ data: [], isLoading: false, isError: false }),
@@ -106,6 +116,7 @@ describe('DashboardPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockActivity();
+    seenAt.value = null;
 
     // Liczniki respektują prefers-reduced-motion — w testach wyłączamy animację,
     // żeby asercje widziały od razu wartości końcowe.
@@ -175,6 +186,55 @@ describe('DashboardPage', () => {
 
     expect(screen.getByText(pl.dashboard.activityUnread(1))).toBeInTheDocument();
     expect(screen.getByText(pl.dashboard.activityComment('Anna Kowalska'))).toBeInTheDocument();
+  });
+
+  it('„Odhacz wszystko" zapisuje znacznik z NAJNOWSZEGO zdarzenia, nie z chwili klikniecia', async () => {
+    // Zdarzenie, ktore przyszlo w trakcie patrzenia na liste, ale jeszcze sie
+    // nie dociagnelo, zostaloby przy `now()` odhaczone bez pokazania.
+    const user = userEvent.setup();
+    mockQuotes([quote()]);
+    mockActivity([
+      event({ id: 'a', at: '2026-08-27T10:00:00Z' }),
+      event({ id: 'b', at: '2026-08-26T10:00:00Z' }),
+    ]);
+    renderPage();
+
+    await user.click(screen.getByRole('button', { name: pl.dashboard.activityClear }));
+
+    const patch = updateSettings.mock.calls[0]?.[0] as { activitySeenAt: string };
+    expect(patch.activitySeenAt).toBe('2026-08-27T10:00:00Z');
+  });
+
+  it('odhaczone zdarzenia znikaja z listy, ale DAJA SIE odsloniec', async () => {
+    // To jest gwarancja, ze „Odhacz wszystko" nie jest przyciskiem, po ktorym
+    // cos przepada — akceptacja oferty jest faktem i nie ma prawa zniknac.
+    const user = userEvent.setup();
+    seenAt.value = '2026-08-27T00:00:00Z';
+    mockQuotes([quote()]);
+    mockActivity([
+      event({ id: 'stare', at: '2026-08-26T10:00:00Z', who: 'Jan Odhaczony' }),
+      event({ id: 'nowe', at: '2026-08-28T10:00:00Z', who: 'Ewa Nowa' }),
+    ]);
+    renderPage();
+
+    expect(screen.getByText(pl.dashboard.activityAccepted('Ewa Nowa'))).toBeInTheDocument();
+    expect(
+      screen.queryByText(pl.dashboard.activityAccepted('Jan Odhaczony')),
+    ).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: pl.dashboard.activityShowOlder(1) }));
+    expect(screen.getByText(pl.dashboard.activityAccepted('Jan Odhaczony'))).toBeInTheDocument();
+  });
+
+  it('bez nowych zdarzen nie ma czego odhaczac', () => {
+    mockQuotes([quote()]);
+    mockActivity([]);
+    renderPage();
+
+    // Przycisk nad pusta lista bylby zaproszeniem do klikania w nic.
+    expect(
+      screen.queryByRole('button', { name: pl.dashboard.activityClear }),
+    ).not.toBeInTheDocument();
   });
 
   it('w trakcie ładowania panele są oznaczone aria-busy i pokazują szkielety', () => {

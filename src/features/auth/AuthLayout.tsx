@@ -1,5 +1,12 @@
 import type { ReactNode } from 'react';
-import authBackground from '@/assets/auth-background.jpg';
+/*
+ * `auth-background2.jpg`, a nie `auth-background.jpg` — nazwa zmieniona
+ * świadomie (2026-08-27). Podmiana samego pliku pod tą samą nazwą nie wchodzi
+ * do gita bez dodatkowego kroku i zostawia w cache przeglądarki oraz w paczce
+ * aplikacji stare zdjęcie. Nowa nazwa = nowy hash w buildzie i pewność, że
+ * wszędzie widać to, co trzeba.
+ */
+import authBackground from '@/assets/auth-background2.jpg';
 import { LogoLockup } from '@/assets/brand/LogoLockup';
 import { pl } from '@/i18n/pl';
 
@@ -26,16 +33,17 @@ export function AuthLayout({
   footer?: ReactNode;
 }) {
   return (
-    // `isolate` domyka warstwy w tym komponencie. Zdjęcie i welon leżą na
-    // ujemnym `z-index`, a taki element potrafi wpaść ZA tło elementu
-    // nadrzędnego. Dziś nad tym ekranem nie ma nic z tłem, ale dołożenie
-    // kiedykolwiek `bg-*` gdzieś wyżej wygasiłoby fotografię bez śladu
-    // w tym pliku. Własny kontekst układania sprawia, że to niemożliwe.
+    // `isolate` domyka warstwy w tym komponencie. Zdjęcie leży na ujemnym
+    // `z-index`, a taki element potrafi wpaść ZA tło elementu nadrzędnego.
+    // Dziś nad tym ekranem nie ma nic z tłem, ale dołożenie kiedykolwiek
+    // `bg-*` gdzieś wyżej wygasiłoby fotografię bez śladu w tym pliku.
+    // Własny kontekst układania sprawia, że to niemożliwe.
     <div className="relative isolate flex min-h-full flex-col items-center justify-center overflow-hidden p-6">
       {/*
-        Zdjęcie jako osobna warstwa, nie `background` na kontenerze: dzięki
-        temu welon wyżej może mieć własne krycie, bez mieszania go w gradient
-        z obrazem.
+        Zdjęcie jako osobna warstwa, nie `background` na kontenerze. Zostaje
+        tak także po zdjęciu welonu: własna warstwa pozwala sterować kadrem
+        (`object-cover`) niezależnie od tego, co leży wyżej, i wrócić z welonem
+        bez przepisywania tła kontenera.
       */}
       <img
         src={authBackground}
@@ -45,45 +53,29 @@ export function AuthLayout({
       />
 
       {/*
-        Ciepły welon nad zdjęciem. Nie jest ozdobą — jest gwarancją czytelności.
+        WELON ZDJĘTY NA ŻYCZENIE WŁAŚCICIELA (2026-08-27) — fotografia idzie
+        teraz na ekran bez żadnego przykrycia.
 
-        Logotyp leży BEZPOŚREDNIO na fotografii (poza szklaną kartą), więc jego
-        kontrast zależy od tego, co akurat wypadnie za nim: przy innym kadrze,
-        innym rozmiarze okna albo podmianie zdjęcia brąz mógłby trafić na ciemną
-        podłogę i zniknąć. Welon podnosi i ujednolica jasność całego tła, więc
-        czytelność przestaje być kwestią szczęścia.
-
-        Welon jest JASNY na całej wysokości, także u dołu. Kusiło, żeby
-        przyciemnić dolną krawędź „dla głębi", ale karta jest wyśrodkowana
-        w pionie, więc stopka pod nią ląduje mniej więcej w połowie ekranu —
-        ciemny dół nic by jej nie dał, a przy niskim oknie wpadłaby na granicę
-        dwóch jasności i przestała być czytelna przy jednym kolorze tekstu.
-        Jednolicie jasne tło znaczy, że KAŻDY napis może być ciemny i zawsze
-        się obroni, niezależnie od kadru i rozmiaru okna.
-
-        Środek jest najbardziej przezroczysty — tam wnętrze widać najlepiej,
-        i tam też stoi szklana karta, która ma co rozmywać.
-
-        ⚠️ **0,55 to dno, nie wartość dobrana na oko.** Przeliczone dla
-        `--ink` na najciemniejszych miejscach zdjęcia, na jakie tekst może
-        trafić przy dowolnym kadrze:
+        ⚠️ CZYM BYŁ I CO ZA SOBĄ ZABRAŁ. Nad zdjęciem leżał jasny gradient
+        `rgba(247,244,240, 0.66 → 0.55 → 0.62)`. Nie był ozdobą: logotyp
+        i stopka leżą BEZPOŚREDNIO na fotografii (poza szklaną kartą), więc
+        ich kontrast zależy teraz od tego, co akurat wypadnie za nimi. Krycie
+        0,55 było policzonym dnem dla `--ink` na najciemniejszych miejscach
+        kadru:
 
             krycie   ekran TV   ciemna podłoga
-            0,50       4,46           4,76      ← TV poniżej progu
+            0,50       4,46           4,76      ← poniżej progu WCAG AA
             0,55       5,07           5,38      ← bezpieczne
             0,66       6,60           6,90
 
-        Zejście niżej niż 0,55 wymagałoby zmiany traktowania napisów
-        (własne tło pod logotypem albo obwódka), a nie samego krycia.
+        Bez welonu ten margines znika. Przy jasnym, równym kadrze wszystko się
+        obroni; brąz na ciemnej podłodze albo na ekranie telewizora w tle —
+        nie. Jeśli logotyp gdzieś zniknie, wracamy nie do samego welonu, tylko
+        do decyzji: albo on, albo własne tło pod napisami.
+
+        Szklana karta z formularzem ma własne wypełnienie i rozmycie, więc pola
+        logowania są czytelne niezależnie od tej zmiany.
       */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10"
-        style={{
-          background:
-            'linear-gradient(180deg, rgba(247,244,240,0.66) 0%, rgba(247,244,240,0.55) 50%, rgba(247,244,240,0.62) 100%)',
-        }}
-      />
 
       {/*
         Pełny lockup — jedyne miejsce, gdzie stoi w całości (08-REDESIGN D-2).
@@ -115,11 +107,12 @@ export function AuthLayout({
         </div>
 
         {/*
-          Stopka leży bezpośrednio na welonie, nie na karcie — dlatego `--ink`,
-          a nie `--ink-soft` jak w reszcie aplikacji. Przeliczone: nad ciemnym
-          fragmentem zdjęcia welon schodzi do ~0,53 luminancji, na czym
-          `--ink-soft` daje ~2,9:1, czyli poniżej progu. `--ink` trzyma tam
-          ponad 8:1. Biała poświata odkleja litery od faktury zdjęcia.
+          Stopka leży bezpośrednio na FOTOGRAFII, nie na karcie — dlatego
+          `--ink`, a nie `--ink-soft` jak w reszcie aplikacji, i dlatego biała
+          poświata pod literami. Po zdjęciu welonu (2026-08-27) obie te rzeczy
+          są jedyną obroną tego napisu: `--ink-soft` dawał tu poniżej 3:1 już
+          przy welonie, a bez niego jest gorzej. Poświata odkleja litery od
+          faktury zdjęcia — nie usuwaj jej razem z welonem.
         */}
         {footer ? (
           <div className="text-ink relative mt-5 text-center text-sm [text-shadow:0_1px_2px_rgba(255,255,255,0.8)]">
