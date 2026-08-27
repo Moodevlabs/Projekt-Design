@@ -54,6 +54,12 @@ export type Project = z.infer<typeof ProjectSchema>;
 /** Projekt z sumami liczonymi w bazie (widok `projects_overview`). */
 export const ProjectOverviewSchema = ProjectSchema.extend({
   clientName: z.string(),
+  /**
+   * Zdjęcie klienta (poprawka 5/6). W widoku, a nie doczytywane osobno:
+   * pulpit rysuje kółko przy każdej teczce, a osobne zapytanie na kartę
+   * byłoby N+1 po to, żeby pokazać obrazek.
+   */
+  clientAvatarPath: z.string().nullable().default(null),
   quotesCount: z.number().int().nonnegative().default(0),
   acceptedNetCents: z.number().int().nonnegative().default(0),
   lastActivityAt: z.string(),

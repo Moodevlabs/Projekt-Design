@@ -84,6 +84,7 @@ function overview(partial: Partial<ProjectOverview> = {}): ProjectOverview {
     updatedAt: '2026-08-01T10:00:00Z',
     stageProgress: {},
     clientName: 'Marta i Piotr Kowalscy',
+    clientAvatarPath: null,
     quotesCount: 2,
     acceptedNetCents: 450_000,
     lastActivityAt: new Date().toISOString(),

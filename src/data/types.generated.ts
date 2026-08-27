@@ -1068,6 +1068,7 @@ export type Database = {
           address: string | null
           area_m2: number | null
           city: string | null
+          client_avatar_path: string | null
           client_id: string | null
           client_name: string | null
           created_at: string | null

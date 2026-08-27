@@ -983,22 +983,26 @@ Pozdrawiam`,
     activeProjects: 'Aktywni klienci i projekty',
     activeProjectsEmpty: 'Brak projektów w toku. Zacznij od dodania klienta.',
     title: 'Pulpit',
-    quotesThisMonth: 'Wyceny w tym miesiącu',
-    sentValue: 'Wartość wysłanych',
-    acceptanceRate: 'Wskaźnik akceptacji',
-    averageValue: 'Średnia wartość',
     recentQuotes: 'Ostatnie wyceny',
-    quickActions: 'Szybkie akcje',
-    thisMonth: 'w tym miesiącu',
-    noAcceptanceData: 'brak rozstrzygniętych',
 
-    // Bilans miesiąca — prawa szyna pulpitu czyta liczby jak podsumowanie wyceny.
-    created: 'Wyceny utworzone',
-    sentToClients: 'Wysłane do klientów',
-    responses: 'Odpowiedzi klientów',
-    settledOnYes: (accepted: number, settled: number) => `${accepted} z ${settled} na TAK`,
-    noResponses: 'Klienci jeszcze nie odpowiedzieli',
-    monthEmptyHint: 'Ten miesiąc zaczyna się od pierwszej wyceny.',
+    /*
+     * PASEK „NA BIEŻĄCO" (poprawka 6, 2026-08-27).
+     *
+     * Podmiotem zdania jest zawsze klient, bo to on coś zrobił. „Wycena
+     * została zaakceptowana" brzmi jak zdarzenie systemowe; „Anna Kowalska
+     * przyjęła ofertę" jest wiadomością od człowieka.
+     */
+    activityTitle: 'Co nowego u klientów',
+    activityUpToDate: 'Jesteś na bieżąco',
+    activityUnread: (count: number) =>
+      count === 1 ? '1 nowa uwaga' : `${count} nowych uwag`,
+    activityUnreadMark: 'nieprzeczytane',
+    activityEmpty: 'Nic się jeszcze nie wydarzyło — pierwszy wysłany link pojawi się tutaj.',
+    activitySomeone: 'Klient',
+    activityAccepted: (who: string) => `${who} przyjął ofertę`,
+    activityRejected: (who: string) => `${who} odrzucił ofertę`,
+    activityComment: (who: string) => `${who} zostawił uwagę`,
+    activityViewed: (who: string) => `${who} otworzył link z ofertą`,
 
     // Pusty pulpit — zaproszenie, nie komunikat o braku.
     emptyTitle: 'Zbuduj pierwszą wycenę',
@@ -1654,6 +1658,12 @@ Pozdrawiam`,
     periodLabel: 'Jak chcesz płacić',
     buy: 'Aktywuj dostęp',
     manage: 'Zarządzaj płatnością',
+
+    // Okno okresu próbnego przy starcie (poprawka 6). Po opłaceniu
+    // subskrypcję obsługuje się wyłącznie z ustawień.
+    trialDialogHint:
+      'Wszystko działa bez ograniczeń. Po opłaceniu subskrypcję znajdziesz w Ustawieniach — to okno przestanie się pokazywać.',
+    trialDialogLater: 'Później',
     readOnlyBanner:
       'Tryb tylko do odczytu — dostęp wygasł. Wyceny możesz dalej przeglądać i eksportować.',
 

@@ -3,18 +3,19 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { QuoteSummary } from '@/data/repos/quotes.repo';
+import type { ActivityEvent } from '@/data/repos/activity.repo';
 import { pl } from '@/i18n/pl';
 
 const useQuotesList = vi.hoisted(() => vi.fn());
-const useSubscription = vi.hoisted(() => vi.fn());
+const useActivity = vi.hoisted(() => vi.fn());
 
 const useBrandKit = vi.hoisted(() => vi.fn(() => ({ isSuccess: true, data: null })));
 const useAllLibraryItems = vi.hoisted(() => vi.fn(() => ({ isSuccess: true, data: [] })));
 
 vi.mock('@/data/queries/useQuotes', () => ({ useQuotesList }));
-vi.mock('@/data/queries/useSubscription', () => ({ useSubscription }));
 vi.mock('@/data/queries/useBrandKit', () => ({ useBrandKit }));
 vi.mock('@/data/queries/useLibrary', () => ({ useAllLibraryItems }));
+vi.mock('@/data/queries/useActivity', () => ({ useActivity }));
 
 // Blok „Aktywni klienci i projekty" (T-58) pyta o teczki.
 vi.mock('@/data/queries/useProjects', () => ({
@@ -26,9 +27,14 @@ vi.mock('@/data/queries/useClients', () => ({
   useUpdateClient: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }));
 
+vi.mock('@/data/queries/useClientAvatar', () => ({
+  useClientAvatarUrl: () => ({ data: null }),
+  useUploadClientAvatar: () => ({ mutate: vi.fn(), isPending: false }),
+  useRemoveClientAvatar: () => ({ mutate: vi.fn(), isPending: false }),
+}));
+
 const { DashboardPage } = await import('./DashboardPage');
 
-/** Wycena utworzona w bieżącym miesiącu — statystyki liczą po `createdAt`. */
 function quote(partial: Partial<QuoteSummary> = {}): QuoteSummary {
   const nowIso = new Date().toISOString();
   return {
@@ -57,6 +63,23 @@ function quote(partial: Partial<QuoteSummary> = {}): QuoteSummary {
   };
 }
 
+function event(partial: Partial<ActivityEvent> = {}): ActivityEvent {
+  return {
+    id: 'acceptance-1',
+    kind: 'accepted',
+    at: new Date().toISOString(),
+    quoteId: 'q1',
+    quoteNumber: 'WYC/2026/08/0001',
+    quoteTitle: 'Remont kuchni',
+    clientId: 'c1',
+    clientName: 'Anna Kowalska',
+    who: 'Anna Kowalska',
+    message: null,
+    unread: false,
+    ...partial,
+  };
+}
+
 function mockQuotes(rows: QuoteSummary[] | undefined, overrides: Record<string, unknown> = {}) {
   useQuotesList.mockReturnValue({
     data: rows,
@@ -65,6 +88,10 @@ function mockQuotes(rows: QuoteSummary[] | undefined, overrides: Record<string, 
     refetch: vi.fn(),
     ...overrides,
   });
+}
+
+function mockActivity(rows: ActivityEvent[] = [], overrides: Record<string, unknown> = {}) {
+  useActivity.mockReturnValue({ data: rows, isLoading: false, isError: false, ...overrides });
 }
 
 function renderPage() {
@@ -78,6 +105,7 @@ function renderPage() {
 describe('DashboardPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockActivity();
 
     // Liczniki respektują prefers-reduced-motion — w testach wyłączamy animację,
     // żeby asercje widziały od razu wartości końcowe.
@@ -91,22 +119,9 @@ describe('DashboardPage', () => {
       removeEventListener: vi.fn(),
       dispatchEvent: vi.fn(),
     }));
-
-    useSubscription.mockReturnValue({
-      data: {
-        workspaceId: 'ws',
-        status: 'trialing',
-        plan: null,
-        trialEndsAt: new Date(Date.now() + 5 * 86_400_000).toISOString(),
-        currentPeriodEnd: null,
-        cancelAtPeriodEnd: false,
-        stripeCustomerId: null,
-      },
-      isLoading: false,
-    });
   });
 
-  it('bez żadnej wyceny pokazuje zaproszenie z akcją, nie pusty bilans', () => {
+  it('bez żadnej wyceny pokazuje zaproszenie z akcją', () => {
     mockQuotes([]);
     renderPage();
 
@@ -115,40 +130,57 @@ describe('DashboardPage', () => {
 
     const cta = screen.getByRole('link', { name: new RegExp(pl.quotes.new) });
     expect(cta).toHaveAttribute('href', '/wyceny/nowa');
-
-    // Bilans miesiąca nie ma czego liczyć — nie renderuje się.
-    expect(screen.queryByText(pl.dashboard.sentToClients)).not.toBeInTheDocument();
-
-    // Subskrypcja zostaje w szynie także na pustym pulpicie.
-    expect(screen.getByText(pl.billing.trial)).toBeInTheDocument();
-    expect(screen.getByText(pl.dashboard.trialDaysLeft(5))).toBeInTheDocument();
   });
 
-  it('pokazuje bilans miesiąca: sumę wysłanych, odpowiedzi i ostatnie wyceny', () => {
+  it('pokazuje ostatnie wyceny i prowadzi do edytora', () => {
     mockQuotes([
       quote(),
       quote({ id: 'q2', title: 'Ogród zimowy', status: 'rejected', totalNetCents: 150_000 }),
     ]);
     renderPage();
 
-    // Suma wysłanych = tylko zaakceptowana (6 200 zł); pojawia się też w wierszu listy.
-    expect(screen.getByText(pl.dashboard.sentToClients)).toBeInTheDocument();
-    expect(screen.getAllByText(/6\s?200,00/).length).toBeGreaterThanOrEqual(2);
-
-    // Odpowiedzi klientów: 1 z 2 na TAK = 50%.
-    expect(screen.getByText(pl.dashboard.settledOnYes(1, 2))).toBeInTheDocument();
-    expect(screen.getByText('50%')).toBeInTheDocument();
-
-    // Wiersz listy prowadzi do edytora.
     const row = screen.getByRole('link', { name: /Remont kuchni/ });
     expect(row).toHaveAttribute('href', '/wyceny/q1');
   });
 
+  it('bilans miesiaca zniknal z pulpitu (poprawka 6)', () => {
+    // Liczyl wyceny utworzone, wyslane i rozstrzygniete w biezacym miesiacu —
+    // dane prawdziwe, ale nie odpowiadajace na zadne pytanie zadawane rano.
+    mockQuotes([quote()]);
+    renderPage();
+
+    expect(screen.queryByText('Wyceny utworzone')).not.toBeInTheDocument();
+    expect(screen.queryByText('Wysłane do klientów')).not.toBeInTheDocument();
+    // Subskrypcja tez: jej miejsce jest w ustawieniach, a okres probny
+    // zglasza sie sam oknem przy starcie.
+    expect(screen.queryByText(pl.billing.manage)).not.toBeInTheDocument();
+  });
+
+  it('na gorze mowi, czy jestesmy na biezaco', () => {
+    mockQuotes([quote()]);
+    mockActivity([event()]);
+    renderPage();
+
+    expect(screen.getByText(pl.dashboard.activityTitle)).toBeInTheDocument();
+    expect(screen.getByText(pl.dashboard.activityAccepted('Anna Kowalska'))).toBeInTheDocument();
+    expect(screen.getByText(pl.dashboard.activityUpToDate)).toBeInTheDocument();
+  });
+
+  it('liczy nieprzeczytane uwagi klientow', () => {
+    mockQuotes([quote()]);
+    mockActivity([
+      event({ id: 'comment-1', kind: 'comment', message: 'Czy da się taniej?', unread: true }),
+    ]);
+    renderPage();
+
+    expect(screen.getByText(pl.dashboard.activityUnread(1))).toBeInTheDocument();
+    expect(screen.getByText(pl.dashboard.activityComment('Anna Kowalska'))).toBeInTheDocument();
+  });
+
   it('w trakcie ładowania panele są oznaczone aria-busy i pokazują szkielety', () => {
     mockQuotes(undefined, { isLoading: true });
-    const { container } = renderPage();
+    renderPage();
 
-    expect(container.querySelectorAll('[aria-busy="true"]').length).toBeGreaterThanOrEqual(1);
     expect(screen.queryByText(pl.dashboard.emptyTitle)).not.toBeInTheDocument();
   });
 
@@ -159,7 +191,6 @@ describe('DashboardPage', () => {
     renderPage();
 
     expect(screen.getByText(pl.quotes.loadError)).toBeInTheDocument();
-    expect(screen.queryByText(pl.dashboard.sentToClients)).not.toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: pl.common.retry }));
     expect(refetch).toHaveBeenCalledTimes(1);

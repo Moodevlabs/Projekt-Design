@@ -19,6 +19,11 @@ vi.mock('@/data/offline/connectivity', () => ({
   useConnectivity: () => ({ online: true, recheck: vi.fn() }),
 }));
 
+// Okno okresu probnego (poprawka 6) wisi w powloce i pyta o subskrypcje.
+vi.mock('@/data/queries/useSubscription', () => ({
+  useSubscription: () => ({ data: null, isLoading: false }),
+}));
+
 // Licznik okresu próbnego w panelu bocznym pyta o subskrypcję. Powłoka nie ma
 // o tym nic do powiedzenia — `TrialBar` ma własne testy.
 /*
