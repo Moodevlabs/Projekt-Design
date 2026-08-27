@@ -33,17 +33,16 @@ export function AuthLayout({
   footer?: ReactNode;
 }) {
   return (
-    // `isolate` domyka warstwy w tym komponencie. Zdjęcie leży na ujemnym
-    // `z-index`, a taki element potrafi wpaść ZA tło elementu nadrzędnego.
-    // Dziś nad tym ekranem nie ma nic z tłem, ale dołożenie kiedykolwiek
-    // `bg-*` gdzieś wyżej wygasiłoby fotografię bez śladu w tym pliku.
-    // Własny kontekst układania sprawia, że to niemożliwe.
+    // `isolate` domyka warstwy w tym komponencie. Zdjęcie i welon leżą na
+    // ujemnym `z-index`, a taki element potrafi wpaść ZA tło elementu
+    // nadrzędnego. Dziś nad tym ekranem nie ma nic z tłem, ale dołożenie
+    // kiedykolwiek `bg-*` gdzieś wyżej wygasiłoby fotografię bez śladu
+    // w tym pliku. Własny kontekst układania sprawia, że to niemożliwe.
     <div className="relative isolate flex min-h-full flex-col items-center justify-center overflow-hidden p-6">
       {/*
-        Zdjęcie jako osobna warstwa, nie `background` na kontenerze. Zostaje
-        tak także po zdjęciu welonu: własna warstwa pozwala sterować kadrem
-        (`object-cover`) niezależnie od tego, co leży wyżej, i wrócić z welonem
-        bez przepisywania tła kontenera.
+        Zdjęcie jako osobna warstwa, nie `background` na kontenerze: dzięki
+        temu welon wyżej ma własne krycie i własny gradient, bez mieszania go
+        w tło razem z obrazem.
       */}
       <img
         src={authBackground}
@@ -53,29 +52,44 @@ export function AuthLayout({
       />
 
       {/*
-        WELON ZDJĘTY NA ŻYCZENIE WŁAŚCICIELA (2026-08-27) — fotografia idzie
-        teraz na ekran bez żadnego przykrycia.
+        Welon nad zdjęciem — wrócił 2026-08-27, po tym jak logotyp zginął na
+        gołej fotografii. Nie jest ozdobą: logotyp i stopka leżą BEZPOŚREDNIO
+        na zdjęciu (poza szklaną kartą), więc ich kontrast zależy od tego, co
+        akurat wypadnie za nimi.
 
-        ⚠️ CZYM BYŁ I CO ZA SOBĄ ZABRAŁ. Nad zdjęciem leżał jasny gradient
-        `rgba(247,244,240, 0.66 → 0.55 → 0.62)`. Nie był ozdobą: logotyp
-        i stopka leżą BEZPOŚREDNIO na fotografii (poza szklaną kartą), więc
-        ich kontrast zależy teraz od tego, co akurat wypadnie za nimi. Krycie
-        0,55 było policzonym dnem dla `--ink` na najciemniejszych miejscach
-        kadru:
+        ## Dlaczego nierówny, a nie jedno krycie na całość
 
-            krycie   ekran TV   ciemna podłoga
-            0,50       4,46           4,76      ← poniżej progu WCAG AA
-            0,55       5,07           5,38      ← bezpieczne
-            0,66       6,60           6,90
+        Nowe zdjęcie (`auth-background2.jpg`) ma **ciemny kasetonowy sufit
+        w górnej części** i jasną drewnianą podłogę na dole. To najgorszy
+        możliwy układ dla tego ekranu, bo blok logo + karta + stopka jest
+        wyśrodkowany w pionie: logotyp — brązowy — ląduje mniej więcej tam,
+        gdzie sufit jest najciemniejszy, a stopka na jasnej podłodze, gdzie
+        pomocy nie potrzebuje wcale.
 
-        Bez welonu ten margines znika. Przy jasnym, równym kadrze wszystko się
-        obroni; brąz na ciemnej podłodze albo na ekranie telewizora w tle —
-        nie. Jeśli logotyp gdzieś zniknie, wracamy nie do samego welonu, tylko
-        do decyzji: albo on, albo własne tło pod napisami.
+        Stąd gradient robi dokładnie odwrotnie niż poprzedni (0,66 → 0,55 →
+        0,62, czyli prawie równy): **kryje tam, gdzie ciemno, i schodzi z drogi
+        tam, gdzie jasno.** Dół spada do 0,30 — o połowę mniej niż wcześniej —
+        więc wnętrza widać znacznie więcej mimo że logotyp jest bezpieczniejszy.
 
-        Szklana karta z formularzem ma własne wypełnienie i rozmycie, więc pola
-        logowania są czytelne niezależnie od tej zmiany.
+        ## Dlaczego wolno tu zejść niżej niż kiedyś
+
+        Poprzednia wersja pilnowała progu 0,55 na CAŁEJ wysokości, bo napisy
+        nie miały żadnej własnej obrony. Teraz logotyp ma białą poświatę
+        (`drop-shadow` niżej), a stopka miała ją od początku — obie odklejają
+        litery od faktury zdjęcia i robią robotę, której wcześniej musiało
+        pilnować samo krycie.
+
+        ⚠️ Gdyby logotyp gdzieś jeszcze znikał: podnoś **górny** stop, nie całość.
+        Podniesienie dolnego nic mu nie da, a zabierze widok wnętrza.
       */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={{
+          background:
+            'linear-gradient(180deg, rgba(247,244,240,0.60) 0%, rgba(247,244,240,0.52) 45%, rgba(247,244,240,0.34) 80%, rgba(247,244,240,0.30) 100%)',
+        }}
+      />
 
       {/*
         Pełny lockup — jedyne miejsce, gdzie stoi w całości (08-REDESIGN D-2).
@@ -94,9 +108,20 @@ export function AuthLayout({
         Sterujemy SZEROKOŚCIĄ, nie wysokością: `w-full` pozwala logotypowi
         zwęzić się w wąskim oknie, zamiast wystawać poza ekran.
       */}
+      {/*
+        Biała poświata pod logotypem (2026-08-27) — ta sama sztuczka, co pod
+        stopką, tylko `drop-shadow` zamiast `text-shadow`, bo to SVG, a nie
+        tekst. `text-shadow` nie działa na kształty w krzywych.
+
+        Dzięki niej brąz nie zlewa się z ciemnym sufitem nawet tam, gdzie welon
+        jest najcieńszy, i to ona pozwoliła zejść z kryciem welonu poniżej
+        dawnego progu 0,55. Rozmycie 3 px: tyle wystarczy, żeby odkleić litery
+        od faktury zdjęcia, a mało, żeby nie zrobić wokół logotypu widocznej
+        białej obwódki.
+      */}
       <LogoLockup
         title={`${pl.app.name} — ${pl.app.tagline}`}
-        className="text-brown relative mb-10 w-full max-w-[460px]"
+        className="text-brown relative mb-10 w-full max-w-[460px] [filter:drop-shadow(0_1px_3px_rgba(255,255,255,0.75))]"
       />
 
       <div className="relative w-full max-w-[380px]">
@@ -109,10 +134,12 @@ export function AuthLayout({
         {/*
           Stopka leży bezpośrednio na FOTOGRAFII, nie na karcie — dlatego
           `--ink`, a nie `--ink-soft` jak w reszcie aplikacji, i dlatego biała
-          poświata pod literami. Po zdjęciu welonu (2026-08-27) obie te rzeczy
-          są jedyną obroną tego napisu: `--ink-soft` dawał tu poniżej 3:1 już
-          przy welonie, a bez niego jest gorzej. Poświata odkleja litery od
-          faktury zdjęcia — nie usuwaj jej razem z welonem.
+          poświata pod literami. `--ink-soft` dawał tu poniżej 3:1 nawet przy
+          grubym welonie.
+
+          Od 2026-08-27 welon na dole schodzi do 0,30, więc poświata jest tu
+          jeszcze ważniejsza niż była — nie usuwaj jej, dobierając krycie
+          welonu.
         */}
         {footer ? (
           <div className="text-ink relative mt-5 text-center text-sm [text-shadow:0_1px_2px_rgba(255,255,255,0.8)]">
