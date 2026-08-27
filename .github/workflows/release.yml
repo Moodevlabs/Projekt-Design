@@ -29,9 +29,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # BEZ `version:` — wersje pnpm podaje `packageManager` w package.json.
+      # Podanie jej w obu miejscach jest bledem, nie duplikatem: action-setup
+      # odmawia startu, zeby nie zbudowac paczki inna wersja niz lokalna.
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10
 
       - uses: actions/setup-node@v4
         with:
