@@ -27,3 +27,31 @@ supabase/.branches
 supabase/.temp
 
 .claude/worktrees
+
+# ---------------------------------------------------------------------------
+# MATERIAŁY WEWNĘTRZNE — poza publicznym repozytorium (2026-08-27)
+#
+# Repozytorium jest publiczne, bo z jego wydań korzysta mechanizm
+# aktualizacji. Kod aplikacji ma prawo tam być; plan pracy, notatki
+# z rozmów i materiały klienta — nie.
+#
+# ⚠️ To wycofuje pliki z PRZYSZŁYCH commitów. W historii zostają — usunięcie
+#    ich stamtąd wymaga przepisania historii (`git filter-repo`) i wymuszonego
+#    pusha, co unieważnia wszystkie istniejące klony.
+#
+# ⚠️ Po tej zmianie pliki żyją WYŁĄCZNIE lokalnie. Świeży klon ich nie ma.
+#    Trzymaj kopię (osobne prywatne repozytorium albo backup dysku).
+# ---------------------------------------------------------------------------
+
+# Dokumentacja projektowa: PRD, architektura, schemat bazy, plan zadań.
+docs/
+
+# Materiały źródłowe od klienta: koncepcje, inspiracje, arkusz, prototyp.
+reference/
+
+# Zasady pracy dla asystenta i komendy projektowe.
+CLAUDE.md
+.claude/
+
+# Wewnętrzny opis produktu.
+TOOLIER-OPIS-APLIKACJI.md

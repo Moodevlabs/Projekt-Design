@@ -49,6 +49,37 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      # ------------------------------------------------------------------
+      # Klucz sprawdzamy PRZED kompilacją Rusta.
+      #
+      # Bez tego kroku zły sekret ujawnia się dopiero na samym końcu, po
+      # ~25 minutach budowania — i to komunikatem, który brzmi jak problem
+      # z hasłem, a zwykle znaczy, że treść klucza została ucięta przy
+      # kopiowaniu z terminala. Tutaj kosztuje sekundy.
+      #
+      # CLI czyta TAURI_SIGNING_PRIVATE_KEY i ...PASSWORD ze środowiska,
+      # więc nie podajemy żadnych flag — sprawdzamy dokładnie tę drogę,
+      # którą pójdzie prawdziwy build.
+      # ------------------------------------------------------------------
+      - name: Sprawdź klucz podpisujący aktualizacje
+        shell: bash
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          if [ -z "$TAURI_SIGNING_PRIVATE_KEY" ]; then
+            echo "::error::Sekret TAURI_SIGNING_PRIVATE_KEY jest pusty."
+            exit 1
+          fi
+          echo "Długość sekretu: ${#TAURI_SIGNING_PRIVATE_KEY} znaków."
+          echo "proba" > klucz-test.txt
+          if ! pnpm tauri signer sign klucz-test.txt > /dev/null 2>&1; then
+            echo "::error::Klucz podpisujący nie działa. Najczęstsza przyczyna: treść sekretu została ucięta przy kopiowaniu. Wklej CAŁY plik .tauri/updater.key jednym ciągiem."
+            exit 1
+          fi
+          echo "Klucz podpisujący działa."
+          rm -f klucz-test.txt klucz-test.txt.sig
+
       # Bramka jakości przed wydaniem. Wypuszczenie paczki, która nie
       # przechodzi własnych testów, jest gorsze niż brak wydania.
       - run: pnpm lint
