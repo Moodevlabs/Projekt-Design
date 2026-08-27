@@ -529,6 +529,11 @@ Pozdrawiam`,
     // Akceptacja i uwagi (T-26).
     acceptedTitle: 'Oferta zaakceptowana',
     acceptedBy: (name: string) => `Zaakceptował(a): ${name}`,
+    acceptedAnonymously: 'Klient przyjął ofertę',
+    unreadComments: (count: number) =>
+      count === 1 ? '1 nieprzeczytana uwaga' : `${count} nieprzeczytanych uwag`,
+    openQuote: 'Otwórz wycenę',
+    linkLabel: 'Adres oferty dla klienta',
     acceptedScope: 'Zakres przyjęty przez klienta',
     turnedOff: (count: number) =>
       count === 1 ? 'Klient wyłączył 1 pozycję' : `Klient wyłączył ${count} pozycji`,

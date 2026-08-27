@@ -30,7 +30,7 @@ import { formatDateTime } from '@/lib/dates';
 import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
 
-import { QuoteFeedbackCard } from './QuoteFeedbackCard';
+import { QuoteFeedbackCard } from '@/features/share/QuoteFeedbackCard';
 
 interface Props {
   quoteId: string;
@@ -40,11 +40,18 @@ interface Props {
 }
 
 /**
- * „Udostępnij klientowi" — jedno miejsce na linki, uwagi i akceptację.
+ * „Udostępnij klientowi" — linki, uwagi i akceptacja (T-25).
  *
  * To jest dziś **główna droga wysłania oferty** (T-20 z Resendem odrzucone):
  * projektant tworzy link, kopiuje go i wysyła ze swojej poczty. Dlatego
  * „Kopiuj" jest pierwszym przyciskiem, a nie schowanym w menu.
+ *
+ * ## Szerokość okna
+ *
+ * 720 px, nie 560. Przy węższym sam adres linku (base64url — 43 znaki plus
+ * domena) nie mieścił się w wierszu, a trzy przyciski akcji i trzy daty
+ * łamały się w kilka rzędów. Okno wyglądało na zatłoczone dokładnie w tym
+ * miejscu, w którym ma być czytelne.
  */
 export function ShareDialog({ quoteId, quoteNumber, open, onOpenChange }: Props) {
   const shares = useShares(open ? quoteId : undefined);
@@ -61,9 +68,11 @@ export function ShareDialog({ quoteId, quoteNumber, open, onOpenChange }: Props)
     });
   };
 
+  const rows = shares.data ?? [];
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[85vh] w-[560px] overflow-y-auto">
+      <DialogContent className="flex max-h-[85vh] w-[min(45rem,calc(100vw-3rem))] flex-col gap-4 overflow-y-auto sm:max-w-none">
         <DialogHeader>
           <DialogTitle>{pl.share.title}</DialogTitle>
           <DialogDescription>{pl.share.description}</DialogDescription>
@@ -75,8 +84,10 @@ export function ShareDialog({ quoteId, quoteNumber, open, onOpenChange }: Props)
           quoteId={quoteId}
         />
 
-        <div className="border-hair-strong flex items-end gap-2 rounded-[var(--radius-control)] border p-3">
-          <label className="flex-1">
+        {/* Wybór ważności i przycisk w jednym rzędzie — to jedna czynność,
+            a nie formularz do wypełniania. */}
+        <div className="border-hair-strong flex flex-wrap items-end gap-3 rounded-[var(--radius-control)] border p-3">
+          <label className="min-w-[10rem] flex-1">
             <span className="text-ink-soft block text-xs font-medium">{pl.share.validFor}</span>
             <select
               value={expiryDays === null ? 'never' : String(expiryDays)}
@@ -102,22 +113,22 @@ export function ShareDialog({ quoteId, quoteNumber, open, onOpenChange }: Props)
           <p className="text-warning text-xs">{pl.share.baseUrlMissing}</p>
         ) : null}
 
-        <ul className="space-y-2">
-          {(shares.data ?? []).map((share) => (
-            <ShareRow
-              key={share.id}
-              share={share}
-              quoteNumber={quoteNumber}
-              onRevoke={() =>
-                revoke.mutate(share.id, { onError: () => toast.error(pl.share.revokeFailed) })
-              }
-            />
-          ))}
-        </ul>
-
-        {(shares.data ?? []).length === 0 && !shares.isLoading ? (
+        {rows.length > 0 ? (
+          <ul className="flex flex-col gap-2">
+            {rows.map((share) => (
+              <ShareRow
+                key={share.id}
+                share={share}
+                quoteNumber={quoteNumber}
+                onRevoke={() =>
+                  revoke.mutate(share.id, { onError: () => toast.error(pl.share.revokeFailed) })
+                }
+              />
+            ))}
+          </ul>
+        ) : shares.isLoading ? null : (
           <p className="text-ink-soft text-sm">{pl.share.noLinks}</p>
-        ) : null}
+        )}
       </DialogContent>
     </Dialog>
   );
@@ -172,11 +183,20 @@ function ShareRow({
         </span>
       </div>
 
-      <p className="text-ink-faint mt-2 truncate font-mono text-xs" title={url}>
-        {url}
-      </p>
+      {/*
+        Adres w polu na całą szerokość, tylko do odczytu i zaznaczalny.
+        Wcześniej był akapitem z `truncate`: linku nie dawało się ani przeczytać
+        w całości, ani zaznaczyć myszą, gdy schowek zawiódł.
+      */}
+      <input
+        readOnly
+        value={url}
+        aria-label={pl.share.linkLabel}
+        onFocus={(event) => event.currentTarget.select()}
+        className="border-hair bg-surface-2 text-ink-soft mt-2 w-full rounded-[var(--radius-control)] border px-2 py-1.5 font-mono text-xs"
+      />
 
-      <div className="text-ink-soft mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs">
+      <div className="text-ink-faint mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs">
         <span>
           {pl.share.created}: {formatDateTime(share.createdAt)}
         </span>
@@ -193,7 +213,7 @@ function ShareRow({
       </div>
 
       {state === 'active' ? (
-        <div className="mt-3 flex gap-2">
+        <div className="mt-3 flex flex-wrap items-center gap-2">
           <Button size="sm" onClick={() => void copy()}>
             {copied ? (
               <Check className="size-3.5" aria-hidden />
