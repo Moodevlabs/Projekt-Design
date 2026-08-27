@@ -80,6 +80,49 @@ jobs:
           echo "Klucz podpisujący działa."
           rm -f klucz-test.txt klucz-test.txt.sig
 
+      # ------------------------------------------------------------------
+      # Tag MUSI zgadzać się z wersją aplikacji.
+      #
+      # ⚠️ To jest zabezpieczenie przed błędem, który przeszedł niezauważony
+      # w wydaniu v1.1.1 (2026-08-27) i objawił się dopiero u użytkownika:
+      # aplikacja na drugim komputerze mówiła „masz najnowszą wersję", choć
+      # wydanie było nowsze.
+      #
+      # Dlaczego nikt tego nie złapał: `tagName` bierze się z gita, ale numer
+      # wersji w `latest.json` i w zbudowanej aplikacji pochodzi z
+      # `tauri-conf.json`. Tag podbity bez podbicia pliku daje wydanie
+      # NAZWANE v1.1.1, w którym aplikacja przedstawia się jako 1.1.0 —
+      # a updater porównuje właśnie te numery, nie nazwę wydania.
+      # `1.1.0 > 1.1.0` jest fałszem, więc aplikacja melduje „aktualna”.
+      #
+      # Build kończył się sukcesem, wydanie wyglądało poprawnie, a jedynym
+      # sygnałem był brak aktualizacji na cudzym komputerze. Ten krok zamienia
+      # to w czerwony build w 5 sekund.
+      # ------------------------------------------------------------------
+      - name: Sprawdź zgodność tagu z wersją aplikacji
+        if: github.ref_type == 'tag'
+        shell: bash
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          conf=$(node -p "require('./src-tauri/tauri.conf.json').version")
+          pkg=$(node -p "require('./package.json').version")
+          cargo=$(grep -m1 '^version = ' src-tauri/Cargo.toml | cut -d'"' -f2)
+
+          echo "tag=$tag  tauri.conf.json=$conf  package.json=$pkg  Cargo.toml=$cargo"
+
+          fail=0
+          for para in "tauri.conf.json:$conf" "package.json:$pkg" "Cargo.toml:$cargo"; do
+            plik="${para%%:*}"
+            wersja="${para#*:}"
+            if [ "$wersja" != "$tag" ]; then
+              echo "::error::$plik ma wersję $wersja, a tag mówi $tag. Podbij wersję we WSZYSTKICH trzech plikach i przetaguj — inaczej updater uzna nowe wydanie za tę samą wersję i nikt go nie dostanie."
+              fail=1
+            fi
+          done
+          [ "$fail" -eq 0 ] || exit 1
+
+          echo "Wersje zgodne."
+
       # Bramka jakości przed wydaniem. Wypuszczenie paczki, która nie
       # przechodzi własnych testów, jest gorsze niż brak wydania.
       - run: pnpm lint
