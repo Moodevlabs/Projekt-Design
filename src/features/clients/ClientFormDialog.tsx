@@ -21,7 +21,13 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { AvatarPicker, initialsOf } from '@/components/shared';
 import { useCreateClient, useUpdateClient } from '@/data/queries/useClients';
+import {
+  useClientAvatarUrl,
+  useRemoveClientAvatar,
+  useUploadClientAvatar,
+} from '@/data/queries/useClientAvatar';
 import {
   ClientDraftSchema,
   clientToDraft,
@@ -94,6 +100,22 @@ export function ClientFormDialog({ open, onOpenChange, client, onSaved }: Client
             className="space-y-4"
             noValidate
           >
+            <FormField
+              control={form.control}
+              name="avatarPath"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <ClientAvatarField
+                      path={field.value}
+                      name={form.watch('name')}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="name"
@@ -193,5 +215,51 @@ export function ClientFormDialog({ open, onOpenChange, client, onSaved }: Client
         </Form>
       </DialogContent>
     </Dialog>
+  );
+}
+
+/**
+ * Zdjęcie klienta w formularzu (poprawka 5, 2026-08-27).
+ *
+ * Plik idzie do Storage od razu, a formularz dostaje samą ścieżkę. Poprzedni
+ * plik kasujemy dopiero po tym, jak nowa ścieżka wylądowała w polu — kolejność
+ * odwrotna zostawiłaby przy błędzie kartotekę wskazującą na nic.
+ */
+function ClientAvatarField({
+  path,
+  name,
+  onChange,
+}: {
+  path: string | null;
+  name: string;
+  onChange: (path: string | null) => void;
+}) {
+  const url = useClientAvatarUrl(path);
+  const upload = useUploadClientAvatar();
+  const remove = useRemoveClientAvatar();
+
+  return (
+    <AvatarPicker
+      label={pl.clients.avatar}
+      hint={pl.clients.avatarHint}
+      url={url.data ?? null}
+      initials={initialsOf(name || pl.clients.newTitle, '??')}
+      busy={upload.isPending}
+      onPick={(file) =>
+        upload.mutate(file, {
+          onSuccess: (saved) => {
+            const previous = path;
+            onChange(saved);
+            if (previous) remove.mutate(previous);
+          },
+          onError: (error) => toast.error(error.message),
+        })
+      }
+      onRemove={() => {
+        const previous = path;
+        onChange(null);
+        if (previous) remove.mutate(previous);
+      }}
+    />
   );
 }

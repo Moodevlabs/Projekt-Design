@@ -112,6 +112,7 @@ export type Database = {
         Row: {
           address: string | null
           archived_at: string | null
+          avatar_path: string | null
           city: string | null
           created_at: string
           deleted_at: string | null
@@ -127,6 +128,7 @@ export type Database = {
         Insert: {
           address?: string | null
           archived_at?: string | null
+          avatar_path?: string | null
           city?: string | null
           created_at?: string
           deleted_at?: string | null
@@ -142,6 +144,7 @@ export type Database = {
         Update: {
           address?: string | null
           archived_at?: string | null
+          avatar_path?: string | null
           city?: string | null
           created_at?: string
           deleted_at?: string | null
@@ -1033,6 +1036,7 @@ export type Database = {
           accepted_net_cents: number | null
           address: string | null
           archived_at: string | null
+          avatar_path: string | null
           city: string | null
           created_at: string | null
           deleted_at: string | null

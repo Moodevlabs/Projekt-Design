@@ -26,6 +26,13 @@ vi.mock('@/data/queries/useQuotes', () => ({
   useCreateQuote: asyncMutationStub,
 }));
 
+// Zdjecia klientow (poprawka 5) — karta pyta o podpisany URL.
+vi.mock('@/data/queries/useClientAvatar', () => ({
+  useClientAvatarUrl: () => ({ data: null }),
+  useUploadClientAvatar: mutationStub,
+  useRemoveClientAvatar: mutationStub,
+}));
+
 vi.mock('@/data/queries/useWorkspace', () => ({
   useWorkspace: () => ({ data: { id: 'ws', settings: {} } }),
   useWorkspaceId: () => 'ws',
@@ -43,6 +50,7 @@ function overview(partial: Partial<ClientOverview> = {}): ClientOverview {
     address: '',
     city: 'Poznań',
     notes: '',
+    avatarPath: null,
     status: 'active',
     archivedAt: null,
     createdAt: '2026-08-01T10:00:00Z',
@@ -104,6 +112,18 @@ describe('ClientsPage', () => {
       'href',
       '/klienci/c1',
     );
+  });
+
+  it('kazdy klient dostaje wlasna karte z inicjalami (poprawka 5)', () => {
+    mockResult([overview(), overview({ id: 'c2', name: 'Jan Nowak' })]);
+    renderPage();
+
+    // Od 2026-08-27 lista to siatka kart, nie tabela — wiersze z kolumnami
+    // sluza do porownywania liczb, a klienta sie na liscie ODNAJDUJE.
+    expect(screen.getAllByTestId('client-card')).toHaveLength(2);
+    // Bez wgranego zdjecia kolko pokazuje skrot nazwy, a nie pusta plame.
+    expect(screen.getByText('AI')).toBeInTheDocument();
+    expect(screen.getByText('JN')).toBeInTheDocument();
   });
 
   it('startuje na aktywnych — zarchiwizowani nie zasmiecaja listy', () => {

@@ -140,6 +140,15 @@ export const WorkspaceSettingsSchema = z.object({
     .array(PriceListItemSchema.omit({ id: true }))
     .nullable()
     .default(null),
+  /**
+   * Zdjęcie użytkownika w pasku nawigacji (poprawka 4, 2026-08-27).
+   *
+   * Ścieżka w buckecie `brand`, jak logo. W `settings`, a nie w osobnej
+   * kolumnie czy tabeli profili, bo Toolier jest narzędziem jednoosobowym
+   * (decyzja z T-27): workspace ma dokładnie jednego użytkownika, więc
+   * „avatar workspace'u" i „avatar użytkownika" to ta sama rzecz.
+   */
+  avatarPath: z.string().nullable().default(null),
 });
 export type WorkspaceSettings = z.infer<typeof WorkspaceSettingsSchema>;
 

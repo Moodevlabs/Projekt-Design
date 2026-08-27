@@ -34,6 +34,14 @@ export const ClientSchema = z.object({
   address: z.string().default(''),
   city: z.string().default(''),
   notes: z.string().default(''),
+  /**
+   * Zdjęcie klienta w buckecie `brand` (poprawka 5, 2026-08-27).
+   *
+   * `null`, a nie `''`: reszta pól tekstowych opisuje klienta i pustka jest
+   * tam zwykłym „nie podano". Tutaj wartość jest **wskazaniem na plik** —
+   * pusty string udawałby ścieżkę, której nie da się podpisać.
+   */
+  avatarPath: z.string().nullable().default(null),
   status: ClientStatusSchema.default('active'),
   archivedAt: z.string().nullable().default(null),
   createdAt: z.string(),
@@ -67,6 +75,12 @@ export const ClientDraftSchema = z.object({
   address: z.string().trim(),
   city: z.string().trim(),
   notes: z.string(),
+  /**
+   * Ścieżka zdjęcia (poprawka 5). Formularz nosi ją razem z resztą pól, mimo
+   * że plik trafia do Storage od razu przy wyborze: dzięki temu „Anuluj"
+   * zostawia kartotekę bez zmian, a zapis idzie jedną mutacją.
+   */
+  avatarPath: z.string().nullable(),
 });
 export type ClientDraft = z.infer<typeof ClientDraftSchema>;
 
@@ -78,7 +92,7 @@ export type ClientDraft = z.infer<typeof ClientDraftSchema>;
  * i `react-hook-form` nie zgodziłby się na resolver. Pustkę podaje ta funkcja.
  */
 export function emptyClientDraft(): ClientDraft {
-  return { name: '', phone: '', email: '', address: '', city: '', notes: '' };
+  return { name: '', phone: '', email: '', address: '', city: '', notes: '', avatarPath: null };
 }
 
 /** Formularz wypełniony istniejącym klientem. */
@@ -90,6 +104,7 @@ export function clientToDraft(client: Client): ClientDraft {
     address: client.address,
     city: client.city,
     notes: client.notes,
+    avatarPath: client.avatarPath,
   };
 }
 

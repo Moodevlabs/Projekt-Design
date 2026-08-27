@@ -18,6 +18,7 @@ function client(partial: Partial<Client> = {}): Client {
     address: 'ul. Wiosenna 12/3',
     city: 'Poznań',
     notes: '',
+    avatarPath: null,
     status: 'active',
     archivedAt: null,
     createdAt: '2026-08-01T10:00:00Z',
@@ -118,6 +119,9 @@ describe('clientToDraft', () => {
       address: 'ul. Wiosenna 12/3',
       city: 'Poznań',
       notes: '',
+      // Zdjecie (poprawka 5) jest polem formularza, nie polem technicznym:
+      // wybiera sie je razem z reszta danych i „Anuluj" ma je cofnac.
+      avatarPath: null,
     });
   });
 });

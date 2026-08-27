@@ -195,6 +195,10 @@ export const pl = {
     newTitle: 'Nowy klient',
     formHint: 'Wystarczy nazwa. Resztę uzupełnisz w każdej chwili.',
 
+    // Zdjęcie klienta (poprawka 5).
+    avatar: 'Zdjęcie klienta',
+    avatarHint: 'Widać je na karcie klienta i na liście. Nie trafia do żadnego dokumentu.',
+
     name: 'Nazwa',
     namePlaceholder: 'Anna i Piotr Kowalscy',
     phone: 'Telefon',
@@ -1554,6 +1558,15 @@ Pozdrawiam`,
     accountIntro: 'Twój dostęp do aplikacji, subskrypcja i dane konta.',
     appIntro: 'Domyślne wartości nowych wycen, miejsce na pliki i aktualizacje.',
     access: 'Dostęp',
+    // Zdjęcie użytkownika (poprawka 4).
+    avatar: 'Twoje zdjęcie',
+    avatarHint:
+      'Widać je w pasku nawigacji. Kwadratowy kadr wygląda najlepiej — obrazek przycinamy do kółka. PNG, JPG lub WEBP, do 5 MB.',
+    avatarSaved: 'Zapisano zdjęcie',
+    avatarRemoved: 'Usunięto zdjęcie',
+    /** Kropka przy avatarze w szynie. */
+    connectionOnline: 'Połączono z internetem',
+    connectionOffline: 'Brak połączenia — zmiany czekają w kolejce',
     yourData: 'Twoje dane',
     dangerZone: 'Strefa nieodwracalna',
     manageSubscription: 'Zarządzaj',

@@ -34,6 +34,7 @@ function mapClient(row: Row): Client {
     address: text(row.address),
     city: text(row.city),
     notes: text(row.notes),
+    avatarPath: (row.avatar_path as string | null) ?? null,
     status: ClientStatusSchema.catch('active').parse(row.status),
     archivedAt: (row.archived_at as string | null) ?? null,
     createdAt: row.created_at as string,
@@ -138,6 +139,7 @@ export async function createClient(input: CreateClientInput): Promise<Client> {
     address: toColumn(input.address),
     city: toColumn(input.city),
     notes: toColumn(input.notes),
+    avatar_path: input.avatarPath,
   };
 
   const rows = unwrap(
@@ -224,6 +226,7 @@ export async function updateClient(id: string, patch: ClientPatch): Promise<Clie
   if (patch.address !== undefined) update.address = toColumn(patch.address);
   if (patch.city !== undefined) update.city = toColumn(patch.city);
   if (patch.notes !== undefined) update.notes = toColumn(patch.notes);
+  if (patch.avatarPath !== undefined) update.avatar_path = patch.avatarPath;
 
   const rows = unwrap(
     await getSupabase().from('clients').update(update).eq('id', id).select('*'),

@@ -65,6 +65,7 @@ function overview(partial: Partial<ClientOverview> = {}): ClientOverview {
     address: 'ul. Wiosenna 12/3',
     city: 'Poznań',
     notes: 'Lubią jasne drewno.',
+    avatarPath: null,
     status: 'active',
     archivedAt: null,
     createdAt: '2026-08-01T10:00:00Z',

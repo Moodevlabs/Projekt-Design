@@ -1,7 +1,10 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { initialsOf } from '@/components/shared';
+import { useAvatarPath, useAvatarUrl } from '@/data/queries/useAvatar';
+import { useConnectivity } from '@/data/offline/connectivity';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -125,10 +128,27 @@ function SidebarLink({
   );
 }
 
-function AccountMenu({ subscriptionOk, expanded }: { subscriptionOk: boolean; expanded: boolean }) {
+function AccountMenu({ expanded }: { expanded: boolean }) {
   const { session, signOut } = useAuth();
   const email = session?.user.email ?? '';
-  const initials = email.slice(0, 2).toUpperCase() || 'AN';
+  const initials = initialsOf(email, 'TO');
+
+  const avatarPath = useAvatarPath();
+  const avatar = useAvatarUrl(avatarPath);
+
+  /*
+   * KROPKA MÓWI O POŁĄCZENIU (poprawka 4, 2026-08-27).
+   *
+   * Do tej pory świeciła stanem subskrypcji — którego i tak nikt tu nie
+   * przekazywał, więc w praktyce była zawsze taka sama i nie znaczyła nic.
+   * Łączność jest tym, co zmienia się w trakcie pracy i o czym trzeba wiedzieć
+   * od razu: bez sieci zapisy idą do kolejki, a nie do bazy.
+   *
+   * Źródłem jest `useConnectivity` — ta sama sonda, na której stoi pasek
+   * offline. `navigator.onLine` mówiłby „jest sieć" w hotelowym Wi-Fi
+   * z ekranem logowania.
+   */
+  const { online } = useConnectivity();
 
   return (
     <DropdownMenu>
@@ -141,16 +161,20 @@ function AccountMenu({ subscriptionOk, expanded }: { subscriptionOk: boolean; ex
       >
         <span className="relative shrink-0">
           <Avatar className="size-9">
+            {avatar.data ? <AvatarImage src={avatar.data} alt={email} /> : null}
             <AvatarFallback className="bg-rail-ink text-rail-pill-ink text-xs font-medium">
               {initials}
             </AvatarFallback>
           </Avatar>
           <span
-            aria-hidden
+            title={online ? pl.settings.connectionOnline : pl.settings.connectionOffline}
+            aria-label={online ? pl.settings.connectionOnline : pl.settings.connectionOffline}
+            data-testid="connection-dot"
+            data-online={online}
             className={cn(
               // Obwódka w kolorze szyny, żeby kropka „siedziała" w panelu.
               'border-rail absolute -right-0.5 -bottom-0.5 size-3 rounded-full border-2',
-              subscriptionOk ? 'bg-rail-ink' : 'bg-rail-ink/40',
+              online ? 'bg-positive' : 'bg-danger',
             )}
           />
         </span>
@@ -176,7 +200,7 @@ function AccountMenu({ subscriptionOk, expanded }: { subscriptionOk: boolean; ex
   );
 }
 
-export function Sidebar({ subscriptionOk = true }: { subscriptionOk?: boolean }) {
+export function Sidebar() {
   const { pathname } = useLocation();
   const { expanded, toggle } = useSidebarExpanded();
   const activeIndex = activeNavIndex(pathname);
@@ -303,7 +327,7 @@ export function Sidebar({ subscriptionOk = true }: { subscriptionOk?: boolean })
 
         <TrialBar expanded={expanded} />
 
-        <AccountMenu subscriptionOk={subscriptionOk} expanded={expanded} />
+        <AccountMenu expanded={expanded} />
       </div>
     </nav>
   );

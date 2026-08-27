@@ -95,6 +95,8 @@ describe('WorkspaceSettingsSchema', () => {
       scheduleTemplate: null,
       stagesTemplate: null,
       priceListTemplate: null,
+      // Zdjecie uzytkownika (poprawka 4) — brak zdjecia znaczy inicjaly.
+      avatarPath: null,
     });
   });
 

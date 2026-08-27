@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { EmptyState, Money } from '@/components/shared';
-import { ClientStatusBadge } from './ClientsTable';
+import { ClientStatusBadge } from './ClientStatusBadge';
 import { ClientFormDialog } from './ClientFormDialog';
 import { ClientQuotesTab } from './ClientQuotesTab';
 import { ClientNotesTab } from './ClientNotesTab';

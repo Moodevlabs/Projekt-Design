@@ -9,6 +9,16 @@ vi.mock('@/data/queries/useWorkspace', () => ({
   useWorkspaceId: () => 'ws-1',
 }));
 
+// Zdjecie uzytkownika i sonda lacznosci w szynie (poprawka 4).
+vi.mock('@/data/queries/useAvatar', () => ({
+  useAvatarPath: () => null,
+  useAvatarUrl: () => ({ data: null }),
+}));
+
+vi.mock('@/data/offline/connectivity', () => ({
+  useConnectivity: () => ({ online: true, recheck: vi.fn() }),
+}));
+
 // Licznik okresu próbnego w panelu bocznym pyta o subskrypcję. Powłoka nie ma
 // o tym nic do powiedzenia — `TrialBar` ma własne testy.
 /*
