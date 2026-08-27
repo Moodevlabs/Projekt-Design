@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Eye, MoreHorizontal, Pencil } from 'lucide-react';
+import { ArrowLeft, Eye, MoreHorizontal, Pencil, Share2 } from 'lucide-react';
 import { InlineText } from './InlineText';
 import { SaveIndicator } from './SaveIndicator';
 import { StatusMark } from '@/components/shared';
@@ -50,6 +50,8 @@ export function EditorTopbar({
   version,
   onNewVersion,
   creatingVersion,
+  onShare,
+  onVersionHistory,
 }: {
   number: string | null;
   status: QuoteStatus;
@@ -90,6 +92,10 @@ export function EditorTopbar({
   /** `null` = tej wyceny nie da sie wersjonowac (jest juz archiwalna). */
   onNewVersion: (() => void) | null;
   creatingVersion: boolean;
+  /** Link dla klienta (T-25). Osobny przycisk, nie pozycja w menu — patrz nizej. */
+  onShare: () => void;
+  /** Historia wersji (T-22). `null` = wycena ma jedna wersje, nie ma czego porownywac. */
+  onVersionHistory: (() => void) | null;
 }) {
   return (
     <div className="surface-band relative z-10 flex h-[68px] shrink-0 items-center gap-4 px-7">
@@ -123,6 +129,16 @@ export function EditorTopbar({
       </div>
 
       <div className="ml-auto flex items-center gap-2">
+        {/*
+          „Udostepnij" stoi OBOK menu, a nie w nim. Od T-25 to jest glowna
+          droga wyslania oferty do inwestora — schowanie jej pod trzema
+          kropkami obok „Nadpisz szablon" mowilby, ze to czynnosc rzadka.
+        */}
+        <Button variant="outline" size="sm" onClick={onShare}>
+          <Share2 className="size-4" aria-hidden />
+          {pl.share.action}
+        </Button>
+
         <div className="border-hair-strong bg-surface flex items-center rounded-[var(--radius-control)] border p-0.5">
           {(['edit', 'preview'] as const).map((value) => {
             const Icon = value === 'edit' ? Pencil : Eye;
@@ -203,6 +219,11 @@ export function EditorTopbar({
               >
                 {pl.quotes.newVersion}
               </DropdownMenuItem>
+            ) : null}
+            {/* Znika przy jednej wersji: pozycja menu, ktora zawsze prowadzi
+                do „nie ma czego porownywac", jest gorsza niz jej brak. */}
+            {onVersionHistory ? (
+              <DropdownMenuItem onSelect={onVersionHistory}>{pl.versions.open}</DropdownMenuItem>
             ) : null}
             <DropdownMenuItem onSelect={onOpenLibrary}>{pl.library.title}</DropdownMenuItem>
             <DropdownMenuItem onSelect={onSaveAllToLibrary}>

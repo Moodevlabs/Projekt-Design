@@ -66,7 +66,7 @@ export function ScopeRow({
           )}
           style={swatch ? { backgroundColor: `${swatch}55` } : undefined}
         >
-          {item.category || pl.editor.scopeNoGroup}
+          {item.categoryName || pl.editor.scopeNoGroup}
         </span>
       </div>
 

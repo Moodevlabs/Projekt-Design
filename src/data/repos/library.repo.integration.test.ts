@@ -9,12 +9,10 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { getSupabase } from '@/data/supabase';
 import { getCurrentWorkspace } from './workspace.repo';
 import {
-  DEFAULT_CATEGORY,
   createLibraryGroup,
   createLibraryItem,
   deleteLibraryGroup,
   deleteLibraryItem,
-  listLibraryCategories,
   listLibraryGroups,
   listLibraryItems,
   saveItemsToLibrary,
@@ -22,12 +20,23 @@ import {
   updateLibraryItem,
 } from './library.repo';
 import { newItem } from '@/domain/quote';
+import {
+  createLibraryCategory,
+  deleteLibraryCategory,
+  listLibraryCategoryRows,
+} from './library-categories.repo';
 
 const DEMO_EMAIL = 'demo@toolier.local';
 const DEMO_PASSWORD = 'demo1234';
 
-/** Własna kategoria testowa — żeby nie mieszać się z pozycjami z seeda. */
+/**
+ * Wlasna GRUPA testowa — zeby nie mieszac sie z pozycjami z seeda.
+ *
+ * Od T-69 grupa to wiersz slownika, a nie tekst w kolumnie: `category`
+ * przestala istniec, bo potrafila rozjechac sie z `category_id`.
+ */
 const TEST_CATEGORY = 'Test-T06';
+let testCategoryId = '';
 
 let workspaceId: string;
 const createdItems: string[] = [];
@@ -46,6 +55,10 @@ beforeAll(async () => {
   }
 
   workspaceId = (await getCurrentWorkspace()).id;
+
+  // Od T-69 grupa jest wierszem slownika, wiec test musi ja najpierw zalozyc.
+  const category = await createLibraryCategory({ workspaceId, name: TEST_CATEGORY });
+  testCategoryId = category.id;
 });
 
 afterAll(async () => {
@@ -56,17 +69,20 @@ afterAll(async () => {
   if (createdGroups.length > 0) {
     await supabase.from('library_groups').delete().in('id', createdGroups);
   }
+  if (testCategoryId) {
+    await deleteLibraryCategory(testCategoryId);
+  }
   await supabase.auth.signOut();
 });
 
 async function makeItem(
   name: string,
-  overrides: { category?: string; unitPriceCents?: number } = {},
+  overrides: { categoryId?: string | null; unitPriceCents?: number } = {},
 ) {
   const item = await createLibraryItem({
     workspaceId,
     name,
-    category: overrides.category ?? TEST_CATEGORY,
+    categoryId: overrides.categoryId === undefined ? testCategoryId : overrides.categoryId,
     description: 'Opis pozycji ' + name,
     unitPriceCents: overrides.unitPriceCents ?? 12_345,
     sortOrder: 100,
@@ -109,7 +125,7 @@ describe('library.repo — pozycje', () => {
 
     expect(item.id).toBeTruthy();
     expect(item.workspaceId).toBe(workspaceId);
-    expect(item.category).toBe(TEST_CATEGORY);
+    expect(item.categoryName).toBe(TEST_CATEGORY);
     expect(item.kind).toBe('item');
     expect(item.unitPriceCents).toBe(12_345);
     expect(item.sortOrder).toBe(100);
@@ -118,16 +134,16 @@ describe('library.repo — pozycje', () => {
   it('wstawia pozycje bez kategorii do kategorii domyslnej', async () => {
     const item = await createLibraryItem({ workspaceId, name: 'Bez kategorii T06' });
     createdItems.push(item.id);
-    expect(item.category).toBe(DEFAULT_CATEGORY);
+    expect(item.categoryName).toBe('');
   });
 
   it('filtruje po kategorii i szuka po nazwie oraz opisie', async () => {
     const item = await makeItem('Unikalna Nazwa Szukana');
 
-    const inCategory = await listLibraryItems(workspaceId, { category: TEST_CATEGORY });
+    const inCategory = await listLibraryItems(workspaceId, { categoryId: testCategoryId });
     expect(inCategory.some((row) => row.id === item.id)).toBe(true);
 
-    const inOther = await listLibraryItems(workspaceId, { category: 'Projekt' });
+    const inOther = await listLibraryItems(workspaceId, { categoryId: 'brak-takiej-grupy' });
     expect(inOther.some((row) => row.id === item.id)).toBe(false);
 
     const byName = await listLibraryItems(workspaceId, { search: 'Unikalna Nazwa' });
@@ -155,20 +171,25 @@ describe('library.repo — pozycje', () => {
     const b = await makeItem('B-sort-test');
     const a = await makeItem('A-sort-test');
 
-    const rows = await listLibraryItems(workspaceId, { category: TEST_CATEGORY });
+    const rows = await listLibraryItems(workspaceId, { categoryId: testCategoryId });
     const indexA = rows.findIndex((row) => row.id === a.id);
     const indexB = rows.findIndex((row) => row.id === b.id);
     expect(indexA).toBeGreaterThanOrEqual(0);
     expect(indexA).toBeLessThan(indexB);
   });
 
-  it('zwraca unikalne kategorie, w tym te z seeda', async () => {
-    await makeItem('Do kategorii');
+  it('grupy pochodza ze slownika, nie z kolumny tekstowej (T-69)', async () => {
+    const item = await makeItem('Do kategorii');
 
-    const categories = await listLibraryCategories(workspaceId);
-    expect(new Set(categories).size).toBe(categories.length);
-    expect(categories).toContain(TEST_CATEGORY);
-    expect(categories).toContain('Projekt');
+    const categories = await listLibraryCategoryRows(workspaceId);
+    const names = categories.map((row) => row.name);
+    expect(new Set(names).size).toBe(names.length);
+    expect(names).toContain(TEST_CATEGORY);
+
+    // Nazwa przy pozycji jest ROZWIAZANA ze slownika przez `category_id`,
+    // a nie skopiowana do wiersza — dlatego nie da sie jej rozjechac.
+    expect(item.categoryId).toBe(testCategoryId);
+    expect(item.categoryName).toBe(TEST_CATEGORY);
   });
 
   it('aktualizuje wskazane pola i nie rusza pozostalych', async () => {
@@ -179,14 +200,14 @@ describe('library.repo — pozycje', () => {
     expect(updated.unitPriceCents).toBe(99_900);
     expect(updated.kind).toBe('discount');
     expect(updated.name).toBe('Do edycji');
-    expect(updated.category).toBe(TEST_CATEGORY);
+    expect(updated.categoryName).toBe(TEST_CATEGORY);
   });
 
   it('kasuje miekko — pozycja znika z listy, ale wiersz zostaje', async () => {
     const item = await makeItem('Do skasowania');
     await deleteLibraryItem(item.id);
 
-    const rows = await listLibraryItems(workspaceId, { category: TEST_CATEGORY });
+    const rows = await listLibraryItems(workspaceId, { categoryId: testCategoryId });
     expect(rows.some((row) => row.id === item.id)).toBe(false);
 
     const { data } = await getSupabase()
@@ -206,7 +227,7 @@ describe('library.repo — pozycje', () => {
 
     const saved = await saveItemsToLibrary(
       workspaceId,
-      items.map((item) => ({ ...item, category: TEST_CATEGORY })),
+      items.map((item) => ({ ...item, categoryId: testCategoryId })),
     );
     saved.forEach((row) => createdItems.push(row.id));
 
@@ -355,7 +376,7 @@ describe('warianty pozycji (F1.4)', () => {
 
     expect(zapisany.variantOf).toBe(lider.id);
 
-    const rows = await listLibraryItems(workspaceId, { category: TEST_CATEGORY });
+    const rows = await listLibraryItems(workspaceId, { categoryId: testCategoryId });
     expect(rows.find((row) => row.id === wariant.id)?.variantOf).toBe(lider.id);
     expect(rows.find((row) => row.id === lider.id)?.variantOf).toBeNull();
   });
@@ -412,7 +433,7 @@ describe('jednostka wpisu bibliotecznego (F2.1)', () => {
     const zapisany = await updateLibraryItem(item.id, { pricingBasis: 'time' });
     expect(zapisany.pricingBasis).toBe('time');
 
-    const rows = await listLibraryItems(workspaceId, { category: TEST_CATEGORY });
+    const rows = await listLibraryItems(workspaceId, { categoryId: testCategoryId });
     expect(rows.find((row) => row.id === item.id)?.pricingBasis).toBe('time');
   });
 

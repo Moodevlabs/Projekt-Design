@@ -1,0 +1,71 @@
+@import 'tailwindcss';
+
+/* ===============================================================
+   TOOLIER — strona oferty dla klienta (T-25b)
+   ---------------------------------------------------------------
+   Ta sama teza wizualna, co w aplikacji (docs/08-REDESIGN-2026):
+   ciepły papier pod spodem, biały dokument na wierzchu. Ale to jest
+   strona, którą ogląda INWESTOR, nie projektant — więc nie ma tu
+   szyny, pasa ani chromu. Jest kartka i decyzja pod nią.
+
+   Kolor akcentu przychodzi z brand kitu studia i jest podmieniany
+   w czasie działania (`--accent`), dlatego nie ma go w tokenach
+   na sztywno — wartość poniżej to tylko bezpieczny domyślny brąz
+   na czas wczytywania.
+   =============================================================== */
+
+:root {
+  --accent: #33251e;
+  --canvas: #f7f4f0;
+  --surface: #ffffff;
+  --ink: #33251e;
+  --ink-soft: #74645a;
+  --ink-faint: #9b8d80;
+  --hair: rgba(51, 37, 30, 0.12);
+  --hair-strong: rgba(51, 37, 30, 0.2);
+  /* Terakota dokumentu — ta sama, co w PDF (--doc-terracotta). */
+  --discount: #b0563c;
+  --ok: #3f6b4f;
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
+  --color-accent: var(--accent);
+  --color-discount: var(--discount);
+  --font-display: 'Faculty Glyphic', ui-serif, Georgia, serif;
+  --font-sans: 'Inter Variable', 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+html,
+body {
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Liczby w kolumnie kwot muszą się zgadzać co do słupka — inaczej suma
+   pod spodem wygląda, jakby dotyczyła czegoś innego. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Pozycja wyłączona przez klienta ma zniknąć wizualnie, ale zostać
+   czytelna — to nadal jest oferta, a nie lista zakupów. */
+.item-off {
+  opacity: 0.45;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+  }
+}

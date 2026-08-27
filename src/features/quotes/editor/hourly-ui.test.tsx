@@ -27,7 +27,7 @@ function libItem(partial: Partial<LibraryItem> = {}): LibraryItem {
   return {
     id: 'lib-1',
     workspaceId: 'ws',
-    category: 'Projekt',
+    categoryName: 'Projekt',
     categoryId: null,
     unit: 'lump' as const,
     unitLabel: null,

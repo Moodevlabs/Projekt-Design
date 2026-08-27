@@ -49,7 +49,8 @@
   /* --- szyna (ciemne tło) ---
      Ciemna powierzchnia potrzebuje WŁASNEJ rampy. Bez niej wszystko ląduje
      w JSX jako `white/65` i `white/25` — dokładnie tak wyglądał Sidebar
-     przed redesignem. Przy okazji: to gotowa baza pod tryb ciemny (T-21). */
+     przed redesignem. Rampa zostaje ciemna, ale trybu ciemnego nie budujemy
+     (T-21 usuniety z planow 2026-08-26). */
   --rail: #33251e;
   --rail-ink: #efece8;
   --rail-ink-soft: rgba(239, 236, 232, 0.62);

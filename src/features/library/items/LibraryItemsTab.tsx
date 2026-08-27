@@ -21,8 +21,6 @@ import type { LibraryColor } from '@/domain/library/schema';
 import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
 
-const CATEGORY_LIST_ID = 'library-categories';
-
 /** Stała referencja — pusta lista nie ma przerysowywać kart przy każdym renderze. */
 const EMPTY_ITEMS: LibraryItem[] = [];
 
@@ -71,12 +69,12 @@ export function LibraryItemsTab() {
     // Nowa usluga trafia do grupy, na ktora czlowiek wlasnie patrzy —
     // „Wszystkie" i „Bez grupy" to nie grupy, wiec tam zostaje bez przypisania.
     const target = categoryId && categoryId !== 'none' ? categoryId : null;
-    const name = categories.data?.find((row) => row.id === target)?.name;
     createItem.mutate(
       {
         name: pl.library.newItemName,
+        // Samo `categoryId` — od T-69 nazwa grupy nie jest kopiowana do wiersza,
+        // tylko rozwiazywana ze slownika przy odczycie.
         categoryId: target,
-        ...(name ? { category: name } : {}),
       },
       // Nowa pozycja od razu rozwinięta — inaczej „Nowa pozycja" ląduje
       // zwinięta gdzieś na liście i trzeba jej szukać, żeby ją nazwać.
@@ -105,12 +103,6 @@ export function LibraryItemsTab() {
         adding={createItem.isPending}
         onAdd={handleAdd}
       />
-
-      <datalist id={CATEGORY_LIST_ID}>
-        {(categories.data ?? []).map((row) => (
-          <option key={row.id} value={row.name} />
-        ))}
-      </datalist>
 
       {items.isError ? <LoadError onRetry={() => void items.refetch()} /> : null}
 
@@ -150,12 +142,7 @@ export function LibraryItemsTab() {
          * siebie to znów ściana, a szkic zamkniętego wiersza i tak by przepadł.
          */
         <div className="card-surface overflow-hidden">
-          <div
-            className={cn(
-              ROW_GRID,
-              'label-caps border-hair text-ink-soft border-b px-3 py-2',
-            )}
-          >
+          <div className={cn(ROW_GRID, 'label-caps border-hair text-ink-soft border-b px-3 py-2')}>
             <span>{pl.library.colService}</span>
             <span className="hidden lg:block">{pl.library.colGroup}</span>
             <span className="hidden lg:block">{pl.library.colMode}</span>
@@ -176,7 +163,7 @@ export function LibraryItemsTab() {
                 <LibraryItemCard
                   item={item}
                   allItems={allItems.data ?? EMPTY_ITEMS}
-                  categoryListId={CATEGORY_LIST_ID}
+                  categories={categories.data ?? []}
                   saving={updateItem.isPending}
                   onSave={(draft) => handleSave(item, draft)}
                   onDelete={() => setPendingDelete(item)}

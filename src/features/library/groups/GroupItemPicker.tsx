@@ -56,7 +56,7 @@ export function GroupItemPicker({ groupName, onPick }: GroupItemPickerProps) {
             {rows.map((item) => (
               <CommandItem
                 key={item.id}
-                value={`${item.name} ${item.description} ${item.category}`}
+                value={`${item.name} ${item.description} ${item.categoryName}`}
                 onSelect={() => {
                   onPick(libraryItemToSnapshot(item));
                   setOpen(false);

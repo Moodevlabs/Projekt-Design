@@ -144,13 +144,14 @@ describe('LibraryGroupsTab', () => {
  */
 describe('LibraryGroupsTab — zawartosc zestawu', () => {
   const expand = async (user: ReturnType<typeof userEvent.setup>) =>
-    user.click(screen.getByRole('button', { name: pl.library.showGroupItems('Kuchnia pod klucz') }));
+    user.click(
+      screen.getByRole('button', { name: pl.library.showGroupItems('Kuchnia pod klucz') }),
+    );
 
   /** Pozycje z pierwszego zapisu zestawu — mock jest nietypowany, wiec bierzemy go raz. */
   function savedItems(): LibraryItemSnapshot[] {
     const call = updateMutate.mock.calls[0]?.[0] as
-      | { patch?: { items?: LibraryItemSnapshot[] } }
-      | undefined;
+      { patch?: { items?: LibraryItemSnapshot[] } } | undefined;
     return call?.patch?.items ?? [];
   }
 
@@ -192,7 +193,7 @@ describe('LibraryGroupsTab — zawartosc zestawu', () => {
         {
           id: '99999999-9999-4999-8999-999999999999',
           workspaceId: '22222222-2222-4222-8222-222222222222',
-          category: 'Kuchnia',
+          categoryName: 'Kuchnia',
           kind: 'item',
           name: 'Blat kamienny',
           description: 'Konglomerat',

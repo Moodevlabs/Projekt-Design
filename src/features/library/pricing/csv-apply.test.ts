@@ -12,7 +12,7 @@ const TYPY: RoomType[] = [
 function item(partial: Partial<LibraryItem> & { id: string; name: string }): LibraryItem {
   return {
     workspaceId: 'ws',
-    category: 'Inne',
+    categoryName: 'Inne',
     categoryId: null,
     unit: 'lump' as const,
     unitLabel: null,
@@ -69,7 +69,11 @@ describe('matchCsvRows', () => {
 describe('buildPricingFromCsv', () => {
   it('pozycja stalocenowa staje sie parametryczna, a jej cena zostaje baza', () => {
     const pozycja = item({ id: '1', name: 'Projekt', unitPriceCents: 20_000 });
-    const pricing = buildPricingFromCsv(row({ name: 'Projekt', perRoomBySlug: { kuchnia: 5_000 } }), pozycja, TYPY);
+    const pricing = buildPricingFromCsv(
+      row({ name: 'Projekt', perRoomBySlug: { kuchnia: 5_000 } }),
+      pozycja,
+      TYPY,
+    );
 
     expect(pricing).toEqual({
       mode: 'per_room',

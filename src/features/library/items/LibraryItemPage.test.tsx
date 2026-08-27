@@ -46,7 +46,7 @@ function item(partial: Partial<LibraryItem> = {}): LibraryItem {
   return {
     id: 'item-1',
     workspaceId: 'ws',
-    category: 'Projekt',
+    categoryName: 'Projekt',
     categoryId: 'cat-1',
     kind: 'item',
     name: 'Pomiar wnętrza',

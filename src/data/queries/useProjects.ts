@@ -7,11 +7,13 @@ import {
   listProjects,
   moveQuoteToProject,
   setProjectStatus,
+  setProjectStageProgress,
   updateProject,
   type ProjectFilters,
   type ProjectPatch,
 } from '@/data/repos/projects.repo';
 import { queryKeys } from '@/data/query-keys';
+import type { StageProgress } from '@/domain/project/stages';
 import type { Project, ProjectDraft, ProjectStatus } from '@/domain/project/schema';
 import { requireWorkspaceId, useWorkspaceId } from './useWorkspace';
 
@@ -134,6 +136,24 @@ export function useMoveQuoteToProject() {
       // projektu, zakładka klienta) pokazują ją teraz gdzie indziej.
       void queryClient.invalidateQueries({ queryKey: queryKeys.quotes() });
       void queryClient.invalidateQueries({ queryKey: queryKeys.quote(quoteId) });
+    },
+  });
+}
+
+/**
+ * Zapis postępu etapów (T-68).
+ *
+ * Unieważnia kartę projektu i jego podsumowanie: pasek postępu i status
+ * projektu czytają tę samą kolumnę.
+ */
+export function useSetProjectStageProgress(projectId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (progress: StageProgress) => setProjectStageProgress(projectId, progress),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.project(projectId) });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.projectOverview(projectId) });
     },
   });
 }

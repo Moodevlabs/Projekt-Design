@@ -1,6 +1,12 @@
 import { Link } from 'react-router-dom';
 import { Download, Plus, Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -43,7 +49,7 @@ export interface QuotesToolbarProps {
   clients: { id: string; name: string }[];
   sort: QuoteSort;
   onSortChange: (next: QuoteSort) => void;
-  onExport: () => void;
+  onExport: (format: 'csv' | 'xlsx') => void;
   exporting: boolean;
 }
 
@@ -133,10 +139,26 @@ export function QuotesToolbar({
           </SelectContent>
         </Select>
 
-        <Button variant="outline" onClick={onExport} disabled={exporting}>
-          <Download className="size-4" aria-hidden />
-          {pl.quotes.exportRegister}
-        </Button>
+        {/*
+          Dwa formaty w jednym menu, a nie dwa przyciski obok siebie: to jest
+          ta sama akcja w dwóch wariantach, a nie dwie akcje.
+        */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" disabled={exporting}>
+              <Download className="size-4" aria-hidden />
+              {pl.quotes.exportRegister}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onSelect={() => onExport('xlsx')}>
+              {pl.quotes.exportXlsx}
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => onExport('csv')}>
+              {pl.quotes.exportCsv}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         <Button asChild>
           <Link to={routes.quoteNew}>

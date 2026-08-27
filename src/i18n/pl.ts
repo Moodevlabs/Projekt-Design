@@ -105,6 +105,9 @@ export const pl = {
     },
     exportRegister: 'Eksportuj rejestr (CSV)',
     registerExported: (count: number) => `Wyeksportowano ${count} pozycji rejestru`,
+    /** Warianty eksportu rejestru (T-23). XLSX pierwszy — liczby zostaja liczbami. */
+    exportXlsx: 'Excel (.xlsx)',
+    exportCsv: 'CSV dla Excela',
     registerEmpty: 'Nie ma czego eksportować — rejestr jest pusty.',
     sort: {
       label: 'Sortuj',
@@ -159,6 +162,30 @@ export const pl = {
     open: 'Otwórz wyszukiwarkę',
   },
   clients: {
+    // Import z CSV (T-23).
+    importAction: 'Importuj z CSV',
+    importTitle: 'Import klientów z pliku CSV',
+    importDescription:
+      'Wskaż plik wyeksportowany z Excela albo arkusza Google. Rozpoznajemy separator i nagłówki kolumn.',
+    importColumns:
+      'Rozpoznawane kolumny: Nazwa, Telefon, E-mail, Miasto, Adres, Notatki. Wystarczy sama nazwa — reszta jest opcjonalna.',
+    importPick: 'Wybierz plik',
+    importEmpty: 'Ten plik nie zawiera żadnych wierszy z danymi.',
+    importFound: (count: number) =>
+      count === 1 ? 'Znaleziono 1 klienta do dodania.' : `Znaleziono ${count} klientów do dodania.`,
+    importIssues: (count: number) =>
+      count === 1 ? '1 wiersz zostanie pominięty:' : `${count} wierszy zostanie pominiętych:`,
+    importLine: (line: number) => `wiersz ${line}`,
+    importNoName: 'brak nazwy klienta',
+    importDuplicate: 'powtórzony w pliku',
+    importMore: (count: number) => `…i jeszcze ${count}`,
+    importConfirm: (count: number) => `Dodaj ${count}`,
+    importing: 'Dodawanie…',
+    imported: (inserted: number, skipped: number) =>
+      skipped > 0
+        ? `Dodano ${inserted}, pominięto ${skipped} (już byli w kartotece).`
+        : `Dodano ${inserted} klientów.`,
+
     title: 'Klienci',
     new: 'Nowy klient',
     first: 'Dodaj pierwszego klienta',
@@ -331,7 +358,8 @@ export const pl = {
     copyRoomsSkip: 'Zacznij pusto',
 
     // Propozycja przestawienia statusu po akceptacji wyceny.
-    suggestInProgress: (name: string) => `Wycena zaakceptowana. Przestawić „${name}" na realizację?`,
+    suggestInProgress: (name: string) =>
+      `Wycena zaakceptowana. Przestawić „${name}" na realizację?`,
     suggestInProgressAction: 'Przestaw',
     statusChanged: 'Status projektu zmieniony',
   },
@@ -385,6 +413,30 @@ export const pl = {
     usage: (used: string, quota: string) => `Zajęte ${used} z ${quota}`,
     usageWarning: 'Zostało mało miejsca — usuń niepotrzebne pliki.',
     usageFull: 'Limit wyczerpany. Nie dodasz nowych plików, dopóki czegoś nie usuniesz.',
+
+    // Kosz (T-67).
+    trashTitle: 'Kosz',
+    trashDescription: (days: number, size: string) =>
+      `Usunięte pliki czekają tu ${days} dni, potem znikają na dobre. Zajmują ${size} — miejsce zwolni się dopiero po trwałym usunięciu.`,
+    trashDays: (days: number) =>
+      days === 1 ? 'zostanie usunięty jutro' : `zostanie usunięty za ${days} dni`,
+    trashDueNow: 'zostanie usunięty przy najbliższym sprzątaniu',
+    restore: 'Przywróć',
+    restored: 'Plik przywrócony.',
+    deletedForever: 'Plik usunięty na stałe.',
+    deleteForeverTitle: 'Usunąć plik na stałe?',
+    deleteForeverDescription: (name: string) =>
+      `„${name}" zniknie bezpowrotnie. Tego nie da się cofnąć.`,
+    trashEmpty: 'Opróżnij kosz',
+    trashEmptyTitle: 'Opróżnić kosz?',
+    trashEmptyDescription: (count: number, size: string) =>
+      `${count} ${count === 1 ? 'plik zniknie' : 'plików zniknie'} bezpowrotnie. Zwolni się ${size}. Tego nie da się cofnąć.`,
+    trashEmptied: (count: number) =>
+      count === 1 ? 'Usunięto 1 plik.' : `Usunięto ${count} plików.`,
+    trashEmptyFailed: (count: number) =>
+      count === 1 ? 'Nie udało się usunąć 1 pliku.' : `Nie udało się usunąć ${count} plików.`,
+    /** Dopisek pod paskiem zużycia, gdy w koszu coś leży. */
+    usageTrashNote: (size: string) => `W tym ${size} w koszu.`,
   },
   documents: {
     tab: 'Dokumenty',
@@ -415,6 +467,68 @@ export const pl = {
     recentEmpty: 'Wyeksportowane PDF-y pojawią się tutaj.',
     seeAll: 'Zobacz wszystkie',
     hint: 'Archiwum pokazuje zapisany plik — nie renderuje go ponownie.',
+  },
+  /** Link dla klienta i akceptacja online (T-25/T-26). */
+  share: {
+    title: 'Udostępnij klientowi',
+    action: 'Udostępnij',
+    description:
+      'Klient otwiera link w przeglądarce, przełącza pozycje TAK/NIE i akceptuje albo zostawia uwagi. Nie musi zakładać konta.',
+    newLink: 'Utwórz link',
+    creating: 'Tworzenie…',
+    validFor: 'Ważny przez',
+    copy: 'Kopiuj link',
+    copied: 'Link skopiowany',
+    copyFailed: 'Nie udało się skopiować linku.',
+    sendByMail: 'Wyślij mailem',
+    revoke: 'Odwołaj',
+    revoked: 'Odwołany',
+    expired: 'Wygasł',
+    active: 'Aktywny',
+    noLinks: 'Nie udostępniono jeszcze tej wyceny.',
+    createFailed: 'Nie udało się utworzyć linku.',
+    revokeFailed: 'Nie udało się odwołać linku.',
+    revokeConfirm:
+      'Odwołany link przestaje działać natychmiast. Klient zobaczy komunikat, żeby poprosić o nowy.',
+    expiresAt: 'Wygasa',
+    neverExpires: 'Bezterminowy',
+    created: 'Utworzony',
+    views: 'Otwarcia',
+    neverOpened: 'Jeszcze nieotwarty',
+    openedTimes: (count: number) => (count === 1 ? 'Otwarty raz' : `Otwarty ${count} razy`),
+    lastOpened: 'Ostatnio',
+    /** Treść maila — projektant wysyła go ze swojej poczty (patrz IDEAS.md). */
+    mailSubject: (number: string) => `Oferta ${number}`,
+    mailBody: (url: string) =>
+      `Dzień dobry,
+
+przesyłam ofertę do wglądu:
+${url}
+
+Pod linkiem można zaznaczyć zakres i potwierdzić wybór albo zostawić uwagi.
+
+Pozdrawiam`,
+    baseUrlMissing:
+      'Nie ustawiono adresu strony ofert (VITE_SHARE_BASE_URL). Link powstanie, ale trzeba go złożyć ręcznie.',
+
+    // Akceptacja i uwagi (T-26).
+    acceptedTitle: 'Oferta zaakceptowana',
+    acceptedBy: (name: string) => `Zaakceptował(a): ${name}`,
+    acceptedScope: 'Zakres przyjęty przez klienta',
+    turnedOff: (count: number) =>
+      count === 1 ? 'Klient wyłączył 1 pozycję' : `Klient wyłączył ${count} pozycji`,
+    turnedOn: (count: number) =>
+      count === 1 ? 'Klient dobrał 1 pozycję' : `Klient dobrał ${count} pozycji`,
+    noChanges: 'Klient przyjął ofertę bez zmian w zakresie.',
+    comments: 'Uwagi klienta',
+    commentsEmpty: 'Klient nie zostawił jeszcze uwag.',
+    markRead: 'Oznacz jako przeczytane',
+    unread: 'Nowe',
+    anonymous: 'Klient',
+
+    // Powiadomienia Realtime (T-26).
+    acceptedToast: 'Klient zaakceptował ofertę.',
+    commentToast: 'Klient zostawił uwagi do oferty.',
   },
   editor: {
     preview: 'Podgląd',
@@ -958,8 +1072,7 @@ export const pl = {
     categoryNoColor: 'Bez koloru',
     categoryAdded: 'Dodano grupę',
     categoryDeleted: 'Usunięto grupę',
-    categoryHint:
-      'Grupy porządkują usługi w procesie projektowym. Kod („01") jest opcjonalny.',
+    categoryHint: 'Grupy porządkują usługi w procesie projektowym. Kod („01") jest opcjonalny.',
     categoriesEmptyTitle: 'Brak grup',
     categoriesEmptyDescription:
       'Grupa to dział albo etap: „Przygotowanie", „Projekt", „Nadzór". Usługi bez grupy dalej działają.',
@@ -1289,6 +1402,96 @@ export const pl = {
     packageSavedMany: (count: number) => `Zapisano ${count} dokumentów w wybranym folderze`,
   },
 
+  /** Praca bez sieci i kolejka wysylki (T-29). */
+  offline: {
+    offline: 'Pracujesz bez połączenia. Zmiany zapisują się lokalnie.',
+    waitingOffline: (count: number) =>
+      count === 1
+        ? 'Brak połączenia. 1 zmiana czeka na wysłanie — nic nie przepadło.'
+        : `Brak połączenia. ${count} zmian czeka na wysłanie — nic nie przepadło.`,
+    waitingOnline: (count: number) =>
+      count === 1 ? 'Wysyłanie 1 zmiany…' : `Wysyłanie ${count} zmian…`,
+    blocked: (count: number) =>
+      count === 1
+        ? 'Jedna zmiana czeka na Twoją decyzję — wycena została zmieniona w innym miejscu.'
+        : `${count} zmian czeka na Twoją decyzję — wyceny zostały zmienione w innym miejscu.`,
+    retry: 'Wyślij teraz',
+    sent: (count: number) =>
+      count === 1 ? 'Wysłano zaległą zmianę.' : `Wysłano ${count} zaległych zmian.`,
+    conflicts: (count: number) =>
+      count === 1
+        ? 'Jedna zmiana nie weszła: wycena została zmieniona w innym miejscu.'
+        : `${count} zmian nie weszło: wyceny zostały zmienione w innym miejscu.`,
+  },
+
+  /** Statusy realizacji etapow w projekcie (T-68). */
+  stages: {
+    tab: 'Etapy',
+    progress: 'Postęp realizacji',
+    doneOf: (done: number, total: number) => `${done} z ${total}`,
+    next: (name: string) => `Następny etap: ${name}`,
+    status: {
+      pending: 'Nierozpoczęty',
+      in_progress: 'W toku',
+      done: 'Zakończony',
+    },
+    notStarted: 'jeszcze nierozpoczęty',
+    startedAt: (date: string) => `rozpoczęty ${date}`,
+    completedAt: (date: string) => `zakończony ${date}`,
+    clientSide: 'Etap po stronie inwestora',
+    orphaned: 'etap spoza obecnego harmonogramu',
+    emptyTitle: 'Brak etapów do śledzenia',
+    emptyNoAccepted:
+      'Etapy pochodzą z harmonogramu zaakceptowanej wyceny. Gdy klient przyjmie ofertę, pojawią się tutaj.',
+    emptyNoSchedule:
+      'Zaakceptowana wycena nie ma harmonogramu. Dodaj etapy w zakładce „Termin" w edytorze wyceny.',
+  },
+
+  /** Historia wersji z porownaniem (T-22). */
+  versions: {
+    title: 'Historia wersji',
+    description: 'Co zmieniło się między wersjami tej oferty i o ile.',
+    onlyOne: 'Ta oferta ma na razie jedną wersję — nie ma czego porównywać.',
+    compareWith: 'Porównaj z',
+    totalsBefore: 'Poprzednia wersja',
+    totalsAfter: 'Ta wersja',
+    delta: 'Różnica',
+    noChanges: 'Wersje mają identyczny zakres i kwoty.',
+    added: (count: number) => (count === 1 ? 'Dodano 1 pozycję' : `Dodano ${count} pozycji`),
+    removed: (count: number) => (count === 1 ? 'Usunięto 1 pozycję' : `Usunięto ${count} pozycji`),
+    changed: (count: number) =>
+      count === 1 ? 'Zmieniono 1 pozycję' : `Zmieniono ${count} pozycji`,
+    unchangedCount: (count: number) => `${count} pozycji bez zmian`,
+    unchanged: (count: number) =>
+      count === 1 ? '1 pozycja bez zmian' : `${count} pozycji bez zmian`,
+    changeName: 'zmieniona nazwa',
+    changePrice: (before: string, after: string) => `kwota: ${before} → ${after}`,
+    changeQty: (before: number, after: number) => `ilość: ${before} → ${after}`,
+    changePath: (before: string, after: string) => `przeniesiona: ${before} → ${after}`,
+    turnedOn: 'włączona w tej wersji',
+    turnedOff: 'wyłączona w tej wersji',
+    /** Pozycja w menu edytora. */
+    open: 'Historia wersji',
+  },
+
+  /** Auto-update aplikacji (T-19). */
+  update: {
+    title: 'Aktualizacje',
+    idle: 'Sprawdź, czy jest nowa wersja Toolier.',
+    check: 'Sprawdź aktualizacje',
+    checking: 'Sprawdzanie…',
+    current: 'Masz najnowszą wersję.',
+    available: (version: string) => `Dostępna wersja ${version}.`,
+    install: 'Pobierz i zainstaluj',
+    downloading: 'Pobieranie…',
+    downloadingPercent: (percent: number) => `Pobieranie… ${percent}%`,
+    ready: 'Aktualizacja gotowa — uruchom ponownie, żeby ją włączyć.',
+    relaunch: 'Uruchom ponownie',
+    relaunchFailed: 'Nie udało się uruchomić ponownie. Zamknij i otwórz aplikację ręcznie.',
+    /** Powiadomienie z cichego sprawdzenia przy starcie. */
+    foundOnStart: (version: string) => `Jest nowa wersja Toolier (${version}).`,
+    goToSettings: 'Ustawienia',
+  },
   settings: {
     general: 'Ogólne',
     title: 'Ustawienia',

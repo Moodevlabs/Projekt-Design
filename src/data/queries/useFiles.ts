@@ -1,9 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  deleteFile,
+  deleteFilePermanently,
   getStorageUsage,
   listFiles,
+  listTrash,
+  purgeExpiredTrash,
   renameFile,
+  restoreFile,
+  trashFile,
   uploadFile,
   type FileFilters,
   type UploadFileInput,
@@ -67,11 +71,73 @@ export function useRenameFile() {
   });
 }
 
+/**
+ * „Usuń" z listy plików = **przeniesienie do kosza** (T-67).
+ *
+ * Nazwa hooka zostaje `useDeleteFile`, bo z punktu widzenia interfejsu to
+ * wciąż jest usuwanie — zmieniło się tylko to, że da się je cofnąć.
+ */
 export function useDeleteFile() {
   const invalidate = useInvalidateFiles();
 
   return useMutation({
-    mutationFn: (file: Pick<StoredFile, 'id' | 'storagePath'>) => deleteFile(file),
+    mutationFn: (file: Pick<StoredFile, 'id' | 'storagePath'>) => trashFile(file.id),
     onSuccess: invalidate,
+  });
+}
+
+export function useTrash() {
+  const workspaceId = useWorkspaceId();
+
+  return useQuery({
+    queryKey: queryKeys.trash(workspaceId),
+    queryFn: () => listTrash(requireWorkspaceId(workspaceId)),
+    enabled: Boolean(workspaceId),
+  });
+}
+
+export function useRestoreFile() {
+  const invalidate = useInvalidateFiles();
+
+  return useMutation({
+    mutationFn: (id: string) => restoreFile(id),
+    onSuccess: invalidate,
+  });
+}
+
+export function useDeleteFilePermanently() {
+  const invalidate = useInvalidateFiles();
+
+  return useMutation({
+    mutationFn: (file: Pick<StoredFile, 'id' | 'storagePath'>) => deleteFilePermanently(file),
+    onSuccess: invalidate,
+  });
+}
+
+/**
+ * Sprzątanie kosza po 30 dniach — wołane raz przy wejściu do widoku plików.
+ *
+ * `staleTime: Infinity` i `retry: false`, bo to nie jest odczyt danych do
+ * pokazania: to operacja porządkowa, której nie ma sensu ponawiać ani
+ * odświeżać. Zwraca liczbę usuniętych plików.
+ */
+export function usePurgeExpiredTrash() {
+  const workspaceId = useWorkspaceId();
+  const queryClient = useQueryClient();
+
+  return useQuery({
+    queryKey: ['trash-purge', workspaceId] as const,
+    queryFn: async () => {
+      const removed = await purgeExpiredTrash(requireWorkspaceId(workspaceId));
+      if (removed > 0) {
+        void queryClient.invalidateQueries({ queryKey: queryKeys.files() });
+        void queryClient.invalidateQueries({ queryKey: queryKeys.trash() });
+        void queryClient.invalidateQueries({ queryKey: queryKeys.storageUsage() });
+      }
+      return removed;
+    },
+    enabled: Boolean(workspaceId),
+    staleTime: Infinity,
+    retry: false,
   });
 }

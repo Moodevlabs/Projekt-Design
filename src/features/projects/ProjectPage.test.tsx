@@ -74,6 +74,7 @@ function overview(partial: Partial<ProjectOverview> = {}): ProjectOverview {
     sortOrder: 0,
     createdAt: '2026-08-01T10:00:00Z',
     updatedAt: '2026-08-01T10:00:00Z',
+    stageProgress: {},
     clientName: 'Marta i Piotr Kowalscy',
     quotesCount: 2,
     acceptedNetCents: 450_000,
@@ -127,14 +128,23 @@ describe('ProjectPage', () => {
     expect(links[0]).toHaveAttribute('href', '/klienci/c1');
   });
 
-  it('ma zakladki Wyceny, Dokumenty, Pliki i Notatki — i tylko te', () => {
+  it('ma zakladki Wyceny, Etapy, Dokumenty, Pliki i Notatki — i tylko te', () => {
     // „Termin" jest zakladka WYCENY, nie projektu — harmonogram dotyczy
     // konkretnej oferty i duplikowanie go tutaj daloby dwa zrodla tej samej daty.
+    //
+    // „Etapy" (T-68) NIE lamia tej zasady: pokazuja POSTEP realizacji etapow
+    // pobranych z harmonogramu zaakceptowanej wyceny, a nie drugi harmonogram.
+    // Zrodlo dat zostaje jedno.
+    //
+    // Ten test jest strazniekiem przed rozrostem: Toolier ma nie zostac
+    // systemem project-management (koncepcja §17). Kazda kolejna zakladka
+    // wymaga swiadomej zmiany tej listy.
     renderPage(overview());
 
     const tabs = screen.getAllByRole('tab').map((tab) => tab.textContent);
     expect(tabs).toEqual([
       pl.projects.tabQuotes,
+      pl.stages.tab,
       pl.documents.tab,
       pl.files.tab,
       pl.projects.tabNotes,

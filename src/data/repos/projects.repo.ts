@@ -6,6 +6,7 @@ import {
   type ProjectOverview,
   type ProjectStatus,
 } from '@/domain/project/schema';
+import { parseStageProgress, type StageProgress } from '@/domain/project/stages';
 import { getSupabase } from '@/data/supabase';
 import type { TablesInsert, TablesUpdate } from '@/data/types.generated';
 import { RepoError, unwrap } from './errors';
@@ -43,6 +44,7 @@ function mapProject(row: Row): Project {
     sortOrder: Number(row.sort_order ?? 0),
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
+    stageProgress: parseStageProgress(row.stage_progress),
   };
 }
 
@@ -222,4 +224,28 @@ export async function moveQuoteToProject(
       .select('id'),
     'Przeniesienie wyceny',
   );
+}
+
+/**
+ * Zapis postępu etapów (T-68).
+ *
+ * Zapisujemy **całą mapę**, a nie pojedynczy klucz. Postęp to kilka wpisów po
+ * kilkadziesiąt bajtów, a `jsonb_set` na kolumnie wymagałby RPC — i tak czy
+ * owak ostatni zapis wygrywa, bo projekt prowadzi jedna osoba.
+ */
+export async function setProjectStageProgress(
+  id: string,
+  progress: StageProgress,
+): Promise<Project> {
+  const rows = unwrap(
+    await getSupabase()
+      .from('projects')
+      .update({ stage_progress: progress })
+      .eq('id', id)
+      .select('*'),
+    'Zapis postępu etapów',
+  );
+  const row = rows[0] as unknown as Row | undefined;
+  if (!row) throw new RepoError('Nie udało się zapisać postępu etapów.');
+  return mapProject(row);
 }

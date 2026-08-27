@@ -4,6 +4,10 @@ const plTime = new Intl.DateTimeFormat('pl-PL', { hour: '2-digit', minute: '2-di
 export const formatDate = (value: string | Date): string => pl.format(new Date(value));
 export const formatTime = (value: string | Date): string => plTime.format(new Date(value));
 
+/** „26.08.2026, 23:40" — data z godziną, do zdarzeń (otwarcia linku, akceptacja). */
+export const formatDateTime = (value: string | Date): string =>
+  `${formatDate(value)}, ${formatTime(value)}`;
+
 /** „dziś", „wczoraj", „3 dni temu", dalej data. */
 export function formatRelativeDay(value: string | Date): string {
   const d = new Date(value);

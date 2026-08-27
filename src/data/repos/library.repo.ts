@@ -24,7 +24,6 @@ import { createLogger } from '@/lib/logger';
 const log = createLogger('library.repo');
 
 /** Kategoria, do której wpadają pozycje bez wskazanej kategorii (jak default w migracji). */
-export const DEFAULT_CATEGORY = 'Inne';
 
 type ItemRow = Tables<'library_items'>;
 type GroupRow = Tables<'library_groups'>;
@@ -36,8 +35,14 @@ type GroupRow = Tables<'library_groups'>;
 export interface LibraryItem {
   id: string;
   workspaceId: string;
-  /** DEPRECATED (T-69): kopia nazwy grupy. Zrodlem jest `categoryId`. */
-  category: string;
+  /**
+   * Nazwa grupy, rozwiazana ze slownika (`library_categories`).
+   *
+   * **Odczyt, nie zapis.** Zrodlem jest `categoryId`; do 1.0 istniala obok
+   * kolumna tekstowa `category`, ktora potrafila sie rozjechac ze slownikiem
+   * (T-69 ja usunal). Puste = pozycja bez grupy.
+   */
+  categoryName: string;
   /** Grupa ze slownika (T-59). `null` = „Bez grupy". */
   categoryId: string | null;
   kind: ItemKind;
@@ -71,7 +76,6 @@ export interface LibraryItem {
 }
 
 export interface LibraryItemFilters {
-  category?: string;
   /** Filtr po grupie ze slownika (T-59). `'none'` = uslugi bez grupy. */
   categoryId?: string;
   search?: string;
@@ -94,11 +98,37 @@ function parsePricing(raw: unknown, id: string): PricingRule {
   return { mode: 'flat' };
 }
 
+/**
+ * Nazwa grupy z osadzonej relacji PostgREST-a.
+ *
+ * `select('*, library_categories(name)')` zwraca obiekt albo `null` — nie
+ * tablice, bo to relacja wiele-do-jednego. Brak grupy jest poprawnym stanem
+ * i daje pusty ciag, a nie „Inne": nazwa zastepcza w danych to nazwa, ktora
+ * predzej czy pozniej wyladuje w PDF-ie jako prawdziwa grupa.
+ */
+/**
+ * Kolumny pozycji razem z nazwa grupy.
+ *
+ * Osadzenie zamiast drugiego zapytania: lista biblioteki potrzebuje nazwy
+ * grupy przy kazdym wierszu, a slownik ma kilkanascie pozycji — join po
+ * stronie bazy jest tanszy niz mapowanie w JS po dwoch odpytaniach.
+ */
+const ITEM_SELECT = '*, library_categories(name)';
+
+function categoryNameOf(row: ItemRow & Record<string, unknown>): string {
+  const embedded = row.library_categories;
+  if (embedded && typeof embedded === 'object' && 'name' in embedded) {
+    const name = (embedded as { name?: unknown }).name;
+    return typeof name === 'string' ? name : '';
+  }
+  return '';
+}
+
 function mapItem(row: ItemRow): LibraryItem {
   return {
     id: row.id,
     workspaceId: row.workspace_id,
-    category: row.category || DEFAULT_CATEGORY,
+    categoryName: categoryNameOf(row),
     categoryId: row.category_id ?? null,
     // `kind` jest w bazie tekstem z CHECK-iem; `catch` chroni przed rozjazdem migracji.
     kind: ItemKindSchema.catch('item').parse(row.kind),
@@ -165,11 +195,10 @@ export async function listLibraryItems(
 ): Promise<LibraryItem[]> {
   let query = getSupabase()
     .from('library_items')
-    .select('*')
+    .select(ITEM_SELECT)
     .eq('workspace_id', workspaceId)
     .is('deleted_at', null);
 
-  if (opts.category) query = query.eq('category', opts.category);
   // `'none'` to nie id, tylko jawne pytanie o usługi bez grupy — te też
   // muszą dać się odfiltrować, inaczej po usunięciu grupy znikałyby z widoku.
   if (opts.categoryId === 'none') query = query.is('category_id', null);
@@ -188,28 +217,9 @@ export async function listLibraryItems(
   return rows.map(mapItem);
 }
 
-/**
- * Unikalne kategorie do filtra. Liczymy w JS z jednej kolumny — kategorii są
- * dziesiątki, więc RPC albo osobny widok nie opłaca się utrzymywać.
- */
-export async function listLibraryCategories(workspaceId: string): Promise<string[]> {
-  const rows = unwrap(
-    await getSupabase()
-      .from('library_items')
-      .select('category')
-      .eq('workspace_id', workspaceId)
-      .is('deleted_at', null),
-    'Kategorie biblioteki',
-  );
-
-  const unique = new Set(rows.map((row) => row.category || DEFAULT_CATEGORY));
-  return [...unique].sort((a, b) => a.localeCompare(b, 'pl'));
-}
-
 export interface CreateLibraryItemInput {
   workspaceId: string;
   name: string;
-  category?: string;
   categoryId?: string | null;
   kind?: ItemKind;
   description?: string;
@@ -230,7 +240,6 @@ export async function createLibraryItem(input: CreateLibraryItemInput): Promise<
       .from('library_items')
       .insert({
         workspace_id: input.workspaceId,
-        category: input.category ?? DEFAULT_CATEGORY,
         category_id: input.categoryId ?? null,
         kind: input.kind ?? 'item',
         name: input.name,
@@ -260,7 +269,6 @@ export async function updateLibraryItem(id: string, patch: LibraryItemPatch): Pr
   // Typowany `update()` nie przyjmuje luźnego obiektu — składamy `TablesUpdate`
   // pole po polu, żeby `undefined` nie wyzerowało kolumny.
   const update: TablesUpdate<'library_items'> = {};
-  if (patch.category !== undefined) update.category = patch.category;
   if (patch.categoryId !== undefined) update.category_id = patch.categoryId;
   if (patch.kind !== undefined) update.kind = patch.kind;
   if (patch.name !== undefined) update.name = patch.name;
@@ -393,7 +401,8 @@ export interface SaveToLibraryInput {
   kind?: ItemKind;
   /** `null` = wycena indywidualna (T-60). */
   unitPriceCents: number | null;
-  category?: string;
+  /** Grupa ze slownika. `null`/pominiete = pozycja bez grupy. */
+  categoryId?: string | null;
 }
 
 /** Najwyższy `sort_order` w bibliotece — nowe pozycje dopisujemy na koniec. */
@@ -431,7 +440,6 @@ export async function saveItemsToLibrary(
       .insert(
         named.map((item, index) => ({
           workspace_id: workspaceId,
-          category: item.category ?? DEFAULT_CATEGORY,
           kind: item.kind ?? 'item',
           name: item.name.trim(),
           description: item.description ?? '',

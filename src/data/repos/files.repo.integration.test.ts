@@ -11,7 +11,10 @@ import {
   FILES_BUCKET,
   QuotaExceededError,
   archiveGeneratedPdf,
-  deleteFile,
+  deleteFilePermanently,
+  listTrash,
+  restoreFile,
+  trashFile,
   downloadFile,
   getDownloadUrl,
   getStorageUsage,
@@ -108,28 +111,51 @@ describe('files.repo — archiwum klienta', () => {
     expect(uKlienta.map((row) => row.id)).toContain(file.id);
   });
 
-  it('licznik zuzycia rosnie po wrzuceniu i MALEJE po usunieciu', async () => {
+  it('kosz NIE zwalnia miejsca — bajty nadal leza w Storage (T-67)', async () => {
     const przed = await getStorageUsage(workspaceId);
     const file = await put('do-skasowania.bin', 4096);
 
     const po = await getStorageUsage(workspaceId);
     expect(po.usedBytes).toBe(przed.usedBytes + 4096);
 
-    await deleteFile(file);
+    await trashFile(file.id);
 
-    // Soft delete zwalnia miejsce od razu, bo obiekt kasujemy w tej samej
-    // operacji — kosza na pliki nie ma w 1.0 (koncepcja §3 reguła 5).
-    const poUsunieciu = await getStorageUsage(workspaceId);
-    expect(poUsunieciu.usedBytes).toBe(przed.usedBytes);
+    // To jest sedno zmiany z 0027. Gdyby kosz zwalnial limit, workspace
+    // moglby zajac w Storage dowolnie duzo ponad 2 GiB — wystarczyloby
+    // wrzucac i kasowac.
+    const wKoszu = await getStorageUsage(workspaceId);
+    expect(wKoszu.usedBytes).toBe(przed.usedBytes + 4096);
+
+    await deleteFilePermanently(file);
+
+    const poTrwalym = await getStorageUsage(workspaceId);
+    expect(poTrwalym.usedBytes).toBe(przed.usedBytes);
   });
 
-  it('usuniety plik znika z listy, a jego obiekt z bucketa', async () => {
+  it('plik z kosza znika z listy, ale DA SIE go pobrac i przywrocic', async () => {
     const file = await put('znika.bin', 256);
-    await deleteFile(file);
+    await trashFile(file.id);
 
     const lista = await listFiles({ workspaceId, clientId });
     expect(lista.map((row) => row.id)).not.toContain(file.id);
 
+    const kosz = await listTrash(workspaceId);
+    expect(kosz.map((row) => row.id)).toContain(file.id);
+
+    // Bajty musza zostac — inaczej nie byloby czego przywracac.
+    await expect(downloadFile(file.storagePath)).resolves.toBeInstanceOf(Uint8Array);
+
+    await restoreFile(file.id);
+    const poPrzywroceniu = await listFiles({ workspaceId, clientId });
+    expect(poPrzywroceniu.map((row) => row.id)).toContain(file.id);
+  });
+
+  it('trwale usuniecie kasuje obiekt z bucketa', async () => {
+    const file = await put('na-zawsze.bin', 256);
+    await trashFile(file.id);
+    await deleteFilePermanently(file);
+
+    expect((await listTrash(workspaceId)).map((row) => row.id)).not.toContain(file.id);
     await expect(downloadFile(file.storagePath)).rejects.toThrow();
   });
 

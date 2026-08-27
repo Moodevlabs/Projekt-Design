@@ -6,7 +6,18 @@ pub fn run() {
 
     #[cfg(desktop)]
     {
-        builder = builder.plugin(tauri_plugin_deep_link::init());
+        builder = builder
+            .plugin(tauri_plugin_deep_link::init())
+            // Updater sprawdza podpis paczki kluczem publicznym z tauri.conf.json.
+            // Bez poprawnego podpisu aktualizacja jest odrzucana — to jest cała
+            // ochrona tego kanału, więc klucz prywatny nie ma prawa trafić do repo.
+            .plugin(tauri_plugin_updater::Builder::new().build())
+            // Potrzebny do restartu po instalacji.
+            .plugin(tauri_plugin_process::init())
+            // Lokalna baza offline (T-29). Schemat zaklada aplikacja przy
+            // starcie — migracje wtyczki wymagalyby trzymania SQL-a w Rust,
+            // a caly stan offline zyje w warstwie `src/data/offline`.
+            .plugin(tauri_plugin_sql::Builder::new().build());
     }
 
     builder

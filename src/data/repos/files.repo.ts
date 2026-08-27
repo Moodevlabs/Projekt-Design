@@ -30,7 +30,9 @@ function mapFile(row: Row): StoredFile {
     projectId: (row.project_id as string | null) ?? null,
     quoteId: (row.quote_id as string | null) ?? null,
     kind: FileKindSchema.catch('upload').parse(row.kind),
-    docType: DocTypeSchema.nullable().catch(null).parse(row.doc_type ?? null),
+    docType: DocTypeSchema.nullable()
+      .catch(null)
+      .parse(row.doc_type ?? null),
     quoteVersion: row.quote_version === null ? null : Number(row.quote_version),
     name: row.name as string,
     mime: typeof row.mime === 'string' ? row.mime : '',
@@ -39,6 +41,7 @@ function mapFile(row: Row): StoredFile {
     createdBy: (row.created_by as string | null) ?? null,
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
+    deletedAt: (row.deleted_at as string | null) ?? null,
   };
 }
 
@@ -175,7 +178,6 @@ export async function uploadFile(input: UploadFileInput): Promise<StoredFile> {
   return mapFile(row);
 }
 
-
 export interface ArchiveTarget {
   clientId: string;
   projectId?: string | null;
@@ -273,36 +275,121 @@ export async function renameFile(id: string, name: string): Promise<StoredFile> 
 }
 
 /**
- * Usunięcie: soft delete w tabeli **i natychmiastowe skasowanie obiektu**.
+ * Do kosza — sam wiersz, bajty zostają (T-67).
  *
- * Kosza na pliki nie ma w 1.0 (koncepcja §3 reguła 5) — trzymanie bajtów
- * „na wszelki wypadek" zjadałoby limit, którego użytkownik nie widzi. Wiersz
- * zostaje jako ślad (kto, kiedy, jak się nazywał), bajty znikają.
+ * Do 1.0 „usuń" kasowało obiekt w Storage w tej samej operacji, więc pomyłka
+ * przy pliku klienta była nie do odkręcenia. Teraz plik znika z list i czeka
+ * 30 dni.
  *
- * Kolejność odwrotna niż przy uploadzie: **najpierw wiersz**. Gdyby najpierw
- * poleciał obiekt, a `update` się nie udał, lista pokazywałaby plik, którego
- * nie da się już pobrać.
+ * Miejsce NIE zwalnia się w tej chwili — bajty nadal leżą w Storage i nadal
+ * liczą się do limitu (migracja 0027). Interfejs musi to powiedzieć wprost,
+ * inaczej człowiek kasuje pliki, patrzy na pasek zużycia i nie rozumie,
+ * dlaczego nic się nie zmieniło.
  */
-export async function deleteFile(file: Pick<StoredFile, 'id' | 'storagePath'>): Promise<void> {
+export async function trashFile(id: string): Promise<void> {
   unwrap(
     await getSupabase()
       .from('files')
       .update({ deleted_at: new Date().toISOString() })
-      .eq('id', file.id)
+      .eq('id', id)
+      .is('deleted_at', null)
       .select('id'),
-    'Usunięcie pliku',
+    'Przeniesienie do kosza',
   );
+}
 
+/** Z kosza z powrotem na listę. */
+export async function restoreFile(id: string): Promise<void> {
+  unwrap(
+    await getSupabase()
+      .from('files')
+      .update({ deleted_at: null })
+      .eq('id', id)
+      .not('deleted_at', 'is', null)
+      .select('id'),
+    'Przywrócenie pliku',
+  );
+}
+
+/** Zawartość kosza — najświeżej wyrzucone na górze. */
+export async function listTrash(workspaceId: string): Promise<StoredFile[]> {
+  const rows = unwrap(
+    await getSupabase()
+      .from('files')
+      .select('*')
+      .eq('workspace_id', workspaceId)
+      .not('deleted_at', 'is', null)
+      .order('deleted_at', { ascending: false }),
+    'Kosz',
+  );
+  return (rows as unknown as Row[]).map(mapFile);
+}
+
+/**
+ * Trwałe usunięcie: **najpierw obiekt, potem wiersz**.
+ *
+ * Odwrotnie niż przy wyrzucaniu do kosza i celowo. Osierocony obiekt
+ * w Storage kosztuje miejsce i nikt go nie widzi; osierocony WIERSZ
+ * pokazywałby w koszu plik, którego nie da się już przywrócić.
+ */
+export async function deleteFilePermanently(
+  file: Pick<StoredFile, 'id' | 'storagePath'>,
+): Promise<void> {
   const removal = await getSupabase().storage.from(FILES_BUCKET).remove([file.storagePath]);
   if (removal.error) {
-    // Wiersz jest już oznaczony jako usunięty, więc z punktu widzenia
-    // użytkownika plik zniknął. Osierocony obiekt to nasz problem, nie jego —
-    // logujemy i nie straszymy błędem.
-    log.error('Nie udalo sie skasowac obiektu po soft delete', {
+    // Nie przerywamy: obiekt mógł już nie istnieć (podwójne kliknięcie,
+    // wcześniejsze sprzątanie). Wiersz i tak ma zniknąć, bo inaczej kosz
+    // zostałby z pozycją, której nie da się usunąć.
+    log.error('Nie udalo sie skasowac obiektu przy trwalym usunieciu', {
       storagePath: file.storagePath,
       error: removal.error.message,
     });
   }
+
+  unwrap(
+    await getSupabase().from('files').delete().eq('id', file.id).select('id'),
+    'Trwałe usunięcie pliku',
+  );
+}
+
+/**
+ * Sprzątanie kosza po 30 dniach.
+ *
+ * Wołane przy wejściu do widoku plików, a nie z harmonogramu — Supabase
+ * w wersji darmowej nie ma `pg_cron`, a dokładanie Edge Function z crona dla
+ * jednej operacji byłoby przerostem. Skutek: kosz sprząta się u kogoś, kto
+ * korzysta z aplikacji, i to wystarcza — plik czekający 40 zamiast 30 dni
+ * nikomu nie szkodzi, a plik usunięty za wcześnie owszem.
+ *
+ * Zwraca liczbę faktycznie usuniętych plików.
+ */
+export async function purgeExpiredTrash(workspaceId: string): Promise<number> {
+  const expired = unwrap(
+    await getSupabase().rpc('files_expired_in_trash', { ws: workspaceId }),
+    'Sprzątanie kosza',
+  );
+
+  if (expired.length === 0) return 0;
+
+  const paths = expired.map((row) => row.storage_path);
+  const removal = await getSupabase().storage.from(FILES_BUCKET).remove(paths);
+  if (removal.error) {
+    log.error('Sprzatanie kosza: czesc obiektow zostala', { error: removal.error.message });
+  }
+
+  unwrap(
+    await getSupabase()
+      .from('files')
+      .delete()
+      .in(
+        'id',
+        expired.map((row) => row.id),
+      )
+      .select('id'),
+    'Sprzątanie kosza',
+  );
+
+  return expired.length;
 }
 
 /** Podpisany URL do pobrania. Ważny minutę — tyle trzeba na kliknięcie. */

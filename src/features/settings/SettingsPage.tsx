@@ -5,7 +5,9 @@ import { useEntitlement } from '@/features/billing/useEntitlement';
 import { WorkspaceSettingsSection } from './WorkspaceSettingsSection';
 import { AccountSection } from './AccountSection';
 import { StorageUsageSection } from '@/features/files/StorageUsageSection';
+import { TrashSection } from '@/features/files/TrashSection';
 import { SampleLibrarySection } from './SampleLibrarySection';
+import { UpdateSection } from './UpdateSection';
 import { pl } from '@/i18n/pl';
 
 /**
@@ -50,6 +52,10 @@ export function SettingsPage() {
           jedno miejsce do personalizacji, nie dwa. */}
       <SampleLibrarySection />
       <StorageUsageSection />
+      {/* Kosz tuż pod paskiem zużycia: pliki w koszu NADAL zajmują limit,
+          więc odpowiedź na „czemu pasek nie drgnął" ma być w zasięgu wzroku. */}
+      <TrashSection />
+      <UpdateSection />
       <AccountSection />
     </div>
   );

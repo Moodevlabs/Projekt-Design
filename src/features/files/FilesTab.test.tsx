@@ -53,6 +53,7 @@ function file(partial: Partial<StoredFile> = {}): StoredFile {
     sizeBytes: 2_516_582,
     storagePath: 'ws/c1/_/f1.pdf',
     createdBy: null,
+    deletedAt: null,
     createdAt: '2026-08-20T10:00:00Z',
     updatedAt: '2026-08-20T10:00:00Z',
     ...partial,

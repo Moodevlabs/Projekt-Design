@@ -1029,23 +1029,92 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
 ## Faza 2
 
 - [x] ~~T-18 Klienci (CRM-lite) + przypięcie do wyceny~~ → **wchłonięte przez T-53** (faza 1, 2026-08-24).
-- [ ] **T-25 Link klienta („magic link") — apka `apps/share`** *(przeniesione z Fazy 3, 2026-08-26)*
+- [x] **T-25 Link klienta („magic link") — apka `apps/share`** *(przeniesione z Fazy 3, 2026-08-26)*
   Osobna lekka apka Vite (`apps/share`) na tym samym `domain/`, tabela `quote_shares` (token, wygaśnięcie, odwołanie), RLS dla anon przez token (RPC `get_shared_quote(token)`). W desktopie: **„Udostępnij klientowi"** → generuje link, **Kopiuj** + **Wyślij mailem** (`mailto:` z gotową treścią, otwiera pocztę projektanta).
   ⚠️ **Decyzja D6 zostaje nienaruszona** — *workspace* zostaje desktopowy. `apps/share` to powierzchnia dla klienta końcowego (bez logowania, bez edycji), nie wersja web Toolier.
   ⚠️ **Do potwierdzenia przez właściciela:** domena (`app.toolier.pl` / inna) i hosting statyku (Vercel/Netlify — darmowy próg wystarcza).
-- [ ] **T-26 Akceptacja online + uwagi klienta** *(przeniesione z Fazy 3, 2026-08-26)*
+  **Zrobione 2026-08-26 (T-25a/b/c):**
+  > - **Migracja `0025_share_links.sql`.** Trzy RPC `SECURITY DEFINER` (`get_shared_quote`, `accept_shared_quote`, `comment_shared_quote`) + `quote_comments`. Odpowiedzi wracają jako `{ok, reason}`, nie wyjątkiem — strona klienta ma pokazać „link wygasł", a nie błąd 500. Token generuje **baza** (`default`: 32 bajty base64url), nie aplikacja.
+  > - **Akceptacja przyjmuje listę id, nie dokument.** Gdyby klient odsyłał całe `body`, mógłby odesłać body z podmienionymi cenami — i wylądowałoby w tabeli jako „zaakceptowana oferta". Snapshot bierze się z serwera, od klienta idzie sam zbiór włączonych pozycji, a kwotę składa `applyEnabledIds` + `calcQuoteTotals`.
+  > - 🔒 **Znalezione przy testowaniu: `anon` mógł wykonać KAŻDĄ funkcję ze schematu `public`**, w tym `SECURITY DEFINER` omijające RLS (`files_bump_usage`, `next_quote_number`, `seed_library_sample`). 0004 §5 odbiera anonimowi tabele, ale funkcji nie ruszał, a Supabase nadaje `EXECUTE` przez `DEFAULT PRIVILEGES`. Do dziś bez znaczenia — bo nie było klienta anonimowego. **T-25 wprowadza pierwszego.** Odcięte **oba** źródła grantu (`anon` ORAZ `PUBLIC` — samo `from anon` zostawiało wykonywalne funkcje triggerowe i `seed_room_types`) plus `alter default privileges` na przyszłość. Anon zostaje z pięcioma funkcjami.
+  > - **`apps/share`, nie monorepo.** Wystarczył alias `@` na `src/`, bo `src/domain/` jest wolny od Reacta i Supabase (reguła 1). Przebudowa na `apps/desktop` + `packages/domain` ruszyłaby `tauri.conf.json`, Vitest, ESLint i `components.json` — koszt bez zysku.
+  > - **Pułapka Vite:** bez `root` w `apps/share/vite.config.ts` polecenie `vite build --config apps/share/...` pakuje **główną** aplikację (bo `root` domyślnie = katalog roboczy, a tam leży `index.html` desktopu) i zapisuje ją jako stronę klienta — 3,2 MB razem z generatorem PDF i tłem ekranu logowania. Po poprawce 490 kB.
+  > - **Zweryfikowane na żywo:** wszystkie 25 migracji przechodzą na czystym Postgresie, 15 scenariuszy RPC sprawdzonych w SQL (wygaśnięcie, odwołanie, podwójna akceptacja, pusta uwaga, soft-delete wyceny, brak dostępu anona do tabel), `types.generated.ts` **wygenerowany z tej bazy**, nie pisany ręcznie.
+  > ⚠️ **Nie zweryfikowane:** strona nie była otwarta w przeglądarce end-to-end. Lokalny stack Supabase nie wstaje — porty 54321–54324 wpadły w zarezerwowany zakres Windows (`netsh int ipv4 show excludedportrange`: 54275–54374). Odblokowanie wymaga admina (`net stop winnat && net start winnat`) albo zmiany portów w `supabase/config.toml`.
+- [x] **T-26 Akceptacja online + uwagi klienta** *(przeniesione z Fazy 3, 2026-08-26)*
   Klient przełącza TAK/NIE, widzi sumę na żywo, klika **„Akceptuję"** (imię + timestamp + IP → `quote_acceptances`) albo **„Mam uwagi"** (pole tekstowe → wraca do projektanta). Status wyceny zmienia się automatycznie (`sent` → `accepted` / `rejected`). Powiadomienie w aplikacji przez Realtime.
   ⚠️ **Bez e-podpisu i bez canvasu do podpisywania** (decyzja właściciela, 2026-08-26). Przyjęcie oferty nie wymaga formy pisemnej — imię, znacznik czasu i IP to **dowód zgody**, nie podpis kwalifikowany. Podpis odręczny na canvasie wyglądałby na mocniejszy, niż jest, i to jedyne, co by wnosił.
-- [ ] T-19 Auto-update (tauri-plugin-updater, endpoint w Supabase Storage / GitHub Releases) — **podpięte pod T-25**: bez auto-update każda poprawka to ręczna reinstalacja u klienta
+  **Zrobione 2026-08-26:**
+  > - Strona klienta ma **dwa** wyjścia: „Akceptuję" i „Mam uwagi". Świadomie **nie ma trzeciego** („Odrzucam") — decyzję o zamknięciu oferty podejmuje projektant, a klient, któremu coś nie pasuje, prawie nigdy nie chce zerwać rozmowy, tylko powiedzieć co zmienić.
+  > - Akceptacja blokuje wiersz wyceny (`for update`), więc dwa równoległe kliknięcia nie dadzą dwóch akceptacji. Druga próba wraca z `already_accepted`, a nie z błędem.
+  > - `quote_acceptances` trzyma **snapshot serwera** + `enabled_item_ids` osobno. Dzięki temu `selectionDiff` mówi projektantowi „klient wyłączył 3 pozycje", a kwoty nie da się podmienić po stronie przeglądarki.
+  > - **Powiadomienie: Realtime, nie odpytywanie.** Migracja `0026` dopisuje `quote_comments` i `quote_acceptances` do publikacji `supabase_realtime` (domyślnie nie ma tam żadnej tabeli). RLS działa jak przy SELECT, więc nie filtrujemy niczego po stronie klienta. Subskrypcja siedzi w `Providers`, nie w `AppShell`: musi być wewnątrz `QueryClientProvider`, bo unieważnia zapytania, a poza tym to sprawa całej aplikacji, nie układu ekranu.
+  > - Lista uwag w oknie „Udostępnij" ma własne odświeżanie co 60 s — Realtime jest kanałem do człowieka patrzącego na **inny** ekran.
+  > ⚠️ **Nie zweryfikowane:** przepływ nie był przeklikany end-to-end (patrz uwaga o portach przy T-25).
+- [x] **T-19 Auto-update** (tauri-plugin-updater, `latest.json` w GitHub Releases) — **podpięte pod T-25**: bez auto-update każda poprawka to ręczna reinstalacja u klienta
+  **Zrobione 2026-08-26:**
+  > - `tauri-plugin-updater` + `tauri-plugin-process` (restart), uprawnienia w `capabilities/default.json`. `cargo check` przechodzi.
+  > - **Nic nie instaluje się samo.** Ciche sprawdzenie przy starcie mówi tylko wtedy, gdy JEST nowa wersja; instalacja czeka w **Ustawieniach → Aktualizacje**. Toolier jest narzędziem pracy — restart w środku przygotowywania oferty dla klienta jest gorszy niż dzień zwłoki z poprawką.
+  > - Wtyczki ładowane **dynamicznym importem** po `runningInTauri()`. Statyczny import wywala stronę w `pnpm dev`, gdzie mostu Tauri nie ma. Z tego samego powodu sekcja Ustawień **znika w przeglądarce**: przycisk, który zawsze kończy się błędem, jest gorszy niż jego brak.
+  > - **Para kluczy wygenerowana.** Publiczny w `tauri.conf.json`, prywatny w `.tauri/updater.key` (w `.gitignore`). ⚠️ **Właściciel musi przenieść go do menedżera haseł i dodać jako sekret GitHuba** — utrata = żadna aktualizacja nie dotrze do zainstalowanych aplikacji. Dopóki nie ma wydania, klucz da się bezkarnie wygenerować od nowa; potem już nie.
+  > - `.github/workflows/release.yml`: tag `v*` → build macOS (arm64 + x86_64) i Windows, `lint`/`typecheck`/`test` jako bramka, `latest.json` generowany przez `tauri-action`. Wydanie powstaje jako **szkic** — `latest.json` staje się widoczny dla wszystkich w chwili publikacji, więc ten moment wybiera człowiek.
+  > - **Przy okazji naprawione:** CSP dopuszczało tylko `ws://127.0.0.1`, więc Realtime z T-26 byłby na produkcji zablokowany. Dodane `wss://*.supabase.co` i `wss://*.supabase.in`.
+  > ⚠️ **Nie zweryfikowane:** pełny `tauri build` nie był uruchamiany (długi, wymaga certyfikatów), workflow nie był odpalony. Sprawdzone: `cargo check`, `lint`, `typecheck`, testy.
 - [ ] **T-83 Wydanie Windows** *(wydzielone z T-17, odłożone 2026-08-26)* — build przechodzi, brakuje **certyfikatu EV / Azure Trusted Signing**. Do zrobienia: cert, `tauri build` z podpisem, sprawdzenie instalatora `Toolier_1.0.0_*` na czystej maszynie (bez Node, Rusta i `.env`). **Blokada jest zakupowa, nie kodowa.**
 - [x] ~~T-20 Wysyłka e-mail z PDF (Resend) + szablon wiadomości~~ → **odrzucone 2026-08-26**, zastąpione przez T-25/T-26. Wysyłka = link + `mailto:` z poczty projektanta: dociera lepiej niż mail z naszej domeny i nie wymaga po naszej stronie SPF/DKIM, obsługi odbić ani roli procesora danych. Gdyby e-mail transakcyjny kiedyś wrócił (przypomnienia, powiadomienia) — najpierw **własny SMTP użytkownika** w ustawieniach (poświadczenia w keychainie), dopiero potem provider, i raczej Brevo/Postmark niż Resend. Uzasadnienie w `docs/IDEAS.md`.
 - [x] ~~T-21 Tryb ciemny + skróty~~ → **usunięte z planów 2026-08-26** (decyzja właściciela). Paleta ⌘K weszła w **T-58**.
-- [ ] T-22 Pełna historia wersji wyceny (diff pozycji, porównanie totali między wersjami) — lekkie wersje v1/v2 są w **T-57**; nie mylić z **T-30**, które wersjonuje *schemat* `body`
-- [ ] T-23 Import/eksport CSV — biblioteka (T-50) i rejestr (T-49) zrobione; zostaje **eksport XLSX** i import klientów z CSV
-- [ ] T-24 Wiele walut i lokalizacja liczb
-- [ ] T-67 Kosz na pliki (30 dni; dziś usunięcie w T-55 jest natychmiastowe)
-- [ ] T-68 Statusy realizacji etapów w projekcie (koncepcja §7 „w przyszłości")
-- [ ] T-69 Usunięcie kolumny `library_items.category` (tekst) po jednej wersji od T-59
+- [x] **T-22 Pełna historia wersji wyceny** (diff pozycji, porównanie totali) — lekkie wersje v1/v2 są w **T-57**; nie mylić z **T-30**, które wersjonuje *schemat* `body`
+  **Zrobione 2026-08-27:**
+  > - 🔑 **Diff NIE MOŻE iść po `id`.** „Nowa wersja" powstaje przez `duplicateQuoteBody`, a ta **regeneruje identyfikatory** sekcji, grup i pozycji (żeby dwa dokumenty nie dzieliły kluczy). Porównanie po `id` pokazałoby, że w v2 usunięto wszystko i dodano wszystko od nowa — czyli dokładnie nic. Jest na to test, który zaczyna od sprawdzenia, że id faktycznie się różnią.
+  > - Dopasowanie po **tożsamości pozycji**, w trzech przebiegach od najpewniejszego: `libraryItemId` (przetrwa zmianę nazwy i przeniesienie) → ścieżka + nazwa → sama nazwa. Każdy przebieg bierze tylko pary **jednoznaczne**; przy dwóch kandydatach zostawia je następnemu. Zły domysł („to ta sama pozycja, tylko podrożała o 4000 zł") jest gorszy niż uczciwe „usunięto jedną, dodano drugą" — też jest na to test.
+  > - Rozpoznawane zmiany: nazwa, kwota, ilość, włączenie/wyłączenie, przeniesienie. **Wyłączenie to zmiana, nie usunięcie** — pozycja dalej jest w dokumencie, tylko nie liczy się do kwoty.
+  > - Kwoty liczy `calcQuoteTotals` na obu wersjach; znak różnicy jest treścią, nie ozdobą („+4 000 zł" i „4 000 zł" znaczą co innego w rozmowie o podwyżce).
+  > - Okno w menu edytora, **znika przy jednej wersji**: pozycja menu, która zawsze prowadzi do „nie ma czego porównywać", jest gorsza niż jej brak.
+  > - Zero migracji — obie wersje to zwykłe wiersze `quotes` z tym samym `lineage_id` (T-57). 11 testów jednostkowych.
+- [x] **T-23 Import/eksport CSV + XLSX** — biblioteka (T-50) i rejestr (T-49) były zrobione; doszedł eksport XLSX i import klientów
+  **Zrobione 2026-08-27:**
+  > - **XLSX bez nowej biblioteki.** `.xlsx` to ZIP z kilkoma XML-ami; SheetJS i ExcelJS potrafią sto razy więcej, niż potrzeba (formuły, style, odczyt) i ważą setki kilobajtów. `src/lib/xlsx.ts` pisze ZIP metodą **`store`** (bez kompresji) — deflate wymagałby biblioteki albo asynchronicznego `CompressionStream`, a eksport rejestru to kilkadziesiąt kilobajtów tekstu. Kod zostaje synchroniczny i testowalny.
+  > - **Po co XLSX, skoro CSV się otwiera:** w XLSX liczby są liczbami. W CSV Excel zgaduje typ kolumny i numer oferty `2026/08/0012` bywa czytany jako data.
+  > - Złapane przy pisaniu: `array.push(...data)` przepełnia stos przy kilkudziesięciu tysiącach elementów — a arkusz rejestru z kilkuset ofertami to setki kilobajtów XML-a. Błąd wyszedłby dopiero u kogoś z dużą bazą. Zastąpione buforem `ByteSink`; jest test na 4000 wierszy.
+  > - **Zweryfikowane niezależnie:** wygenerowany plik otwarty Pythonowym `zipfile` (inna implementacja ZIP-a) — wszystkie CRC poprawne, 501 wierszy, polskie znaki i ucieczki XML na miejscu.
+  > - **Import klientów zakłada plik z Excela KLIENTA, nie nasz format.** Separator wykrywany (`;` z Excela PL, `,` z Google Sheets, tabulator z CRM-ów) i wybierany po liczbie kolumn, nie po pierwszym trafieniu — „Kowalski, Jan;500100100" ma oba znaki. Nagłówki po synonimach i bez ogonków. Plik bez nagłówka też wchodzi.
+  > - Import **nie odrzuca całego pliku** przez jeden zły wiersz: brak nazwy i duplikaty trafiają do listy problemów, reszta wchodzi. Import wykładający się na 300 kontaktach, bo w 47. brakuje nazwiska, jest bezużyteczny.
+  > - Dwa kroki: podgląd („znaleziono 128 klientów, 3 wiersze bez nazwy") → zapis. Klienci już obecni w kartotece są pomijani (nazwa + telefon bez formatowania), bo import robi się zwykle więcej niż raz.
+  > - 29 nowych testów jednostkowych (12 XLSX + 17 import).
+- [x] **T-24 Wiele walut**
+  **Zrobione 2026-08-27:**
+  > - Ustawienie waluty i selektor były od T-16, ale **edytor i PDF miały `'PLN'` na sztywno w siedmiu miejscach** — studio rozliczające się w euro dostawało ofertę w złotych niezależnie od tego, co wybrało.
+  > - Lista walut przeniesiona do domeny i **zamknięta** (PLN, EUR, USD, GBP, CZK, CHF, SEK, NOK). Dowolny trzyliterowy kod przeszedłby przez `Intl`, ale wpisany z literówką dałby ofertę w walucie, której nie ma — a błąd wyszedłby dopiero u klienta, na dokumencie z kwotą.
+  > - `safeCurrency`: nieznany kod cofa się do złotego zamiast rzucać. `Intl` rzuca `RangeError`, a wycena z uszkodzoną wartością w kolumnie ma się **otworzyć i dać poprawić**, a nie wywalić edytora.
+  > - 🔑 **Format liczb zostaje polski niezależnie od waluty**: „12 005,50 €", a nie „€12,005.50". Dokument czyta ten, kto go wystawia — dlatego to zadanie dokłada wybór **waluty**, a nie wybór locale'u. Stąd też zmiana nazwy: „lokalizacja liczb" była fałszywą obietnicą.
+  > - Walutę dobiera `useCreateQuote`, **nie miejsca wywołania**. Wycenę zakłada się z pięciu ekranów; pierwszy, który by zapomniał, dałby złą ofertę. Wartość jest snapshotem — przestawienie domyślnej waluty nie rusza wycen, które już powstały.
+  > - Przypięte testem: `pl-PL` (CLDR `min2`) **nie grupuje** liczb czterocyfrowych — „1200,50", ale „12 005,50". Wygląda na przeoczenie, jest regułą języka.
+- [x] **T-67 Kosz na pliki** (30 dni; do 1.0 usunięcie w T-55 było natychmiastowe)
+  **Zrobione 2026-08-27:**
+  > - **Zmiana semantyki limitu — najważniejsza rzecz w tym zadaniu.** 0017 zwalniał miejsce już przy `deleted_at` i było to POPRAWNE, bo obiekt w Storage znikał w tej samej chwili. Z koszem bajty **zostają** (inaczej nie ma czego przywracać), więc zwalnianie limitu przy wyrzuceniu do kosza znaczyłoby, że workspace może zająć w Storage dowolnie dużo ponad 2 GiB — wystarczy wrzucać i kasować. Migracja `0027` przenosi zwolnienie miejsca na **trwałe usunięcie wiersza** i przelicza liczniki od zera (backfill).
+  > - Tak działa każdy kosz, którego użytkownik już używał (Dysk, Dropbox), więc „opróżnij kosz, żeby odzyskać miejsce" nikogo nie zaskoczy. Sekcja kosza stoi **tuż pod paskiem zużycia** — odpowiedź na „czemu pasek nie drgnął" ma być w zasięgu wzroku.
+  > - Trwałe usunięcie idzie **najpierw obiekt, potem wiersz** — odwrotnie niż wyrzucenie do kosza. Osierocony obiekt kosztuje miejsce i nikt go nie widzi; osierocony wiersz pokazywałby w koszu plik, którego nie da się przywrócić.
+  > - **Sprzątanie bez harmonogramu.** Supabase bez `pg_cron` nie ma crona, a Edge Function z crona dla jednej operacji to przerost. `files_expired_in_trash()` zwraca ścieżki (obiektów w Storage nie da się skasować z SQL-a), aplikacja kasuje je przy wejściu do Ustawień. Plik czekający 40 zamiast 30 dni nikomu nie szkodzi — plik usunięty za wcześnie owszem.
+  > - `daysLeftInTrash` zaokrągla **w górę**: zaniżona liczba w komunikacie o kasowaniu danych jest gorsza niż zawyżona. 4 testy jednostkowe.
+  > - Testy integracyjne przepisane na nową semantykę: sprawdzają teraz, że kosz **nie** zwalnia miejsca, że plik w koszu **da się pobrać** (inaczej nie byłoby czego przywracać) i że dopiero trwałe usunięcie kasuje obiekt.
+  > ⚠️ **Nie zweryfikowane:** testy integracyjne (`pnpm test:db`) nie były uruchomione — wymagają działającego stacku Supabase, a ten nie wstaje przez zarezerwowane porty Windows (patrz T-25). Migracja `0027` sprawdzona na jednorazowym Postgresie.
+- [x] **T-68 Statusy realizacji etapów w projekcie** (koncepcja §7 „w przyszłości")
+  **Zrobione 2026-08-27:**
+  > - 🔑 **Etapy nie mieszkają w projekcie.** Źródłem listy jest harmonogram **zaakceptowanej wyceny**; projekt trzyma wyłącznie postęp. Kopiowanie etapów do projektu znaczyłoby, że pierwsza zmiana harmonogramu rozjeżdża dwa miejsca i nikt nie wie, które jest prawdziwe. Dlatego zakładka bywa pusta i to jest poprawny stan.
+  > - `projects.stage_progress` jako **mapa po `stage_id`, nie tablica**: postęp jest przypisany do etapu, a nie ułożony w kolejność, więc przestawienie etapów w harmonogramie go nie rusza.
+  > - Wpis trzyma **kopię nazwy** etapu — żeby „Etap wizualny — zakończony 12.08" dało się pokazać także wtedy, gdy ten etap zniknął z harmonogramu po zmianie wyceny. Takie wpisy są oznaczone jako osierocone, nie liczą się do procentu i nie da się ich przestawiać: to historia, nie plan.
+  > - Daty ustawiane **przy przejściu**: cofnięcie z „zakończony" na „w toku" zachowuje datę rozpoczęcia i kasuje datę zakończenia, bo ta druga przestała być prawdą.
+  > - **To nie jest Gantt ani lista zadań** (koncepcja §17). Trzy stany i data. Test pilnujący listy zakładek projektu zaktualizowany świadomie, z komentarzem, dlaczego „Etapy" nie łamią zasady „harmonogram tylko w wycenie".
+  > - 20 testów jednostkowych, migracja `0028` sprawdzona na czystym Postgresie.
+- [x] **T-69 Usunięcie kolumny `library_items.category`** (tekst) — po jednej wersji od T-59
+  **Zrobione 2026-08-27:**
+  > - **To nie było samo „drop column".** Kolumna była jeszcze *czytana* w pięciu miejscach interfejsu (karta usługi, wiersz listy, picker, panel zakresu, grupowanie w edytorze) i *pisana* z pola tekstowego z listą podpowiedzi.
+  > - Problem, który to kończy: ta sama informacja żyła w dwóch miejscach. Zmiana nazwy grupy w słowniku **nie docierała** do pozycji zapisanych wcześniej, a literówka w polu tekstowym zakładała „grupę", której nie było w słowniku — i pozycja znikała z filtrów.
+  > - `LibraryItem.category` → `categoryName`, **rozwiązywane ze słownika** przez osadzenie PostgREST-a (`select('*, library_categories(name)')`). Odczyt, nie zapis.
+  > - Karta usługi: **wybór ze słownika** zamiast wolnego tekstu. Brak grupy daje pusty ciąg, a nie „Inne" — nazwa zastępcza w danych to nazwa, która prędzej czy później wyląduje w PDF-ie jako prawdziwa grupa.
+  > - Migracja `0029` nie gubi danych: przed usunięciem kolumny dopina `category_id` po nazwie, a grupy nieobecne w słowniku zakłada (pomijając „Inne", bo to była wartość domyślna kolumny, a nie decyzja użytkownika).
+  > - ⚠️ **Złapane:** `seed_library_sample` z 0022 wstawia do tej kolumny. Ciało funkcji plpgsql sprawdza się przy **wywołaniu**, więc bez odtworzenia funkcji pierwsze nowe konto po tej migracji dostałoby błąd zamiast biblioteki przykładowej. Funkcja odtworzona w `0029`.
+  > - **Zweryfikowane na czystym Postgresie:** 0001–0029 przechodzą, kolumna zniknęła, indeks zastępczy stoi, seed daje 38 usług w 8 grupach — wszystkie z `category_id`.
 
 ## Faza 3
 
@@ -1053,7 +1122,22 @@ Zadania oznaczone `(F…)` pochodzą z `FEATURES-Z-EXCELA.md` — tam jest pełn
 - [x] ~~T-26 Akceptacja online + podpis + powiadomienie~~ → **przeniesione do Fazy 2** (2026-08-26), bez podpisu.
 - [x] ~~T-27 Wielu użytkowników w workspace~~ → **usunięte z planów** (decyzja właściciela, 2026-08-26). Toolier zostaje narzędziem jednoosobowym; jeśli wróci, to jako osobna decyzja produktowa, bo dotyka RLS w każdej tabeli.
 - [x] ~~T-28 Statystyki wyłączanych pozycji~~ → **usunięte z planów** (decyzja właściciela, 2026-08-26).
-- [ ] T-29 Offline: SQLite (tauri-plugin-sql) + kolejka sync
+- [x] **T-29 Offline: SQLite (tauri-plugin-sql) + kolejka sync**
+  **Zrobione 2026-08-27 — z JAWNIE WĘŻSZYM zakresem niż „tryb offline".**
+  > ### Co powstało
+  > - `tauri-plugin-sql` (tylko `sqlite`) + lokalna baza `toolier-offline.db`: kolejka wysyłki i podręczna kopia otwartych wycen. **To nie jest lustro schematu z Postgresa** — odwzorowanie całej bazy znaczyłoby dwa schematy i dwa zestawy migracji do utrzymania.
+  > - **Nieudany autozapis nie przepada**: ląduje w kolejce i idzie, gdy sieć wróci. Kolejka **koalescuje po dokumencie**, więc godzina pisania bez sieci daje jeden wpis, nie setki (autozapis leci co 800 ms).
+  > - 🔑 **Nigdy nie nadpisujemy po cichu.** Wpis niesie `baseUpdatedAt` — stan, który autor faktycznie widział. Przy koalescencji bierzemy go z **pierwszego** wpisu, nie z ostatniego: podmiana udawałaby, że autor widział też cudze zmiany. Gdy serwer ma nowszy stan, wpis **zatrzymuje się** i czeka na człowieka. Cicha wygrana ostatniego zapisu kasuje pracę, której nikt nie widział.
+  > - Konflikt **nie jest ponawiany** — ponowienie go nie naprawi, a każda próba oddala moment, w którym człowiek się o nim dowie. Błąd sieci owszem, wykładniczo, do 5 prób; potem wpis **zostaje** jako `failed`, a nie znika.
+  > - Łączność sprawdzamy **żądaniem do Supabase**, nie samym `navigator.onLine`: hotelowe Wi-Fi z ekranem logowania i VPN bez trasy to oba `onLine === true`.
+  > - Pasek stanu **milczy, gdy nie ma o czym mówić**. Pasek widoczny zawsze przestaje być zauważany dokładnie wtedy, gdy zaczyna mieć znaczenie.
+  > - Wysyłka po powrocie sieci idzie **sama i po kolei**: to nie jest nowa decyzja (te zmiany użytkownik już chciał zapisać), a równoległość dałaby wyścig o `updated_at`, czyli konflikt wygenerowany przez nas.
+  > ### Czego świadomie NIE ma
+  > - ⚠️ **To nie jest tryb offline-first.** Bez sieci nie da się założyć klienta, projektu ani nowej wyceny — do tego trzeba lokalnych identyfikatorów i mapowania ich na serwerowe. To osobne zadanie i osobna klasa problemów (scalanie, kolejność, kaskady).
+  > - Brak lokalnego lustra list (klienci, projekty, biblioteka). Offline otwiera się to, co było w podręcznej kopii.
+  > ### Weryfikacja
+  > - 15 testów jednostkowych kolejki (koalescencja, `baseUpdatedAt` z pierwszego wpisu, konflikt bez ponawiania, sufit prób), `cargo check` z wtyczką przechodzi, lint + typecheck czyste, 1414 testów zielonych.
+  > - ⚠️ **Nie zweryfikowane na żywo:** ścieżka SQLite wymaga uruchomionego Tauri (`pnpm tauri dev`) — w przeglądarce cała warstwa cicho nic nie robi z założenia. Nie było też testu z faktycznym zerwaniem sieci.
 
 ## Notatki z wykonania
 (dopisuj pod zadaniem po ukończeniu)

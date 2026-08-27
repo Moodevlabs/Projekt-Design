@@ -5,7 +5,12 @@ import type { ItemKind, PricingRule } from '@/domain/quote';
 export interface ItemDraft {
   name: string;
   description: string;
-  category: string;
+  /**
+   * Grupa ze slownika (T-69). Do 1.0 bylo tu pole tekstowe `category`,
+   * ktore potrafilo rozjechac sie z `category_id` — nazwa zmieniona
+   * w slowniku nie docierala do pozycji zapisanych wczesniej.
+   */
+  categoryId: string | null;
   kind: ItemKind;
   /** `null` = wycena indywidualna (T-60). Nie myl z zerem. */
   unitPriceCents: number | null;
@@ -18,7 +23,7 @@ export function toItemDraft(item: LibraryItem): ItemDraft {
   return {
     name: item.name,
     description: item.description,
-    category: item.category,
+    categoryId: item.categoryId,
     kind: item.kind,
     unitPriceCents: item.unitPriceCents,
     pricing: item.pricing,
@@ -36,7 +41,7 @@ export function draftSignature(draft: ItemDraft): string {
   return JSON.stringify([
     draft.name,
     draft.description,
-    draft.category,
+    draft.categoryId,
     draft.kind,
     draft.unitPriceCents,
     draft.pricing,

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient, type Query } from '@tanstack/react-query';
 import {
   createClient,
+  importClients,
   deleteClient,
   getClient,
   getClientOverview,
@@ -119,5 +120,24 @@ export function useDeleteClient() {
   return useMutation({
     mutationFn: (id: string) => deleteClient(id),
     onSuccess: (_data, id) => invalidate(id),
+  });
+}
+
+/**
+ * Import kartoteki z CSV (T-23).
+ *
+ * Unieważnia całą listę klientów, nie dokleja wierszy do cache: po wstawieniu
+ * kilkuset rekordów naraz i tak trzeba pobrać listę od nowa, a doklejanie
+ * rozjechałoby sortowanie i liczniki.
+ */
+export function useImportClients() {
+  const workspaceId = useWorkspaceId();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (drafts: ClientDraft[]) => importClients(requireWorkspaceId(workspaceId), drafts),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.clients() });
+    },
   });
 }

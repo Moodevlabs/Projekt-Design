@@ -85,7 +85,7 @@ export function LibraryItemPage() {
   const update = useUpdateLibraryItem();
 
   const item = useMemo(
-    () => (isNew ? null : (items.data ?? []).find((row) => row.id === id) ?? null),
+    () => (isNew ? null : ((items.data ?? []).find((row) => row.id === id) ?? null)),
     [isNew, items.data, id],
   );
 

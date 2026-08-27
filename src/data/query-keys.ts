@@ -28,6 +28,8 @@ export const queryKeys = {
   project: (id: string) => ['projects', 'detail', id] as const,
   projectOverview: (id: string) => ['projects', 'detail', id, 'overview'] as const,
   files: (filters?: unknown) => (filters ? (['files', filters] as const) : (['files'] as const)),
+  trash: (workspaceId?: string) =>
+    workspaceId ? (['trash', workspaceId] as const) : (['trash'] as const),
   storageUsage: (workspaceId?: string) =>
     workspaceId ? (['storage-usage', workspaceId] as const) : (['storage-usage'] as const),
   roomTypes: (workspaceId?: string) =>
@@ -44,6 +46,10 @@ export const queryKeys = {
     workspaceId ? (['library', 'sample', workspaceId] as const) : (['library', 'sample'] as const),
   libraryGroups: (workspaceId?: string) =>
     workspaceId ? (['library', 'groups', workspaceId] as const) : (['library', 'groups'] as const),
+  /** Linki klienta, uwagi i akceptacja — wszystko per wycena (T-25/T-26). */
+  shares: (quoteId: string) => ['quotes', 'detail', quoteId, 'shares'] as const,
+  quoteComments: (quoteId: string) => ['quotes', 'detail', quoteId, 'comments'] as const,
+  quoteAcceptance: (quoteId: string) => ['quotes', 'detail', quoteId, 'acceptance'] as const,
   templates: (workspaceId?: string) =>
     workspaceId ? (['templates', workspaceId] as const) : (['templates'] as const),
   template: (id: string) => ['templates', 'detail', id] as const,

@@ -41,10 +41,7 @@ export function QuotesListPage() {
   const register = useRegisterExport();
 
   const hasFilters =
-    status !== 'all' ||
-    search.trim().length > 0 ||
-    city !== ALL_CITIES ||
-    clientId !== ALL_CLIENTS;
+    status !== 'all' || search.trim().length > 0 || city !== ALL_CITIES || clientId !== ALL_CLIENTS;
   const rows = quotes.data ?? [];
 
   const resetFilters = () => {
@@ -71,7 +68,7 @@ export function QuotesListPage() {
         onSortChange={setSort}
         // Eksportujemy TO, CO WIDAC po filtrach — plik inny niż lista na
         // ekranie byłby gorszy niż brak eksportu.
-        onExport={() => void register.exportRegister(filters)}
+        onExport={(format) => void register.exportRegister(filters, format)}
         exporting={register.exporting}
       />
 

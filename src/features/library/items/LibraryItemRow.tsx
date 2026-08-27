@@ -40,7 +40,8 @@ export function LibraryItemRow({
 }) {
   const label = item.name || pl.library.newItemName;
   const summary = libraryRowSummary(item);
-  const Icon = PRICING_CHOICE_ICONS[pricingChoiceFor(item.pricing.mode, item.unit, item.unitPriceCents)];
+  const Icon =
+    PRICING_CHOICE_ICONS[pricingChoiceFor(item.pricing.mode, item.unit, item.unitPriceCents)];
   const swatch = categorySwatch(categoryColor);
   const bodyId = `library-item-body-${item.id}`;
 
@@ -98,7 +99,7 @@ export function LibraryItemRow({
               )}
               style={swatch ? { backgroundColor: `${swatch}55` } : undefined}
             >
-              {item.category || pl.library.withoutCategory}
+              {item.categoryName || pl.library.withoutCategory}
             </span>
           </span>
 

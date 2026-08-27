@@ -4,6 +4,7 @@ import { ArrowLeft, FolderOpen, MapPin, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ProjectStagesTab } from './ProjectStagesTab';
 import { EmptyState, Money } from '@/components/shared';
 import { ProjectFormDialog } from './ProjectFormDialog';
 import { ProjectQuotesTab } from './ProjectQuotesTab';
@@ -125,6 +126,7 @@ export function ProjectPage() {
       <Tabs defaultValue="quotes" className="space-y-4">
         <TabsList aria-label={pl.projects.title}>
           <TabsTrigger value="quotes">{pl.projects.tabQuotes}</TabsTrigger>
+          <TabsTrigger value="stages">{pl.stages.tab}</TabsTrigger>
           <TabsTrigger value="documents">{pl.documents.tab}</TabsTrigger>
           <TabsTrigger value="files">{pl.files.tab}</TabsTrigger>
           <TabsTrigger value="notes">{pl.projects.tabNotes}</TabsTrigger>
@@ -132,6 +134,9 @@ export function ProjectPage() {
 
         <TabsContent value="quotes">
           <ProjectQuotesTab project={data} client={client.data ?? null} />
+        </TabsContent>
+        <TabsContent value="stages">
+          <ProjectStagesTab projectId={data.id} stageProgress={data.stageProgress} />
         </TabsContent>
         <TabsContent value="documents">
           <DocumentsTab clientId={data.clientId} projectId={data.id} />

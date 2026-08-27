@@ -18,9 +18,19 @@
         { "url": "https://billing.stripe.com/*" },
         { "url": "https://*.supabase.co/*" },
         { "url": "https://accounts.google.com/*" },
-        { "url": "https://toolier.pl/*" }
+        { "url": "https://toolier.pl/*" },
+        { "url": "https://*.toolier.pl/*" },
+        { "url": "http://localhost:*/*" },
+        { "url": "mailto:*" }
       ]
     },
-    "deep-link:default"
+    "deep-link:default",
+    "updater:default",
+    "process:allow-restart",
+    "sql:default",
+    "sql:allow-load",
+    "sql:allow-execute",
+    "sql:allow-select",
+    "sql:allow-close"
   ]
 }

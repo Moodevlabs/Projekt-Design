@@ -24,9 +24,52 @@ export function roundCents(value: number): number {
   return value < 0 ? -Math.round(-value) : Math.round(value);
 }
 
+/**
+ * Waluty, w których da się wystawić ofertę (T-24).
+ *
+ * Lista jest ZAMKNIĘTA i krótka. Dowolny trzyliterowy kod przeszedłby przez
+ * `Intl`, ale wpisany z literówką („PNL") dałby ofertę w walucie, której nie
+ * ma — a błąd wyszedłby dopiero u klienta, na dokumencie z kwotą.
+ *
+ * Kolejność: złoty pierwszy, potem to, w czym polskie studia realnie
+ * wystawiają oferty zagranicznym inwestorom.
+ */
+export const CURRENCIES = ['PLN', 'EUR', 'USD', 'GBP', 'CZK', 'CHF', 'SEK', 'NOK'] as const;
+export type Currency = (typeof CURRENCIES)[number];
+
+export function isCurrency(code: string): code is Currency {
+  return (CURRENCIES as readonly string[]).includes(code);
+}
+
+/**
+ * Waluta do formatowania — nieznany kod cofamy do złotego.
+ *
+ * `Intl.NumberFormat` rzuca `RangeError` na niepoprawnym kodzie, a wycena
+ * z uszkodzoną wartością w kolumnie ma się otworzyć i dać się poprawić,
+ * a nie wywalić cały edytor.
+ */
+export function safeCurrency(code: string | null | undefined): Currency {
+  return code && isCurrency(code) ? code : 'PLN';
+}
+
+/**
+ * **Format liczb zostaje polski niezależnie od waluty.**
+ *
+ * `pl-PL` + `EUR` daje „1 200,50 €" — przecinek dziesiętny i spacja jako
+ * separator tysięcy, czyli zapis, który czyta autor oferty. Przełączanie
+ * całego formatu razem z walutą dałoby „€1,200.50" w polskim dokumencie:
+ * kwota poprawna, dokument nieczytelny dla tego, kto go wystawia.
+ *
+ * Dlatego T-24 dokłada wybór WALUTY, a nie wybór locale'u.
+ */
+const LOCALE = 'pl-PL';
+
 /** Formatuje grosze do postaci prezentacyjnej, np. `120050` → `1 200,50 zł`. */
 export function formatMoney(cents: number, currency = 'PLN'): string {
-  const formatter = new Intl.NumberFormat('pl-PL', { style: 'currency', currency });
+  const formatter = new Intl.NumberFormat(LOCALE, {
+    style: 'currency',
+    currency: safeCurrency(currency),
+  });
   return formatter.format(roundCents(cents) / 100);
 }
 

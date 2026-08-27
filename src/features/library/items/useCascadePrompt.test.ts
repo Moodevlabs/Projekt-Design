@@ -16,7 +16,7 @@ function libraryItem(overrides: Partial<LibraryItem> = {}): LibraryItem {
   return {
     id: LIB_ID,
     workspaceId: 'ws',
-    category: 'Kuchnia',
+    categoryName: 'Kuchnia',
     categoryId: null,
     unit: 'lump' as const,
     unitLabel: null,
@@ -138,7 +138,7 @@ describe('useCascadePrompt — scenariusz z kryterium T-10', () => {
     const { result } = renderHook(() => useCascadePrompt());
 
     // Kategoria jest cechą biblioteki, nie pozycji w wycenie.
-    act(() => result.current.offer(libraryItem(), libraryItem({ category: 'Nadzór' })));
+    act(() => result.current.offer(libraryItem(), libraryItem({ categoryName: 'Nadzór' })));
 
     expect(result.current.prompt).toBeNull();
   });

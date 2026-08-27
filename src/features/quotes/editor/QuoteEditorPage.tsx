@@ -9,6 +9,8 @@ import { QuoteDndProvider } from './dnd/QuoteDndProvider';
 import { useStableIds } from './dnd/useStableIds';
 import { useAutosave } from './useAutosave';
 import { EditorTopbar } from './components/EditorTopbar';
+import { ShareDialog } from './components/ShareDialog';
+import { VersionHistoryDialog } from './components/VersionHistoryDialog';
 import { QuoteHeader } from './components/QuoteHeader';
 import { SectionBlock } from './components/SectionBlock';
 import { TotalsCard } from './components/TotalsCard';
@@ -252,7 +254,18 @@ function EditorSurface({
   onReload: () => void;
   onRetry: () => void;
 }) {
-  const { body, mode, number, status, saveState, lastSavedAt, quoteId, version } = useEditorStore(
+  const {
+    body,
+    mode,
+    number,
+    status,
+    saveState,
+    lastSavedAt,
+    quoteId,
+    version,
+    lineageId,
+    currency,
+  } = useEditorStore(
     useShallow((state) => ({
       body: state.body,
       mode: state.mode,
@@ -262,6 +275,8 @@ function EditorSurface({
       lastSavedAt: state.lastSavedAt,
       quoteId: state.quoteId,
       version: state.version,
+      lineageId: state.lineageId,
+      currency: state.currency,
     })),
   );
 
@@ -320,6 +335,8 @@ function EditorSurface({
   const schedule = useEditorStore((state) => state.schedule);
   const documents = useEditorStore((state) => state.documents);
   const [packageOpen, setPackageOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const [tab, setTab] = useState<'quote' | 'schedule' | 'documents'>('quote');
   const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
   const [overwriteTemplateOpen, setOverwriteTemplateOpen] = useState(false);
@@ -458,7 +475,7 @@ function EditorSurface({
               body,
               number,
               issueDate,
-              currency: 'PLN',
+              currency,
               onExported: markAsSent.afterExport,
               archive: archive.target,
               version,
@@ -519,7 +536,28 @@ function EditorSurface({
                 }
               : null
           }
+          onShare={() => setShareOpen(true)}
+          onVersionHistory={version > 1 ? () => setHistoryOpen(true) : null}
         />
+
+        {/*
+          Montujemy DOPIERO po otwarciu, a nie trzymamy zamknietego w drzewie:
+          zamkniety modal wolalby trzy zapytania (linki, uwagi, akceptacja)
+          przy kazdym wejsciu do edytora, a nikt na nie nie patrzy.
+        */}
+        {quoteId && historyOpen && lineageId ? (
+          <VersionHistoryDialog
+            lineageId={lineageId}
+            currentId={quoteId}
+            currency={currency}
+            open
+            onOpenChange={setHistoryOpen}
+          />
+        ) : null}
+
+        {quoteId && shareOpen ? (
+          <ShareDialog quoteId={quoteId} quoteNumber={number} open onOpenChange={setShareOpen} />
+        ) : null}
 
         <ReadOnlyBanner />
 
@@ -590,7 +628,7 @@ function EditorSurface({
               priceList: documents?.priceList ?? null,
               number,
               issueDate,
-              currency: 'PLN',
+              currency,
               archive: archive.target,
             });
           }}
@@ -669,7 +707,7 @@ function EditorSurface({
                       key={section.id}
                       section={section}
                       editing={editing}
-                      currency="PLN"
+                      currency={currency}
                       vatRate={body.vatRate}
                       pricesInclude={body.pricesInclude}
                       rooms={body.rooms}
@@ -708,7 +746,7 @@ function EditorSurface({
                 <div className="mt-10">
                   <DiscountsSection
                     body={body}
-                    currency="PLN"
+                    currency={currency}
                     editing={editing}
                     onAdd={addDiscount}
                     onToggle={toggleDiscount}
@@ -756,7 +794,7 @@ function EditorSurface({
               />
               <TotalsCard
                 body={body}
-                currency="PLN"
+                currency={currency}
                 issueDate={issueDate}
                 hourlyRateCents={workspaceRate}
               />

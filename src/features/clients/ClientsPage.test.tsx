@@ -18,6 +18,8 @@ vi.mock('@/data/queries/useClients', () => ({
   useUpdateClient: asyncMutationStub,
   useSetClientStatus: mutationStub,
   useDeleteClient: mutationStub,
+  // Import z CSV (T-23) — dialog montuje sie zawsze, wiec hook musi istniec.
+  useImportClients: mutationStub,
 }));
 
 vi.mock('@/data/queries/useQuotes', () => ({
