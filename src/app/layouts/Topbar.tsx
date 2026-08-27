@@ -58,11 +58,7 @@ export function Topbar({ title }: { title: string }) {
           zakładać dokument bez przypisania. Bez klienta też można — ale to
           teraz decyzja, a nie domyślny efekt kliknięcia.
         */}
-        <Button
-          variant="frame"
-          onClick={() => setNewQuoteOpen(true)}
-          className="h-9 gap-2.5 px-4"
-        >
+        <Button variant="frame" onClick={() => setNewQuoteOpen(true)} className="h-9 gap-2.5 px-4">
           <Plus className="size-4" aria-hidden />
           {pl.quotes.new}
         </Button>

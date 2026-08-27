@@ -122,7 +122,7 @@ function RoomTypeRow({ roomType, canWrite }: { roomType: RoomType; canWrite: boo
         value={name}
         disabled={!canWrite}
         aria-label={pl.settings.roomTypeName(roomType.name)}
-        className="h-8 border-transparent bg-transparent px-1.5 shadow-none focus-visible:border-hair-strong"
+        className="focus-visible:border-hair-strong h-8 border-transparent bg-transparent px-1.5 shadow-none"
         onChange={(event) => setName(event.target.value)}
         onBlur={zapisz}
         onKeyDown={(event) => {

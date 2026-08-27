@@ -1,7 +1,9 @@
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PageSection } from '@/components/shared';
-import { useStorageUsage } from '@/data/queries/useFiles';
+import { Link } from 'react-router-dom';
+import { routes } from '@/app/routes';
+import { useStorageUsage, useTrash } from '@/data/queries/useFiles';
 import { QUOTA_WARN_RATIO, formatBytes } from '@/domain/files/schema';
 import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
@@ -15,6 +17,8 @@ import { cn } from '@/lib/utils';
  */
 export function StorageUsageSection() {
   const usage = useStorageUsage();
+  const trash = useTrash();
+  const trashBytes = (trash.data ?? []).reduce((sum, row) => sum + row.sizeBytes, 0);
 
   if (usage.isLoading || !usage.data) {
     return (
@@ -40,6 +44,21 @@ export function StorageUsageSection() {
         {warning ? (
           <p className={cn('text-sm', full ? 'text-danger' : 'text-warning')}>
             {full ? pl.files.usageFull : pl.files.usageWarning}
+          </p>
+        ) : null}
+
+        {/*
+          Odpowiedz na „skasowalem pliki, a pasek nie drgnal" (2026-08-27).
+          Pliki w koszu NADAL zajmuja limit — miejsce zwalnia sie dopiero po
+          trwalym usunieciu. Pokazujemy to tylko wtedy, gdy cos w koszu lezy:
+          zdanie o pustym koszu byloby szumem przy kazdym wejsciu w Ustawienia.
+        */}
+        {trashBytes > 0 ? (
+          <p className="text-ink-soft text-sm">
+            {pl.files.usageTrashNote(formatBytes(trashBytes))}{' '}
+            <Link to={routes.trash} className="underline underline-offset-4">
+              {pl.files.usageTrashLink}
+            </Link>
           </p>
         ) : null}
       </div>

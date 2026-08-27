@@ -4,20 +4,38 @@ import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
 
 /**
- * Ustawienia z sekcjami (05-UI §3, T-58).
+ * Ustawienia — trzy karty (05-UI §3, przeprojektowane 2026-08-27).
  *
- * Branding wszedł tu jako **pierwsza sekcja** i zniknął z sidebara: to nie
- * jest osobny obszar pracy, tylko konfiguracja, do której wraca się raz na
- * kilka miesięcy. Trasa `/branding` została jako alias — zapisane linki
- * i testy sprzed T-58 mają dalej działać.
+ * ## Co było nie tak
+ *
+ * Do 2026-08-27 „Ustawienia" były jedną kolumną, w której jedno pod drugim
+ * stały: domyślne wartości wycen, biblioteka przykładowa, miejsce na pliki,
+ * **kosz**, aktualizacje, hasło, eksport danych i kasowanie konta. Żeby
+ * cokolwiek znaleźć, trzeba było przewinąć wszystko — a „zmień hasło"
+ * i „ustaw stawkę VAT" wyglądały tak samo.
+ *
+ * ## Podział
+ *
+ * Trzy pytania, trzy karty:
+ *  - **Aplikacja** — jak zachowuje się narzędzie i nowe dokumenty;
+ *  - **Branding** — jak wygląda to, co widzi inwestor;
+ *  - **Konto** — kim jestem i co mogę zrobić ze swoim dostępem.
+ *
+ * Kosz wyszedł stąd całkiem: dostał własny ekran w szynie, bo nie jest
+ * ustawieniem, tylko miejscem z czyimiś plikami.
  *
  * Sekcje są osobnymi TRASAMI, a nie zakładkami w stanie komponentu: branding
  * to pełnoekranowy formularz z podglądem PDF-a i wciśnięcie go w kolumnę
- * `max-w-2xl` reszty ustawień zjadłoby ten podgląd.
+ * `max-w-2xl` reszty ustawień zjadłoby ten podgląd. Przy okazji każda karta
+ * ma własny adres, więc da się do niej wysłać link.
+ *
+ * `/ustawienia` zostaje **Aplikacją**, a nie Kontem: to jest odpowiedź na
+ * pytanie, które ludzie zadają, klikając „Ustawienia".
  */
 const SECTIONS = [
+  { to: routes.settings, label: pl.settings.tabApp, end: true },
   { to: routes.settingsBranding, label: pl.nav.brand },
-  { to: routes.settings, label: pl.settings.general, end: true },
+  { to: routes.settingsAccount, label: pl.settings.tabAccount },
 ] as const;
 
 export function SettingsLayout() {

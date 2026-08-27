@@ -13,9 +13,12 @@ export const routes = {
   templates: '/szablony',
   /** Alias sprzed T-58 — Branding jest teraz sekcja Ustawien. */
   brand: '/branding',
+  /** Kosz na pliki — wlasny ekran, nie sekcja Ustawien (2026-08-27). */
+  trash: '/kosz',
   help: '/pomoc',
   settings: '/ustawienia',
   settingsBranding: '/ustawienia/branding',
+  settingsAccount: '/ustawienia/konto',
   subscription: '/subskrypcja',
   login: '/logowanie',
   register: '/rejestracja',

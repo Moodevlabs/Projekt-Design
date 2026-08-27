@@ -78,7 +78,9 @@ describe('Typy pomieszczen', () => {
     await user.tab();
 
     expect(updateRoomMutate).toHaveBeenCalledTimes(1);
-    const [args] = updateRoomMutate.mock.calls[0] as [{ id: string; patch: Record<string, unknown> }];
+    const [args] = updateRoomMutate.mock.calls[0] as [
+      { id: string; patch: Record<string, unknown> },
+    ];
     expect(args.patch).toEqual({ name: 'Kuchnia otwarta' });
     expect(args.patch).not.toHaveProperty('slug');
   });

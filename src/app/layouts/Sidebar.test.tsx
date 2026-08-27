@@ -117,18 +117,23 @@ describe('Sidebar — rozwijanie', () => {
 });
 
 describe('Sidebar — kolejnosc i zakres (T-58)', () => {
-  it('kolejnosc z 05-UI §2: Pulpit · Klienci · Wyceny · Biblioteka · Szablony | Pomoc · Ustawienia', () => {
+  it('kolejnosc z 05-UI §2: Pulpit · Klienci · Wyceny · Biblioteka · Szablony | Kosz · Pomoc · Ustawienia', () => {
     // Klienci PRZED wycenami: od T-53 to oni sa osia aplikacji.
+    //
+    // Kosz doszedl 2026-08-27 NAD Pomoca. Byl sekcja Ustawien, ktora znikala,
+    // gdy byl pusty — czyli czlowiek szukajacy skasowanego pliku nie mial
+    // gdzie zajrzec. Stoi pod kreska, bo sie do niego ZAGLADA, a nie pracuje.
     expect(NAV_ITEMS.map((item) => item.label)).toEqual([
       pl.nav.dashboard,
       pl.nav.clients,
       pl.nav.quotes,
       pl.nav.library,
       pl.nav.templates,
+      pl.nav.trash,
       pl.nav.help,
       pl.nav.settings,
     ]);
-    // Pomoc i Ustawienia sa w osobnej grupie, pod kreska (T-73).
+    // Kosz, Pomoc i Ustawienia sa w osobnej grupie, pod kreska (T-73).
     expect(NAV_ITEMS.map((item) => item.group)).toEqual([
       'main',
       'main',
@@ -137,7 +142,17 @@ describe('Sidebar — kolejnosc i zakres (T-58)', () => {
       'main',
       'system',
       'system',
+      'system',
     ]);
+  });
+
+  it('Kosz prowadzi na wlasny ekran i jest pierwszy pod kreska', () => {
+    renderAt('/kosz');
+    const trash = screen.getByRole('link', { name: pl.nav.trash });
+    expect(trash).toHaveAttribute('href', '/kosz');
+    expect(trash).toHaveAttribute('aria-current', 'page');
+    // Kulka liczy pozycje W SWOJEJ grupie — Kosz jest w niej pierwszy.
+    expect(screen.getByTestId('nav-active-marker')).toHaveAttribute('data-index', '0');
   });
 
   it('Pomoc prowadzi do poradnika i podswietla sie na jego trasie', () => {
@@ -145,8 +160,9 @@ describe('Sidebar — kolejnosc i zakres (T-58)', () => {
     const help = screen.getByRole('link', { name: pl.nav.help });
     expect(help).toHaveAttribute('href', '/pomoc');
     expect(help).toHaveAttribute('aria-current', 'page');
-    // Kulka liczy pozycje W SWOJEJ grupie — Pomoc jest w niej pierwsza.
-    expect(screen.getByTestId('nav-active-marker')).toHaveAttribute('data-index', '0');
+    // Kulka liczy pozycje W SWOJEJ grupie — od 2026-08-27 Pomoc jest DRUGA,
+    // bo nad nia stoi Kosz.
+    expect(screen.getByTestId('nav-active-marker')).toHaveAttribute('data-index', '1');
   });
 
   it('Branding zniknal z sidebara — wszedl do Ustawien', () => {
