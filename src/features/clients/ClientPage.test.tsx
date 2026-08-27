@@ -65,6 +65,7 @@ function overview(partial: Partial<ClientOverview> = {}): ClientOverview {
     address: 'ul. Wiosenna 12/3',
     city: 'Poznań',
     notes: 'Lubią jasne drewno.',
+    avatarPath: null,
     status: 'active',
     archivedAt: null,
     createdAt: '2026-08-01T10:00:00Z',
@@ -127,6 +128,9 @@ describe('ClientPage', () => {
     const tabs = screen.getAllByRole('tab').map((tab) => tab.textContent);
     expect(tabs).toEqual([
       pl.clients.tabProjects,
+      // Brief stoi PRZED wycenami (poprawka 9): w kolejnosci wspolpracy jest
+      // pierwszy — dopiero z jego odpowiedzi wiadomo, co wycenic.
+      pl.brief.tab,
       pl.clients.tabQuotes,
       pl.documents.tab,
       pl.files.tab,

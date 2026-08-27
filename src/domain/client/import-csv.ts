@@ -190,6 +190,9 @@ const EMPTY: ClientDraft = {
   address: '',
   city: '',
   notes: '',
+  // Import z CSV nie niesie zdjęć — kolumna z adresem pliku nie miałaby
+  // sensu, bo plik i tak musi trafić do Storage.
+  avatarPath: null,
 };
 
 /**

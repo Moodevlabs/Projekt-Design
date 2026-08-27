@@ -240,6 +240,7 @@ function ExistingQuoteEditor({ quoteId }: { quoteId: string }) {
   return (
     <EditorSurface
       createdAt={quote.data?.createdAt ?? new Date().toISOString()}
+      sentAt={quote.data?.sentAt ?? null}
       onReload={() => void quote.refetch()}
       onRetry={saveNow}
     />
@@ -248,10 +249,13 @@ function ExistingQuoteEditor({ quoteId }: { quoteId: string }) {
 
 function EditorSurface({
   createdAt,
+  sentAt,
   onReload,
   onRetry,
 }: {
   createdAt: string;
+  /** `quotes.sent_at` — pierwszy krok ścieżki decyzji klienta (poprawka 7a). */
+  sentAt: string | null;
   onReload: () => void;
   onRetry: () => void;
 }) {
@@ -307,8 +311,6 @@ function EditorSurface({
   const updateDiscount = useEditorStore((state) => state.updateDiscount);
   const removeDiscount = useEditorStore((state) => state.removeDiscount);
   const toggleDiscount = useEditorStore((state) => state.toggleDiscount);
-  const addRoomBlocksAction = useEditorStore((state) => state.addRoomBlocks);
-  const insertItemToRoomBlocks = useEditorStore((state) => state.insertItemToRoomBlocks);
   const setItemVariant = useEditorStore((state) => state.setItemVariant);
   const [libraryOpen, setLibraryOpen] = useState(false);
   const templates = useTemplateActions();
@@ -341,48 +343,6 @@ function EditorSurface({
   const [tab, setTab] = useState<'quote' | 'schedule' | 'documents'>('quote');
   const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
   const [overwriteTemplateOpen, setOverwriteTemplateOpen] = useState(false);
-
-  /**
-   * „Rozpisz na pomieszczenia”. Mówimy wprost, ile bloków przybyło — akcja
-   * potrafi dodać kilkanaście wierszy naraz i cisza po kliknięciu byłaby
-   * niepokojąca. Osobno komunikat, gdy nie ma czego rozpisywać.
-   */
-  const handleAddRoomBlocks = useCallback(
-    (sectionId: string) => {
-      const state = useEditorStore.getState();
-      const rooms = state.body?.rooms ?? [];
-      if (rooms.length === 0) {
-        toast.info(pl.editor.addRoomBlocksNoRooms);
-        return;
-      }
-
-      const przed =
-        state.body?.sections.find((section) => section.id === sectionId)?.groups.length ?? 0;
-      addRoomBlocksAction(sectionId);
-      const po =
-        useEditorStore.getState().body?.sections.find((section) => section.id === sectionId)?.groups
-          .length ?? 0;
-
-      const dodane = po - przed;
-      if (dodane > 0) toast.success(pl.editor.addRoomBlocksDone(dodane));
-      else toast.info(pl.editor.addRoomBlocksNothing);
-    },
-    [addRoomBlocksAction],
-  );
-
-  const handleInsertItemToRoomBlocks = useCallback(
-    (sectionId: string, item: Item) => {
-      const state = useEditorStore.getState();
-      const bloki =
-        state.body?.sections
-          .find((section) => section.id === sectionId)
-          ?.groups.filter((group) => group.roomId !== null).length ?? 0;
-
-      insertItemToRoomBlocks(sectionId, item);
-      if (bloki > 0) toast.success(pl.editor.addItemToAllRoomsDone(bloki));
-    },
-    [insertItemToRoomBlocks],
-  );
 
   /**
    * Wstawianie z biblioteki. Wpis oznaczony jako rabat trafia do **listy
@@ -726,12 +686,8 @@ function EditorSurface({
                       onToggleItem={toggleItem}
                       onPatchItem={updateItem}
                       onRemoveItem={removeItem}
-                      onInsertItems={handleInsertItems}
-                      onInsertGroup={insertGroup}
                       onSaveItemToLibrary={library.saveItem}
                       onSaveGroupToLibrary={library.saveGroup}
-                      onAddRoomBlocks={handleAddRoomBlocks}
-                      onInsertItemToRoomBlocks={handleInsertItemToRoomBlocks}
                     />
                   ))}
                 </SortableContext>
@@ -790,7 +746,7 @@ function EditorSurface({
                 otwarciu modala; kto nie wiedzial, ze tam jest, nie dowiadywal
                 sie o niej wcale. Karta milczy, dopoki nie ma czego pokazac.
               */}
-              {quoteId ? <QuoteFeedback quoteId={quoteId} /> : null}
+              {quoteId ? <QuoteFeedback quoteId={quoteId} sentAt={sentAt} /> : null}
 
               {editing ? <DocumentsCard /> : null}
 

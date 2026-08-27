@@ -268,6 +268,16 @@ describe('LibraryItemsTab — zwijane wiersze (T-72)', () => {
     expect(screen.queryByLabelText(fieldLabel(pl.library.itemNameLabel))).not.toBeInTheDocument();
   });
 
+  it('klik w ptaszek tez rozwija wiersz', async () => {
+    // Regresja z 2026-08-27: strzałka była samą grafiką poza przyciskiem,
+    // więc jedyny element wyglądający jak „rozwiń" nie robił nic.
+    const user = userEvent.setup();
+    render(<LibraryItemsTab />);
+
+    await user.click(screen.getByTestId('library-item-chevron'));
+    expect(screen.getByLabelText(fieldLabel(pl.library.itemNameLabel))).toBeInTheDocument();
+  });
+
   it('rozwiniety jest co najwyzej jeden wiersz', async () => {
     const user = userEvent.setup();
     mockItems([baseItem(), baseItem({ id: 'item-2', name: 'Fronty' })]);

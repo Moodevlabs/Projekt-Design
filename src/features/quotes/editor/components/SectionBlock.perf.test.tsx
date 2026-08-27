@@ -116,11 +116,7 @@ function Harness() {
       onToggleItem={toggleItem}
       onPatchItem={updateItem}
       onRemoveItem={removeItem}
-      onInsertItems={noop}
-      onInsertGroup={noop}
       onSaveItemToLibrary={noop}
-      onAddRoomBlocks={noop}
-      onInsertItemToRoomBlocks={noop}
       onSaveGroupToLibrary={noop}
     />
   );

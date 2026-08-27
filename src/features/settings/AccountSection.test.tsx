@@ -20,6 +20,15 @@ vi.mock('sonner', () => ({
   toast: { success: toastSuccess, error: toastError, info: vi.fn() },
 }));
 
+// Zdjecie uzytkownika (poprawka 4) ma wlasne zapytania — sekcje konta
+// testujemy w izolacji od warstwy danych, tak jak reszte tego pliku.
+vi.mock('@/data/queries/useAvatar', () => ({
+  useAvatarPath: () => null,
+  useAvatarUrl: () => ({ data: null }),
+  useUploadAvatar: () => ({ mutate: vi.fn(), isPending: false }),
+  useRemoveAvatar: () => ({ mutate: vi.fn(), isPending: false }),
+}));
+
 const { AccountSection } = await import('./AccountSection');
 
 const signOut = vi.fn(() => Promise.resolve());

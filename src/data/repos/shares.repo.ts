@@ -1,6 +1,7 @@
 import { getSupabase } from '@/data/supabase';
 import type { Tables } from '@/data/types.generated';
 import {
+  DecisionSchema,
   expiryFromDays,
   type Acceptance,
   type QuoteComment,
@@ -57,6 +58,10 @@ function mapAcceptance(row: AcceptanceRow): Acceptance {
     // `inet` wraca z PostgREST-a jako string; typ generowany mówi `unknown`.
     signerIp: typeof row.signer_ip === 'string' ? row.signer_ip : null,
     acceptedAt: row.accepted_at,
+    // Wiersze sprzed migracji 0033 nie mają kolumny w typie — `catch` w zod
+    // sprowadza je do `accepted`, bo wtedy innej odpowiedzi nie było.
+    decision: DecisionSchema.catch('accepted').parse(row.decision),
+    reason: row.reason,
   };
 }
 

@@ -249,7 +249,9 @@ function OwnerToggle({
       title={provider ? pl.editor.stageOwnerProviderFull : pl.editor.stageOwnerClientFull}
       onClick={() => onChange(provider ? 'client' : 'provider')}
       className={cn(
-        'shrink-0 rounded-[var(--radius-pill)] px-2 py-0.5 text-[10.5px] font-semibold tracking-[0.04em] uppercase transition-colors',
+        // Stała szerokość, żeby pigułki układały się w kolumnę pod główką
+        // „Kto" — dwa różne skróty dawały wcześniej postrzępioną krawędź.
+        'w-[74px] shrink-0 rounded-[var(--radius-pill)] px-2 py-0.5 text-center text-[10.5px] font-semibold tracking-[0.04em] uppercase transition-colors',
         provider
           ? 'bg-[var(--doc-sage-light)] text-[var(--doc-sage)]'
           : 'bg-[var(--doc-surface)] text-[var(--doc-ink-soft)]',

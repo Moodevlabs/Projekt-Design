@@ -1,62 +1,68 @@
 import { useMemo } from 'react';
 import { ActiveProjects } from './ActiveProjects';
+import { ActivityFeed } from './ActivityFeed';
 import { RecentQuotes } from './RecentQuotes';
-import { MonthLedger } from './MonthLedger';
 import { DashboardEmptyState } from './DashboardEmptyState';
 import { OnboardingChecklist } from './OnboardingChecklist';
-import { SubscriptionCard } from './SubscriptionCard';
-import { calcDashboardStats } from './stats';
-import { calcSettledCounts } from './settled';
 import { useQuotesList } from '@/data/queries/useQuotes';
 
 const RECENT_COUNT = 5;
 
 /**
- * Pulpit dziedziczy anatomię edytora wyceny: praca (lista) po lewej,
- * osiadająca suma — bilans miesiąca — w prawej szynie, pod nią subskrypcja.
- * Jedno zapytanie zasila i bilans, i listę; statystyki liczymy z cache.
+ * Pulpit (przebudowany 2026-08-27, poprawka 6).
+ *
+ * ## Co się zmieniło i dlaczego
+ *
+ * Zniknął **bilans miesiąca** z prawej szyny. Liczył wyceny utworzone,
+ * wysłane i rozstrzygnięte w bieżącym miesiącu — dane prawdziwe, ale
+ * niebędące odpowiedzią na żadne pytanie, które ktoś rano zadaje. Pracownia
+ * projektowa nie rozlicza się z miesiąca; rozlicza się z tego, na co czeka
+ * klient. Razem z nim zniknęła karta subskrypcji: jej miejsce jest
+ * w ustawieniach, a okres próbny zgłasza się sam, raz, przy starcie
+ * (`TrialDialog`).
+ *
+ * ## Co zostało i w jakiej kolejności
+ *
+ * 1. **Co nowego u klientów** — akceptacje, odrzucenia, uwagi, otwarte linki.
+ *    Na samej górze, bo to jedyna rzecz na tym ekranie, która może wymagać
+ *    reakcji dzisiaj.
+ * 2. Teczki w toku.
+ * 3. Ostatnie wyceny.
+ *
+ * Jedna kolumna, nie dwie: po usunięciu szyny prawa kolumna byłaby pustym
+ * pasem, a treść zwężona bez powodu.
  */
 export function DashboardPage() {
   const quotes = useQuotesList({ sort: 'updated_desc' });
   const rows = useMemo(() => quotes.data ?? [], [quotes.data]);
-  const stats = useMemo(() => calcDashboardStats(rows), [rows]);
-  const settled = useMemo(() => calcSettledCounts(rows), [rows]);
 
   const loading = quotes.isLoading;
   const error = quotes.isError;
   const empty = !loading && !error && rows.length === 0;
 
   return (
-    <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
-      <div className="min-w-0">
-        {/*
-          Checklist stoi NAD trescia, nie zamiast niej: po pierwszej wycenie
-          pulpit ma juz co pokazac, a dwa kroki moga byc wciaz do zrobienia.
-        */}
-        {!loading && !error ? <OnboardingChecklist hasQuotes={rows.length > 0} /> : null}
+    <div className="mx-auto w-full max-w-[900px]">
+      {/*
+        Pasek zdarzeń stoi NAD checklistą startową: nawet na świeżym koncie
+        pierwsze otwarcie linku przez klienta jest ważniejsze niż przypomnienie
+        o wgraniu logo.
+      */}
+      {!empty ? <ActivityFeed /> : null}
 
-        {/* Od T-58 pulpit prowadzi do KLIENTOW, nie do wycen — blok teczek
-            w toku stoi nad lista ostatnich ofert (05-UI §3). */}
-        <ActiveProjects />
+      {!loading && !error ? <OnboardingChecklist hasQuotes={rows.length > 0} /> : null}
 
-        {empty ? (
-          <DashboardEmptyState />
-        ) : (
-          <RecentQuotes
-            quotes={rows.slice(0, RECENT_COUNT)}
-            loading={loading}
-            error={error}
-            onRetry={() => void quotes.refetch()}
-          />
-        )}
-      </div>
+      <ActiveProjects />
 
-      <div className="space-y-6">
-        {!empty && !error ? (
-          <MonthLedger stats={stats} settled={settled} loading={loading} />
-        ) : null}
-        <SubscriptionCard />
-      </div>
+      {empty ? (
+        <DashboardEmptyState />
+      ) : (
+        <RecentQuotes
+          quotes={rows.slice(0, RECENT_COUNT)}
+          loading={loading}
+          error={error}
+          onRetry={() => void quotes.refetch()}
+        />
+      )}
     </div>
   );
 }

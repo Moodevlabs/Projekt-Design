@@ -42,11 +42,30 @@ export type OpeningHoursRow = z.infer<typeof OpeningHoursRowSchema>;
 /** Stopka mieści maksymalnie cztery wiersze godzin — dalej rozjeżdża się layout PDF. */
 export const MAX_OPENING_HOURS_ROWS = 4;
 
+/**
+ * Wariant logo na pasie nagłówka PDF.
+ *
+ * `auto` liczy kontrast z koloru nagłówka; `light` i `dark` to decyzja
+ * użytkownika, która tę regułę wyłącza. Nazwy opisują SAM PLIK, nie tło:
+ * `light` to jasny znak (na ciemny pas), `dark` — ciemny (na jasny pas).
+ */
+export const HeaderLogoSchema = z.enum(['auto', 'light', 'dark']);
+export type HeaderLogoChoice = z.infer<typeof HeaderLogoSchema>;
+
 export const BrandKitSchema = z.object({
   companyName: z.string().default(''),
   /** Ścieżka w Storage, np. `brand/{workspaceId}/logo-dark.png`. */
   logoDarkPath: z.string().nullable().default(null),
   logoLightPath: z.string().nullable().default(null),
+  /**
+   * Który wariant logo kłaść na pasie nagłówka PDF (poprawka 3, 2026-08-27).
+   *
+   * `auto` = dotychczasowa reguła kontrastu: jasny nagłówek bierze ciemne logo,
+   * ciemny — jasne. Zostaje domyślną, bo w większości przypadków jest po prostu
+   * poprawna. Wartości `light` / `dark` są dla znaków, które mają własne tło
+   * albo istnieją w jednej wersji i mają wyglądać zawsze tak samo.
+   */
+  headerLogo: HeaderLogoSchema.default('auto'),
   // Parytet z `0024_brand_defaults_toolier.sql`. Dotyczy TYLKO nowych
   // workspace'ów — istniejące mają własne wartości w wierszu i nic ich
   // nie nadpisuje (08-REDESIGN D-4: kolor oferty jest własnością klienta).
@@ -121,6 +140,15 @@ export const WorkspaceSettingsSchema = z.object({
     .array(PriceListItemSchema.omit({ id: true }))
     .nullable()
     .default(null),
+  /**
+   * Zdjęcie użytkownika w pasku nawigacji (poprawka 4, 2026-08-27).
+   *
+   * Ścieżka w buckecie `brand`, jak logo. W `settings`, a nie w osobnej
+   * kolumnie czy tabeli profili, bo Toolier jest narzędziem jednoosobowym
+   * (decyzja z T-27): workspace ma dokładnie jednego użytkownika, więc
+   * „avatar workspace'u" i „avatar użytkownika" to ta sama rzecz.
+   */
+  avatarPath: z.string().nullable().default(null),
 });
 export type WorkspaceSettings = z.infer<typeof WorkspaceSettingsSchema>;
 

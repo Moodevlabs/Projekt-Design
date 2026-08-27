@@ -30,6 +30,8 @@ function acceptance(partial: Partial<Acceptance> = {}): Acceptance {
     signerName: 'Anna Kowalska',
     signerIp: null,
     acceptedAt: '2026-08-27T09:30:00Z',
+    decision: 'accepted',
+    reason: null,
     ...partial,
   };
 }

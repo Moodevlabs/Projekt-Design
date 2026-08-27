@@ -65,7 +65,19 @@ export function ScheduleTab({ editing }: { editing: boolean }) {
         </h2>
         <p className="mt-1 text-[13px] text-[var(--doc-ink-soft)]">{pl.editor.scheduleIntro}</p>
 
-        <div className="mt-6 flex flex-wrap items-center gap-5">
+        {/*
+          ZAŁOŻENIA JAKO NAZWANY BLOK (poprawka 7b, 2026-08-27).
+
+          Cztery pola stały wcześniej luzem pod tytułem, jako pasek wersalików.
+          Wyglądały na ozdobę nagłówka, a są jedynym wejściem, z którego
+          wychodzą daty w podsumowaniu — więc mają własną ramkę i własne
+          zdanie o tym, co robią.
+        */}
+        <section className="border-hair mt-6 rounded-[var(--radius-card)] border p-4">
+          <h3 className="label-caps text-ink-soft">{pl.editor.scheduleAssumptions}</h3>
+          <p className="text-ink-soft mt-1 text-[12.5px]">{pl.editor.scheduleAssumptionsHint}</p>
+
+          <div className="mt-3 flex flex-wrap items-center gap-5">
           <label className="flex flex-col gap-1 text-[11px] font-semibold tracking-[0.09em] text-[var(--doc-sage)] uppercase">
             {pl.editor.scheduleStart}
             <input
@@ -106,9 +118,23 @@ export function ScheduleTab({ editing }: { editing: boolean }) {
               <option value="none">{pl.editor.scheduleHolidaysNone}</option>
             </select>
           </label>
+          </div>
+        </section>
+
+        {/*
+          Główka nad listą etapów — ten sam wzorzec co w panelu pomieszczeń
+          i nad tabelami. Bez niej „ARCH." i liczba po prawej nie mają podpisu
+          w miejscu, w którym się na nie patrzy.
+        */}
+        <div className="text-ink-soft mt-8 flex items-center gap-2 text-[10px] tracking-[0.08em] uppercase">
+          <span className="w-4 shrink-0" aria-hidden />
+          <span className="min-w-0 flex-1">{pl.editor.scheduleColumnStage}</span>
+          <span className="w-[74px] shrink-0 text-center">{pl.editor.scheduleColumnOwner}</span>
+          <span className="w-14 shrink-0 text-right">{pl.editor.scheduleColumnDays}</span>
+          <span className="w-[22px] shrink-0" aria-hidden />
         </div>
 
-        <ul className="mt-8 flex flex-col border-t border-[var(--doc-ink)] pt-1">
+        <ul className="flex flex-col border-t border-[var(--doc-ink)] pt-1">
           {schedule.stages.map((stage) => (
             <StageRow
               key={stage.id}
@@ -129,6 +155,15 @@ export function ScheduleTab({ editing }: { editing: boolean }) {
             {pl.editor.addStage}
           </AddLink>
         ) : null}
+
+        {/*
+          Legenda ARCH./INW. stoi POD listą, a nie tylko w karcie wyniku:
+          skrót przy każdym wierszu potrzebuje rozwinięcia tam, gdzie te
+          wiersze są.
+        */}
+        <p className="mt-5 text-[12.5px] text-[var(--doc-ink-soft)]">
+          {pl.editor.scheduleOwnerLegend}
+        </p>
 
         {rooms.length === 0 ? (
           // Etapy zalezne od pomieszczen policza wtedy sama baze — warto

@@ -14,7 +14,13 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { ConfirmDialog, PageSection } from '@/components/shared';
+import { AvatarPicker, ConfirmDialog, initialsOf, PageSection } from '@/components/shared';
+import {
+  useAvatarPath,
+  useAvatarUrl,
+  useRemoveAvatar,
+  useUploadAvatar,
+} from '@/data/queries/useAvatar';
 import { useAuth } from '@/features/auth/auth-context';
 import { NewPasswordFormSchema, type NewPasswordForm } from '@/features/auth/schema';
 import { authErrorMessage } from '@/features/auth/errors';
@@ -43,6 +49,14 @@ export function AccountSection() {
    */
   return (
     <>
+      {/*
+        Zdjęcie stoi PRZED hasłem: to jedyna rzecz na tej stronie, którą widać
+        potem gdzie indziej (pasek nawigacji), więc ma być pierwsza.
+      */}
+      <PageSection title={pl.settings.avatar}>
+        <AvatarSection email={session?.user.email ?? ''} />
+      </PageSection>
+
       <PageSection title={pl.settings.access}>
         <p className="text-ink-soft mb-4 text-sm">{session?.user.email}</p>
         <PasswordForm />
@@ -65,6 +79,44 @@ export function AccountSection() {
         <DeleteAccount onDeleted={() => void signOut()} />
       </PageSection>
     </>
+  );
+}
+
+/**
+ * Zdjęcie użytkownika (poprawka 4, 2026-08-27).
+ *
+ * Zapisuje się **od razu**, bez przycisku „Zapisz": wybór pliku jest już
+ * potwierdzeniem, a druga decyzja po nim byłaby pytaniem o to samo. To inaczej
+ * niż w brandingu, gdzie zapis jest jawny — tam formularz ma kilkanaście pól
+ * i podgląd PDF, który przerysowuje się przy każdej zmianie.
+ */
+function AvatarSection({ email }: { email: string }) {
+  const path = useAvatarPath();
+  const url = useAvatarUrl(path);
+  const upload = useUploadAvatar();
+  const remove = useRemoveAvatar();
+
+  return (
+    <AvatarPicker
+      label={pl.settings.avatar}
+      hint={pl.settings.avatarHint}
+      url={url.data ?? null}
+      initials={initialsOf(email, 'TO')}
+      size="lg"
+      busy={upload.isPending || remove.isPending}
+      onPick={(file) =>
+        upload.mutate(file, {
+          onSuccess: () => toast.success(pl.settings.avatarSaved),
+          onError: (error) => toast.error(error.message),
+        })
+      }
+      onRemove={() =>
+        remove.mutate(undefined, {
+          onSuccess: () => toast.success(pl.settings.avatarRemoved),
+          onError: (error) => toast.error(error.message),
+        })
+      }
+    />
   );
 }
 

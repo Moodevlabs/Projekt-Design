@@ -20,6 +20,9 @@ export interface HelpSection {
   icon:
     | 'start'
     | 'clients'
+    // Brief i wizja lokalna (poprawki 9 i 10 z 2026-08-27).
+    | 'brief'
+    | 'visit'
     | 'quote'
     | 'status'
     | 'schedule'
@@ -47,9 +50,10 @@ export const helpPl = {
   quickTitle: 'Najczęściej szukane',
   quick: [
     { label: 'Pierwsza wycena w 5 minut', target: 'start' },
+    { label: 'Brief przed projektem', target: 'brief' },
     { label: 'Dodawanie usług do wyceny', target: 'quote' },
-    { label: 'Usługi liczone za pomieszczenie', target: 'library' },
-    { label: 'Nowa wersja i statusy', target: 'status' },
+    { label: 'Link i decyzja klienta', target: 'status' },
+    { label: 'Wizja lokalna i obmiar', target: 'visit' },
     { label: 'Skróty klawiszowe', target: 'keys' },
   ],
   tipLabel: 'Wskazówka',
@@ -75,7 +79,11 @@ export const helpPl = {
         },
         {
           kind: 'p',
-          text: 'Nawigacja po lewej: Pulpit, Klienci, Wyceny, Biblioteka, Szablony — to obszary pracy. Pod kreską Pomoc i Ustawienia. Pasek można rozwinąć przyciskiem na dole, żeby widzieć etykiety.',
+          text: 'Nawigacja po lewej: Pulpit, Klienci, Wyceny, Biblioteka, Szablony — to obszary pracy. Pod kreską Pomoc i Ustawienia. Pasek można rozwinąć przyciskiem na dole, żeby widzieć etykiety. Na wąskim oknie rozwinięty pasek nasuwa się na treść i chowa po kliknięciu obok albo po przejściu do innego ekranu.',
+        },
+        {
+          kind: 'p',
+          text: 'Na dole paska stoi Twoje zdjęcie (ustawiasz je w Ustawieniach → Konto) z kropką połączenia: zielona znaczy, że aplikacja ma łączność, czerwona — że pracujesz bez sieci i zmiany czekają w kolejce.',
         },
         {
           kind: 'tip',
@@ -83,7 +91,7 @@ export const helpPl = {
         },
         {
           kind: 'p',
-          text: 'Pulpit pokazuje aktywnych klientów i projekty (ostatnio edytowane), cztery liczby z bieżącego miesiąca (liczba wycen, wartość wysłanych, akceptacja, średnia wartość), pięć ostatnich wycen i stan subskrypcji. Checklista startowa znika sama, gdy wszystkie trzy kroki są zrobione.',
+          text: 'Pulpit zaczyna się od paska „Co nowego u klientów”: akceptacje, odrzucenia, uwagi i otwarte linki, z kropką przy tym, czego jeszcze nie przeczytałeś. Gdy jest cicho, mówi „Jesteś na bieżąco”. Niżej teczki w toku i pięć ostatnich wycen. Checklista startowa znika sama, gdy wszystkie trzy kroki są zrobione. Subskrypcji na pulpicie nie ma — okres próbny zgłasza się sam, raz dziennie, przy starcie; po opłaceniu obsługujesz ją z Ustawień.',
         },
       ],
     },
@@ -96,9 +104,10 @@ export const helpPl = {
         {
           kind: 'list',
           items: [
-            'Lista klientów: szukajka (nazwa, e-mail, telefon, miasto), pigułki Aktywni / Zarchiwizowani, w wierszu liczba projektów i wartość zaakceptowanych wycen. Menu „⋯” daje Nowy projekt, Nową wycenę i Archiwizuj.',
-            'Karta klienta: nagłówek z kontaktem i adresem oraz zakładki Projekty · Wyceny · Dokumenty · Pliki · Notatki.',
-            'Projekt: nazwa, adres, metraż, typ (mieszkanie, dom, lokal…) i status zmieniany wprost z nagłówka. Zakładki Wyceny · Dokumenty · Pliki · Notatki.',
+            'Lista klientów: siatka kart — na każdej zdjęcie klienta, kontakt, miasto, liczba wycen, wartość zaakceptowanych i ostatnia aktywność. Nad listą szukajka (nazwa, e-mail, telefon, miasto) i pigułki Aktywni / Zarchiwizowani. Menu „⋯” na karcie daje Nowy projekt, Nową wycenę i Archiwizuj.',
+            'Zdjęcie klienta dodajesz w oknie edycji kartoteki. Bez zdjęcia karta pokazuje inicjały — nigdy pustego kółka.',
+            'Karta klienta: nagłówek z kontaktem i adresem oraz zakładki Projekty · Brief · Wyceny · Dokumenty · Pliki · Notatki.',
+            'Projekt: nazwa, adres, metraż, typ (mieszkanie, dom, lokal…) i status zmieniany wprost z nagłówka. Zakładki Wyceny · Wizja lokalna · Etapy · Dokumenty · Pliki · Notatki.',
             'Wyceny w projekcie są grupowane po linii wersji: wiersz to najnowsza wersja, rozwinięcie pokazuje starsze.',
           ],
         },
@@ -110,6 +119,74 @@ export const helpPl = {
         {
           kind: 'p',
           text: 'Archiwizacja klienta chowa go z listy, ale nie kasuje niczego — wyceny, pliki i dokumenty zostają. Zarchiwizowanego klienta dalej da się wybrać w edytorze wyceny.',
+        },
+      ],
+    },
+    {
+      id: 'brief',
+      icon: 'brief',
+      title: 'Brief klienta',
+      lead: 'Kwestionariusz, który klient wypełnia przed rozpoczęciem projektu. Pierwszy etap współpracy — dopiero z jego odpowiedzi wiadomo, co właściwie wycenić.',
+      blocks: [
+        {
+          kind: 'steps',
+          items: [
+            'Karta klienta → zakładka „Brief” → „Wyślij brief”. Powstaje link ważny 60 dni.',
+            'Kopiujesz link albo klikasz „Wyślij mailem” — otwiera się Twoja poczta z gotową treścią. Brief idzie od Ciebie, nie z naszej domeny.',
+            'Klient otwiera link w przeglądarce, bez zakładania konta. Formularz jest opatrzony Twoim logo i kolorem z Brandingu.',
+            'Odpowiedzi wracają na kartę klienta. Pasek postępu mówi, ile z pytań jest już wypełnione; „Odpowiedzi klienta” rozwija je w układzie dokumentu.',
+          ],
+        },
+        {
+          kind: 'list',
+          items: [
+            'Pięć bloków: obiekt · kto tu będzie mieszkał · zakres prac · estetyka · budżet i termin. Kolejność jest celowa — klient odpowiada najłatwiej na fakty, najtrudniej na pieniądze.',
+            'Wymagane są dwa pytania: co projektujemy i metraż. Reszta jest opcjonalna, bo brief wypełnia się wieczorem, na telefonie, na raty.',
+            'Klient może zapisywać wielokrotnie — formularz pamięta to, co już wpisane, i wraca do tego przy ponownym otwarciu linku.',
+            'Briefów może być kilka: klient wraca z drugim mieszkaniem, a każde ma inne odpowiedzi.',
+          ],
+        },
+        {
+          kind: 'tip',
+          title: 'Pytania są zamrażane przy wysyłce',
+          text: 'Brief zapamiętuje zestaw pytań z chwili wystawienia linku. Dzięki temu brief sprzed pół roku pokazuje pytania, na które klient naprawdę odpowiadał — a nie dzisiejsze.',
+        },
+        {
+          kind: 'warn',
+          title: 'Odwołanie linku nie kasuje odpowiedzi',
+          text: '„Odwołaj link” zamyka dostęp klientowi natychmiast, ale to, co już przyszło, zostaje. Skasowanie briefu (kosz) usuwa również odpowiedzi i tego nie da się cofnąć.',
+        },
+      ],
+    },
+    {
+      id: 'visit',
+      icon: 'visit',
+      title: 'Wizja lokalna',
+      lead: 'Notatka ze stanu zastanego: obmiar, instalacje, zdjęcia, ustalenia. Jedyny zapis tego, jak było, zanim ktokolwiek czegokolwiek dotknął.',
+      blocks: [
+        {
+          kind: 'p',
+          text: 'Teczka projektu → zakładka „Wizja lokalna” → „Nowa wizja”. Wizji może być kilka: pierwsza przed projektem, druga po wyburzeniach, trzecia przed montażem. Każda opisuje inny stan tego samego wnętrza.',
+        },
+        {
+          kind: 'list',
+          items: [
+            'Data wizyty i obecni (projektant, inwestor, kierownik budowy) — nagłówek karty pokazuje je razem z podsumowaniem.',
+            'Obmiar: nazwa pomieszczenia i trzy wymiary w centymetrach. Powierzchnia liczy się sama — nie da się jej nadpisać, bo rozjechałaby się z wymiarami obok. Pomieszczenie bez kompletu wymiarów nie wchodzi do sumy.',
+            'Do sprawdzenia: gotowa lista czternastu rzeczy, od ścian po zgody wspólnoty. Każda ma stan: Jest OK · Do wymiany · Brak · Nie ustalono. Pozycje można dopisać i usunąć.',
+            'Zdjęcia trafiają jednocześnie do plików projektu — tutaj są tylko przypięte do tej wizyty.',
+            'Notatka z wizji: obserwacje, ustalenia, ryzyka. To, co wymaga decyzji inwestora.',
+          ],
+        },
+        {
+          kind: 'tip',
+          title: '„Nie ustalono” to prawidłowa odpowiedź',
+          text: 'Znaczy „byłem na miejscu i nie dało się tego sprawdzić” — zakryte piony, brak dokumentacji, nieobecny wykonawca. Nagłówek karty liczy takie pozycje, żeby było wiadomo, do czego trzeba wrócić.',
+        },
+        {
+          kind: 'warn',
+          title: 'Zapis jest jawny',
+          text: 'Obmiar wpisuje się seriami po kilkanaście liczb, więc karta nie zapisuje się sama. Pasek „Zapisz” pojawia się dopiero, gdy coś zmienisz — dopóki go widzisz, zmiany nie są w bazie.',
         },
       ],
     },
@@ -128,15 +205,15 @@ export const helpPl = {
           items: [
             'Nagłówek: tytuł, podtytuł, data, ważność (dni), tekst wstępu i opis projektu. Klikasz w tekst i piszesz — w edycji pola mają kreskowaną ramkę, w podglądzie znikają.',
             'Sekcja = etap (np. „Koncepcja”, „Projekt techniczny”). Grupa = podzbiór w sekcji, np. pomieszczenie. Pozycja = usługa z ceną.',
-            '„Dodaj usługi” otwiera panel z tabelą biblioteki: usługa · grupa · sposób wyceny · stawka. Kliknij „Dodaj” przy każdej potrzebnej — panel zostaje otwarty, cel („Dodaj do: sekcja › grupa”) zmieniasz na górze. „Gotowe” zamyka.',
-            '„Pozycja ręcznie” dodaje pusty wiersz, „Z biblioteki” to szybki popover do dopisania jednej usługi, „Rozpisz na pomieszczenia” tworzy grupę dla każdego pomieszczenia wyceny.',
+            '„Dodaj usługi” otwiera panel z tabelą biblioteki: usługa · grupa · sposób wyceny · stawka. Kliknij „Dodaj” przy każdej potrzebnej — panel zostaje otwarty, cel („Dodaj do: sekcja › grupa”) zmieniasz na górze. „Gotowe” zamyka. To jedyna droga dobierania usług z biblioteki.',
+            '„Pozycja ręcznie” dodaje pusty wiersz — do rzeczy spoza biblioteki.',
             'Przełącznik TAK/NIE przy pozycji: wyłączona zostaje w dokumencie jako opcja bez kwoty (jeśli tak ustawisz w Ustawieniach), ale nie wchodzi do sumy. Przełącznik przy grupie włącza lub wyłącza wszystkie jej pozycje.',
             'Ilość i jednostka („× 80 m²”, „× 3 kadry”) — z biblioteki, ale edytowalne w wierszu. Ceny wpisujesz jak w arkuszu: „1 200”, „1200,50”.',
           ],
         },
         {
           kind: 'p',
-          text: 'Pomieszczenia (prawa kolumna): nazwa, ilość i typ ze słownika oraz dwie flagi — W (część wizualna) i T (część techniczna). Usługi liczone „według pomieszczeń” biorą stąd swoje składniki: stawka z biblioteki × pomieszczenia w zasięgu usługi. Wiersz takiej pozycji pokazuje pod kwotą „od X · N pom.”, żeby było wiadomo, skąd liczba.',
+          text: 'Pomieszczenia (prawa kolumna): nazwa, ilość i typ ze słownika oraz dwie flagi — W (część wizualna, czyli projekt aranżacji) i T (część techniczna, czyli rysunki wykonawcze). Usługi liczone „według pomieszczeń” biorą stąd swoje składniki: stawka z biblioteki × pomieszczenia w zasięgu usługi. Pod listą stoi zdanie „Do części wizualnej liczy się N, do technicznej M” — to dokładnie te liczby, które bierze cennik. Wiersz takiej pozycji pokazuje pod kwotą „od X · N pom.”, żeby było wiadomo, skąd liczba.',
         },
         {
           kind: 'warn',
@@ -175,12 +252,31 @@ export const helpPl = {
           kind: 'list',
           items: [
             'Statusy: Szkic → Wysłana → Zaakceptowana / Odrzucona / Wygasła. „Archiwalna” to wersja zastąpiona przez nowszą — nie kosz.',
-            'Eksport PDF pyta „Oznaczyć jako wysłaną?”. Status zmienisz też z menu wiersza w rejestrze.',
+            'Eksport PDF pyta „Oznaczyć jako wysłaną?”. „Wysłana” to jedyny status, który ustawiasz ręcznie — wysłanie oferty jest Twoją czynnością.',
+            'Zaakceptowana i Odrzucona zapisuje WYŁĄCZNIE klient, pod linkiem. Dzięki temu data i przyjęty zakres są jego odpowiedzią, a nie naszym domysłem.',
             '„Nowa wersja” (menu „⋯” w edytorze albo w rejestrze) tworzy v2 z tą samą treścią i numerem; v1 zostaje w linii wersji. Numer wersji na dokumencie jest domyślnie ukryty (Ustawienia), w nazwie pliku — zawsze.',
             '„Duplikuj” robi niezależną wycenę z nowym numerem, „Przenieś do projektu” zmienia teczkę.',
             'Rejestr (Wyceny): filtry statusów jako pigułki (archiwalne domyślnie ukryte), filtr klienta i miasta, szukajka, sortowanie. Kolumna notatek to notatki wewnętrzne — nigdy nie trafiają do PDF ani do szablonu.',
             '„Eksportuj rejestr (CSV)” zapisuje to, co widać po filtrach, w układzie otwierającym się w Excelu bez przekodowania.',
           ],
+        },
+        {
+          kind: 'p',
+          text: 'LINK DLA KLIENTA. Menu „⋯” w edytorze → „Udostępnij”. Powstaje adres, który klient otwiera w przeglądarce bez konta. Link niesie komplet: wycenę z przełącznikami TAK/NIE, termin i dokumenty towarzyszące — klient widzi dokładnie to, co akceptuje.',
+        },
+        {
+          kind: 'steps',
+          items: [
+            'Klient przełącza pozycje i widzi, jak zmienia się kwota.',
+            'Ma trzy drogi wyjścia: „Akceptuję ofertę”, „Mam uwagi” albo „Nie skorzystam z tej oferty” (z opcjonalnym powodem).',
+            'Odpowiedź wraca do wyceny jako oś „Na czym stoimy”: wysłano → otwarto → uwagi → decyzja. Kroki, które jeszcze nie zaszły, zostają na liście wyszarzone — dzięki temu widać, na co się czeka.',
+            'Pod osią stoi lista pozycji, które klient ODZNACZYŁ — nazwami, nie liczbą. Od nich zaczyna się telefon do klienta.',
+          ],
+        },
+        {
+          kind: 'warn',
+          title: 'Odmowa zamyka ofertę',
+          text: 'Po odrzuceniu tej samej wyceny nie da się już zaakceptować — trzeba zrobić nową wersję. Klient widzi to zdanie przed potwierdzeniem, razem z podpowiedzią, że przy poprawkach lepszą drogą są uwagi.',
         },
       ],
     },
@@ -193,10 +289,11 @@ export const helpPl = {
         {
           kind: 'steps',
           items: [
-            'Podaj datę startu, dni robocze w tygodniu u Ciebie i u inwestora oraz czy liczyć święta.',
+            'Blok „Założenia” na górze: data startu prac, dni robocze w tygodniu po Twojej i po stronie inwestora oraz to, czy liczymy polskie święta. Z tych czterech wartości wychodzą daty w podsumowaniu obok.',
             'Etapy (inwentaryzacja, rzuty, koncepcja, wizualizacje, rysunki techniczne…) mają dni bazowe i — dla etapów zależnych od pomieszczeń — dni na typ pomieszczenia. Lista startuje z szablonu z Ustawień.',
             'Włączona pozycja wyceny z etykietą (np. „wizualizacje”) sama włącza pasujący etap — tylko włącza, nigdy nie wyłącza; komunikat pozwala cofnąć.',
-            'Wynik: termin optymalny (sama Twoja praca) i najpóźniejszy (z dniami inwestora na decyzje). Bez daty startu widzisz liczbę dni i zgrubny przelicznik na tygodnie.',
+            'Kolumna „Kto” przy etapie: ARCH. to czas pracowni, INW. — czas po stronie inwestora (decyzje, akceptacje, zbieranie inspiracji). Rozdzielamy je, bo to drugie najczęściej rozciąga termin, a najtrudniej je potem wytłumaczyć.',
+            'Wynik: termin optymalny (zakłada, że inwestor odpowiada od ręki) i najpóźniejszy (dolicza jego dni w całości). Prawda leży pomiędzy — dlatego widełki, a nie jedna data. Bez daty startu widzisz liczbę dni i zgrubny przelicznik na tygodnie.',
           ],
         },
         {
@@ -251,7 +348,7 @@ export const helpPl = {
       blocks: [
         {
           kind: 'p',
-          text: 'Usługi to lista zwiniętych wierszy: nazwa, grupa, sposób wyceny, stawka i przełącznik „Aktywna”. Klik rozwija formularz (nazwa, opis, grupa, cena, wariant, reguła cenowa); ikona ołówka otwiera pełną stronę usługi z numerowanymi krokami i podglądem w ofercie. Pigułki grup nad listą zawężają widok, szukajka szuka w nazwie i opisie.',
+          text: 'Usługi to lista zwiniętych wierszy: nazwa, grupa, sposób wyceny, stawka i przełącznik „Aktywna”. Rozwijasz wiersz kliknięciem w tekst albo w strzałkę po prawej — działa jedno i drugie. Pod spodem otwiera się formularz (nazwa, opis, grupa, cena, wariant, reguła cenowa); ikona ołówka prowadzi do pełnej strony usługi z numerowanymi krokami i podglądem w ofercie. Pigułki grup nad listą zawężają widok, szukajka szuka w nazwie i opisie.',
         },
         {
           kind: 'list',
@@ -328,7 +425,19 @@ export const helpPl = {
             'Wycena bierze te ustawienia jako kopię w chwili utworzenia — zmiana VAT nie rusza ofert, które już poszły.',
             'Biblioteka: „Usuń pozostałe przykładowe (N)”.',
             'Pliki: pasek zużycia limitu.',
-            'Konto: zmiana hasła, „Eksportuj dane” (jeden JSON ze wszystkim: wyceny z treścią, biblioteka, zestawy, szablony, klienci, ustawienia, lista plików) i „Usuń konto” — bezpowrotnie, z potwierdzeniem słowem.',
+            'Konto: Twoje zdjęcie (widać je w pasku nawigacji), zmiana hasła, „Eksportuj dane” (jeden JSON ze wszystkim: wyceny z treścią, biblioteka, zestawy, szablony, klienci, ustawienia, lista plików) i „Usuń konto” — bezpowrotnie, z potwierdzeniem słowem.',
+          ],
+        },
+        {
+          kind: 'p',
+          text: 'BRANDING (Ustawienia → Branding) składa się z trzech rzeczy: znaku, kolorów i kroju pisma. Znak wgrywasz w dwóch wersjach — ciemnej (na jasny nagłówek) i jasnej (na ciemny). O tym, który stanie na pasie, decyduje ustawienie „Logo na nagłówku”: „Dobierz sam” patrzy na kolor marki, a „Zawsze znak jasny / ciemny” wyłącza tę regułę — przydaje się przy znakach z własnym białym tłem.',
+        },
+        {
+          kind: 'list',
+          items: [
+            '„Kolor marki” to pas na górze każdej strony PDF — ten za logo i numerem oferty. Tym samym kolorem drukują się tytuły sekcji i linia nad podpisem. Kolor tekstu na pasie dobiera się sam pod kontrast.',
+            '„Tło podsumowania kosztów” wypełnia ramkę z sumą na końcu oferty. Kwoty drukujemy na niej ciemnym atramentem, więc trzymaj się jasnego odcienia.',
+            'Podgląd na dole strony to prawdziwy PDF złożony z bieżących ustawień — także tych jeszcze niezapisanych.',
           ],
         },
         {
@@ -367,7 +476,7 @@ export const helpPl = {
             { keys: 'Ctrl / ⌘ + Enter', action: 'W palecie: otwórz wycenę od razu w edycji' },
             { keys: 'Ctrl / ⌘ + S', action: 'W edytorze: zapisz teraz (autozapis i tak działa)' },
             { keys: 'Enter / Esc', action: 'W polu tekstowym wyceny: zatwierdź / cofnij' },
-            { keys: 'Strzałki + Enter', action: 'W popoverze „Z biblioteki”: przeglądaj i wstaw' },
+            { keys: 'Szukajka w panelu', action: 'W „Dodaj usługi”: filtruj bibliotekę po nazwie i grupie' },
             { keys: 'Przeciągnij za uchwyt ⋮⋮', action: 'Zmień kolejność pozycji, grup, sekcji, grup w bibliotece' },
           ],
         },
@@ -413,6 +522,22 @@ export const helpPl = {
             {
               q: 'Gdzie są moje dane i jak je zabrać?',
               a: 'Ustawienia → Konto → „Eksportuj dane” zapisuje jeden plik JSON ze wszystkim. Działa także po wygaśnięciu subskrypcji.',
+            },
+            {
+              q: 'Nie mogę ręcznie oznaczyć wyceny jako zaakceptowanej.',
+              a: 'I nie da się — to celowe. Akceptację i odmowę zapisuje wyłącznie klient, pod linkiem („Udostępnij”). Dzięki temu data i przyjęty zakres są jego odpowiedzią, a nie naszym domysłem. Ręcznie ustawiasz tylko „Wysłana”.',
+            },
+            {
+              q: 'Klient nie chce oferty. Jak to zapisać?',
+              a: 'Klient klika „Nie skorzystam z tej oferty” pod linkiem i może dopisać powód. Wycena dostaje status Odrzucona, a powód pojawia się na osi „Na czym stoimy” w edytorze.',
+            },
+            {
+              q: 'Podgląd brandingu nie działa na macOS.',
+              a: 'To był błąd zabezpieczeń okna aplikacji (generator PDF potrzebuje WebAssembly). Naprawione — jeśli wersja jest starsza, zaktualizuj aplikację.',
+            },
+            {
+              q: 'Po rozwinięciu paska nawigacji treść ucieka poza ekran.',
+              a: 'Na oknach węższych niż 1280 px rozwinięty pasek nasuwa się teraz NA treść zamiast ją odsuwać. Chowa się kliknięciem obok albo po przejściu do innego ekranu.',
             },
           ],
         },

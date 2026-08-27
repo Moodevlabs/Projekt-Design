@@ -103,12 +103,14 @@ export function RoomRow({
         <FlagToggle
           active={room.includedInVisual}
           label={pl.editor.roomVisual(label)}
+          title={pl.editor.roomVisualTitle}
           short={pl.editor.roomVisualShort}
           onToggle={() => onPatch({ includedInVisual: !room.includedInVisual })}
         />
         <FlagToggle
           active={room.includedInTechnical}
           label={pl.editor.roomTechnical(label)}
+          title={pl.editor.roomTechnicalTitle}
           short={pl.editor.roomTechnicalShort}
           onToggle={() => onPatch({ includedInTechnical: !room.includedInTechnical })}
         />
@@ -120,11 +122,14 @@ export function RoomRow({
 function FlagToggle({
   active,
   label,
+  title,
   short,
   onToggle,
 }: {
   active: boolean;
   label: string;
+  /** Podpowiedź pod kursorem — sama litera nic nie mówi. */
+  title: string;
   short: string;
   onToggle: () => void;
 }) {
@@ -132,6 +137,7 @@ function FlagToggle({
     <button
       type="button"
       aria-label={label}
+      title={title}
       aria-pressed={active}
       onClick={onToggle}
       className={cn(

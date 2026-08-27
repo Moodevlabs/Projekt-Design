@@ -47,6 +47,10 @@ export const queryKeys = {
   libraryGroups: (workspaceId?: string) =>
     workspaceId ? (['library', 'groups', workspaceId] as const) : (['library', 'groups'] as const),
   /** Linki klienta, uwagi i akceptacja — wszystko per wycena (T-25/T-26). */
+  /** Briefy klienta (T-93) — pod kluczem klienta, bo to jego dokument. */
+  briefs: (clientId: string) => ['clients', 'detail', clientId, 'briefs'] as const,
+  /** Wizje lokalne projektu (T-94). */
+  siteVisits: (projectId: string) => ['projects', 'detail', projectId, 'site-visits'] as const,
   shares: (quoteId: string) => ['quotes', 'detail', quoteId, 'shares'] as const,
   quoteComments: (quoteId: string) => ['quotes', 'detail', quoteId, 'comments'] as const,
   quoteAcceptance: (quoteId: string) => ['quotes', 'detail', quoteId, 'acceptance'] as const,

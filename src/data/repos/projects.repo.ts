@@ -52,6 +52,7 @@ function mapOverview(row: Row): ProjectOverview {
   return {
     ...mapProject(row),
     clientName: text(row.client_name),
+    clientAvatarPath: (row.client_avatar_path as string | null) ?? null,
     quotesCount: Number(row.quotes_count ?? 0),
     acceptedNetCents: Number(row.accepted_net_cents ?? 0),
     lastActivityAt: (row.last_activity_at as string) ?? (row.updated_at as string),

@@ -7,7 +7,16 @@ import {
   type SharedQuotePayload,
 } from '@/domain/share/schema';
 
+import {
+  BriefSubmitResultSchema,
+  SharedBriefPayloadSchema,
+  type BriefAnswers,
+  type BriefSubmitResult,
+  type SharedBriefPayload,
+} from '@/domain/brief';
+
 export { tokenFromPath } from '@/domain/share/schema';
+export { briefTokenFromPath } from '@/domain/brief';
 import type { Database } from '@/data/types.generated';
 
 /**
@@ -57,6 +66,27 @@ export async function acceptSharedQuote(
   return ShareActionResultSchema.parse(data);
 }
 
+/**
+ * Odmowa (poprawka 7a, 2026-08-27).
+ *
+ * Powód jest opcjonalny — wymuszanie uzasadnienia przy „nie" zamienia jedno
+ * kliknięcie w rozmowę, której klient może nie chcieć prowadzić. Wtedy nie
+ * odpowie wcale, a projektant zostanie z ciszą zamiast z odpowiedzią.
+ */
+export async function rejectSharedQuote(
+  token: string,
+  signerName: string,
+  reason: string,
+): Promise<ShareActionResult> {
+  const { data, error } = await client.rpc('reject_shared_quote', {
+    p_token: token,
+    p_signer_name: signerName,
+    p_reason: reason.trim() || null,
+  });
+  if (error) throw new Error(error.message);
+  return ShareActionResultSchema.parse(data);
+}
+
 export async function commentSharedQuote(
   token: string,
   authorName: string,
@@ -69,6 +99,28 @@ export async function commentSharedQuote(
   });
   if (error) throw new Error(error.message);
   return ShareActionResultSchema.parse(data);
+}
+
+/**
+ * Brief klienta (T-93, poprawka 9) — ta sama zasada co przy ofercie: dwa RPC
+ * i zero dostępu do tabel. Token jest jedynym uchwytem.
+ */
+export async function fetchSharedBrief(token: string): Promise<SharedBriefPayload> {
+  const { data, error } = await client.rpc('get_shared_brief', { p_token: token });
+  if (error) throw new Error(error.message);
+  return SharedBriefPayloadSchema.parse(data);
+}
+
+export async function submitSharedBrief(
+  token: string,
+  answers: BriefAnswers,
+): Promise<BriefSubmitResult> {
+  const { data, error } = await client.rpc('submit_shared_brief', {
+    p_token: token,
+    p_answers: answers,
+  });
+  if (error) throw new Error(error.message);
+  return BriefSubmitResultSchema.parse(data);
 }
 
 /**

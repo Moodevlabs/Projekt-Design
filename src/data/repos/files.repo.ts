@@ -29,6 +29,7 @@ function mapFile(row: Row): StoredFile {
     clientId: row.client_id as string,
     projectId: (row.project_id as string | null) ?? null,
     quoteId: (row.quote_id as string | null) ?? null,
+    siteVisitId: (row.site_visit_id as string | null) ?? null,
     kind: FileKindSchema.catch('upload').parse(row.kind),
     docType: DocTypeSchema.nullable()
       .catch(null)
@@ -51,6 +52,8 @@ export interface FileFilters {
   clientId?: string;
   /** Pliki jednej teczki. */
   projectId?: string;
+  /** Zdjęcia z jednej wizji lokalnej (T-94). */
+  siteVisitId?: string;
   kind?: FileKind;
 }
 
@@ -63,6 +66,7 @@ export async function listFiles(filters: FileFilters): Promise<StoredFile[]> {
 
   if (filters.clientId) query = query.eq('client_id', filters.clientId);
   if (filters.projectId) query = query.eq('project_id', filters.projectId);
+  if (filters.siteVisitId) query = query.eq('site_visit_id', filters.siteVisitId);
   if (filters.kind) query = query.eq('kind', filters.kind);
 
   const rows = unwrap(await query.order('created_at', { ascending: false }), 'Lista plików');
@@ -109,6 +113,8 @@ export interface UploadFileInput {
   workspaceId: string;
   clientId: string;
   projectId?: string | null;
+  /** Zdjęcie z wizji lokalnej (T-94) — plik zostaje plikiem projektu. */
+  siteVisitId?: string | null;
   /** Nazwa widoczna na liście — bierzemy ją od użytkownika, nie ze ścieżki. */
   name: string;
   mime?: string;
@@ -148,6 +154,7 @@ export async function uploadFile(input: UploadFileInput): Promise<StoredFile> {
     workspace_id: input.workspaceId,
     client_id: input.clientId,
     project_id: input.projectId ?? null,
+    site_visit_id: input.siteVisitId ?? null,
     kind: 'upload',
     name: input.name,
     mime: input.mime || null,

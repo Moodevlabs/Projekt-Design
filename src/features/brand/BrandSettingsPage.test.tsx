@@ -40,6 +40,29 @@ describe('BrandSettingsPage', () => {
     expect(screen.getByLabelText(pl.brand.companyName)).toHaveValue('Studio Wnętrz');
   });
 
+  it('pozwala wymusic wariant logo na naglowku (poprawka 3)', async () => {
+    const user = userEvent.setup();
+    // Domyslny kolor marki jest ciemny, wiec „dobierz sam" daje znak JASNY.
+    render(<BrandSettingsPage />);
+    // Zdanie niesie tez ostrzezenie o braku wgranego pliku, stad dopasowanie
+    // po fragmencie, a nie po calym ciagu.
+    expect(screen.getByText(/Teraz na nagłówku stoi znak jasny/)).toBeInTheDocument();
+
+    await user.click(screen.getByRole('radio', { name: pl.brand.headerLogoDark }));
+    expect(screen.getByText(/Teraz na nagłówku stoi znak ciemny/)).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: pl.common.save }));
+    const patch = updateMutate.mock.calls[0]?.[0] as BrandKit;
+    expect(patch.headerLogo).toBe('dark');
+  });
+
+  it('mowi wprost, ktory kolor gdzie widac', () => {
+    render(<BrandSettingsPage />);
+    // Etykieta „Kolor akcentu" nie odpowiadala na jedyne zadawane tu pytanie.
+    expect(screen.getByText(pl.brand.accentColorHint)).toBeInTheDocument();
+    expect(screen.getByText(pl.brand.bgColorHint)).toBeInTheDocument();
+  });
+
   it('bez zmian nie pokazuje paska zapisu', () => {
     render(<BrandSettingsPage />);
     // Pasek ma sie pojawiac dopiero, gdy jest co zapisywac.

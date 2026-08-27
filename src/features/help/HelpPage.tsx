@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import {
   ArrowRight,
   CircleHelp,
+  ClipboardList,
   Clock,
   CreditCard,
   Download,
@@ -12,6 +13,7 @@ import {
   LayoutDashboard,
   LayoutTemplate,
   Library,
+  Ruler,
   Settings,
   Upload,
   Users,
@@ -30,6 +32,9 @@ import { cn } from '@/lib/utils';
 const ICONS: Record<HelpSection['icon'], LucideIcon> = {
   start: LayoutDashboard,
   clients: Users,
+  // Brief i wizja lokalna (poprawki 9 i 10).
+  brief: ClipboardList,
+  visit: Ruler,
   quote: FileText,
   status: History,
   schedule: Clock,

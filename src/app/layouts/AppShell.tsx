@@ -3,6 +3,7 @@ import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 import { WorkspaceGuard } from './WorkspaceGuard';
 import { OfflineBanner } from '@/features/offline/OfflineBanner';
+import { TrialDialog } from '@/features/billing/TrialDialog';
 import { pl } from '@/i18n/pl';
 
 type RouteHandle = { title?: string; hideTopbar?: boolean };
@@ -31,6 +32,7 @@ export function AppShell() {
             <Outlet />
           </WorkspaceGuard>
         </main>
+        <TrialDialog />
       </div>
     );
   }
@@ -50,6 +52,13 @@ export function AppShell() {
           </WorkspaceGuard>
         </main>
       </div>
+
+      {/*
+        Okres próbny zgłasza się raz dziennie, oknem — a nie kartą stojącą
+        na pulpicie na stałe (poprawka 6). Wisi w powłoce, nie na pulpicie:
+        aplikację otwiera się czasem prosto w wycenie.
+      */}
+      <TrialDialog />
     </div>
   );
 }

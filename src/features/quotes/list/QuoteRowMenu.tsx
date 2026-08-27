@@ -34,8 +34,26 @@ import { canCreateVersion, type QuoteStatus } from '@/domain/quote';
 import { routes } from '@/app/routes';
 import { pl } from '@/i18n/pl';
 
-/** Statusy, które ustawia się ręcznie z listy. `draft` jest stanem wyjściowym. */
-const SETTABLE: QuoteStatus[] = ['sent', 'accepted', 'rejected'];
+/**
+ * Statusy, które wolno ustawić ręcznie.
+ *
+ * ## Dlaczego tylko „wysłana" (poprawka 7a, 2026-08-27)
+ *
+ * `accepted` i `rejected` zniknęły z tego menu. To są **odpowiedzi klienta**
+ * i od teraz zapisuje je wyłącznie on — akceptacją albo odmową pod linkiem
+ * (`accept_shared_quote` / `reject_shared_quote`). Ręczne przeklikanie
+ * zaburzało hierarchię, i to na dwa sposoby naraz:
+ *
+ *  * wycena wchodziła w stan „zaakceptowana" **bez wpisu akceptacji**, więc
+ *    nie dało się odpowiedzieć na pytanie, KTÓRY zakres klient przyjął ani
+ *    kiedy — a to jest jedyny powód, dla którego ten stan w ogóle istnieje;
+ *  * data odrzucenia znaczyła „dzień, w którym projektant stracił nadzieję",
+ *    a nie dzień, w którym klient odpowiedział.
+ *
+ * „Wysłana" zostaje, bo to fakt po NASZEJ stronie: wysłanie oferty jest
+ * czynnością projektanta i nikt inny nie może o nim zameldować.
+ */
+const SETTABLE: QuoteStatus[] = ['sent'];
 
 export function QuoteRowMenu({
   quoteId,

@@ -5,11 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { EmptyState, Money } from '@/components/shared';
-import { ClientStatusBadge } from './ClientsTable';
+import { ClientStatusBadge } from './ClientStatusBadge';
 import { ClientFormDialog } from './ClientFormDialog';
 import { ClientQuotesTab } from './ClientQuotesTab';
 import { ClientNotesTab } from './ClientNotesTab';
 import { ClientProjectsTab } from '@/features/projects/ClientProjectsTab';
+import { ClientBriefTab } from '@/features/brief/ClientBriefTab';
 import { FilesTab } from '@/features/files/FilesTab';
 import { DocumentsTab } from '@/features/files/DocumentsTab';
 import { ClientRowMenu } from './ClientRowMenu';
@@ -121,6 +122,12 @@ export function ClientPage() {
       <Tabs defaultValue="projects" className="space-y-4">
         <TabsList aria-label={pl.clients.title}>
           <TabsTrigger value="projects">{pl.clients.tabProjects}</TabsTrigger>
+          {/*
+            Brief stoi ZARAZ PO projektach, przed wycenami — bo w kolejności
+            współpracy jest pierwszy: dopiero z jego odpowiedzi wiadomo, co
+            wycenić (poprawka 9).
+          */}
+          <TabsTrigger value="brief">{pl.brief.tab}</TabsTrigger>
           <TabsTrigger value="quotes">{pl.clients.tabQuotes}</TabsTrigger>
           <TabsTrigger value="documents">{pl.documents.tab}</TabsTrigger>
           <TabsTrigger value="files">{pl.files.tab}</TabsTrigger>
@@ -129,6 +136,9 @@ export function ClientPage() {
 
         <TabsContent value="projects">
           <ClientProjectsTab client={data} />
+        </TabsContent>
+        <TabsContent value="brief">
+          <ClientBriefTab clientId={data.id} />
         </TabsContent>
         <TabsContent value="quotes">
           <ClientQuotesTab client={data} />

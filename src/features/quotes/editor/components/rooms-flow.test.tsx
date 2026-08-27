@@ -122,46 +122,9 @@ describe('dodawanie pomieszczenia', () => {
   });
 });
 
-describe('rozpisanie sekcji na pomieszczenia', () => {
-  it('blok bierze nazwę z WYBRANEGO typu, a nie „Nowe pomieszczenie"', async () => {
-    const user = userEvent.setup();
-    render(<PanelNaStorze />);
-
-    await user.click(screen.getByRole('button', { name: pl.editor.addRoom }));
-    await user.selectOptions(
-      screen.getByLabelText(pl.editor.roomTypeLabel('Nowe pomieszczenie')),
-      'rt-kuchnia',
-    );
-
-    const sectionId = useEditorStore.getState().body?.sections[0]?.id;
-    if (!sectionId) throw new Error('brak sekcji');
-    useEditorStore.getState().addRoomBlocks(sectionId);
-
-    const group = useEditorStore.getState().body?.sections[0]?.groups[0];
-    expect(group?.name).toBe('Kuchnia');
-    expect(group?.roomId).toBe(pomieszczenia()[0]?.id);
-  });
-
-  it('zmiana nazwy pomieszczenia po rozpisaniu przechodzi na blok', async () => {
-    // Naglowek bloku czyta nazwe pomieszczenia na zywo — dlatego nie da sie
-    // (i nie trzeba) edytowac go w miejscu.
-    const user = userEvent.setup();
-    render(<PanelNaStorze />);
-    await user.click(screen.getByRole('button', { name: pl.editor.addRoom }));
-
-    const sectionId = useEditorStore.getState().body?.sections[0]?.id;
-    if (!sectionId) throw new Error('brak sekcji');
-    useEditorStore.getState().addRoomBlocks(sectionId);
-
-    await user.selectOptions(
-      screen.getByLabelText(pl.editor.roomTypeLabel('Nowe pomieszczenie')),
-      'rt-salon',
-    );
-
-    const room = pomieszczenia()[0];
-    const group = useEditorStore.getState().body?.sections[0]?.groups[0];
-    expect(room?.label).toBe('Salon');
-    // Blok dalej wskazuje to samo pomieszczenie, wiec naglowek pokaze „Salon".
-    expect(group?.roomId).toBe(room?.id);
-  });
-});
+/*
+ * Blok „rozpisanie sekcji na pomieszczenia" zniknal razem z akcja
+ * `addRoomBlocks` (poprawka 7, 2026-08-27). Zasada, ktorej pilnowal — naglowek
+ * bloku czyta nazwe pomieszczenia NA ZYWO, wiec zmiana typu przechodzi na blok
+ * — obowiazuje dalej i sprawdza ja `GroupBlock.test`.
+ */

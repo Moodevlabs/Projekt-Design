@@ -25,6 +25,8 @@ const TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'];
 export function LogoField({
   variant,
   label,
+  hint,
+  active = false,
   path,
   uploading,
   onUpload,
@@ -32,6 +34,10 @@ export function LogoField({
 }: {
   variant: LogoVariant;
   label: string;
+  /** Jedno zdanie: na jaki nagłówek jest ta wersja. */
+  hint?: string;
+  /** Czy to TEN wariant, który stoi teraz na nagłówku PDF. */
+  active?: boolean;
   path: string | null;
   uploading: boolean;
   onUpload: (file: File) => void;
@@ -54,11 +60,25 @@ export function LogoField({
 
   return (
     <div className="space-y-2">
-      <p className="text-ink text-sm font-medium">{label}</p>
+      <p className="text-ink flex flex-wrap items-center gap-2 text-sm font-medium">
+        {label}
+        {/*
+          Znacznik „na nagłówku" mówi, który z dwóch plików faktycznie jedzie
+          do PDF-a. Bez tego strona pokazuje dwa loga i milczy o tym, że
+          dokument bierze tylko jedno z nich.
+        */}
+        {active ? (
+          <span className="bg-surface-2 text-ink-soft rounded-[var(--radius-pill)] px-2 py-0.5 text-[10.5px] font-normal">
+            {pl.brand.headerLogo}
+          </span>
+        ) : null}
+      </p>
+      {hint ? <p className="text-ink-soft text-xs">{hint}</p> : null}
 
       <div
         className={cn(
-          'border-hair flex h-24 items-center justify-center rounded-[var(--radius-card)] border p-3',
+          'flex h-24 items-center justify-center rounded-[var(--radius-card)] border p-3',
+          active ? 'border-ink/40 border-2' : 'border-hair',
           variant === 'light' ? 'bg-brown' : 'bg-surface',
         )}
       >

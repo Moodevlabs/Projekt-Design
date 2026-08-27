@@ -46,6 +46,7 @@ export type Database = {
           default_valid_days: number
           font_family: string
           footer_text: string | null
+          header_logo: string
           logo_dark_path: string | null
           logo_light_path: string | null
           opening_hours: Json
@@ -66,6 +67,7 @@ export type Database = {
           default_valid_days?: number
           font_family?: string
           footer_text?: string | null
+          header_logo?: string
           logo_dark_path?: string | null
           logo_light_path?: string | null
           opening_hours?: Json
@@ -86,6 +88,7 @@ export type Database = {
           default_valid_days?: number
           font_family?: string
           footer_text?: string | null
+          header_logo?: string
           logo_dark_path?: string | null
           logo_light_path?: string | null
           opening_hours?: Json
@@ -105,10 +108,144 @@ export type Database = {
           },
         ]
       }
+      client_briefs: {
+        Row: {
+          answers: Json
+          client_id: string
+          created_at: string
+          expires_at: string | null
+          first_viewed_at: string | null
+          id: string
+          last_viewed_at: string | null
+          project_id: string | null
+          revoked_at: string | null
+          submitted_at: string | null
+          template: Json
+          token: string
+          updated_at: string
+          view_count: number
+          workspace_id: string
+        }
+        Insert: {
+          answers?: Json
+          client_id: string
+          created_at?: string
+          expires_at?: string | null
+          first_viewed_at?: string | null
+          id?: string
+          last_viewed_at?: string | null
+          project_id?: string | null
+          revoked_at?: string | null
+          submitted_at?: string | null
+          template?: Json
+          token?: string
+          updated_at?: string
+          view_count?: number
+          workspace_id: string
+        }
+        Update: {
+          answers?: Json
+          client_id?: string
+          created_at?: string
+          expires_at?: string | null
+          first_viewed_at?: string | null
+          id?: string
+          last_viewed_at?: string | null
+          project_id?: string | null
+          revoked_at?: string | null
+          submitted_at?: string | null
+          template?: Json
+          token?: string
+          updated_at?: string
+          view_count?: number
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_briefs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_briefs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_briefs_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      site_visits: {
+        Row: {
+          attendees: string
+          checks: Json
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string
+          project_id: string
+          rooms: Json
+          updated_at: string
+          visited_at: string
+          workspace_id: string
+        }
+        Insert: {
+          attendees?: string
+          checks?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string
+          project_id: string
+          rooms?: Json
+          updated_at?: string
+          visited_at?: string
+          workspace_id: string
+        }
+        Update: {
+          attendees?: string
+          checks?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string
+          project_id?: string
+          rooms?: Json
+          updated_at?: string
+          visited_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_visits_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_visits_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           address: string | null
           archived_at: string | null
+          avatar_path: string | null
           city: string | null
           created_at: string
           deleted_at: string | null
@@ -124,6 +261,7 @@ export type Database = {
         Insert: {
           address?: string | null
           archived_at?: string | null
+          avatar_path?: string | null
           city?: string | null
           created_at?: string
           deleted_at?: string | null
@@ -139,6 +277,7 @@ export type Database = {
         Update: {
           address?: string | null
           archived_at?: string | null
+          avatar_path?: string | null
           city?: string | null
           created_at?: string
           deleted_at?: string | null
@@ -175,6 +314,7 @@ export type Database = {
           project_id: string | null
           quote_id: string | null
           quote_version: number | null
+          site_visit_id: string | null
           size_bytes: number
           storage_path: string
           updated_at: string
@@ -193,6 +333,7 @@ export type Database = {
           project_id?: string | null
           quote_id?: string | null
           quote_version?: number | null
+          site_visit_id?: string | null
           size_bytes: number
           storage_path: string
           updated_at?: string
@@ -211,6 +352,7 @@ export type Database = {
           project_id?: string | null
           quote_id?: string | null
           quote_version?: number | null
+          site_visit_id?: string | null
           size_bytes?: number
           storage_path?: string
           updated_at?: string
@@ -552,8 +694,10 @@ export type Database = {
         Row: {
           accepted_at: string
           accepted_body: Json
+          decision: string
           enabled_item_ids: string[]
           id: string
+          reason: string | null
           quote_id: string
           share_id: string | null
           signer_ip: unknown
@@ -572,8 +716,10 @@ export type Database = {
         Update: {
           accepted_at?: string
           accepted_body?: Json
+          decision?: string
           enabled_item_ids?: string[]
           id?: string
+          reason?: string | null
           quote_id?: string
           share_id?: string | null
           signer_ip?: unknown
@@ -1030,6 +1176,7 @@ export type Database = {
           accepted_net_cents: number | null
           address: string | null
           archived_at: string | null
+          avatar_path: string | null
           city: string | null
           created_at: string | null
           deleted_at: string | null
@@ -1061,6 +1208,7 @@ export type Database = {
           address: string | null
           area_m2: number | null
           city: string | null
+          client_avatar_path: string | null
           client_id: string | null
           client_name: string | null
           created_at: string | null
@@ -1113,6 +1261,18 @@ export type Database = {
       }
       comment_shared_quote: {
         Args: { p_author_name: string; p_message: string; p_token: string }
+        Returns: Json
+      }
+      get_shared_brief: {
+        Args: { p_token: string }
+        Returns: Json
+      }
+      reject_shared_quote: {
+        Args: { p_reason?: string | null; p_signer_name: string; p_token: string }
+        Returns: Json
+      }
+      submit_shared_brief: {
+        Args: { p_answers: Json; p_token: string }
         Returns: Json
       }
       files_bump_usage: {

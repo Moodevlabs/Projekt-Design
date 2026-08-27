@@ -45,6 +45,9 @@ describe('BrandKitSchema', () => {
       companyName: '',
       logoDarkPath: null,
       logoLightPath: null,
+      // Parytet z `0030_brand_header_logo.sql`: domyślnie o wariancie decyduje
+      // kontrast do koloru marki, tak jak przed wprowadzeniem tego pola.
+      headerLogo: 'auto',
       accentColor: '#33251E',
       bgColor: '#EFECE8',
       fontFamily: 'Lato',
@@ -92,6 +95,8 @@ describe('WorkspaceSettingsSchema', () => {
       scheduleTemplate: null,
       stagesTemplate: null,
       priceListTemplate: null,
+      // Zdjecie uzytkownika (poprawka 4) — brak zdjecia znaczy inicjaly.
+      avatarPath: null,
     });
   });
 

@@ -195,6 +195,10 @@ export const pl = {
     newTitle: 'Nowy klient',
     formHint: 'Wystarczy nazwa. Resztę uzupełnisz w każdej chwili.',
 
+    // Zdjęcie klienta (poprawka 5).
+    avatar: 'Zdjęcie klienta',
+    avatarHint: 'Widać je na karcie klienta i na liście. Nie trafia do żadnego dokumentu.',
+
     name: 'Nazwa',
     namePlaceholder: 'Anna i Piotr Kowalscy',
     phone: 'Telefon',
@@ -554,6 +558,38 @@ Pozdrawiam`,
     // Powiadomienia Realtime (T-26).
     acceptedToast: 'Klient zaakceptował ofertę.',
     commentToast: 'Klient zostawił uwagi do oferty.',
+
+    /*
+     * ŚCIEŻKA DECYZJI (poprawka 7a, 2026-08-27).
+     *
+     * Do tej pory o tym, co się dzieje z ofertą, mówiły trzy rozsypane
+     * elementy: pigułka statusu, wiersz „otwarty 4 razy" w oknie udostępniania
+     * i osobna karta akceptacji. Każdy z nich był prawdziwy i żaden nie
+     * odpowiadał na pytanie „na czym stoimy". Oś odpowiada.
+     */
+    pathTitle: 'Na czym stoimy',
+    pathSent: 'Oferta wysłana',
+    pathSentPending: 'Jeszcze nie wysłana',
+    pathSentHint: 'Utwórz link albo oznacz wycenę jako wysłaną.',
+    pathOpened: 'Klient otworzył link',
+    pathOpenedPending: 'Klient jeszcze nie otworzył',
+    pathOpenedHint: 'Dopóki link nie zostanie otwarty, nie ma na co czekać.',
+    pathComments: (count: number) =>
+      count === 1 ? '1 uwaga od klienta' : `${count} uwagi/uwag od klienta`,
+    pathCommentsNone: 'Bez uwag',
+    pathDecisionPending: 'Czekamy na decyzję',
+    pathDecisionPendingHint: 'Klient może zaakceptować ofertę, odrzucić ją albo zgłosić uwagi.',
+    pathAccepted: 'Klient przyjął ofertę',
+    pathRejected: 'Klient odrzucił ofertę',
+    pathRejectedReason: (reason: string) => `Powód: ${reason}`,
+    pathNoReason: 'Klient nie podał powodu.',
+    /** Ręczna zmiana statusu zniknęła — mówimy o tym wprost, raz. */
+    pathManualNote:
+      'Akceptację i odmowę zapisuje wyłącznie klient, pod linkiem. Dzięki temu data i zakres są jego odpowiedzią, a nie naszym domysłem.',
+
+    // Które pozycje klient odznaczył — nazwami, nie liczbą.
+    turnedOffTitle: 'Klient odznaczył',
+    turnedOnTitle: 'Klient dobrał',
   },
   editor: {
     preview: 'Podgląd',
@@ -644,7 +680,24 @@ Pozdrawiam`,
     // Pomieszczenia wyceny (cennik parametryczny).
     rooms: 'Pomieszczenia',
     roomsHint: 'Usługi liczone za pomieszczenie biorą stąd swoje składniki.',
-    roomsEmpty: 'Brak pomieszczeń. Dodaj je, jeśli wyceniasz za pomieszczenie.',
+
+    /*
+     * PANEL POMIESZCZEŃ MÓWI, PO CO JEST (poprawka 7, 2026-08-27).
+     *
+     * Wcześniej lista zaczynała się od pustego pola i dwóch kwadracików
+     * podpisanych „W" i „T". Legenda stała pod spodem, więc czytało się ją
+     * dopiero po tym, jak coś już się kliknęło.
+     */
+    roomsPurpose:
+      'Lista pomieszczeń objętych projektem. Usługi wyceniane „za pomieszczenie" mnożą przez nią swoją stawkę — reszta pozycji jej nie używa.',
+    roomsCount: (count: number) =>
+      count === 1 ? '1 pomieszczenie' : `${count} pomieszczeń`,
+    roomsColumnName: 'Pomieszczenie',
+    roomsColumnQty: 'Ile',
+    roomsSplit: (visual: number, technical: number) =>
+      `Do części wizualnej liczy się ${visual}, do technicznej ${technical}.`,
+    roomsEmpty:
+      'Brak pomieszczeń. Dodaj je tylko wtedy, gdy któraś usługa liczy się za pomieszczenie — inaczej lista nic nie zmienia.',
     addRoom: 'Dodaj pomieszczenie',
     newRoomName: 'Nowe pomieszczenie',
     roomNameLabel: (room: string) => `Nazwa pomieszczenia: ${room}`,
@@ -661,16 +714,16 @@ Pozdrawiam`,
     roomTechnical: (room: string) => `Część techniczna: ${room}`,
     roomVisualShort: 'W',
     roomTechnicalShort: 'T',
-    roomFlagsHint: 'W — część wizualna, T — techniczna. Decydują, co wchodzi do której usługi.',
-    /** Bloki per pomieszczenie w sekcji. */
-    addRoomBlocks: 'Rozpisz na pomieszczenia',
-    addRoomBlocksDone: (count: number) =>
-      count === 1 ? 'Dodano blok 1 pomieszczenia' : `Dodano bloki ${count} pomieszczeń`,
-    addRoomBlocksNothing: 'Wszystkie pomieszczenia mają już swoje bloki.',
-    addRoomBlocksNoRooms: 'Najpierw dodaj pomieszczenia w panelu obok.',
-    addItemToAllRooms: 'Do wszystkich pomieszczeń',
-    addItemToAllRoomsDone: (count: number) =>
-      count === 1 ? 'Dodano do 1 pomieszczenia' : `Dodano do ${count} pomieszczeń`,
+    roomFlagsHint:
+      'W — część wizualna (projekt aranżacji), T — techniczna (rysunki wykonawcze). Usługa liczona za pomieszczenie bierze tylko te pomieszczenia, które ma zaznaczone.',
+    /** Podpowiedź pod kursorem na kwadraciku — legenda nie zawsze jest widoczna. */
+    roomVisualTitle: 'Wlicza się do części wizualnej',
+    roomTechnicalTitle: 'Wlicza się do części technicznej',
+    /*
+     * Teksty „Rozpisz na pomieszczenia" i „Do wszystkich pomieszczeń" usunięte
+     * 2026-08-27 razem z przyciskami (poprawka 7) — obie akcje budowały
+     * strukturę dokumentu za autora. Same bloki pomieszczeń zostają.
+     */
     roomBlockLabel: (room: string, qty: number) => (qty > 1 ? `${room} ×${qty}` : room),
     roomBlockOff: 'pominięte',
 
@@ -744,22 +797,41 @@ Pozdrawiam`,
     extrasEntryDaysLabel: (name: string) => `Dni usługi: ${name}`,
     removeExtrasEntry: (name: string) => `Usuń z terminu: ${name}`,
     scheduleTitle: 'Szacowany termin',
+    /*
+     * ZAKŁADKA MÓWI, JAK LICZY (poprawka 7b, 2026-08-27).
+     *
+     * Wcześniej zaczynała się od paska czterech pól z etykietami w rodzaju
+     * „Dni rob./tydz. — wykonawca" i listy etapów bez główki. Wszystko było
+     * prawdziwe i nic nie tłumaczyło, skąd bierze się data na dole.
+     */
     scheduleIntro:
-      'Etapy z dniami po stronie wykonawcy i inwestora. Etapy zależne od pomieszczeń liczą się z tych samych pomieszczeń co wycena.',
-    scheduleStart: 'Start',
-    scheduleProviderWeek: 'Dni rob./tydz. — wykonawca',
-    scheduleClientWeek: 'Dni rob./tydz. — inwestor',
-    scheduleHolidays: 'Święta',
-    scheduleHolidaysPl: 'polskie',
-    scheduleHolidaysNone: 'pomijaj',
+      'Termin składa się z etapów. Każdy etap ma swoje dni i stronę, która je zużywa: pracownię albo inwestora. Etapy zależne od pomieszczeń biorą je z tej samej listy co wycena.',
+    scheduleAssumptions: 'Założenia',
+    scheduleAssumptionsHint:
+      'Z tych czterech wartości wychodzą daty w podsumowaniu obok. Bez daty startu policzymy same dni.',
+    scheduleStart: 'Start prac',
+    scheduleProviderWeek: 'Dni robocze / tydzień — pracownia',
+    scheduleClientWeek: 'Dni robocze / tydzień — inwestor',
+    scheduleHolidays: 'Dni wolne',
+    scheduleHolidaysPl: 'z polskimi świętami',
+    scheduleHolidaysNone: 'tylko weekendy',
+    /** Główka nad listą etapów — te same wersaliki co nad tabelami. */
+    scheduleColumnStage: 'Etap',
+    scheduleColumnOwner: 'Kto',
+    scheduleColumnDays: 'Dni',
+    scheduleOwnerLegend:
+      'ARCH. — czas pracowni, INW. — czas po stronie inwestora (decyzje, akceptacje, zbieranie inspiracji). Rozdzielamy je, bo to drugie najczęściej rozciąga termin, a najtrudniej je potem wytłumaczyć.',
     scheduleEmpty: 'Harmonogram powstanie po wejściu w tryb edycji.',
     scheduleNoRooms:
       'Brak pomieszczeń w wycenie — etapy zależne od pomieszczeń liczą teraz tylko dni bazowe.',
     scheduleResult: 'Wynik',
-    scheduleProviderDays: 'Dni robocze — wykonawca',
+    scheduleProviderDays: 'Dni robocze — pracownia',
     scheduleClientDays: 'Dni robocze — inwestor',
     scheduleEndOptimal: 'Optymalne zakończenie',
     scheduleEndLatest: 'Najpóźniejsze',
+    /** Dlaczego widełki, a nie jedna data — pytanie pada za każdym razem. */
+    scheduleRangeHint:
+      'Termin optymalny zakłada, że inwestor odpowiada od ręki. Najpóźniejszy dolicza jego dni w całości. Prawda leży pomiędzy — i dlatego podajemy widełki, a nie jedną datę.',
     scheduleNoStart: 'Podaj datę startu, żeby zobaczyć terminy.',
     scheduleCalendarHint: (optimal: number, latest: number) =>
       `W przeliczeniu na dni kalendarzowe: ${optimal}–${latest}.`,
@@ -805,8 +877,9 @@ Pozdrawiam`,
     workloadCommunication: 'Komunikacja projektowa',
     workloadCommunicationHint: 'Liczba zawarta w sumie poniżej.',
     workloadTotal: 'Razem',
-    itemTagCommunication: 'Komunikacja projektowa',
-    itemTagsLabel: (name: string) => `Etykiety pozycji: ${name}`,
+    // `itemTagCommunication` / `itemTagsLabel` zdjęte 2026-08-27 razem
+    // z przełącznikiem przy pozycji (poprawka 7). Wiersz „w tym komunikacja"
+    // w pracochłonności zostaje — dla wycen, w których etykietę już nadano.
     itemMinutesLabel: 'Minuty pracy',
     convertTitle: 'Przeliczyć wartości?',
     convertDescription: (rate: string) =>
@@ -975,26 +1048,151 @@ Pozdrawiam`,
     backToList: 'Wyceny',
     itemsCount: (count: number) => `${count} poz.`,
   },
+  /*
+   * BRIEF KLIENTA (T-93, poprawka 9 z 2026-08-27).
+   *
+   * Pierwszy etap współpracy — wcześniejszy niż wycena, bo dopiero z briefu
+   * wiadomo, co właściwie wycenić.
+   */
+  brief: {
+    tab: 'Brief',
+    title: 'Brief klienta',
+    intro:
+      'Kwestionariusz do wypełnienia przez klienta, zanim zaczniecie projekt. Wysyłasz link — klient odpowiada bez zakładania konta, na raty, kiedy mu wygodnie.',
+    create: 'Wyślij brief',
+    creating: 'Tworzenie…',
+    createFailed: 'Nie udało się utworzyć briefu.',
+    empty: 'Ten klient nie dostał jeszcze briefu.',
+    linkLabel: 'Adres briefu dla klienta',
+    copy: 'Kopiuj link',
+    copied: 'Link skopiowany',
+    copyFailed: 'Nie udało się skopiować linku.',
+    sendByMail: 'Wyślij mailem',
+    revoke: 'Odwołaj link',
+    revokeConfirm:
+      'Odwołany link przestaje działać natychmiast. Odpowiedzi, które już przyszły, zostają.',
+    revoked: 'Odwołany',
+    expired: 'Wygasł',
+    waiting: 'Czeka na odpowiedzi',
+    open: 'Otwarty',
+    validFor: 'Ważny przez',
+    neverOpened: 'Klient jeszcze nie otworzył',
+    openedTimes: (count: number) => (count === 1 ? 'Otwarty raz' : `Otwarty ${count} razy`),
+    submittedOn: (date: string) => `Odesłany ${date}`,
+    progress: (answered: number, total: number) => `Wypełnione ${answered} z ${total}`,
+    noAnswerYet: 'Bez odpowiedzi',
+    answersTitle: 'Odpowiedzi klienta',
+    delete: 'Usuń brief',
+    deleteConfirm:
+      'Brief zniknie razem z odpowiedziami klienta. Tego nie da się cofnąć.',
+
+    /** Treść maila — projektant wysyła go ze swojej poczty, jak przy ofercie. */
+    mailSubject: 'Brief przed rozpoczęciem projektu',
+    mailBody: (url: string) =>
+      `Dzień dobry,
+
+zanim zaczniemy, prosimy o wypełnienie krótkiego briefu:
+${url}
+
+Nie trzeba zakładać konta ani odpowiadać za jednym razem — formularz zapamiętuje to, co już wpisane.
+
+Pozdrawiam`,
+  },
+
+  /*
+   * WIZJA LOKALNA (T-94, poprawka 10 z 2026-08-27).
+   *
+   * Pierwsza wizyta na miejscu: obmiar, spis instalacji, zdjęcia stanu
+   * zastanego. Jedyny zapis tego, jak było, zanim ktokolwiek czegokolwiek
+   * dotknął — i dlatego wraca się do niej przez cały projekt.
+   */
+  siteVisit: {
+    tab: 'Wizja lokalna',
+    title: 'Wizja lokalna',
+    intro:
+      'Notatka ze stanu zastanego: obmiar, instalacje, zdjęcia, ustalenia. Wizji może być kilka — druga po wyburzeniach, trzecia przed montażem.',
+    add: 'Nowa wizja',
+    empty: 'Nie ma jeszcze żadnej wizji lokalnej.',
+    emptyHint: 'Zapisz obmiar i stan zastany, zanim ekipa cokolwiek ruszy.',
+    date: 'Data wizyty',
+    attendees: 'Obecni',
+    attendeesPlaceholder: 'projektant, inwestor, kierownik budowy',
+    notes: 'Notatka z wizji',
+    notesPlaceholder: 'Obserwacje, ustalenia, ryzyka. Co wymaga decyzji inwestora.',
+    delete: 'Usuń wizję',
+    deleteConfirm:
+      'Wizja zniknie razem z obmiarem i notatką. Zdjęcia zostaną w plikach projektu.',
+
+    // Obmiar.
+    rooms: 'Obmiar',
+    roomsHint:
+      'Wymiary w centymetrach — powierzchnia liczy się sama. Pomieszczenie bez kompletu wymiarów nie wchodzi do sumy.',
+    roomsEmpty: 'Brak obmiaru.',
+    addRoom: 'Dodaj pomieszczenie',
+    roomName: 'Pomieszczenie',
+    roomNamePlaceholder: 'Salon',
+    roomLength: 'Dł. (cm)',
+    roomWidth: 'Szer. (cm)',
+    roomHeight: 'Wys. (cm)',
+    roomArea: 'Pow.',
+    roomNote: 'Uwagi',
+    roomNoteLabel: (room: string) => `Uwagi: ${room}`,
+    removeRoom: (room: string) => `Usuń z obmiaru: ${room}`,
+    areaTotal: (m2: number) => `Zmierzona powierzchnia: ${m2} m²`,
+    noArea: 'brak',
+
+    // Spis instalacji.
+    checks: 'Do sprawdzenia',
+    checksHint:
+      'Lista jest punktem wyjścia — pozycje można dopisać i usunąć. „Nie ustalono" to prawidłowa odpowiedź: znaczy „byłem i nie dało się sprawdzić".',
+    addCheck: 'Dodaj pozycję',
+    checkNote: 'Uwaga',
+    checkNoteLabel: (label: string) => `Uwaga: ${label}`,
+    removeCheck: (label: string) => `Usuń pozycję: ${label}`,
+    unresolved: (count: number) =>
+      count === 1 ? '1 pozycja nieustalona' : `${count} pozycji nieustalonych`,
+    allResolved: 'Wszystko ustalone',
+    state: {
+      ok: 'Jest, OK',
+      replace: 'Do wymiany',
+      missing: 'Brak',
+      unknown: 'Nie ustalono',
+    },
+
+    // Zdjęcia.
+    photos: 'Zdjęcia',
+    photosHint: 'Trafiają też do plików projektu — tutaj są przypięte do tej wizyty.',
+    addPhotos: 'Dodaj zdjęcia',
+    photosEmpty: 'Brak zdjęć z tej wizyty.',
+    uploading: 'Wysyłanie…',
+    uploadFailed: 'Nie udało się wysłać pliku.',
+    saved: 'Zapisano wizję lokalną',
+  },
+
   dashboard: {
     activeProjects: 'Aktywni klienci i projekty',
     activeProjectsEmpty: 'Brak projektów w toku. Zacznij od dodania klienta.',
     title: 'Pulpit',
-    quotesThisMonth: 'Wyceny w tym miesiącu',
-    sentValue: 'Wartość wysłanych',
-    acceptanceRate: 'Wskaźnik akceptacji',
-    averageValue: 'Średnia wartość',
     recentQuotes: 'Ostatnie wyceny',
-    quickActions: 'Szybkie akcje',
-    thisMonth: 'w tym miesiącu',
-    noAcceptanceData: 'brak rozstrzygniętych',
 
-    // Bilans miesiąca — prawa szyna pulpitu czyta liczby jak podsumowanie wyceny.
-    created: 'Wyceny utworzone',
-    sentToClients: 'Wysłane do klientów',
-    responses: 'Odpowiedzi klientów',
-    settledOnYes: (accepted: number, settled: number) => `${accepted} z ${settled} na TAK`,
-    noResponses: 'Klienci jeszcze nie odpowiedzieli',
-    monthEmptyHint: 'Ten miesiąc zaczyna się od pierwszej wyceny.',
+    /*
+     * PASEK „NA BIEŻĄCO" (poprawka 6, 2026-08-27).
+     *
+     * Podmiotem zdania jest zawsze klient, bo to on coś zrobił. „Wycena
+     * została zaakceptowana" brzmi jak zdarzenie systemowe; „Anna Kowalska
+     * przyjęła ofertę" jest wiadomością od człowieka.
+     */
+    activityTitle: 'Co nowego u klientów',
+    activityUpToDate: 'Jesteś na bieżąco',
+    activityUnread: (count: number) =>
+      count === 1 ? '1 nowa uwaga' : `${count} nowych uwag`,
+    activityUnreadMark: 'nieprzeczytane',
+    activityEmpty: 'Nic się jeszcze nie wydarzyło — pierwszy wysłany link pojawi się tutaj.',
+    activitySomeone: 'Klient',
+    activityAccepted: (who: string) => `${who} przyjął ofertę`,
+    activityRejected: (who: string) => `${who} odrzucił ofertę`,
+    activityComment: (who: string) => `${who} zostawił uwagę`,
+    activityViewed: (who: string) => `${who} otworzył link z ofertą`,
 
     // Pusty pulpit — zaproszenie, nie komunikat o braku.
     emptyTitle: 'Zbuduj pierwszą wycenę',
@@ -1321,22 +1519,52 @@ Pozdrawiam`,
     title: 'Branding',
     companyName: 'Nazwa firmy',
     logo: 'Logo',
-    accentColor: 'Kolor akcentu',
-    bgColor: 'Kolor tła PDF',
+    /*
+     * NAZWY MÓWIĄCE, GDZIE TO WIDAĆ (poprawka 3, 2026-08-27).
+     *
+     * „Kolor akcentu" i „Kolor tła PDF" nie odpowiadały na jedyne pytanie,
+     * jakie się przy nich zadaje: co się zmieni na dokumencie. Etykieta nazywa
+     * teraz miejsce, a podpowiedź wylicza wszystkie miejsca, bo kolor marki
+     * pracuje w trzech.
+     */
+    accentColor: 'Kolor marki',
+    accentColorHint:
+      'Pas na górze każdej strony PDF — ten za logo i numerem oferty. Tym samym kolorem drukują się tytuły sekcji i linia nad podpisem. Tekst na pasie dobiera się sam: jasny na ciemnym kolorze, ciemny na jasnym.',
+    bgColor: 'Tło podsumowania kosztów',
+    bgColorHint:
+      'Wypełnienie ramki z sumą na końcu oferty — tej z kwotą netto, VAT-em i brutto. Kwoty drukujemy na niej ciemnym atramentem, więc trzymaj się jasnego odcienia.',
     font: 'Font',
+    fontHint: 'Krój całego dokumentu: tytuły, pozycje i stopka.',
     contacts: 'Kontakt',
     footer: 'Stopka',
 
     // Sekcje formularza.
     sectionIdentity: 'Firma',
     sectionLook: 'Wygląd PDF',
+    sectionLookHint:
+      'Trzy rzeczy, z których składa się dokument: znak na nagłówku, kolory i krój pisma. Zmiany widać od razu w podglądzie na dole strony.',
     sectionContact: 'Kontakt i stopka',
     sectionDefaults: 'Domyślne w wycenie',
 
     // Logo.
-    logoDark: 'Logo na jasne tło',
-    logoLight: 'Logo na ciemny nagłówek',
+    logoDark: 'Znak ciemny',
+    logoDarkHint: 'Wersja do położenia na JASNYM nagłówku.',
+    logoLight: 'Znak jasny',
+    logoLightHint: 'Wersja do położenia na CIEMNYM nagłówku.',
     logoHint: 'PNG, JPG, WEBP lub SVG, do 5 MB.',
+
+    // Wybór wariantu na nagłówku (poprawka 3).
+    headerLogo: 'Logo na nagłówku',
+    headerLogoHint:
+      'Który z dwóch znaków ma stanąć na pasie nagłówka. „Dobierz sam" patrzy na kolor marki: na ciemnym pasie kładzie znak jasny, na jasnym — ciemny.',
+    headerLogoAuto: 'Dobierz sam',
+    headerLogoLight: 'Zawsze znak jasny',
+    headerLogoDark: 'Zawsze znak ciemny',
+    headerLogoResolved: (variant: 'light' | 'dark') =>
+      variant === 'light'
+        ? 'Teraz na nagłówku stoi znak jasny.'
+        : 'Teraz na nagłówku stoi znak ciemny.',
+    headerLogoMissing: 'Ten wariant nie jest jeszcze wgrany — na pasie stanie sama nazwa firmy.',
     logoUpload: (variant: string) => `Wgraj: ${variant}`,
     logoRemove: (variant: string) => `Usuń: ${variant}`,
     logoEmpty: 'Brak logo',
@@ -1524,6 +1752,15 @@ Pozdrawiam`,
     accountIntro: 'Twój dostęp do aplikacji, subskrypcja i dane konta.',
     appIntro: 'Domyślne wartości nowych wycen, miejsce na pliki i aktualizacje.',
     access: 'Dostęp',
+    // Zdjęcie użytkownika (poprawka 4).
+    avatar: 'Twoje zdjęcie',
+    avatarHint:
+      'Widać je w pasku nawigacji. Kwadratowy kadr wygląda najlepiej — obrazek przycinamy do kółka. PNG, JPG lub WEBP, do 5 MB.',
+    avatarSaved: 'Zapisano zdjęcie',
+    avatarRemoved: 'Usunięto zdjęcie',
+    /** Kropka przy avatarze w szynie. */
+    connectionOnline: 'Połączono z internetem',
+    connectionOffline: 'Brak połączenia — zmiany czekają w kolejce',
     yourData: 'Twoje dane',
     dangerZone: 'Strefa nieodwracalna',
     manageSubscription: 'Zarządzaj',
@@ -1611,6 +1848,12 @@ Pozdrawiam`,
     periodLabel: 'Jak chcesz płacić',
     buy: 'Aktywuj dostęp',
     manage: 'Zarządzaj płatnością',
+
+    // Okno okresu próbnego przy starcie (poprawka 6). Po opłaceniu
+    // subskrypcję obsługuje się wyłącznie z ustawień.
+    trialDialogHint:
+      'Wszystko działa bez ograniczeń. Po opłaceniu subskrypcję znajdziesz w Ustawieniach — to okno przestanie się pokazywać.',
+    trialDialogLater: 'Później',
     readOnlyBanner:
       'Tryb tylko do odczytu — dostęp wygasł. Wyceny możesz dalej przeglądać i eksportować.',
 

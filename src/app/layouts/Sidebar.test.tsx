@@ -9,6 +9,17 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 vi.mock('@/features/billing/useEntitlement', () => ({
   useEntitlement: () => ({ canWrite: true, reason: 'active', loading: true }),
 }));
+
+// Zdjecie uzytkownika i sonda lacznosci (poprawka 4) — obie pytaja na zewnatrz.
+vi.mock('@/data/queries/useAvatar', () => ({
+  useAvatarPath: () => null,
+  useAvatarUrl: () => ({ data: null }),
+}));
+
+const online = vi.hoisted(() => ({ value: true }));
+vi.mock('@/data/offline/connectivity', () => ({
+  useConnectivity: () => ({ online: online.value, recheck: vi.fn() }),
+}));
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { AuthStub } from '@/features/auth/test-utils';
 import { Sidebar } from './Sidebar';
@@ -29,6 +40,26 @@ function renderAt(path: string) {
 
 beforeEach(() => {
   window.localStorage.clear();
+  online.value = true;
+});
+
+describe('Sidebar — kropka polaczenia (poprawka 4)', () => {
+  it('zielona, gdy jest lacznosc', () => {
+    renderAt('/');
+    const dot = screen.getByTestId('connection-dot');
+    expect(dot).toHaveAttribute('data-online', 'true');
+    expect(dot).toHaveAccessibleName(pl.settings.connectionOnline);
+  });
+
+  it('czerwona, gdy sieci nie ma', () => {
+    // Do 2026-08-27 kropka swiecila stanem subskrypcji, ktorego nikt tu nie
+    // przekazywal — byla wiec zawsze taka sama i nie znaczyla nic.
+    online.value = false;
+    renderAt('/');
+    const dot = screen.getByTestId('connection-dot');
+    expect(dot).toHaveAttribute('data-online', 'false');
+    expect(dot).toHaveAccessibleName(pl.settings.connectionOffline);
+  });
 });
 
 describe('Sidebar — aktywna pozycja', () => {
@@ -185,6 +216,59 @@ describe('Sidebar — kolejnosc i zakres (T-58)', () => {
     expect(screen.getByRole('link', { name: pl.nav.clients })).toHaveAttribute(
       'aria-current',
       'page',
+    );
+  });
+});
+
+describe('Sidebar — waskie okno (poprawka 1)', () => {
+  /** Podmienia `matchMedia` tak, zeby zapytanie o waskie okno bylo prawdziwe. */
+  function setNarrow(narrow: boolean) {
+    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+      matches: narrow && query.includes('max-width'),
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }));
+  }
+
+  it('rozwinieta szyna kladzie sie NA tresci, zamiast ja odsuwac', async () => {
+    setNarrow(true);
+    const user = userEvent.setup();
+    renderAt('/');
+
+    await user.click(screen.getByRole('button', { name: pl.nav.expand }));
+
+    const rail = screen.getByRole('navigation', { name: pl.app.name });
+    expect(rail).toHaveAttribute('data-overlay', 'true');
+    expect(rail.className).toContain('absolute');
+  });
+
+  it('w szerokim oknie szyna zostaje w ukladzie', async () => {
+    setNarrow(false);
+    const user = userEvent.setup();
+    renderAt('/');
+
+    await user.click(screen.getByRole('button', { name: pl.nav.expand }));
+
+    const rail = screen.getByRole('navigation', { name: pl.app.name });
+    expect(rail).not.toHaveAttribute('data-overlay');
+    expect(rail.className).toContain('relative');
+  });
+
+  it('przejscie w menu zwija nakladke — inaczej przykrywa strone, na ktora sie weszlo', async () => {
+    setNarrow(true);
+    const user = userEvent.setup();
+    renderAt('/');
+
+    await user.click(screen.getByRole('button', { name: pl.nav.expand }));
+    await user.click(screen.getByRole('link', { name: pl.nav.clients }));
+
+    expect(screen.getByRole('navigation', { name: pl.app.name })).not.toHaveAttribute(
+      'data-overlay',
     );
   });
 });

@@ -7,7 +7,7 @@ import { InlineText } from './InlineText';
 import { ItemRow } from './ItemRow';
 import { ItemToggle } from './ItemToggle';
 import { AddLink } from './AddLink';
-import { LibraryPicker } from './LibraryPicker';
+
 import { SaveToLibraryButton } from './SaveToLibraryButton';
 import { DragHandle } from './DragHandle';
 import { ItemsColumnsHeader } from './ItemsColumnsHeader';
@@ -51,10 +51,8 @@ export interface GroupBlockProps {
   onToggleItem: (itemId: string) => void;
   onPatchItem: (itemId: string, patch: Partial<Item>) => void;
   onRemoveItem: (itemId: string) => void;
-  onInsertItems: (sectionId: string, groupId: string | null, items: Item[]) => void;
   onSaveItemToLibrary: (item: Item) => void;
   onSaveGroupToLibrary: (group: Group) => void;
-  onInsertItemToRoomBlocks: (sectionId: string, item: Item) => void;
 }
 
 export const GroupBlock = memo(function GroupBlock({
@@ -76,10 +74,8 @@ export const GroupBlock = memo(function GroupBlock({
   onToggleItem,
   onPatchItem,
   onRemoveItem,
-  onInsertItems,
   onSaveItemToLibrary,
   onSaveGroupToLibrary,
-  onInsertItemToRoomBlocks,
 }: GroupBlockProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const openScope = useScopePanel((state) => state.openFor);
@@ -247,21 +243,6 @@ export const GroupBlock = memo(function GroupBlock({
             {pl.editor.scopeOpen}
           </AddLink>
           <AddLink onClick={() => onAddItem(sectionId, group.id)}>{pl.editor.addItemManual}</AddLink>
-          <LibraryPicker
-            pricing={pricing}
-            priorityCategory={group.name}
-            onPickItem={(item) => onInsertItems(sectionId, group.id, [item])}
-          />
-          {room ? (
-            // Skrót z arkusza: ta sama usługa idzie zwykle do każdego
-            // pomieszczenia naraz, a nie do jednego.
-            <LibraryPicker
-              pricing={pricing}
-              priorityCategory={group.name}
-              label={pl.editor.addItemToAllRooms}
-              onPickItem={(item) => onInsertItemToRoomBlocks(sectionId, item)}
-            />
-          ) : null}
         </div>
       ) : null}
 

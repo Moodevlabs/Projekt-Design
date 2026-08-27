@@ -18,6 +18,7 @@ function parseBrandKit(row: BrandRow): BrandKit {
     companyName: row.company_name,
     logoDarkPath: row.logo_dark_path,
     logoLightPath: row.logo_light_path,
+    headerLogo: row.header_logo,
     accentColor: row.accent_color,
     bgColor: row.bg_color,
     fontFamily: row.font_family,
@@ -63,6 +64,7 @@ export async function updateBrandKit(workspaceId: string, patch: BrandKitPatch):
   if (patch.companyName !== undefined) update.company_name = patch.companyName;
   if (patch.logoDarkPath !== undefined) update.logo_dark_path = patch.logoDarkPath;
   if (patch.logoLightPath !== undefined) update.logo_light_path = patch.logoLightPath;
+  if (patch.headerLogo !== undefined) update.header_logo = patch.headerLogo;
   if (patch.accentColor !== undefined) update.accent_color = patch.accentColor;
   if (patch.bgColor !== undefined) update.bg_color = patch.bgColor;
   if (patch.fontFamily !== undefined) update.font_family = patch.fontFamily;
@@ -103,10 +105,37 @@ const BUCKET = 'brand';
  * cache'ują się po adresie: nadpisanie tej samej ścieżki pokazywałoby stare
  * logo do czasu wyczyszczenia cache.
  */
-function logoPath(workspaceId: string, variant: LogoVariant, fileName: string): string {
+function imagePath(workspaceId: string, prefix: string, fileName: string): string {
   const dot = fileName.lastIndexOf('.');
   const ext = dot > 0 ? fileName.slice(dot + 1).toLowerCase() : 'png';
-  return `${workspaceId}/logo-${variant}-${Date.now()}.${ext}`;
+  return `${workspaceId}/${prefix}-${Date.now()}.${ext}`;
+}
+
+/**
+ * Wgrywa obrazek marki do bucketa `brand` i zwraca jego ścieżkę.
+ *
+ * Ten sam bucket obsługuje logo, avatar użytkownika i avatary klientów
+ * (poprawki 4 i 5 z 2026-08-27). Osobne buckety znaczyłyby trzy komplety
+ * polityk RLS pilnujących dokładnie tej samej rzeczy: że pierwszy segment
+ * ścieżki to `workspace_id`, do którego wolno nam zaglądać.
+ *
+ * Zapis ścieżki tam, gdzie ma trafić, zostawiamy wołającemu — inaczej
+ * nieudany zapis zostawiłby osierocony plik bez możliwości powiązania go
+ * z czymkolwiek.
+ */
+export async function uploadBrandImage(
+  workspaceId: string,
+  prefix: string,
+  file: File,
+): Promise<string> {
+  const path = imagePath(workspaceId, prefix, file.name);
+
+  const { error } = await getSupabase()
+    .storage.from(BUCKET)
+    .upload(path, file, { contentType: file.type, upsert: false });
+
+  if (error) throw new RepoError('Wgranie pliku: ' + error.message, error);
+  return path;
 }
 
 /**
@@ -119,14 +148,7 @@ export async function uploadLogo(
   variant: LogoVariant,
   file: File,
 ): Promise<string> {
-  const path = logoPath(workspaceId, variant, file.name);
-
-  const { error } = await getSupabase()
-    .storage.from(BUCKET)
-    .upload(path, file, { contentType: file.type, upsert: false });
-
-  if (error) throw new RepoError('Wgranie logo: ' + error.message, error);
-  return path;
+  return uploadBrandImage(workspaceId, `logo-${variant}`, file);
 }
 
 /**
@@ -138,6 +160,9 @@ export async function removeLogo(path: string): Promise<void> {
   const { error } = await getSupabase().storage.from(BUCKET).remove([path]);
   if (error) log.warn('Nie udało się skasować pliku logo', { path, error: error.message });
 }
+
+/** To samo dla avatarów — ta sama zasada: liczy się, że zniknął z interfejsu. */
+export const removeBrandImage = removeLogo;
 
 /**
  * Podpisany URL do podglądu. Bucket jest prywatny, więc bez podpisu przeglądarka
@@ -154,3 +179,6 @@ export async function getLogoUrl(path: string, expiresInSeconds = 3600): Promise
   }
   return data.signedUrl;
 }
+
+/** Podpisany URL dowolnego obrazka z bucketa `brand` (logo, avatar). */
+export const getBrandImageUrl = getLogoUrl;

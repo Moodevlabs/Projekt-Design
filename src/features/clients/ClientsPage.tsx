@@ -5,7 +5,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { EmptyState } from '@/components/shared';
 import { ClientsToolbar, type ClientStatusFilter } from './ClientsToolbar';
 import { ImportClientsDialog } from './ImportClientsDialog';
-import { ClientsTable } from './ClientsTable';
+import { ClientsGrid } from './ClientsGrid';
 import { ClientFormDialog } from './ClientFormDialog';
 import { useClients } from '@/data/queries/useClients';
 import type { ClientSort } from '@/data/repos/clients.repo';
@@ -96,7 +96,7 @@ export function ClientsPage() {
       ) : null}
 
       {clients.isLoading || rows.length > 0 ? (
-        <ClientsTable
+        <ClientsGrid
           rows={rows}
           loading={clients.isLoading}
           onEdit={(client) => {
