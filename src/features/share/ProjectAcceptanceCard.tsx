@@ -1,12 +1,13 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, MessageSquare } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { routes } from '@/app/routes';
 import { useQuoteAcceptance, useQuoteComments } from '@/data/queries/useShares';
 import { useQuotesList } from '@/data/queries/useQuotes';
-import { formatDateTime } from '@/lib/dates';
 import { pl } from '@/i18n/pl';
+
+import { AcceptanceBlock } from './AcceptanceBlock';
 
 /**
  * „Klient przyjął ofertę" na karcie projektu (T-26, wyprowadzone 2026-08-27).
@@ -17,8 +18,10 @@ import { pl } from '@/i18n/pl';
  * trzeba było wejść w wycenę, otworzyć modal i dopiero tam zobaczyć, że klient
  * podpisał. Projekt, na który patrzy się najczęściej, nie mówił o tym nic.
  *
- * Karta pokazuje **wynik**, nie mechanikę: kto przyjął, kiedy i czy zostawił
- * uwagi. Po szczegóły (linki, licznik otwarć) prowadzi odnośnik do wyceny.
+ * Wygląd jest ten sam co w edytorze i w oknie udostępniania (`AcceptanceBlock`)
+ * — ta sama informacja ma wyglądać tak samo niezależnie od miejsca. Różnica to
+ * dwie rzeczy, których nie ma sensu pokazywać przy otwartej wycenie: **której**
+ * wyceny dotyczy i odnośnik do niej.
  *
  * ## Czemu tylko jedna wycena
  *
@@ -38,44 +41,38 @@ export function ProjectAcceptanceCard({ projectId }: { projectId: string }) {
   if (!quote || !acceptance.data) return null;
 
   const unread = (comments.data ?? []).filter((row) => row.readAt === null).length;
+  const quoteLabel = [quote.number, quote.title].filter(Boolean).join(' · ');
 
   return (
-    <section className="border-positive/30 bg-positive-wash rounded-[var(--radius-card)] border p-5">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="min-w-0">
-          <h2 className="text-positive flex items-center gap-2 text-sm font-semibold">
-            <CheckCircle2 className="size-4 shrink-0" aria-hidden />
-            {pl.share.acceptedTitle}
-          </h2>
+    <section className="card-surface p-5">
+      <AcceptanceBlock
+        acceptance={acceptance.data}
+        quoteLabel={quoteLabel}
+        action={
+          <Button variant="ghost" size="sm" asChild className="-mt-1 -mr-2 shrink-0">
+            <Link to={routes.quote(quote.id)}>
+              {pl.share.openQuote}
+              <ArrowRight className="size-3.5" aria-hidden />
+            </Link>
+          </Button>
+        }
+      />
 
-          <p className="mt-1.5 text-sm">
-            {acceptance.data.signerName
-              ? pl.share.acceptedBy(acceptance.data.signerName)
-              : pl.share.acceptedAnonymously}
-            {' · '}
-            {formatDateTime(acceptance.data.acceptedAt)}
-          </p>
-
-          <p className="text-ink-soft mt-0.5 text-sm">
-            {quote.number ? `${quote.number} · ` : ''}
-            {quote.title}
-          </p>
-
-          {unread > 0 ? (
-            <p className="text-ink-soft mt-2 flex items-center gap-1.5 text-sm">
-              <MessageSquare className="size-3.5 shrink-0" aria-hidden />
-              {pl.share.unreadComments(unread)}
-            </p>
-          ) : null}
-        </div>
-
-        <Button variant="outline" size="sm" asChild>
-          <Link to={routes.quote(quote.id)}>
-            {pl.share.openQuote}
-            <ArrowRight className="size-3.5" aria-hidden />
-          </Link>
-        </Button>
-      </div>
+      {/*
+        Same uwagi zostają w wycenie — tutaj wystarczy, że są. Przeniesienie
+        ich treści na kartę projektu dałoby dwa miejsca do odhaczania tego
+        samego i dwa, które trzeba pamiętać, żeby zsynchronizować.
+      */}
+      {unread > 0 ? (
+        <p className="text-ink-soft mt-4 flex items-center gap-2 border-t border-[var(--hair)] pt-4 text-[13px]">
+          <span
+            aria-hidden
+            className="size-1.5 shrink-0 rounded-full"
+            style={{ background: 'var(--status-sent)' }}
+          />
+          {pl.share.unreadComments(unread)}
+        </p>
+      ) : null}
     </section>
   );
 }
