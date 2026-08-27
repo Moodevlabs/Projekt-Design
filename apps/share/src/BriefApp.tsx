@@ -41,7 +41,7 @@ export function BriefApp({ token }: { token: string }) {
 
   useEffect(() => {
     if (!isConfigured) {
-      setScreen({ kind: 'error', message: 'Strona nie jest skonfigurowana.' });
+      setScreen({ kind: 'error', message: 'Strona nie została poprawnie skonfigurowana.' });
       return;
     }
 
@@ -89,7 +89,7 @@ export function BriefApp({ token }: { token: string }) {
       }
     } catch (error) {
       setActionError(
-        error instanceof Error ? error.message : 'Nie udało się zapisać odpowiedzi.',
+        error instanceof Error ? error.message : 'Zapisanie odpowiedzi nie powiodło się.',
       );
     } finally {
       setBusy(false);
@@ -129,17 +129,17 @@ export function BriefApp({ token }: { token: string }) {
 
         <article className="rounded-2xl bg-[var(--surface)] p-6 shadow-[0_1px_2px_rgba(51,37,30,0.06),0_8px_24px_-12px_rgba(51,37,30,0.18)] sm:p-10">
           <h1 className="font-display text-2xl tracking-tight sm:text-3xl">
-            Brief przed rozpoczęciem projektu
+            Brief przed rozpoczęciem prac projektowych
           </h1>
           <p className="text-ink-soft mt-2 text-sm leading-relaxed">
-            Odpowiedzi pomogą nam zaproponować rozwiązania dopasowane do Was, a nie do średniej.
-            Nie trzeba wypełniać wszystkiego za jednym razem — wystarczy zapisać i wrócić później,
-            tym samym linkiem.
+            Przekazane odpowiedzi pozwolą przygotować rozwiązania odpowiadające Państwa oczekiwaniom
+            i sposobowi korzystania z wnętrza. Formularza nie trzeba wypełniać jednorazowo —
+            wprowadzone dane można zapisać i uzupełnić później, korzystając z tego samego adresu.
           </p>
 
           {progress.total > 0 ? (
             <p className="text-ink-soft mt-4 text-xs">
-              Wypełnione {progress.answered} z {progress.total}
+              Uzupełniono {progress.answered} z {progress.total}
               {savedAt ? ' · zapisano' : ''}
             </p>
           ) : null}
@@ -156,7 +156,8 @@ export function BriefApp({ token }: { token: string }) {
               {busy ? 'Zapisywanie…' : 'Zapisz odpowiedzi'}
             </button>
             <p className="text-ink-soft text-center text-xs">
-              Możesz zapisywać wielokrotnie — nadpisujemy poprzednią wersję.
+              Zapis można ponawiać wielokrotnie — każdorazowo zastępuje poprzednią wersję
+              odpowiedzi.
             </p>
             {actionError ? <p className="text-discount text-sm">{actionError}</p> : null}
           </div>

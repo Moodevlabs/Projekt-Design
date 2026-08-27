@@ -97,7 +97,11 @@ export function RegisterPage() {
       ) : null}
 
       <Form {...form}>
-        <form onSubmit={(event) => void form.handleSubmit(onSubmit)(event)} className="space-y-4" noValidate>
+        <form
+          onSubmit={(event) => void form.handleSubmit(onSubmit)(event)}
+          className="space-y-4"
+          noValidate
+        >
           <FormField
             control={form.control}
             name="company"
@@ -107,7 +111,9 @@ export function RegisterPage() {
                 <FormControl>
                   <Input autoComplete="organization" autoFocus {...field} />
                 </FormControl>
-                <FormDescription>Tak nazwiemy Twój workspace. Zmienisz to później.</FormDescription>
+                <FormDescription>
+                  Nazwa workspace’u. Można ją zmienić w każdej chwili.
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -158,7 +164,11 @@ export function RegisterPage() {
             </Alert>
           ) : null}
 
-          <Button type="submit" className="w-full" disabled={!isConfigured || form.formState.isSubmitting}>
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={!isConfigured || form.formState.isSubmitting}
+          >
             {form.formState.isSubmitting ? pl.common.loading : pl.auth.register}
           </Button>
         </form>

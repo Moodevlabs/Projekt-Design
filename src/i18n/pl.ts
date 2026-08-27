@@ -64,19 +64,21 @@ export const pl = {
   quotes: {
     title: 'Wyceny',
     new: 'Nowa wycena',
-    newDialogHint: 'Wybierz klienta i projekt — dane inwestora wypełnią się same.',
+    newDialogHint: 'Wskaż klienta i projekt — dane inwestora zostaną uzupełnione automatycznie.',
     // Start z szablonu przy zakładaniu wyceny (T-70).
     startFrom: 'Zacznij od',
     startFromEmpty: 'Pustej wyceny',
-    startFromPackage: 'Szablon niesie też termin i dokumenty — trafią do nowej wyceny.',
+    startFromPackage:
+      'Szablon zawiera również termin i dokumenty — zostaną przeniesione do nowej wyceny.',
     withoutClient: 'Bez klienta',
     number: 'Numer',
     client: 'Klient',
     quoteTitle: 'Tytuł',
     total: 'Suma',
     updated: 'Zaktualizowano',
-    emptyTitle: 'Nie masz jeszcze żadnej wyceny',
-    emptyDescription: 'Zbuduj pierwszą ofertę z pozycjami TAK/NIE i wyślij ją klientowi jako PDF.',
+    emptyTitle: 'Nie utworzono jeszcze żadnej wyceny',
+    emptyDescription:
+      'Przygotuj pierwszą ofertę z pozycjami do wyboru TAK/NIE i przekaż ją inwestorowi w formie dokumentu PDF.',
     exportPdf: 'Eksportuj PDF',
     noResultsTitle: 'Brak wyników',
     noResultsDescription: 'Zmień filtr albo wyczyść wyszukiwanie.',
@@ -96,7 +98,8 @@ export const pl = {
     notes: 'Notatki',
     notesFor: (name: string) => `Notatki i rodzaj: ${name}`,
     notesPlaceholder: 'Notatka wewnętrzna — nie trafia do PDF…',
-    notesHint: 'Widoczne tylko dla Ciebie. Nie idą do PDF ani do duplikatu wyceny.',
+    notesHint:
+      'Notatka wewnętrzna. Nie jest umieszczana w PDF ani kopiowana przy duplikowaniu wyceny.',
     notesSaved: 'Zapisano notatkę',
     hasNotes: 'Ma notatkę',
     docKindLabel: 'Rodzaj dokumentu',
@@ -122,8 +125,8 @@ export const pl = {
 
     // Wersje wycen (T-57).
     newVersion: 'Nowa wersja',
-    newVersionHint: 'Kolejna propozycja dla tej samej inwestycji.',
-    duplicateHint: 'Ta sama oferta dla innego klienta — nowa linia od v1.',
+    newVersionHint: 'Kolejny wariant oferty dla tej samej inwestycji.',
+    duplicateHint: 'Ta sama oferta dla innego klienta — nowa linia wersji od v1.',
     versionCreated: (label: string) => `Utworzono ${label}`,
     olderVersions: (count: number) =>
       count === 1 ? '1 starsza wersja' : `${count} starsze wersje`,
@@ -133,7 +136,7 @@ export const pl = {
 
     replaceAcceptedTitle: 'Zastąpić zaakceptowaną wycenę?',
     replaceAcceptedDescription:
-      'W tym projekcie zaakceptowana jest już inna wycena. Projekt może mieć tylko jedną — poprzednia stanie się archiwalna.',
+      'W projekcie znajduje się już zaakceptowana wycena. Projekt może mieć wyłącznie jedną — dotychczasowa otrzyma status archiwalnej.',
     replaceAcceptedConfirm: 'Zastąp',
     replaceAccepted: 'Zastąpiono zaakceptowaną wycenę',
     moveToProject: 'Przenieś do projektu',
@@ -150,16 +153,16 @@ export const pl = {
      */
     archiveConfirmTitle: 'Usunąć wycenę?',
     archiveConfirmDescription:
-      'Wycena zniknie z listy, ale zostanie w bazie — będzie można ją przywrócić.',
+      'Wycena zostanie ukryta na liście, lecz pozostanie w bazie danych — przywrócenie jest możliwe w każdej chwili.',
     duplicated: 'Utworzono kopię wyceny',
     archivedToast: 'Wycena usunięta',
     loadError: 'Nie udało się wczytać wycen.',
   },
   search: {
     title: 'Szukaj',
-    description: 'Znajdź klienta, projekt, wycenę albo usługę.',
+    description: 'Wyszukiwanie klientów, projektów, wycen i usług.',
     placeholder: 'Szukaj klienta, projektu, wyceny…',
-    empty: 'Nic nie znaleziono.',
+    empty: 'Brak wyników.',
     actions: 'Akcje',
     open: 'Otwórz wyszukiwarkę',
   },
@@ -168,9 +171,9 @@ export const pl = {
     importAction: 'Importuj z CSV',
     importTitle: 'Import klientów z pliku CSV',
     importDescription:
-      'Wskaż plik wyeksportowany z Excela albo arkusza Google. Rozpoznajemy separator i nagłówki kolumn.',
+      'Wskaż plik wyeksportowany z programu Excel lub arkusza Google. Separator i nagłówki kolumn rozpoznawane są automatycznie.',
     importColumns:
-      'Rozpoznawane kolumny: Nazwa, Telefon, E-mail, Miasto, Adres, Notatki. Wystarczy sama nazwa — reszta jest opcjonalna.',
+      'Rozpoznawane kolumny: Nazwa, Telefon, E-mail, Miasto, Adres, Notatki. Wymagana jest wyłącznie nazwa — pozostałe pozostają opcjonalne.',
     importPick: 'Wybierz plik',
     importEmpty: 'Ten plik nie zawiera żadnych wierszy z danymi.',
     importFound: (count: number) =>
@@ -185,7 +188,7 @@ export const pl = {
     importing: 'Dodawanie…',
     imported: (inserted: number, skipped: number) =>
       skipped > 0
-        ? `Dodano ${inserted}, pominięto ${skipped} (już byli w kartotece).`
+        ? `Dodano ${inserted}, pominięto ${skipped} (rekordy obecne już w kartotece).`
         : `Dodano ${inserted} klientów.`,
 
     title: 'Klienci',
@@ -193,11 +196,11 @@ export const pl = {
     first: 'Dodaj pierwszego klienta',
     editTitle: 'Edytuj klienta',
     newTitle: 'Nowy klient',
-    formHint: 'Wystarczy nazwa. Resztę uzupełnisz w każdej chwili.',
+    formHint: 'Wymagana jest wyłącznie nazwa. Pozostałe dane można uzupełnić później.',
 
     // Zdjęcie klienta (poprawka 5).
     avatar: 'Zdjęcie klienta',
-    avatarHint: 'Widać je na karcie klienta i na liście. Nie trafia do żadnego dokumentu.',
+    avatarHint: 'Widoczne na karcie klienta i na liście. Nie jest umieszczane w żadnym dokumencie.',
 
     name: 'Nazwa',
     namePlaceholder: 'Anna i Piotr Kowalscy',
@@ -208,7 +211,7 @@ export const pl = {
     city: 'Miasto',
     notes: 'Notatki',
     notesPlaceholder: 'Ustalenia, preferencje, historia kontaktu…',
-    notesHint: 'Widoczne tylko dla Ciebie. Nie trafiają do wyceny ani do PDF.',
+    notesHint: 'Notatki wewnętrzne. Nie są przenoszone do wyceny ani do dokumentów PDF.',
 
     quotesCount: 'Wyceny',
     acceptedValue: 'Zaakceptowane',
@@ -224,8 +227,8 @@ export const pl = {
     cardQuotes: 'Wyceny',
     cardAccepted: 'Zaakceptowane',
     /** Ostatnia aktywność jako zdanie, nie jako etykieta kolumny. */
-    cardActivity: (when: string) => `Ostatnio: ${when}`,
-    cardNoActivity: 'Bez ruchu',
+    cardActivity: (when: string) => `Ostatnia aktywność: ${when}`,
+    cardNoActivity: 'Brak aktywności',
     cardOpen: 'Otwórz teczkę',
 
     status: {
@@ -251,20 +254,21 @@ export const pl = {
     rowActions: 'Akcje klienta',
     newQuote: 'Nowa wycena',
 
-    emptyTitle: 'Nie masz jeszcze żadnego klienta',
+    emptyTitle: 'Kartoteka klientów jest pusta',
     emptyDescription:
-      'Klient to teczka: dane kontaktowe, wyceny i notatki w jednym miejscu. Wycena wypełni się jego danymi.',
+      'Karta klienta gromadzi dane kontaktowe, wyceny i notatki w jednym miejscu. Dane inwestora uzupełniają się w wycenie automatycznie.',
     noResultsTitle: 'Brak wyników',
-    noResultsDescription: 'Zmień filtr albo wyczyść wyszukiwanie.',
+    noResultsDescription: 'Zmień kryteria filtrowania lub wyczyść wyszukiwanie.',
     loadError: 'Nie udało się wczytać klientów.',
     notFoundTitle: 'Nie znaleziono klienta',
-    notFoundDescription: 'Klient mógł zostać usunięty albo nigdy nie istniał.',
+    notFoundDescription: 'Rekord został usunięty lub podany adres jest nieprawidłowy.',
     backToList: 'Wszyscy klienci',
 
     tabQuotes: 'Wyceny',
     tabNotes: 'Notatki',
     quotesEmptyTitle: 'Brak wycen dla tego klienta',
-    quotesEmptyDescription: 'Załóż pierwszą — dane inwestora wypełnią się same.',
+    quotesEmptyDescription:
+      'Utwórz pierwszą wycenę — dane inwestora zostaną uzupełnione automatycznie.',
     notesEmpty: 'Brak notatek.',
     notesSaved: 'Zapisano notatkę',
 
@@ -276,19 +280,19 @@ export const pl = {
     restored: 'Klient przywrócony',
     archiveConfirmTitle: 'Zarchiwizować klienta?',
     archiveConfirmDescription:
-      'Zniknie z listy aktywnych, ale jego wyceny i dane zostają nietknięte. Możesz go przywrócić.',
+      'Klient zostanie ukryty na liście aktywnych. Jego wyceny i dane pozostaną nienaruszone, a przywrócenie jest możliwe w każdej chwili.',
     deleteConfirmTitle: 'Usunąć klienta?',
     deleteConfirmDescription: (quotes: number) =>
       quotes > 0
-        ? `Klient trafi do kosza. Jego ${quotes === 1 ? 'wycena zostaje' : `wyceny (${quotes}) zostają`} nietknięte i dalej wskazują na tę kartę.`
-        : 'Klient trafi do kosza. Nie ma przypisanych wycen.',
+        ? `Klient zostanie przeniesiony do kosza. Jego ${quotes === 1 ? 'wycena pozostaje nienaruszona i nadal wskazuje' : `wyceny (${quotes}) pozostają nienaruszone i nadal wskazują`} na tę kartę.`
+        : 'Klient zostanie przeniesiony do kosza. Nie ma przypisanych wycen.',
     deleted: 'Klient usunięty',
 
     // Zakładka „Projekty" na karcie klienta (T-54).
     tabProjects: 'Projekty',
     projectsEmptyTitle: 'Brak projektów',
     projectsEmptyDescription:
-      'Projekt to teczka jednej inwestycji: adres, metraż, wyceny i notatki w jednym miejscu.',
+      'Projekt obejmuje jedną inwestycję: adres, metraż, wyceny i notatki w jednym miejscu.',
   },
   projects: {
     title: 'Projekty',
@@ -296,7 +300,7 @@ export const pl = {
     first: 'Dodaj pierwszy projekt',
     editTitle: 'Edytuj projekt',
     newTitle: 'Nowy projekt',
-    formHint: 'Adres podpowiadamy z kartoteki klienta — możesz go nadpisać.',
+    formHint: 'Adres uzupełniany jest z kartoteki klienta i podlega edycji.',
 
     name: 'Nazwa projektu',
     namePlaceholder: 'Dom 164 m² — Konstancin',
@@ -323,7 +327,7 @@ export const pl = {
     startDate: 'Data startu',
     notes: 'Notatki',
     notesPlaceholder: 'Ustalenia, zakres, terminy…',
-    notesHint: 'Widoczne tylko dla Ciebie. Nie trafiają do wyceny ani do PDF.',
+    notesHint: 'Notatki wewnętrzne. Nie są przenoszone do wyceny ani do dokumentów PDF.',
     notesSaved: 'Zapisano notatkę',
 
     client: 'Klient',
@@ -343,39 +347,40 @@ export const pl = {
     deleteConfirmTitle: 'Usunąć projekt?',
     deleteConfirmDescription: (quotes: number) =>
       quotes > 0
-        ? `Projekt trafi do kosza. Jego ${quotes === 1 ? 'wycena zostaje' : `wyceny (${quotes}) zostają`} nietknięte — dalej znajdziesz je u klienta.`
-        : 'Projekt trafi do kosza. Nie ma przypisanych wycen.',
+        ? `Projekt zostanie przeniesiony do kosza. Jego ${quotes === 1 ? 'wycena pozostaje nienaruszona i dostępna' : `wyceny (${quotes}) pozostają nienaruszone i dostępne`} na karcie klienta.`
+        : 'Projekt zostanie przeniesiony do kosza. Nie ma przypisanych wycen.',
 
     notFoundTitle: 'Nie znaleziono projektu',
-    notFoundDescription: 'Projekt mógł zostać usunięty albo nigdy nie istniał.',
+    notFoundDescription: 'Rekord został usunięty lub podany adres jest nieprawidłowy.',
     loadError: 'Nie udało się wczytać projektów.',
 
     tabQuotes: 'Wyceny',
     tabNotes: 'Notatki',
     quotesEmptyTitle: 'Brak wycen w tym projekcie',
-    quotesEmptyDescription: 'Załóż pierwszą — dane inwestora wypełnią się same.',
+    quotesEmptyDescription:
+      'Utwórz pierwszą wycenę — dane inwestora zostaną uzupełnione automatycznie.',
 
     // Przenoszenie wyceny między teczkami.
     moveTitle: 'Przenieś do projektu',
-    moveDescription: 'Zmieni się wyłącznie przypisanie. Treść oferty zostaje bez zmian.',
+    moveDescription: 'Zmianie ulega wyłącznie przypisanie. Treść oferty pozostaje bez zmian.',
     moveAttachesClient:
-      'Ta wycena nie ma jeszcze klienta — razem z projektem zostanie przypisana do jego właściciela.',
+      'Wycena nie ma przypisanego klienta — wraz z projektem zostanie przypisana do jego właściciela.',
     moveNone: 'Bez projektu',
-    moveEmpty: 'Ten klient nie ma jeszcze żadnego projektu.',
+    moveEmpty: 'Klient nie ma jeszcze żadnego projektu.',
     moved: (name: string) => `Przeniesiono do projektu: ${name}`,
     movedOut: 'Wycena wyjęta z projektu',
 
     // Kopiowanie pomieszczeń przy nowej wycenie w projekcie.
     copyRoomsTitle: 'Skopiować pomieszczenia?',
     copyRoomsDescription: (count: number, from: string) =>
-      `Ostatnia wycena w tym projekcie („${from}") ma ${count === 1 ? '1 pomieszczenie' : `${count} pomieszczeń`}. Przenieść je do nowej?`,
+      `Ostatnia wycena w tym projekcie („${from}") zawiera ${count === 1 ? '1 pomieszczenie' : `${count} pomieszczeń`}. Przenieść je do nowej wyceny?`,
     copyRoomsConfirm: 'Skopiuj',
-    copyRoomsSkip: 'Zacznij pusto',
+    copyRoomsSkip: 'Rozpocznij bez pomieszczeń',
 
     // Propozycja przestawienia statusu po akceptacji wyceny.
     suggestInProgress: (name: string) =>
-      `Wycena zaakceptowana. Przestawić „${name}" na realizację?`,
-    suggestInProgressAction: 'Przestaw',
+      `Wycena została zaakceptowana. Zmienić status projektu „${name}" na „W realizacji"?`,
+    suggestInProgressAction: 'Zmień status',
     statusChanged: 'Status projektu zmieniony',
   },
   files: {
@@ -383,10 +388,11 @@ export const pl = {
     tab: 'Pliki',
     add: 'Dodaj pliki',
     dropHere: 'Upuść pliki tutaj',
-    dropHint: 'Przeciągnij pliki z pulpitu albo kliknij „Dodaj pliki". Do 25 MB na plik.',
+    dropHint:
+      'Przeciągnij pliki lub użyj przycisku „Dodaj pliki". Maksymalny rozmiar pojedynczego pliku: 25 MB.',
     emptyTitle: 'Brak plików',
     emptyDescription:
-      'Rzuty, zdjęcia, umowy — wszystko, co dotyczy tego klienta, w jednym miejscu.',
+      'Rzuty, zdjęcia, umowy i pozostała dokumentacja dotycząca klienta — w jednym miejscu.',
     loadError: 'Nie udało się wczytać plików.',
 
     name: 'Nazwa',
@@ -419,15 +425,15 @@ export const pl = {
 
     deleteTitle: 'Usunąć plik?',
     deleteDescription: (name: string) =>
-      `„${name}" zniknie bezpowrotnie — kosza na pliki nie ma. Zwolnione miejsce wróci do limitu.`,
+      `Plik „${name}" zostanie przeniesiony do kosza. Zajmowane miejsce zwolni się po jego trwałym usunięciu.`,
     deleted: 'Plik usunięty',
 
     // Pasek zużycia w Ustawieniach.
     usageTitle: 'Pliki',
     usageDescription: 'Miejsce zajęte przez pliki klientów i wygenerowane dokumenty.',
     usage: (used: string, quota: string) => `Zajęte ${used} z ${quota}`,
-    usageWarning: 'Zostało mało miejsca — usuń niepotrzebne pliki.',
-    usageFull: 'Limit wyczerpany. Nie dodasz nowych plików, dopóki czegoś nie usuniesz.',
+    usageWarning: 'Dostępne miejsce jest na wyczerpaniu — zalecane usunięcie zbędnych plików.',
+    usageFull: 'Limit wyczerpany. Dodawanie plików będzie możliwe po zwolnieniu miejsca.',
 
     // Kosz (T-67).
     /** Wlasny ekran kosza (2026-08-27) — pokazuje sie takze pusty. */
@@ -440,10 +446,10 @@ export const pl = {
         : `Zajmują ${size}. Miejsce zwolni się dopiero po trwałym usunięciu.`,
     trashEmptyTitle2: 'Kosz jest pusty',
     trashEmptyDescription2: (days: number) =>
-      `Usunięte pliki trafiają tutaj i czekają ${days} dni, zanim znikną na dobre. Do tego czasu można je przywrócić.`,
+      `Usunięte pliki przechowywane są tutaj przez ${days} dni. W tym czasie możliwe jest ich przywrócenie.`,
     trashTitle: 'Kosz',
     trashDescription: (days: number, size: string) =>
-      `Usunięte pliki czekają tu ${days} dni, potem znikają na dobre. Zajmują ${size} — miejsce zwolni się dopiero po trwałym usunięciu.`,
+      `Usunięte pliki przechowywane są przez ${days} dni, a następnie kasowane trwale. Zajmują ${size} — miejsce zwolni się po trwałym usunięciu.`,
     trashDays: (days: number) =>
       days === 1 ? 'zostanie usunięty jutro' : `zostanie usunięty za ${days} dni`,
     trashDueNow: 'zostanie usunięty przy najbliższym sprzątaniu',
@@ -452,11 +458,11 @@ export const pl = {
     deletedForever: 'Plik usunięty na stałe.',
     deleteForeverTitle: 'Usunąć plik na stałe?',
     deleteForeverDescription: (name: string) =>
-      `„${name}" zniknie bezpowrotnie. Tego nie da się cofnąć.`,
+      `Plik „${name}" zostanie usunięty trwale. Operacji nie można cofnąć.`,
     trashEmpty: 'Opróżnij kosz',
     trashEmptyTitle: 'Opróżnić kosz?',
     trashEmptyDescription: (count: number, size: string) =>
-      `${count} ${count === 1 ? 'plik zniknie' : 'plików zniknie'} bezpowrotnie. Zwolni się ${size}. Tego nie da się cofnąć.`,
+      `${count} ${count === 1 ? 'plik zostanie usunięty' : 'plików zostanie usuniętych'} trwale. Zwolnione zostanie ${size}. Operacji nie można cofnąć.`,
     trashEmptied: (count: number) =>
       count === 1 ? 'Usunięto 1 plik.' : `Usunięto ${count} plików.`,
     trashEmptyFailed: (count: number) =>
@@ -471,7 +477,7 @@ export const pl = {
     title: 'Dokumenty',
     emptyTitle: 'Brak dokumentów',
     emptyDescription:
-      'PDF-y wyeksportowane z wycen trafiają tutaj automatycznie. Zobaczysz dokładnie to, co poszło do inwestora.',
+      'Dokumenty PDF wyeksportowane z wycen zapisywane są tutaj automatycznie — w wersji przekazanej inwestorowi.',
     open: 'Otwórz',
     quoteNumber: 'Wycena',
     docType: 'Typ',
@@ -492,16 +498,16 @@ export const pl = {
 
     // Karta w prawej kolumnie edytora.
     recent: 'Dokumenty',
-    recentEmpty: 'Wyeksportowane PDF-y pojawią się tutaj.',
-    seeAll: 'Zobacz wszystkie',
-    hint: 'Archiwum pokazuje zapisany plik — nie renderuje go ponownie.',
+    recentEmpty: 'Wyeksportowane dokumenty PDF pojawią się w tym miejscu.',
+    seeAll: 'Pokaż wszystkie',
+    hint: 'Archiwum udostępnia zapisany plik — dokument nie jest generowany ponownie.',
   },
   /** Link dla klienta i akceptacja online (T-25/T-26). */
   share: {
     title: 'Udostępnij klientowi',
     action: 'Udostępnij',
     description:
-      'Klient otwiera link w przeglądarce, przełącza pozycje TAK/NIE i akceptuje albo zostawia uwagi. Nie musi zakładać konta.',
+      'Inwestor otwiera link w przeglądarce, wybiera pozycje TAK/NIE, a następnie akceptuje ofertę lub przekazuje uwagi. Zakładanie konta nie jest wymagane.',
     newLink: 'Utwórz link',
     creating: 'Tworzenie…',
     validFor: 'Ważny przez',
@@ -517,7 +523,7 @@ export const pl = {
     createFailed: 'Nie udało się utworzyć linku.',
     revokeFailed: 'Nie udało się odwołać linku.',
     revokeConfirm:
-      'Odwołany link przestaje działać natychmiast. Klient zobaczy komunikat, żeby poprosić o nowy.',
+      'Odwołany link przestaje działać natychmiast. Inwestor zobaczy komunikat z prośbą o kontakt w sprawie nowego adresu.',
     expiresAt: 'Wygasa',
     neverExpires: 'Bezterminowy',
     created: 'Utworzony',
@@ -530,19 +536,19 @@ export const pl = {
     mailBody: (url: string) =>
       `Dzień dobry,
 
-przesyłam ofertę do wglądu:
+w załączonym odnośniku przekazuję ofertę do wglądu:
 ${url}
 
-Pod linkiem można zaznaczyć zakres i potwierdzić wybór albo zostawić uwagi.
+Pod wskazanym adresem można wybrać zakres prac i potwierdzić wybór lub przekazać uwagi.
 
-Pozdrawiam`,
+Z wyrazami szacunku`,
     baseUrlMissing:
-      'Nie ustawiono adresu strony ofert (VITE_SHARE_BASE_URL). Link powstanie, ale trzeba go złożyć ręcznie.',
+      'Nie skonfigurowano adresu strony ofert (VITE_SHARE_BASE_URL). Link zostanie utworzony, lecz jego adres wymaga ręcznego złożenia.',
 
     // Akceptacja i uwagi (T-26).
     acceptedTitle: 'Oferta zaakceptowana',
     /** Oczko wersalikowe nad imieniem — mowi CO to jest, nie kto. */
-    acceptedEyebrow: 'Przyjęte przez klienta',
+    acceptedEyebrow: 'Zakres zaakceptowany przez inwestora',
     acceptedOn: (date: string, time: string) => `${date} o ${time}`,
     commentsWithUnread: (total: number, unread: number) =>
       `Uwagi klienta (${total}) · ${unread} nieprzeczytane`,
@@ -576,25 +582,25 @@ Pozdrawiam`,
      * i osobna karta akceptacji. Każdy z nich był prawdziwy i żaden nie
      * odpowiadał na pytanie „na czym stoimy". Oś odpowiada.
      */
-    pathTitle: 'Na czym stoimy',
-    pathSent: 'Oferta wysłana',
-    pathSentPending: 'Jeszcze nie wysłana',
-    pathSentHint: 'Utwórz link albo oznacz wycenę jako wysłaną.',
-    pathOpened: 'Klient otworzył link',
-    pathOpenedPending: 'Klient jeszcze nie otworzył',
-    pathOpenedHint: 'Dopóki link nie zostanie otwarty, nie ma na co czekać.',
+    pathTitle: 'Stan procesu ofertowego',
+    pathSent: 'Oferta przekazana',
+    pathSentPending: 'Oferta nieprzekazana',
+    pathSentHint: 'Utwórz link do oferty lub oznacz wycenę jako wysłaną.',
+    pathOpened: 'Inwestor otworzył link',
+    pathOpenedPending: 'Link nieotwarty',
+    pathOpenedHint: 'Do czasu otwarcia linku dalsze kroki pozostają wstrzymane.',
     pathComments: (count: number) =>
-      count === 1 ? '1 uwaga od klienta' : `${count} uwagi/uwag od klienta`,
-    pathCommentsNone: 'Bez uwag',
-    pathDecisionPending: 'Czekamy na decyzję',
-    pathDecisionPendingHint: 'Klient może zaakceptować ofertę, odrzucić ją albo zgłosić uwagi.',
-    pathAccepted: 'Klient przyjął ofertę',
-    pathRejected: 'Klient odrzucił ofertę',
-    pathRejectedReason: (reason: string) => `Powód: ${reason}`,
-    pathNoReason: 'Klient nie podał powodu.',
+      count === 1 ? '1 uwaga inwestora' : `${count} uwagi/uwag inwestora`,
+    pathCommentsNone: 'Brak uwag',
+    pathDecisionPending: 'Oczekiwanie na decyzję',
+    pathDecisionPendingHint: 'Inwestor może zaakceptować ofertę, odrzucić ją lub przekazać uwagi.',
+    pathAccepted: 'Oferta zaakceptowana',
+    pathRejected: 'Oferta odrzucona',
+    pathRejectedReason: (reason: string) => `Uzasadnienie: ${reason}`,
+    pathNoReason: 'Inwestor nie podał uzasadnienia.',
     /** Ręczna zmiana statusu zniknęła — mówimy o tym wprost, raz. */
     pathManualNote:
-      'Akceptację i odmowę zapisuje wyłącznie klient, pod linkiem. Dzięki temu data i zakres są jego odpowiedzią, a nie naszym domysłem.',
+      'Akceptacja i odmowa rejestrowane są wyłącznie przez inwestora, pod przekazanym linkiem. Data i zakres stanowią zatem jego oświadczenie, a nie zapis wprowadzony po stronie pracowni.',
 
     // Które pozycje klient odznaczył — nazwami, nie liczbą.
     turnedOffTitle: 'Klient odznaczył',
@@ -616,14 +622,15 @@ Pozdrawiam`,
     saveAllToLibrary: 'Zapisz wszystko do biblioteki',
     saveAllToLibraryDone: (count: number) =>
       count === 1 ? 'Zapisano 1 pozycję w bibliotece' : `Zapisano ${count} pozycji w bibliotece`,
-    saveAllToLibraryEmpty: 'Nie ma czego zapisać — nazwij najpierw pozycje.',
+    saveAllToLibraryEmpty: 'Brak pozycji do zapisania — pozycje wymagają wcześniejszego nazwania.',
     saveGroupToLibrary: 'Zapisz zestaw do biblioteki',
     savedGroupToLibrary: 'Zapisano zestaw w bibliotece',
-    saveGroupToLibraryDone: (name: string) => `Zestaw „${name}” jest w bibliotece`,
-    saveGroupToLibraryEmpty: 'Pusty zestaw nie ma czego zapisać — dodaj najpierw pozycje.',
-    saveGroupToLibraryUnnamed: 'Nazwij najpierw grupę — zestaw bez nazwy nie da się odnaleźć.',
+    saveGroupToLibraryDone: (name: string) => `Zestaw „${name}” zapisano w bibliotece`,
+    saveGroupToLibraryEmpty: 'Zestaw jest pusty — dodaj pozycje przed zapisaniem.',
+    saveGroupToLibraryUnnamed:
+      'Grupa wymaga nazwy — zestaw bez nazwy nie będzie możliwy do odnalezienia.',
     pickerSearch: 'Szukaj w bibliotece',
-    pickerEmpty: 'Nic nie pasuje',
+    pickerEmpty: 'Brak dopasowań',
     pickerLibraryEmpty: 'Biblioteka jest pusta',
     pickerItemsTab: 'Pozycje',
     pickerGroupsTab: 'Grupy',
@@ -641,14 +648,15 @@ Pozdrawiam`,
     },
     pickerDone: 'Gotowe',
     priceFrom: (amount: string) => `od ${amount}`,
-    pickerNoRooms: 'Wycena nie ma pomieszczeń — ta usługa policzy samą bazę.',
+    pickerNoRooms:
+      'Wycena nie zawiera pomieszczeń — usługa zostanie policzona wyłącznie od stawki bazowej.',
     pickerNoRoomsAction: 'Dodaj pomieszczenia',
 
     // Panel „Dodaj usługi” — zakres wyceny jako tabela z biblioteki (T-71, inspiracja 1).
     scopeOpen: 'Dodaj usługi',
     scopeTitle: 'Dodaj usługi do wyceny',
     scopeHint:
-      'Kliknij „Dodaj” przy usłudze — trafia od razu do wyceny. Panel zostaje otwarty, aż klikniesz „Gotowe”.',
+      'Przycisk „Dodaj” przy usłudze umieszcza ją bezpośrednio w wycenie. Panel pozostaje otwarty do momentu wybrania opcji „Gotowe”.',
     scopeTarget: 'Dodaj do',
     scopeTargetLabel: (section: string, group: string | null) =>
       group ? `${section} › ${group}` : section,
@@ -669,13 +677,14 @@ Pozdrawiam`,
     scopeAdd: 'Dodaj',
     scopeAddLabel: (name: string) => `Dodaj do wyceny: ${name}`,
     scopeNoGroup: 'Bez grupy',
-    scopeEmpty: 'Nic nie pasuje do filtrów.',
-    scopeLibraryEmpty: 'Biblioteka jest pusta — dodaj usługi w Bibliotece.',
-    scopeSetsEmpty: 'Nie masz jeszcze zestawów. Zapisz grupę wyceny jako zestaw ikoną zakładki.',
+    scopeEmpty: 'Brak pozycji spełniających kryteria filtrowania.',
+    scopeLibraryEmpty: 'Biblioteka jest pusta — usługi dodaje się w sekcji Biblioteka.',
+    scopeSetsEmpty:
+      'Nie utworzono jeszcze żadnego zestawu. Grupę pozycji wyceny można zapisać jako zestaw ikoną zakładki.',
     scopeSetItems: (count: number) => (count === 1 ? '1 pozycja' : `${count} poz.`),
-    scopeNoRoomsTitle: 'Wycena nie ma jeszcze pomieszczeń',
+    scopeNoRoomsTitle: 'Wycena nie zawiera pomieszczeń',
     scopeNoRoomsBody:
-      'Usługi liczone według pomieszczeń biorą stawki z biblioteki dla każdego pomieszczenia wyceny. Bez pomieszczeń policzą samą bazę — często 0 zł.',
+      'Usługi rozliczane według pomieszczeń pobierają stawki z biblioteki dla każdego pomieszczenia ujętego w wycenie. Przy braku pomieszczeń uwzględniana jest wyłącznie stawka bazowa — najczęściej 0 zł.',
     scopeNoRoomsAction: 'Dodaj pomieszczenie',
     scopeRoomsOk: (count: number) =>
       count === 1
@@ -688,7 +697,7 @@ Pozdrawiam`,
     itemsColPrice: 'Cena',
     // Pomieszczenia wyceny (cennik parametryczny).
     rooms: 'Pomieszczenia',
-    roomsHint: 'Usługi liczone za pomieszczenie biorą stąd swoje składniki.',
+    roomsHint: 'Usługi rozliczane za pomieszczenie pobierają z tej listy swoje składniki.',
 
     /*
      * PANEL POMIESZCZEŃ MÓWI, PO CO JEST (poprawka 7, 2026-08-27).
@@ -698,14 +707,14 @@ Pozdrawiam`,
      * dopiero po tym, jak coś już się kliknęło.
      */
     roomsPurpose:
-      'Lista pomieszczeń objętych projektem. Usługi wyceniane „za pomieszczenie" mnożą przez nią swoją stawkę — reszta pozycji jej nie używa.',
+      'Wykaz pomieszczeń objętych projektem. Usługi wyceniane „za pomieszczenie" mnożą przez niego swoją stawkę; pozostałe pozycje z niego nie korzystają.',
     roomsCount: (count: number) => (count === 1 ? '1 pomieszczenie' : `${count} pomieszczeń`),
     roomsColumnName: 'Pomieszczenie',
     roomsColumnQty: 'Ile',
     roomsSplit: (visual: number, technical: number) =>
       `Do części wizualnej liczy się ${visual}, do technicznej ${technical}.`,
     roomsEmpty:
-      'Brak pomieszczeń. Dodaj je tylko wtedy, gdy któraś usługa liczy się za pomieszczenie — inaczej lista nic nie zmienia.',
+      'Brak pomieszczeń. Lista ma znaczenie wyłącznie wtedy, gdy któraś z usług rozliczana jest za pomieszczenie.',
     addRoom: 'Dodaj pomieszczenie',
     newRoomName: 'Nowe pomieszczenie',
     roomNameLabel: (room: string) => `Nazwa pomieszczenia: ${room}`,
@@ -715,7 +724,7 @@ Pozdrawiam`,
     removeRoom: (room: string) => `Usuń pomieszczenie: ${room}`,
     removeRoomTitle: 'Usunąć pomieszczenie?',
     removeRoomDescription: (room: string) =>
-      `„${room}” zniknie z wyceny, a usługi liczone za pomieszczenie przeliczą się bez niego. Pozycje przypisane do tego pomieszczenia zostają — tracą tylko przypisanie.`,
+      `Pomieszczenie „${room}” zostanie usunięte z wyceny, a usługi rozliczane za pomieszczenie zostaną przeliczone bez niego. Pozycje przypisane do tego pomieszczenia pozostaną w wycenie i utracą jedynie przypisanie.`,
     /** Kolumna M z arkusza — „w projekcie”. */
     roomVisual: (room: string) => `Część wizualna: ${room}`,
     /** Kolumna A z arkusza — „w części technicznej”. */
@@ -723,7 +732,7 @@ Pozdrawiam`,
     roomVisualShort: 'W',
     roomTechnicalShort: 'T',
     roomFlagsHint:
-      'W — część wizualna (projekt aranżacji), T — techniczna (rysunki wykonawcze). Usługa liczona za pomieszczenie bierze tylko te pomieszczenia, które ma zaznaczone.',
+      'W — część wizualna (projekt aranżacji), T — część techniczna (rysunki wykonawcze). Usługa rozliczana za pomieszczenie uwzględnia wyłącznie pomieszczenia oznaczone w danym zakresie.',
     /** Podpowiedź pod kursorem na kwadraciku — legenda nie zawsze jest widoczna. */
     roomVisualTitle: 'Wlicza się do części wizualnej',
     roomTechnicalTitle: 'Wlicza się do części technicznej',
@@ -743,8 +752,8 @@ Pozdrawiam`,
     // Dokument „Etapy wspolpracy" (F6.1).
     stagesDocTitle: 'Etapy współpracy',
     stagesDocIntro: (objete: number, wszystkie: number) =>
-      `Zakres tej oferty obejmuje ${objete} z ${wszystkie} etapów. Pozostałe zostają na liście, żeby było jasne, czego nie zawiera.`,
-    stagesDocEmpty: 'Dokument powstanie po wejściu w tryb edycji.',
+      `Zakres oferty obejmuje ${objete} z ${wszystkie} etapów. Pozostałe pozostają na liście, aby zakres wyłączony z oferty był jednoznaczny.`,
+    stagesDocEmpty: 'Dokument zostanie utworzony po przejściu w tryb edycji.',
     stagesDocValidDays: 'Ważny (dni)',
     stagesDocFootnote: 'Przypis',
     stagesDocFootnotePlaceholder: 'Uwagi do zakresu, zastrzeżenia…',
@@ -761,8 +770,8 @@ Pozdrawiam`,
     docTabPriceList: 'Cennik dodatkowy',
     priceListTitle: 'Cennik usług dodatkowych',
     priceListIntro:
-      'Usługi spoza zakresu tej oferty. Ceny podane widłekami — dokładna kwota zależy od zakresu i wychodzi po rozmowie.',
-    priceListEmpty: 'Cennik powstanie po wejściu w tryb edycji.',
+      'Usługi wykraczające poza zakres niniejszej oferty. Ceny podano w widełkach — ostateczna kwota ustalana jest po określeniu szczegółowego zakresu.',
+    priceListEmpty: 'Cennik zostanie utworzony po przejściu w tryb edycji.',
     priceListValidDays: 'Ważny (dni)',
     priceListFootnote: 'Przypis',
     priceListFootnotePlaceholder: 'Uwagi do cennika, zastrzeżenia…',
@@ -789,19 +798,19 @@ Pozdrawiam`,
     priceListAddedDaysLabel: (name: string) => `Dni doliczane do terminu: ${name}`,
     priceListAddedDaysPlaceholder: 'dni',
     priceListAddedDaysHint: 'Dni robocze wykonawcy doliczane po dodaniu usługi do wyceny.',
-    addToQuoteTitle: 'Co ma się zmienić?',
+    addToQuoteTitle: 'Zakres zmiany',
     addToQuoteCost: 'Wycena — pozycja z kwotą',
     addToQuoteSchedule: (days: number) =>
       days === 1 ? 'Termin — +1 dzień roboczy' : `Termin — +${days} dni roboczych`,
-    addToQuoteScheduleNew: 'Wycena nie ma jeszcze terminu — założymy go.',
+    addToQuoteScheduleNew: 'Wycena nie zawiera jeszcze terminu — zostanie on utworzony.',
     addToQuoteConfirm: 'Dodaj',
     priceListAddedToSchedule: (name: string, days: number) =>
       days === 1 ? `Termin dłuższy o 1 dzień: ${name}` : `Termin dłuższy o ${days} dni: ${name}`,
-    priceListNothingSelected: 'Zaznacz przynajmniej jeden efekt.',
+    priceListNothingSelected: 'Wskaż co najmniej jeden zakres zmiany.',
 
     // Etap zbiorczy „Usługi dodatkowe" w zakładce Termin.
     extrasStageName: 'Usługi dodatkowe',
-    extrasStageHint: 'Dni z cennika dodatkowego. Suma składników poniżej.',
+    extrasStageHint: 'Dni wynikające z cennika dodatkowego. Suma składników poniżej.',
     extrasEntryDaysLabel: (name: string) => `Dni usługi: ${name}`,
     removeExtrasEntry: (name: string) => `Usuń z terminu: ${name}`,
     scheduleTitle: 'Szacowany termin',
@@ -813,10 +822,10 @@ Pozdrawiam`,
      * prawdziwe i nic nie tłumaczyło, skąd bierze się data na dole.
      */
     scheduleIntro:
-      'Termin składa się z etapów. Każdy etap ma swoje dni i stronę, która je zużywa: pracownię albo inwestora. Etapy zależne od pomieszczeń biorą je z tej samej listy co wycena.',
+      'Termin stanowi sumę etapów. Każdy etap ma przypisaną liczbę dni oraz stronę, która je wykorzystuje: pracownię albo inwestora. Etapy zależne od pomieszczeń korzystają z tej samej listy co wycena.',
     scheduleAssumptions: 'Założenia',
     scheduleAssumptionsHint:
-      'Z tych czterech wartości wychodzą daty w podsumowaniu obok. Bez daty startu policzymy same dni.',
+      'Na podstawie tych czterech wartości wyznaczane są daty w podsumowaniu obok. Bez daty rozpoczęcia obliczana jest wyłącznie liczba dni.',
     scheduleStart: 'Start prac',
     scheduleProviderWeek: 'Dni robocze / tydzień — pracownia',
     scheduleClientWeek: 'Dni robocze / tydzień — inwestor',
@@ -828,10 +837,10 @@ Pozdrawiam`,
     scheduleColumnOwner: 'Kto',
     scheduleColumnDays: 'Dni',
     scheduleOwnerLegend:
-      'ARCH. — czas pracowni, INW. — czas po stronie inwestora (decyzje, akceptacje, zbieranie inspiracji). Rozdzielamy je, bo to drugie najczęściej rozciąga termin, a najtrudniej je potem wytłumaczyć.',
-    scheduleEmpty: 'Harmonogram powstanie po wejściu w tryb edycji.',
+      'ARCH. — czas pracy pracowni, INW. — czas po stronie inwestora (decyzje, akceptacje, dobór materiałów). Rozdzielenie tych wartości jest istotne: to czas inwestora najczęściej wydłuża termin realizacji.',
+    scheduleEmpty: 'Harmonogram zostanie utworzony po przejściu w tryb edycji.',
     scheduleNoRooms:
-      'Brak pomieszczeń w wycenie — etapy zależne od pomieszczeń liczą teraz tylko dni bazowe.',
+      'Wycena nie zawiera pomieszczeń — etapy zależne od pomieszczeń uwzględniają wyłącznie dni bazowe.',
     scheduleResult: 'Wynik',
     scheduleProviderDays: 'Dni robocze — pracownia',
     scheduleClientDays: 'Dni robocze — inwestor',
@@ -839,8 +848,8 @@ Pozdrawiam`,
     scheduleEndLatest: 'Najpóźniejsze',
     /** Dlaczego widełki, a nie jedna data — pytanie pada za każdym razem. */
     scheduleRangeHint:
-      'Termin optymalny zakłada, że inwestor odpowiada od ręki. Najpóźniejszy dolicza jego dni w całości. Prawda leży pomiędzy — i dlatego podajemy widełki, a nie jedną datę.',
-    scheduleNoStart: 'Podaj datę startu, żeby zobaczyć terminy.',
+      'Termin optymalny zakłada niezwłoczne decyzje inwestora. Termin najpóźniejszy uwzględnia jego dni w pełnym wymiarze. Rzeczywisty termin mieści się pomiędzy tymi wartościami — stąd widełki zamiast jednej daty.',
+    scheduleNoStart: 'Podanie daty rozpoczęcia umożliwi wyznaczenie terminów.',
     scheduleCalendarHint: (optimal: number, latest: number) =>
       `W przeliczeniu na dni kalendarzowe: ${optimal}–${latest}.`,
     addStage: 'Dodaj etap',
@@ -865,25 +874,27 @@ Pozdrawiam`,
     stageDefaultPerRoom: 'Pozostałe',
     stageDefaultPerRoomLabel: (name: string) => `Dni za pozostałe pomieszczenia: ${name}`,
     stageRoomDaysLabel: (name: string, room: string) => `Dni za ${room}: ${name}`,
-    stageNoRoomTypes: 'Brak typów pomieszczeń — dodaj je w ustawieniach.',
+    stageNoRoomTypes: 'Brak typów pomieszczeń — słownik uzupełnia się w Bibliotece.',
     removeStage: (name: string) => `Usuń etap: ${name}`,
-    stageAutoEnabled: (name: string) => `Włączono etap „${name}" — wycena go obejmuje.`,
+    stageAutoEnabled: (name: string) =>
+      `Etap „${name}" został włączony — obejmuje go zakres wyceny.`,
     stageEntryAutoIncluded: (name: string) =>
-      `Etap „${name}” wszedł do zakresu — wycena go obejmuje.`,
-    roomBlockNameHint: 'Nazwę zmienisz w panelu „Pomieszczenia" obok — tutaj jest tylko pokazana.',
+      `Etap „${name}” został dodany do zakresu — obejmuje go wycena.`,
+    roomBlockNameHint:
+      'Nazwa pochodzi z panelu „Pomieszczenia" obok i tam podlega edycji. Tutaj jest wyłącznie prezentowana.',
     itemFramesLabel: 'Liczba kadrów',
     pricingBasis: 'Sposób liczenia',
     basisAmount: 'Kwotowo',
     basisTime: 'Godzinowo',
     hourlyRate: 'Stawka za godzinę',
-    hourlyRateMissing: 'Bez stawki wszystkie kwoty wychodzą zerowe.',
+    hourlyRateMissing: 'Brak stawki godzinowej powoduje, że wszystkie kwoty wynoszą zero.',
     workload: 'Pracochłonność',
     workloadEstimate: 'Szacowana pracochłonność',
     workloadEstimateHint:
-      'Szacunek wyliczony z cen według stawki z ustawień — nie z wpisanego czasu.',
-    workloadNoRate: 'Ustaw stawkę godzinową w ustawieniach, żeby dało się oszacować czas.',
+      'Wartość szacunkowa wyliczona z kwot według stawki z ustawień, a nie z wprowadzonego czasu pracy.',
+    workloadNoRate: 'Oszacowanie czasu wymaga ustawienia stawki godzinowej w Ustawieniach.',
     workloadCommunication: 'Komunikacja projektowa',
-    workloadCommunicationHint: 'Liczba zawarta w sumie poniżej.',
+    workloadCommunicationHint: 'Wartość ujęta w sumie poniżej.',
     workloadTotal: 'Razem',
     // `itemTagCommunication` / `itemTagsLabel` zdjęte 2026-08-27 razem
     // z przełącznikiem przy pozycji (poprawka 7). Wiersz „w tym komunikacja"
@@ -891,15 +902,15 @@ Pozdrawiam`,
     itemMinutesLabel: 'Minuty pracy',
     convertTitle: 'Przeliczyć wartości?',
     convertDescription: (rate: string) =>
-      `Wycena ma już pozycje. Przeliczyć ich liczby według stawki ${rate}, czy zostawić je bez zmian?`,
+      `Wycena zawiera już pozycje. Przeliczyć ich wartości według stawki ${rate}, czy pozostawić bez zmian?`,
     convertDescriptionNoRate:
-      'Wycena ma już pozycje, ale nie ma stawki godzinowej — nie ma po czym przeliczać. Liczby zostaną bez zmian i będą znaczyć minuty.',
+      'Wycena zawiera pozycje, lecz nie ustalono stawki godzinowej — przeliczenie nie jest możliwe. Wartości pozostaną bez zmian i będą interpretowane jako minuty.',
     convertYes: 'Przelicz',
-    convertNo: 'Zostaw liczby',
+    convertNo: 'Pozostaw bez zmian',
     convertedToTime: 'Kwoty przeliczone na minuty.',
     convertedToAmount: 'Minuty przeliczone na kwoty.',
     libraryBasisMismatch:
-      'Ta pozycja jest liczona w innych jednostkach. Ustaw stawkę godzinową, żeby dało się ją przeliczyć.',
+      'Pozycja rozliczana jest w innych jednostkach. Przeliczenie wymaga ustawienia stawki godzinowej.',
     libraryConvertedToTime: 'Przeliczono z kwoty na minuty według stawki wyceny.',
     libraryConvertedToAmount: 'Przeliczono z minut na kwotę według stawki wyceny.',
     insertPlaceholder: 'Wstaw pole automatyczne',
@@ -930,7 +941,7 @@ Pozdrawiam`,
     discountConditionLabel: (name: string) => `Tylko przy komplecie: ${name}`,
     discountConditionShort: 'Tylko przy komplecie',
     discountConditionHint:
-      'Rabat należy się dopiero, gdy klient bierze wszystkie pozycje z zakresu.',
+      'Rabat przysługuje wyłącznie w przypadku wyboru wszystkich pozycji objętych zakresem.',
     /** Dlaczego rabat wynosi 0 zł — bez tego wygląda jak błąd. */
     discountUnmet: (enabled: number, total: number) =>
       `Warunek niespełniony (${enabled}/${total} pozycji)`,
@@ -951,9 +962,9 @@ Pozdrawiam`,
     pdfFailed: 'Nie udało się wygenerować PDF.',
     markAsSentTitle: 'Oznaczyć wycenę jako wysłaną?',
     markAsSentDescription:
-      'PDF jest zapisany. Jeśli właśnie wysyłasz go klientowi, wycena zmieni status ze szkicu na „wysłana" i trafi do zestawień.',
-    markAsSentConfirm: 'Tak, wysłana',
-    markAsSentDismiss: 'Zostaw szkic',
+      'Dokument PDF został zapisany. Jeżeli jest przekazywany inwestorowi, status wyceny zmieni się ze szkicu na „Wysłana" i zostanie ona ujęta w zestawieniach.',
+    markAsSentConfirm: 'Oznacz jako wysłaną',
+    markAsSentDismiss: 'Pozostaw szkic',
     markedAsSent: 'Wycena oznaczona jako wysłana.',
 
     summary: 'Podsumowanie',
@@ -966,7 +977,7 @@ Pozdrawiam`,
     saved: 'Zapisano',
     saving: 'Zapisywanie…',
     saveError: 'Błąd zapisu — ponów',
-    conflict: 'Wycena zmieniona w innym miejscu — przeładuj.',
+    conflict: 'Wycena została zmieniona w innej sesji — wymagane ponowne wczytanie.',
     reload: 'Przeładuj',
 
     eyebrow: 'Oferta projektowa',
@@ -981,16 +992,16 @@ Pozdrawiam`,
     clientOpen: 'Otwórz kartę klienta',
     clientRefresh: 'Odśwież dane klienta',
     clientRefreshed: 'Przepisano dane z kartoteki',
-    clientOutdated: 'Dane w dokumencie różnią się od kartoteki.',
+    clientOutdated: 'Dane w dokumencie różnią się od danych w kartotece.',
     clientSnapshotHint:
-      'Wycena trzyma kopię danych z chwili utworzenia — edycja kartoteki nie zmienia wysłanej oferty.',
+      'Wycena przechowuje kopię danych z chwili jej utworzenia — edycja kartoteki nie zmienia treści przekazanej oferty.',
     clientAttached: (name: string) => `Wycena przypięta do klienta: ${name}`,
     clientDetached: 'Wycena odpięta od klienta',
     projectLabel: 'Projekt',
     projectPick: 'Wybierz projekt',
     projectNone: 'Bez projektu',
     projectNew: 'Nowy projekt',
-    projectNeedsClient: 'Najpierw wybierz klienta — projekty należą do niego.',
+    projectNeedsClient: 'Wybór projektu wymaga wcześniejszego wskazania klienta.',
     projectOpen: 'Otwórz projekt',
 
     individualPrice: 'wycena indywidualna',
@@ -1007,11 +1018,11 @@ Pozdrawiam`,
     city: 'Miasto',
     validity: 'Ważność oferty',
     projectDescription: 'Opis projektu',
-    projectDescriptionPlaceholder: 'Kliknij, aby dodać opis projektu…',
+    projectDescriptionPlaceholder: 'Opis projektu — kliknij, aby uzupełnić…',
     preparedBy: 'Ofertę przygotował/a',
     titlePlaceholder: 'Tytuł wyceny',
     subtitlePlaceholder: 'Podtytuł (opcjonalnie)',
-    introPlaceholder: 'Tekst wstępu widoczny dla klienta…',
+    introPlaceholder: 'Tekst wprowadzenia widoczny dla inwestora…',
     /** 1 dzień / 2 dni / 22 dni — w polskim tylko liczba pojedyncza jest inna. */
     days: (count: number) => (count === 1 ? '1 dzień' : `${count} dni`),
 
@@ -1048,11 +1059,11 @@ Pozdrawiam`,
     removeSection: 'Usuń sekcję',
     removeGroupConfirmTitle: 'Usunąć grupę razem z pozycjami?',
     removeSectionConfirmTitle: 'Usunąć sekcję razem z zawartością?',
-    removeConfirmDescription: 'Tej operacji nie da się cofnąć.',
+    removeConfirmDescription: 'Operacji nie można cofnąć.',
 
     corruptedTitle: 'Wycena uszkodzona',
     corruptedDescription:
-      'Nie udało się odczytać treści tej wyceny. Skontaktuj się z pomocą — dane są bezpieczne, ale edytor ich nie otworzy.',
+      'Odczytanie treści wyceny nie powiodło się. Dane pozostają bezpieczne, lecz edytor nie jest w stanie ich otworzyć — prosimy o kontakt z pomocą techniczną.',
     backToList: 'Wyceny',
     itemsCount: (count: number) => `${count} poz.`,
   },
@@ -1217,22 +1228,23 @@ Z wyrazami szacunku`,
     tab: 'Wizja lokalna',
     title: 'Wizja lokalna',
     intro:
-      'Notatka ze stanu zastanego: obmiar, instalacje, zdjęcia, ustalenia. Wizji może być kilka — druga po wyburzeniach, trzecia przed montażem.',
+      'Dokumentacja stanu zastanego: obmiar, instalacje, zdjęcia i ustalenia. Wizji może być kilka — kolejno po pracach wyburzeniowych oraz przed montażem.',
     add: 'Nowa wizja',
-    empty: 'Nie ma jeszcze żadnej wizji lokalnej.',
-    emptyHint: 'Zapisz obmiar i stan zastany, zanim ekipa cokolwiek ruszy.',
+    empty: 'Nie zarejestrowano jeszcze żadnej wizji lokalnej.',
+    emptyHint: 'Obmiar i stan zastany warto udokumentować przed rozpoczęciem prac przez wykonawcę.',
     date: 'Data wizyty',
     attendees: 'Obecni',
     attendeesPlaceholder: 'projektant, inwestor, kierownik budowy',
     notes: 'Notatka z wizji',
     notesPlaceholder: 'Obserwacje, ustalenia, ryzyka. Co wymaga decyzji inwestora.',
     delete: 'Usuń wizję',
-    deleteConfirm: 'Wizja zniknie razem z obmiarem i notatką. Zdjęcia zostaną w plikach projektu.',
+    deleteConfirm:
+      'Wizja zostanie usunięta wraz z obmiarem i notatką. Zdjęcia pozostaną w plikach projektu.',
 
     // Obmiar.
     rooms: 'Obmiar',
     roomsHint:
-      'Wymiary w centymetrach — powierzchnia liczy się sama. Pomieszczenie bez kompletu wymiarów nie wchodzi do sumy.',
+      'Wymiary podawane są w centymetrach, powierzchnia wyliczana jest automatycznie. Pomieszczenie bez kompletu wymiarów nie jest wliczane do sumy.',
     roomsEmpty: 'Brak obmiaru.',
     addRoom: 'Dodaj pomieszczenie',
     roomName: 'Pomieszczenie',
@@ -1250,7 +1262,7 @@ Z wyrazami szacunku`,
     // Spis instalacji.
     checks: 'Do sprawdzenia',
     checksHint:
-      'Lista jest punktem wyjścia — pozycje można dopisać i usunąć. „Nie ustalono" to prawidłowa odpowiedź: znaczy „byłem i nie dało się sprawdzić".',
+      'Lista stanowi punkt wyjścia — pozycje można dodawać i usuwać. „Nie ustalono" jest prawidłową odpowiedzią i oznacza, że danego elementu nie dało się sprawdzić podczas wizyty.',
     addCheck: 'Dodaj pozycję',
     checkNote: 'Uwaga',
     checkNoteLabel: (label: string) => `Uwaga: ${label}`,
@@ -1267,7 +1279,8 @@ Z wyrazami szacunku`,
 
     // Zdjęcia.
     photos: 'Zdjęcia',
-    photosHint: 'Trafiają też do plików projektu — tutaj są przypięte do tej wizyty.',
+    photosHint:
+      'Zdjęcia zapisywane są również w plikach projektu; w tym miejscu pozostają powiązane z konkretną wizytą.',
     addPhotos: 'Dodaj zdjęcia',
     photosEmpty: 'Brak zdjęć z tej wizyty.',
     uploading: 'Wysyłanie…',
@@ -1277,45 +1290,47 @@ Z wyrazami szacunku`,
 
   dashboard: {
     activeProjects: 'Aktywni klienci i projekty',
-    activeProjectsEmpty: 'Brak projektów w toku. Zacznij od dodania klienta.',
+    activeProjectsEmpty: 'Brak projektów w toku. Pracę rozpoczyna się od dodania klienta.',
     title: 'Pulpit',
     recentQuotes: 'Ostatnie wyceny',
 
     /*
-     * PASEK „NA BIEŻĄCO" (poprawka 6, 2026-08-27).
+     * PASEK AKTYWNOŚCI (poprawka 6, 2026-08-27; rejestr przepisany w T-97).
      *
-     * Podmiotem zdania jest zawsze klient, bo to on coś zrobił. „Wycena
-     * została zaakceptowana" brzmi jak zdarzenie systemowe; „Anna Kowalska
-     * przyjęła ofertę" jest wiadomością od człowieka.
+     * Wpis nazywa klienta i zdarzenie: „Anna Kowalska — akceptacja oferty".
+     * Forma rzeczownikowa, a nie relacjonująca („przyjęła ofertę"), bo pasek
+     * jest rejestrem zdarzeń, a nie strumieniem wiadomości.
      */
-    activityTitle: 'Co nowego u klientów',
-    activityUpToDate: 'Jesteś na bieżąco',
+    activityTitle: 'Aktywność klientów',
+    activityUpToDate: 'Brak nowych zdarzeń',
     activityUnread: (count: number) => (count === 1 ? '1 nowa uwaga' : `${count} nowych uwag`),
     activityUnreadMark: 'nieprzeczytane',
-    activityEmpty: 'Nic się jeszcze nie wydarzyło — pierwszy wysłany link pojawi się tutaj.',
+    activityEmpty:
+      'Brak zarejestrowanych zdarzeń — pierwszy przekazany link pojawi się w tym miejscu.',
 
     /*
      * CZYSZCZENIE PASKA (2026-08-27).
      *
-     * „Odhacz", a nie „Wyczyść": zdarzenia nie znikają, tylko przestają się
-     * pokazywać. Akceptacja oferty jest faktem i nie ma prawa zniknąć dlatego,
-     * że ktoś kliknął przycisk — stąd odsłonięcie jednym kliknięciem.
+     * „Oznacz jako przejrzane", a nie „Wyczyść": zdarzenia nie są usuwane,
+     * a jedynie przestają być wyświetlane. Akceptacja oferty jest faktem
+     * i nie może zniknąć wskutek kliknięcia — stąd możliwość ponownego
+     * odsłonięcia listy.
      */
-    activityClear: 'Odhacz wszystko',
-    activityCleared: 'Odhaczone. Nowe zdarzenia pojawią się tutaj.',
+    activityClear: 'Oznacz wszystkie jako przejrzane',
+    activityCleared: 'Zdarzenia oznaczone jako przejrzane. Nowe pojawią się w tym miejscu.',
     activityShowOlder: (count: number) =>
-      count === 1 ? 'Pokaż 1 odhaczone' : `Pokaż ${count} odhaczonych`,
-    activityHideOlder: 'Ukryj odhaczone',
+      count === 1 ? 'Pokaż 1 przejrzane' : `Pokaż ${count} przejrzanych`,
+    activityHideOlder: 'Ukryj przejrzane',
     activitySomeone: 'Klient',
-    activityAccepted: (who: string) => `${who} przyjął ofertę`,
-    activityRejected: (who: string) => `${who} odrzucił ofertę`,
-    activityComment: (who: string) => `${who} zostawił uwagę`,
-    activityViewed: (who: string) => `${who} otworzył link z ofertą`,
+    activityAccepted: (who: string) => `${who} — akceptacja oferty`,
+    activityRejected: (who: string) => `${who} — odrzucenie oferty`,
+    activityComment: (who: string) => `${who} — uwagi do oferty`,
+    activityViewed: (who: string) => `${who} — otwarcie linku z ofertą`,
 
-    // Pusty pulpit — zaproszenie, nie komunikat o braku.
-    emptyTitle: 'Zbuduj pierwszą wycenę',
+    // Pusty pulpit — zapowiedź działania narzędzia, nie komunikat o braku.
+    emptyTitle: 'Pierwsza wycena',
     emptyLead:
-      'Dodajesz pozycje, klient przełącza TAK/NIE, a suma przelicza się sama. Gotową ofertę wysyłasz jako brandowany PDF.',
+      'Pozycje oferty wprowadza pracownia, inwestor wybiera zakres przełącznikami TAK/NIE, a suma przeliczana jest automatycznie. Gotowy dokument przekazywany jest w formie PDF z identyfikacją wizualną pracowni.',
     demoYes: 'TAK',
     demoNo: 'NIE',
     demoItemConcept: 'Projekt koncepcyjny',
@@ -1338,11 +1353,11 @@ Z wyrazami szacunku`,
     // Biblioteka przykladowa (T-62).
     sampleBadge: 'Przykładowa',
     sampleSectionHint:
-      'Biblioteka przykładowa dostaje każde nowe konto. Edytowane pozycje przestają być przykładowe i zostaną.',
+      'Biblioteka przykładowa udostępniana jest każdemu nowemu kontu. Pozycje poddane edycji tracą status przykładowych i pozostają w bibliotece.',
     deleteSample: (count: number) => `Usuń pozostałe przykładowe (${count})`,
     deleteSampleTitle: 'Usunąć pozycje przykładowe?',
     deleteSampleDescription: (count: number) =>
-      `Zniknie ${count} nietkniętych pozycji i puste grupy przykładowe. To, co edytowałeś, zostaje.`,
+      `Usuniętych zostanie ${count} niezmodyfikowanych pozycji oraz puste grupy przykładowe. Pozycje poddane edycji pozostaną w bibliotece.`,
     sampleDeleted: (count: number) => `Usunięto ${count} pozycji przykładowych`,
 
     // Pelnoekranowy edytor uslugi (T-61).
@@ -1358,14 +1373,15 @@ Z wyrazami szacunku`,
       individual: 'Indywidualnie',
     },
     ratesSection: 'Stawki według pomieszczeń',
-    ratesHint: 'Stawki edytujesz w zakładce „Stawki" — tam widać całą macierz naraz.',
+    ratesHint: 'Stawki edytowane są w zakładce „Stawki", gdzie widoczna jest cała macierz.',
     goToRates: 'Przejdź do stawek',
     extraSettings: 'Ustawienia dodatkowe',
     minPriceLabel: 'Cena „od"',
-    minPriceHint: 'Pokazywana na liście. Nie wpływa na obliczenia.',
+    minPriceHint: 'Wartość prezentowana na liście. Nie wpływa na obliczenia.',
     customUnitLabel: 'Własna jednostka',
     activeLabel: 'Aktywna w bibliotece',
-    activeHint: 'Nieaktywna znika z wyboru w edytorze, ale zostaje w wycenach, które ją mają.',
+    activeHint:
+      'Usługa nieaktywna nie jest dostępna w edytorze, lecz pozostaje w wycenach, które już ją zawierają.',
     // Lista usług jako zwijane wiersze (T-72, inspiracja 1).
     rowExpand: (name: string) => `Rozwiń: ${name}`,
     rowCollapse: (name: string) => `Zwiń: ${name}`,
@@ -1380,20 +1396,20 @@ Z wyrazami szacunku`,
     nameRequired: 'Usługa musi mieć nazwę.',
     itemSaved: 'Zapisano usługę',
     cascadeHint:
-      'Zmiany trafią do nowych wycen. Otwartą wycenę zaktualizujesz z panelu biblioteki w edytorze.',
+      'Zmiany obowiązują w nowych wycenach. Otwartą wycenę aktualizuje się z panelu biblioteki w edytorze.',
     preview: 'Podgląd w ofercie',
-    howItWorks: 'Jak to działa?',
+    howItWorks: 'Zasada naliczania',
     howItWorksText: {
-      flat: 'Cena jest stała. W wycenie mnożymy ją przez ilość — na przykład 4 godziny po 150 zł to 600 zł.',
+      flat: 'Cena stała, mnożona w wycenie przez ilość — przykładowo 4 godziny po 150 zł dają 600 zł.',
       per_room:
-        'Cena wynika ze stawek za pomieszczenia z zakładki „Stawki". Wycena liczy je z listy pomieszczeń danej oferty, więc ta sama usługa da inną kwotę przy innym metrażu.',
+        'Cena wynika ze stawek za pomieszczenia zdefiniowanych w zakładce „Stawki". Wyliczana jest na podstawie listy pomieszczeń danej oferty, dlatego ta sama usługa daje inną kwotę przy innym zakresie.',
       per_frame:
-        'Cena to stawka za pomieszczenie plus baza pomnożona przez liczbę kadrów. Używane przy wizualizacjach.',
+        'Cena stanowi sumę stawki za pomieszczenie oraz stawki bazowej pomnożonej przez liczbę kadrów. Sposób stosowany przy wizualizacjach.',
       individual:
-        'Pozycja jest w ofercie, ale nie ma ceny i nie wchodzi do sumy. Klient widzi „wycena indywidualna", a podsumowanie mówi, ile takich pozycji zawiera oferta.',
+        'Pozycja ujęta jest w ofercie, lecz nie ma ceny i nie wchodzi do sumy. Inwestor widzi adnotację „wycena indywidualna", a podsumowanie wskazuje liczbę takich pozycji.',
     },
     usageTitle: 'Statystyki użycia',
-    usageNever: 'Jeszcze nieużywana w żadnej wycenie.',
+    usageNever: 'Usługa nie została dotąd użyta w żadnej wycenie.',
     usageCount: (count: number) =>
       count === 1
         ? 'Użyta w 1 wycenie'
@@ -1402,7 +1418,7 @@ Z wyrazami szacunku`,
           : `Użyta w ${count} wycenach`,
     usageLast: (when: string) => `Ostatnio: ${when}`,
     itemNotFoundTitle: 'Nie znaleziono usługi',
-    itemNotFoundDescription: 'Usługa mogła zostać usunięta albo nigdy nie istniała.',
+    itemNotFoundDescription: 'Rekord został usunięty lub podany adres jest nieprawidłowy.',
     editItem: 'Edytuj usługę',
 
     categoryNew: 'Nowa grupa',
@@ -1416,12 +1432,12 @@ Z wyrazami szacunku`,
     categoryHint: 'Grupy porządkują usługi w procesie projektowym. Kod („01") jest opcjonalny.',
     categoriesEmptyTitle: 'Brak grup',
     categoriesEmptyDescription:
-      'Grupa to dział albo etap: „Przygotowanie", „Projekt", „Nadzór". Usługi bez grupy dalej działają.',
+      'Grupa odpowiada działowi lub etapowi prac: „Przygotowanie", „Projekt", „Nadzór". Usługi nieprzypisane do grupy pozostają w pełni funkcjonalne.',
     categoryDeleteTitle: 'Usunąć grupę?',
     categoryDeleteDescription: (items: number) =>
       items > 0
-        ? `Grupa zniknie z listy. ${items === 1 ? 'Jej usługa trafi' : `Jej usługi (${items}) trafią`} do „Bez grupy" — nic nie zostanie skasowane.`
-        : 'Grupa zniknie z listy. Nie ma w niej żadnych usług.',
+        ? `Grupa zostanie usunięta z listy. ${items === 1 ? 'Przypisana do niej usługa zostanie przeniesiona' : `Przypisane do niej usługi (${items}) zostaną przeniesione`} do kategorii „Bez grupy" — żadne dane nie zostaną skasowane.`
+        : 'Grupa zostanie usunięta z listy. Nie zawiera żadnych usług.',
     withoutCategory: 'Bez grupy',
     withoutCategoryCount: (count: number) => `Bez grupy: ${count}`,
     itemCount: (count: number) =>
@@ -1430,7 +1446,7 @@ Z wyrazami szacunku`,
     moveDown: 'Przenieś niżej',
 
     title: 'Biblioteka',
-    sheetHint: 'Zmiany cen i nazw możesz od razu przenieść na otwartą wycenę.',
+    sheetHint: 'Zmiany cen i nazw można od razu przenieść na otwartą wycenę.',
     items: 'Pozycje',
     /*
      * Klucz zostaje `groups` (tak nazywa się tabela `library_groups`, §9.3),
@@ -1441,7 +1457,7 @@ Z wyrazami szacunku`,
     category: 'Kategoria',
     emptyTitle: 'Biblioteka jest pusta',
     emptyDescription:
-      'Dodaj pozycje, których używasz najczęściej — wstawisz je do wyceny jednym kliknięciem.',
+      'Dodaj najczęściej stosowane pozycje — ich wstawienie do wyceny wymaga wówczas jednego kliknięcia.',
 
     // Zakładki i filtry.
     tabsLabel: 'Sekcje biblioteki',
@@ -1468,12 +1484,12 @@ Z wyrazami szacunku`,
     deleteItem: (name: string) => `Usuń pozycję: ${name}`,
     deleteItemTitle: 'Usunąć pozycję z biblioteki?',
     deleteItemDescription: (name: string) =>
-      `„${name}” zniknie z biblioteki. Wyceny, w których już jej użyto, zostają nietknięte.`,
+      `Pozycja „${name}” zostanie usunięta z biblioteki. Wyceny, w których już jej użyto, pozostają nienaruszone.`,
     itemsEmptyTitle: 'Biblioteka pozycji jest pusta',
     itemsEmptyDescription:
-      'Dodaj pierwszą pozycję — nazwę, opis i cenę wstawisz potem do wyceny jednym kliknięciem.',
-    itemsNoResultsTitle: 'Brak pozycji dla tych filtrów',
-    itemsNoResultsDescription: 'Zmień kategorię albo wyczyść wyszukiwanie.',
+      'Dodaj pierwszą pozycję — nazwa, opis i cena będą następnie wstawiane do wyceny jednym kliknięciem.',
+    itemsNoResultsTitle: 'Brak pozycji spełniających kryteria',
+    itemsNoResultsDescription: 'Zmień kategorię lub wyczyść wyszukiwanie.',
 
     // Reguły cenowe (cennik parametryczny).
     pricingLabel: 'Sposób wyceny',
@@ -1486,10 +1502,11 @@ Z wyrazami szacunku`,
     variantNone: 'Osobna pozycja',
     variantLeaderNote: (count: number) =>
       count === 1
-        ? 'Ta pozycja jest główna dla 1 wariantu — dlatego sama nie może być czyimś wariantem.'
-        : `Ta pozycja jest główna dla ${count} wariantów — dlatego sama nie może być czyimś wariantem.`,
-    pricingFlatHint: 'Cena × ilość — jak dotąd.',
-    pricingPerRoomHint: 'Baza plus stawka za każde zaznaczone pomieszczenie wyceny.',
+        ? 'Pozycja jest nadrzędna dla 1 wariantu, wobec czego sama nie może być wariantem innej pozycji.'
+        : `Pozycja jest nadrzędna dla ${count} wariantów, wobec czego sama nie może być wariantem innej pozycji.`,
+    pricingFlatHint: 'Cena pomnożona przez ilość.',
+    pricingPerRoomHint:
+      'Stawka bazowa powiększona o stawkę za każde wskazane pomieszczenie wyceny.',
     pricingPerFrameHint: 'Stawka pomieszczenia plus baza za każdy kadr.',
     pricingBase: 'Baza',
     pricingBaseFor: (name: string) => `Baza dla pozycji: ${name}`,
@@ -1498,12 +1515,12 @@ Z wyrazami szacunku`,
     pricingScopeAll: 'Wszystkie',
     pricingScopeVisual: 'Wizualne',
     pricingScopeTechnical: 'Techniczne',
-    pricingScopeHint: 'Które pomieszczenia wliczają się do tej usługi.',
+    pricingScopeHint: 'Zakres pomieszczeń uwzględnianych przy naliczaniu tej usługi.',
     pricingRooms: 'Stawki za pomieszczenie',
     pricingRoomPrice: (room: string) => `Stawka: ${room}`,
     pricingDefaultRoom: 'Pozostałe',
     pricingDefaultRoomHint: 'Dla pomieszczeń spoza słownika i typów bez własnej stawki.',
-    pricingNoRoomTypes: 'Najpierw dodaj typy pomieszczeń w ustawieniach.',
+    pricingNoRoomTypes: 'Wymagane jest wcześniejsze zdefiniowanie typów pomieszczeń.',
     pricingExample: (cents: string, rooms: number) =>
       rooms === 1 ? `Przy 1 pomieszczeniu: ${cents}` : `Przy ${rooms} pomieszczeniach: ${cents}`,
 
@@ -1511,7 +1528,7 @@ Z wyrazami szacunku`,
     matrix: 'Macierz cennika',
     matrixHint: 'Stawki wszystkich pozycji naraz. Puste pole znaczy „stawka domyślna”.',
     matrixEmpty: 'Brak pozycji liczonych za pomieszczenie.',
-    matrixNoRoomTypes: 'Najpierw dodaj typy pomieszczeń w ustawieniach.',
+    matrixNoRoomTypes: 'Wymagane jest wcześniejsze zdefiniowanie typów pomieszczeń.',
     matrixColumnItem: 'Pozycja',
     matrixColumnBase: 'Baza',
     matrixColumnDefault: 'Pozostałe',
@@ -1545,24 +1562,24 @@ Z wyrazami szacunku`,
     deleteGroup: (name: string) => `Usuń grupę: ${name}`,
     deleteGroupTitle: 'Usunąć grupę z biblioteki?',
     deleteGroupDescription: (name: string) =>
-      `„${name}” zniknie z biblioteki. Wyceny zbudowane z tej grupy zostają nietknięte.`,
+      `Grupa „${name}” zostanie usunięta z biblioteki. Wyceny zbudowane na jej podstawie pozostają nienaruszone.`,
     groupTotal: 'Suma netto',
-    groupItemsEmpty: 'Ten zestaw nie ma jeszcze pozycji.',
+    groupItemsEmpty: 'Zestaw nie zawiera jeszcze pozycji.',
 
     // Zawartość zestawu — dodawanie i usuwanie pozycji na karcie grupy.
     groupAddItem: 'Dodaj pozycję',
     groupAddItemFor: (name: string) => `Dodaj pozycję do zestawu: ${name}`,
     groupPickerSearch: 'Szukaj w bibliotece',
-    groupPickerEmpty: 'Nic nie pasuje',
-    groupPickerNoItems: 'Najpierw dodaj pozycje w zakładce „Pozycje”.',
+    groupPickerEmpty: 'Brak dopasowań',
+    groupPickerNoItems: 'Wymagane jest wcześniejsze dodanie pozycji w zakładce „Pozycje”.',
     groupRemoveItem: (name: string) => `Usuń z zestawu: ${name}`,
     groupItemQty: (name: string) => `Ilość: ${name}`,
-    groupItemsHint: 'Zmiany zawartości zapisują się od razu.',
+    groupItemsHint: 'Zmiany zawartości zapisywane są automatycznie.',
     showGroupItems: (name: string) => `Pokaż pozycje grupy: ${name}`,
     hideGroupItems: (name: string) => `Ukryj pozycje grupy: ${name}`,
-    groupsEmptyTitle: 'Nie masz jeszcze żadnego zestawu',
+    groupsEmptyTitle: 'Nie utworzono jeszcze żadnego zestawu',
     groupsEmptyDescription:
-      'Grupa to gotowy zestaw pozycji — wstawisz nim do wyceny cały etap prac naraz.',
+      'Zestaw stanowi gotowy komplet pozycji, który pozwala wprowadzić do wyceny cały etap prac jednocześnie.',
     /** Mianownik liczby mnogiej: 1 pozycja / 2 pozycje / 5 pozycji. */
     itemsCount: (count: number) => {
       if (count === 1) return '1 pozycja';
@@ -1580,15 +1597,16 @@ Z wyrazami szacunku`,
       const mod100 = count % 100;
       const few = mod10 >= 2 && mod10 <= 4 && !(mod100 >= 12 && mod100 <= 14);
       const phrase = count === 1 ? '1 pozycję' : `${count} ${few ? 'pozycje' : 'pozycji'}`;
-      return `W otwartej wycenie ${phrase} pochodzi z „${name}”. Przepiszemy tam nazwę, opis i cenę — ilości i przełączniki TAK/NIE zostaną nietknięte.`;
+      return `W otwartej wycenie ${phrase} pochodzi z pozycji „${name}”. Zaktualizowane zostaną nazwa, opis i cena; ilości oraz ustawienia TAK/NIE pozostaną bez zmian.`;
     },
     cascadeConfirm: 'Zaktualizuj wycenę',
-    cascadeDismiss: 'Zostaw wycenę bez zmian',
+    cascadeDismiss: 'Pozostaw bez zmian',
   },
   templates: {
     title: 'Szablony',
     emptyTitle: 'Brak szablonów',
-    emptyDescription: 'Zapisz gotową wycenę jako szablon, żeby następną zacząć od 80% roboty.',
+    emptyDescription:
+      'Gotową wycenę można zapisać jako szablon, aby kolejne oferty przygotowywać na podstawie sprawdzonego układu.',
     newFromTemplate: 'Nowa wycena z szablonu',
 
     // Lista szablonów.
@@ -1599,7 +1617,7 @@ Z wyrazami szacunku`,
     remove: (name: string) => `Usuń szablon: ${name}`,
     removeTitle: 'Usunąć szablon?',
     removeDescription: (name: string) =>
-      `„${name}” zniknie z listy. Wyceny utworzone z tego szablonu zostają nietknięte.`,
+      `Szablon „${name}” zostanie usunięty z listy. Wyceny utworzone na jego podstawie pozostają nienaruszone.`,
     itemsCount: (count: number) => {
       if (count === 1) return '1 pozycja';
       const rest = count % 10;
@@ -1607,7 +1625,7 @@ Z wyrazami szacunku`,
       if (rest >= 2 && rest <= 4 && (tens < 12 || tens > 14)) return `${count} pozycje`;
       return `${count} pozycji`;
     },
-    corrupted: 'Szablon uszkodzony — nie da się z niego utworzyć wyceny.',
+    corrupted: 'Szablon uszkodzony — utworzenie wyceny na jego podstawie nie jest możliwe.',
     loadError: 'Nie udało się wczytać szablonów.',
     createdFrom: (name: string) => `Nowa wycena z szablonu „${name}”`,
 
@@ -1615,16 +1633,16 @@ Z wyrazami szacunku`,
     saveAsTemplate: 'Zapisz jako szablon',
     saveAsTemplateTitle: 'Nowy szablon z tej wyceny',
     saveAsTemplateDescription:
-      'Szablon zapamiętuje układ i pozycje, ale nie dane klienta ani numeru wyceny.',
+      'Szablon zachowuje układ dokumentu i pozycje. Nie obejmuje danych klienta ani numeru wyceny.',
     saveAsTemplateName: 'Nazwa szablonu',
     saveAsTemplateConfirm: 'Zapisz szablon',
     saveAsTemplateDone: (name: string) => `Zapisano szablon „${name}”`,
     overwrite: 'Nadpisz szablon',
     overwriteTitle: 'Nadpisać szablon?',
     overwriteDescription: (name: string) =>
-      `Zawartość „${name}” zostanie zastąpiona bieżącą wyceną. Tej zmiany nie da się cofnąć.`,
+      `Zawartość szablonu „${name}” zostanie zastąpiona bieżącą wyceną. Operacji nie można cofnąć.`,
     overwriteDone: (name: string) => `Nadpisano szablon „${name}”`,
-    overwriteEmpty: 'Nie masz jeszcze żadnego szablonu do nadpisania.',
+    overwriteEmpty: 'Brak szablonów możliwych do nadpisania.',
 
     // Pakiet: szablon niesie też termin i dokumenty (T-63).
     contents: 'Zapisz razem z wyceną',
@@ -1647,10 +1665,10 @@ Z wyrazami szacunku`,
      */
     accentColor: 'Kolor marki',
     accentColorHint:
-      'Pas na górze każdej strony PDF — ten za logo i numerem oferty. Tym samym kolorem drukują się tytuły sekcji i linia nad podpisem. Tekst na pasie dobiera się sam: jasny na ciemnym kolorze, ciemny na jasnym.',
+      'Kolor pasa w górnej części każdej strony PDF, na którym umieszczane są logo i numer oferty. W tym samym kolorze drukowane są tytuły sekcji oraz linia nad podpisem. Kolor tekstu na pasie dobierany jest automatycznie: jasny na ciemnym tle, ciemny na jasnym.',
     bgColor: 'Tło podsumowania kosztów',
     bgColorHint:
-      'Wypełnienie ramki z sumą na końcu oferty — tej z kwotą netto, VAT-em i brutto. Kwoty drukujemy na niej ciemnym atramentem, więc trzymaj się jasnego odcienia.',
+      'Wypełnienie ramki podsumowania na końcu oferty, zawierającej kwotę netto, VAT i brutto. Kwoty drukowane są ciemnym kolorem, dlatego zalecany jest jasny odcień tła.',
     font: 'Font',
     fontHint: 'Krój całego dokumentu: tytuły, pozycje i stopka.',
     contacts: 'Kontakt',
@@ -1660,7 +1678,7 @@ Z wyrazami szacunku`,
     sectionIdentity: 'Firma',
     sectionLook: 'Wygląd PDF',
     sectionLookHint:
-      'Trzy rzeczy, z których składa się dokument: znak na nagłówku, kolory i krój pisma. Zmiany widać od razu w podglądzie na dole strony.',
+      'Trzy elementy identyfikacji dokumentu: znak w nagłówku, kolorystyka i krój pisma. Wprowadzone zmiany widoczne są natychmiast w podglądzie w dolnej części strony.',
     sectionContact: 'Kontakt i stopka',
     sectionDefaults: 'Domyślne w wycenie',
 
@@ -1674,15 +1692,16 @@ Z wyrazami szacunku`,
     // Wybór wariantu na nagłówku (poprawka 3).
     headerLogo: 'Logo na nagłówku',
     headerLogoHint:
-      'Który z dwóch znaków ma stanąć na pasie nagłówka. „Dobierz sam" patrzy na kolor marki: na ciemnym pasie kładzie znak jasny, na jasnym — ciemny.',
-    headerLogoAuto: 'Dobierz sam',
+      'Wariant znaku umieszczanego na pasie nagłówka. Opcja „Dobór automatyczny" uwzględnia kolor marki: na ciemnym pasie stosuje znak jasny, na jasnym — ciemny.',
+    headerLogoAuto: 'Dobór automatyczny',
     headerLogoLight: 'Zawsze znak jasny',
     headerLogoDark: 'Zawsze znak ciemny',
     headerLogoResolved: (variant: 'light' | 'dark') =>
       variant === 'light'
-        ? 'Teraz na nagłówku stoi znak jasny.'
-        : 'Teraz na nagłówku stoi znak ciemny.',
-    headerLogoMissing: 'Ten wariant nie jest jeszcze wgrany — na pasie stanie sama nazwa firmy.',
+        ? 'Na nagłówku stosowany jest obecnie znak jasny.'
+        : 'Na nagłówku stosowany jest obecnie znak ciemny.',
+    headerLogoMissing:
+      'Wybrany wariant nie został jeszcze wgrany — na pasie nagłówka pojawi się wyłącznie nazwa firmy.',
     logoUpload: (variant: string) => `Wgraj: ${variant}`,
     logoRemove: (variant: string) => `Usuń: ${variant}`,
     logoEmpty: 'Brak logo',
@@ -1705,14 +1724,15 @@ Z wyrazami szacunku`,
 
     // F7.2 — godziny otwarcia i wystawiający.
     openingHours: 'Godziny otwarcia',
-    openingHoursHint: 'Blok „CZYNNE" w stopce PDF. Bez wierszy nie drukuje się wcale.',
+    openingHoursHint:
+      'Blok „CZYNNE" w stopce dokumentu PDF. Przy braku wierszy nie jest drukowany.',
     openingHoursLabel: (index: number) => `Wiersz ${index + 1} — dni`,
     openingHoursValue: (index: number) => `Wiersz ${index + 1} — godziny`,
     openingHoursLabelPlaceholder: 'poniedziałek – piątek',
     openingHoursValuePlaceholder: '8.00 – 16.00',
     addOpeningHours: 'Dodaj wiersz',
     removeOpeningHours: (index: number) => `Usuń wiersz ${index + 1}`,
-    openingHoursFull: 'Więcej niż cztery wiersze nie zmieszczą się w stopce.',
+    openingHoursFull: 'Stopka mieści maksymalnie cztery wiersze.',
     signer: 'Wystawiający',
     signerName: 'Imię i nazwisko',
     signerTitle: 'Tytuł zawodowy',
@@ -1723,8 +1743,8 @@ Z wyrazami szacunku`,
 
     previewTitle: 'Podgląd oferty',
     previewHint:
-      'Przykładowa wycena złożona z tych ustawień — także tych jeszcze niezapisanych. Dane są zmyślone.',
-    previewRendering: 'Przeliczam…',
+      'Przykładowa wycena wygenerowana na podstawie bieżących ustawień, w tym niezapisanych. Dane mają charakter poglądowy.',
+    previewRendering: 'Generowanie podglądu…',
     previewOpen: 'Otwórz podgląd w nowym oknie',
   },
   /** Teksty widoczne wyłącznie w wygenerowanych dokumentach. */
@@ -1732,33 +1752,36 @@ Z wyrazami szacunku`,
     individualPrice: 'wycena indywidualna',
     validUntil: 'Ważny do',
     scheduleStart: 'Start',
-    scheduleNoStart: 'Termin policzymy po ustaleniu daty rozpoczęcia.',
+    scheduleNoStart: 'Termin zostanie wyznaczony po ustaleniu daty rozpoczęcia prac.',
     scheduleRoomsTable: 'Zakres per pomieszczenie',
     scheduleWholeProject: 'Etapy dla całego projektu',
     scheduleStageDays: 'Dni robocze',
     exportSchedule: 'Eksportuj termin (PDF)',
-    scheduleMissing: 'Ta wycena nie ma jeszcze harmonogramu — ustaw go w zakładce „Termin".',
+    scheduleMissing:
+      'Wycena nie zawiera jeszcze harmonogramu — należy go określić w zakładce „Termin".',
     scheduleSaved: 'Zapisano dokument „Szacowany termin"',
     stagesIncluded: 'w zakresie',
     stagesExcluded: 'poza zakresem',
     stagesCount: (objete: number, wszystkie: number) =>
       `${objete} z ${wszystkie} etapów w zakresie`,
     exportStages: 'Eksportuj etapy współpracy (PDF)',
-    stagesMissing: 'Ta wycena nie ma jeszcze dokumentu etapów — złóż go w zakładce „Dokumenty”.',
+    stagesMissing:
+      'Wycena nie zawiera jeszcze dokumentu etapów — przygotowuje się go w zakładce „Dokumenty”.',
     stagesSaved: 'Zapisano dokument „Etapy współpracy”',
     priceListRangeNote:
-      'Ceny podane widłekami — dokładna kwota zależy od zakresu i powstaje po rozmowie.',
+      'Ceny podano w widełkach — ostateczna kwota zależy od zakresu i ustalana jest indywidualnie.',
     exportPriceList: 'Eksportuj cennik dodatkowy (PDF)',
     priceListMissing:
-      'Ta wycena nie ma jeszcze cennika dodatkowego — złóż go w zakładce „Dokumenty”.',
+      'Wycena nie zawiera jeszcze cennika dodatkowego — przygotowuje się go w zakładce „Dokumenty”.',
     priceListSaved: 'Zapisano dokument „Cennik usług dodatkowych”',
 
     // Pakiet dokumentów (F6.3).
     exportPackage: 'Eksportuj pakiet dokumentów…',
     packageTitle: 'Eksport pakietu',
-    packageIntro: 'Wybierz dokumenty dla inwestora. Wszystkie niosą numer tej wyceny.',
+    packageIntro:
+      'Wskaż dokumenty przeznaczone dla inwestora. Każdy z nich zawiera numer niniejszej wyceny.',
     packageSingle: 'Jeden plik PDF',
-    packageSingleHint: 'Dokumenty jeden po drugim, ze wspólną numeracją stron.',
+    packageSingleHint: 'Dokumenty w jednym pliku, ze wspólną numeracją stron.',
     packageSeparateHint: 'Osobne pliki do wybranego folderu.',
     packageDoc: {
       quote: 'Wycena',
@@ -1775,24 +1798,24 @@ Z wyrazami szacunku`,
 
   /** Praca bez sieci i kolejka wysylki (T-29). */
   offline: {
-    offline: 'Pracujesz bez połączenia. Zmiany zapisują się lokalnie.',
+    offline: 'Brak połączenia z siecią. Zmiany zapisywane są lokalnie.',
     waitingOffline: (count: number) =>
       count === 1
-        ? 'Brak połączenia. 1 zmiana czeka na wysłanie — nic nie przepadło.'
-        : `Brak połączenia. ${count} zmian czeka na wysłanie — nic nie przepadło.`,
+        ? 'Brak połączenia. 1 zmiana oczekuje na wysłanie — żadne dane nie zostały utracone.'
+        : `Brak połączenia. ${count} zmian oczekuje na wysłanie — żadne dane nie zostały utracone.`,
     waitingOnline: (count: number) =>
       count === 1 ? 'Wysyłanie 1 zmiany…' : `Wysyłanie ${count} zmian…`,
     blocked: (count: number) =>
       count === 1
-        ? 'Jedna zmiana czeka na Twoją decyzję — wycena została zmieniona w innym miejscu.'
-        : `${count} zmian czeka na Twoją decyzję — wyceny zostały zmienione w innym miejscu.`,
+        ? 'Jedna zmiana oczekuje na decyzję — wycena została zmodyfikowana w innej sesji.'
+        : `${count} zmian oczekuje na decyzję — wyceny zostały zmodyfikowane w innej sesji.`,
     retry: 'Wyślij teraz',
     sent: (count: number) =>
       count === 1 ? 'Wysłano zaległą zmianę.' : `Wysłano ${count} zaległych zmian.`,
     conflicts: (count: number) =>
       count === 1
-        ? 'Jedna zmiana nie weszła: wycena została zmieniona w innym miejscu.'
-        : `${count} zmian nie weszło: wyceny zostały zmienione w innym miejscu.`,
+        ? 'Jedna zmiana nie została zapisana: wycenę zmodyfikowano w innej sesji.'
+        : `${count} zmian nie zostało zapisanych: wyceny zmodyfikowano w innej sesji.`,
   },
 
   /** Statusy realizacji etapow w projekcie (T-68). */
@@ -1813,21 +1836,21 @@ Z wyrazami szacunku`,
     orphaned: 'etap spoza obecnego harmonogramu',
     emptyTitle: 'Brak etapów do śledzenia',
     emptyNoAccepted:
-      'Etapy pochodzą z harmonogramu zaakceptowanej wyceny. Gdy klient przyjmie ofertę, pojawią się tutaj.',
+      'Etapy pochodzą z harmonogramu zaakceptowanej wyceny i pojawią się po przyjęciu oferty przez inwestora.',
     emptyNoSchedule:
-      'Zaakceptowana wycena nie ma harmonogramu. Dodaj etapy w zakładce „Termin" w edytorze wyceny.',
+      'Zaakceptowana wycena nie zawiera harmonogramu. Etapy definiuje się w zakładce „Termin" w edytorze wyceny.',
   },
 
   /** Historia wersji z porownaniem (T-22). */
   versions: {
     title: 'Historia wersji',
-    description: 'Co zmieniło się między wersjami tej oferty i o ile.',
-    onlyOne: 'Ta oferta ma na razie jedną wersję — nie ma czego porównywać.',
+    description: 'Zestawienie różnic zakresu i kwot pomiędzy wersjami oferty.',
+    onlyOne: 'Oferta ma obecnie jedną wersję — porównanie nie jest możliwe.',
     compareWith: 'Porównaj z',
     totalsBefore: 'Poprzednia wersja',
     totalsAfter: 'Ta wersja',
     delta: 'Różnica',
-    noChanges: 'Wersje mają identyczny zakres i kwoty.',
+    noChanges: 'Wersje mają identyczny zakres oraz identyczne kwoty.',
     added: (count: number) => (count === 1 ? 'Dodano 1 pozycję' : `Dodano ${count} pozycji`),
     removed: (count: number) => (count === 1 ? 'Usunięto 1 pozycję' : `Usunięto ${count} pozycji`),
     changed: (count: number) =>
@@ -1848,80 +1871,82 @@ Z wyrazami szacunku`,
   /** Auto-update aplikacji (T-19). */
   update: {
     title: 'Aktualizacje',
-    idle: 'Sprawdź, czy jest nowa wersja Toolier.',
+    idle: 'Sprawdzenie dostępności nowej wersji aplikacji Toolier.',
     check: 'Sprawdź aktualizacje',
     checking: 'Sprawdzanie…',
-    current: 'Masz najnowszą wersję.',
-    available: (version: string) => `Dostępna wersja ${version}.`,
+    current: 'Zainstalowana jest najnowsza wersja.',
+    available: (version: string) => `Dostępna jest wersja ${version}.`,
     install: 'Pobierz i zainstaluj',
     downloading: 'Pobieranie…',
     downloadingPercent: (percent: number) => `Pobieranie… ${percent}%`,
-    ready: 'Aktualizacja gotowa — uruchom ponownie, żeby ją włączyć.',
+    ready: 'Aktualizacja gotowa do instalacji — wymagane ponowne uruchomienie aplikacji.',
     relaunch: 'Uruchom ponownie',
-    relaunchFailed: 'Nie udało się uruchomić ponownie. Zamknij i otwórz aplikację ręcznie.',
+    relaunchFailed:
+      'Ponowne uruchomienie nie powiodło się. Prosimy zamknąć i otworzyć aplikację ręcznie.',
     /** Powiadomienie z cichego sprawdzenia przy starcie. */
-    foundOnStart: (version: string) => `Jest nowa wersja Toolier (${version}).`,
+    foundOnStart: (version: string) => `Dostępna jest nowa wersja Toolier (${version}).`,
     goToSettings: 'Ustawienia',
   },
   settings: {
     // Podzial na trzy karty (2026-08-27): konto · branding · aplikacja.
     tabAccount: 'Konto',
     tabApp: 'Aplikacja',
-    accountIntro: 'Twój dostęp do aplikacji, subskrypcja i dane konta.',
-    appIntro: 'Domyślne wartości nowych wycen, miejsce na pliki i aktualizacje.',
+    accountIntro: 'Dostęp do aplikacji, subskrypcja i dane konta.',
+    appIntro: 'Domyślne wartości nowych wycen, miejsce na pliki oraz aktualizacje.',
     access: 'Dostęp',
     // Zdjęcie użytkownika (poprawka 4).
-    avatar: 'Twoje zdjęcie',
+    avatar: 'Zdjęcie profilowe',
     avatarHint:
-      'Widać je w pasku nawigacji. Kwadratowy kadr wygląda najlepiej — obrazek przycinamy do kółka. PNG, JPG lub WEBP, do 5 MB.',
+      'Widoczne w pasku nawigacji. Zalecany kadr kwadratowy — obraz przycinany jest do koła. Formaty PNG, JPG lub WEBP, do 5 MB.',
     avatarSaved: 'Zapisano zdjęcie',
     avatarRemoved: 'Usunięto zdjęcie',
     /** Kropka przy avatarze w szynie. */
-    connectionOnline: 'Połączono z internetem',
-    connectionOffline: 'Brak połączenia — zmiany czekają w kolejce',
-    yourData: 'Twoje dane',
-    dangerZone: 'Strefa nieodwracalna',
+    connectionOnline: 'Połączenie z siecią aktywne',
+    connectionOffline: 'Brak połączenia — zmiany oczekują w kolejce',
+    yourData: 'Dane konta',
+    dangerZone: 'Operacje nieodwracalne',
     manageSubscription: 'Zarządzaj',
-    subscriptionHint: 'Plan, płatności i faktury otwierają się na osobnym ekranie.',
+    subscriptionHint: 'Plan, płatności i faktury dostępne są na osobnym ekranie.',
     general: 'Ogólne',
     title: 'Ustawienia',
     sectionQuotes: 'Domyślne dla wycen',
     currency: 'Waluta',
     vatRate: 'Stawka VAT',
-    pricesInclude: 'Ceny w wycenie podaję',
+    pricesInclude: 'Ceny w wycenie podawane są jako',
     pricesNet: 'netto (VAT doliczany)',
     pricesGross: 'brutto (VAT w cenie)',
     pricesIncludeHint:
       'Dotyczy nowych wycen. Wyceny już zapisane zachowują ustawienie sprzed zmiany.',
-    defaultPricingBasis: 'Nowe wyceny liczę',
+    defaultPricingBasis: 'Sposób naliczania w nowych wycenach',
     hourlyRate: 'Stawka za godzinę (zł)',
     hourlyRateEmpty: 'nie podano',
     hourlyRateHint:
-      'Wycena bierze stawkę jako kopię w chwili utworzenia — późniejsza zmiana tutaj nie rusza ofert, które już poszły.',
+      'Wycena zapisuje kopię stawki w chwili utworzenia — późniejsza zmiana nie wpływa na oferty już przekazane inwestorom.',
     numberPattern: 'Wzorzec numeracji',
     numberPatternPreview: 'Następna wycena dostanie numer',
     numberPatternHint: 'Tokeny: {YYYY}, {YY}, {MM}, {DD}, {seq}, {seq:6}.',
     numberPatternReset: 'Przywróć domyślny wzorzec',
     showVersionOnPdf: 'Numer wersji na dokumencie',
     showVersionOnPdfHint:
-      'Domyślnie wyłączone — inwestor nie musi wiedzieć, że to kolejne podejście. W nazwie pliku wersja jest zawsze.',
+      'Opcja domyślnie wyłączona. Numer wersji pozostaje zawsze widoczny w nazwie pliku.',
     showDisabledItems: 'Pokazuj wyłączone pozycje w PDF',
     showDisabledItemsHint:
-      'Wyłączone pozycje trafiają do PDF jako opcje bez kwoty — przydatne przy wariantach do wyboru.',
+      'Wyłączone pozycje umieszczane są w dokumencie jako opcje bez kwoty — rozwiązanie przydatne przy wariantach do wyboru.',
     unsaved: 'Niezapisane zmiany',
     saved: 'Ustawienia zapisane.',
-    readOnly: 'Dostęp wygasł — ustawień nie da się zmienić. Eksport danych działa dalej.',
+    readOnly:
+      'Dostęp wygasł — zmiana ustawień nie jest możliwa. Eksport danych pozostaje dostępny.',
 
     roomTypes: 'Typy pomieszczeń',
     roomTypesHint:
-      'Po nich cennik parametryczny dobiera stawkę. Zmiana nazwy nie rusza klucza, więc nie psuje cen w zapisanych wycenach.',
-    roomTypesEmpty: 'Nie masz jeszcze żadnych typów pomieszczeń.',
+      'Na ich podstawie cennik parametryczny dobiera stawkę. Zmiana nazwy nie modyfikuje klucza technicznego, więc nie wpływa na ceny w zapisanych wycenach.',
+    roomTypesEmpty: 'Nie zdefiniowano jeszcze żadnych typów pomieszczeń.',
     roomTypeNamePlaceholder: 'np. Kuchnia',
     roomTypeName: (name: string) => `Nazwa typu pomieszczenia: ${name}`,
     roomTypeRemove: (name: string) => `Usuń typ pomieszczenia ${name}`,
     roomTypeRemoveTitle: 'Usunąć typ pomieszczenia?',
     roomTypeRemoveDescription: (name: string) =>
-      `„${name}" zniknie z listy, ale wyceny i reguły cenowe, które już go używają, zostaną nietknięte.`,
+      `Typ „${name}" zostanie usunięty z listy. Wyceny i reguły cenowe, które już go stosują, pozostaną nienaruszone.`,
     roomTypeDuplicate: 'Taki typ pomieszczenia już istnieje.',
 
     account: 'Konto',
@@ -1931,18 +1956,18 @@ Z wyrazami szacunku`,
     passwordChanged: 'Hasło zmienione.',
     exportData: 'Eksportuj dane',
     exportDataHint:
-      'Jeden plik JSON ze wszystkim: wyceny wraz z treścią, biblioteka, zestawy, szablony, klienci i ustawienia.',
-    exportRunning: 'Przygotowuję plik…',
+      'Pojedynczy plik JSON zawierający komplet danych: wyceny wraz z treścią, bibliotekę, zestawy, szablony, kartotekę klientów i ustawienia.',
+    exportRunning: 'Przygotowywanie pliku…',
     exportDone: 'Dane zapisane do pliku.',
     exportOpen: 'Otwórz',
     exportFailed: 'Nie udało się wyeksportować danych.',
     deleteAccount: 'Usuń konto',
     deleteAccountHint:
-      'Kasuje konto i wszystkie dane bezpowrotnie. Zanim to zrobisz, wyeksportuj wyceny — nie da się ich odzyskać.',
+      'Trwale usuwa konto wraz ze wszystkimi danymi. Przed wykonaniem operacji zalecany jest eksport wycen — odzyskanie danych nie będzie możliwe.',
     deleteAccountConfirmLabel: (word: string) => `Wpisz ${word}, aby potwierdzić`,
-    deleteAccountTitle: 'Usunąć konto na zawsze?',
+    deleteAccountTitle: 'Trwale usunąć konto?',
     deleteAccountDescription:
-      'Znikną wszystkie wyceny, biblioteka, szablony i ustawienia. Tej operacji nie da się cofnąć.',
+      'Usunięte zostaną wszystkie wyceny, biblioteka, szablony i ustawienia. Operacji nie można cofnąć.',
     accountDeleted: 'Konto usunięte.',
     deleteAccountFailed: 'Nie udało się usunąć konta.',
   },
@@ -1963,23 +1988,23 @@ Z wyrazami szacunku`,
     /** „Stan dostępu" — nie „Status", bo mówimy o prawie do pracy, nie o rekordzie. */
     accessLabel: 'Stan dostępu',
     /** Nagłówek sekcji wyboru częstotliwości płatności. */
-    periodLabel: 'Jak chcesz płacić',
+    periodLabel: 'Okres rozliczeniowy',
     buy: 'Aktywuj dostęp',
     manage: 'Zarządzaj płatnością',
 
     // Okno okresu próbnego przy starcie (poprawka 6). Po opłaceniu
     // subskrypcję obsługuje się wyłącznie z ustawień.
     trialDialogHint:
-      'Wszystko działa bez ograniczeń. Po opłaceniu subskrypcję znajdziesz w Ustawieniach — to okno przestanie się pokazywać.',
+      'Aplikacja działa bez ograniczeń funkcjonalnych. Po opłaceniu subskrypcji jej obsługa dostępna jest w Ustawieniach, a niniejsze okno przestaje być wyświetlane.',
     trialDialogLater: 'Później',
     readOnlyBanner:
-      'Tryb tylko do odczytu — dostęp wygasł. Wyceny możesz dalej przeglądać i eksportować.',
+      'Tryb tylko do odczytu — dostęp wygasł. Przeglądanie i eksport wycen pozostają dostępne.',
 
     /**
      * Aplikacja jest płatna w całości — nie ma wersji darmowej ani pakietów.
-     * Wybór dotyczy wyłącznie tego, jak często płacisz.
+     * Wybór dotyczy wyłącznie częstotliwości płatności.
      */
-    intro: 'Toolier jest aplikacją płatną. Wybierz, jak chcesz płacić.',
+    intro: 'Toolier jest aplikacją płatną. Wskaż preferowany okres rozliczeniowy.',
     monthly: 'Miesięcznie',
     yearly: 'Rocznie',
     /**
@@ -2013,26 +2038,29 @@ Z wyrazami szacunku`,
         return `Zostały ${days} dni okresu próbnego`;
       return `Zostało ${days} dni okresu próbnego`;
     },
-    trialExplainer: 'Okres próbny to czas na sprawdzenie aplikacji — nie wymaga karty.',
+    trialExplainer:
+      'Okres próbny umożliwia zapoznanie się z aplikacją i nie wymaga podania danych karty płatniczej.',
     renewsAt: (date: string) => `Odnowienie: ${date}`,
     endsAt: (date: string) => `Dostęp do: ${date}`,
     /*
      * Wyjaśnienia stanu. Nie powtarzają nazwy stanu, bo stoją bezpośrednio pod
      * nagłówkiem, który ją już podaje — mają mówić, CO Z TYM ZROBIĆ.
      */
-    canceledNotice: 'Dostęp działa do końca opłaconego okresu.',
-    pastDueNotice: 'Płatność się nie powiodła. Popraw dane karty, żeby nie stracić dostępu.',
-    expiredNotice: 'Twoje wyceny są bezpieczne — wróć do nich po opłaceniu.',
-    graceNotice: 'Ponawiamy płatność. Możesz pracować normalnie.',
+    canceledNotice: 'Dostęp pozostaje aktywny do końca opłaconego okresu.',
+    pastDueNotice:
+      'Płatność nie powiodła się. Aktualizacja danych karty pozwoli zachować ciągłość dostępu.',
+    expiredNotice: 'Dane pozostają zabezpieczone i będą dostępne po opłaceniu subskrypcji.',
+    graceNotice: 'Trwa ponowna próba obciążenia karty. Praca w aplikacji przebiega bez zmian.',
     noSubscription: 'Brak informacji o płatności.',
 
-    dataSafe: 'Twoje dane zostają na miejscu — po wygaśnięciu dalej je otworzysz i wyeksportujesz.',
-    failed: 'Nie udało się połączyć ze Stripe.',
-    noUrl: 'Stripe nie zwrócił adresu płatności.',
-    returned: 'Sprawdzam status płatności…',
-    activated: 'Dostęp aktywny. Dziękujemy!',
-    checkoutCanceled: 'Płatność przerwana — nic nie pobraliśmy.',
-    readOnlyEditHint: 'Edycja wymaga aktywnego dostępu. Podgląd i eksport działają dalej.',
+    dataSafe:
+      'Dane pozostają zachowane — po wygaśnięciu dostępu nadal możliwe jest ich przeglądanie i eksport.',
+    failed: 'Nie udało się nawiązać połączenia z operatorem płatności.',
+    noUrl: 'Operator płatności nie zwrócił adresu transakcji.',
+    returned: 'Weryfikacja statusu płatności…',
+    activated: 'Dostęp został aktywowany. Dziękujemy.',
+    checkoutCanceled: 'Płatność przerwana — żadne środki nie zostały pobrane.',
+    readOnlyEditHint: 'Edycja wymaga aktywnego dostępu. Podgląd i eksport pozostają dostępne.',
   },
   auth: {
     login: 'Zaloguj się',
@@ -2043,18 +2071,18 @@ Z wyrazami szacunku`,
     company: 'Nazwa firmy',
     fullName: 'Imię i nazwisko',
     google: 'Kontynuuj z Google',
-    noAccount: 'Nie masz konta?',
-    hasAccount: 'Masz już konto?',
+    noAccount: 'Nie posiadasz konta?',
+    hasAccount: 'Posiadasz już konto?',
   },
   onboarding: {
-    title: 'Zacznij od trzech rzeczy',
-    lead: 'Każdy krok zajmuje chwilę i oszczędza pracy przy pierwszej ofercie.',
+    title: 'Konfiguracja początkowa',
+    lead: 'Trzy kroki, które przygotowują aplikację do przygotowania pierwszej oferty.',
     progress: (done: number, total: number) => `${done} z ${total}`,
     done: 'gotowe',
     steps: {
       brand: {
-        title: 'Wgraj logo',
-        hint: 'Trafia do każdego PDF-a — wgrane raz oszczędza poprawianie ofert później.',
+        title: 'Wgraj logo pracowni',
+        hint: 'Znak umieszczany jest w każdym dokumencie PDF. Wystarczy wgrać go jednokrotnie.',
       },
       /*
        * Od T-62 nowe konto dostaje 38 usług przykładowych, więc „Dodaj
@@ -2063,31 +2091,31 @@ Z wyrazami szacunku`,
        * poprawiona cena. Napis ma mówić dokładnie to.
        */
       library: {
-        title: 'Ustaw swoje ceny w bibliotece',
-        hint: 'Konto startuje z gotowymi usługami — popraw ceny na swoje albo dodaj własne.',
+        title: 'Ustal własne ceny w bibliotece',
+        hint: 'Konto zawiera gotowy zestaw usług — wystarczy uzupełnić stawki lub dodać własne pozycje.',
       },
       quote: {
-        title: 'Zrób pierwszą wycenę',
-        hint: 'Pozycje TAK/NIE, sumy na żywo, PDF na końcu.',
+        title: 'Przygotuj pierwszą wycenę',
+        hint: 'Pozycje z wyborem TAK/NIE, sumy przeliczane na bieżąco, dokument PDF na zakończenie.',
       },
     },
   },
 
   errors: {
-    generic: 'Coś poszło nie tak.',
+    generic: 'Wystąpił nieoczekiwany błąd.',
     notFound: 'Nie znaleziono strony.',
-    notConfigured: 'Brak konfiguracji Supabase — uzupełnij plik .env.',
+    notConfigured: 'Brak konfiguracji Supabase — należy uzupełnić plik .env.',
     workspaceTitle: 'Nie udało się wczytać danych firmy',
     workspaceHint:
-      'Aplikacja połączyła się z bazą, ale nie znalazła Twojego workspace. Najczęściej znaczy to, że baza nie ma zaaplikowanych migracji albo aplikacja wskazuje na inny projekt Supabase niż myślisz.',
+      'Połączenie z bazą danych zostało nawiązane, lecz nie odnaleziono workspace przypisanego do konta. Najczęstszą przyczyną jest brak zaaplikowanych migracji albo wskazanie innego projektu Supabase.',
     connectedTo: (url: string) => `Adres bazy: ${url}`,
 
     // Ekran awaryjny (T-17).
     crashTitle: 'Aplikacja napotkała błąd',
     crashLead:
-      'Twoje dane są bezpieczne — wyceny zapisują się w chmurze na bieżąco. Przekaż poniższy komunikat, jeśli błąd się powtórzy.',
-    crashReload: 'Przeładuj aplikację',
-    crashBack: 'Spróbuj dalej',
+      'Dane pozostają bezpieczne — wyceny zapisywane są w chmurze na bieżąco. W przypadku powtórzenia się błędu prosimy o przekazanie poniższego komunikatu.',
+    crashReload: 'Uruchom aplikację ponownie',
+    crashBack: 'Kontynuuj pracę',
   },
 } as const;
 

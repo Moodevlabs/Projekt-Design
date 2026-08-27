@@ -84,8 +84,8 @@ export function DecisionPanel({ onAccept, onReject, onComment, busy, error }: Pr
           />
         </label>
         <p className="text-ink-soft text-xs leading-relaxed">
-          Akceptacja zapisuje wybrane pozycje, Twoje imię oraz datę i godzinę. Nie jest to podpis
-          elektroniczny — to potwierdzenie zakresu, na który się umawiacie.
+          Akceptacja rejestruje wybrany zakres pozycji, podane imię i nazwisko oraz datę i godzinę.
+          Nie stanowi ona podpisu elektronicznego, lecz potwierdzenie uzgodnionego zakresu prac.
         </p>
         <div className="flex gap-2">
           <button
@@ -139,13 +139,13 @@ export function DecisionPanel({ onAccept, onReject, onComment, busy, error }: Pr
             onChange={(event) => setMessage(event.target.value)}
             rows={3}
             maxLength={4000}
-            placeholder="Np. wybraliśmy inną pracownię."
+            placeholder="Przykładowo: wybór innej pracowni projektowej."
             className="border-hair mt-1 w-full resize-y rounded-lg border bg-[var(--surface)] px-3 py-2.5 text-sm outline-none focus:border-[var(--accent)]"
           />
         </label>
         <p className="text-ink-soft text-xs leading-relaxed">
-          Ta decyzja zamyka ofertę — po niej nie da się jej już zaakceptować. Jeśli chodzi
-          o poprawki, lepszą drogą są uwagi.
+          Decyzja ta zamyka postępowanie ofertowe — późniejsza akceptacja nie będzie możliwa. W
+          przypadku oczekiwanych korekt właściwą ścieżką jest przekazanie uwag.
         </p>
         <div className="flex gap-2">
           <button
@@ -198,7 +198,7 @@ export function DecisionPanel({ onAccept, onReject, onComment, busy, error }: Pr
           required
           rows={5}
           maxLength={4000}
-          placeholder="Np. prosimy o wariant bez wizualizacji łazienki."
+          placeholder="Przykładowo: prosimy o wariant bez wizualizacji łazienki."
           className="border-hair mt-1 w-full resize-y rounded-lg border bg-[var(--surface)] px-3 py-2.5 text-sm outline-none focus:border-[var(--accent)]"
         />
       </label>

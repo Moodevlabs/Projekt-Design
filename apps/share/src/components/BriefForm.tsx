@@ -97,11 +97,7 @@ function Field({
             className={INPUT}
           />
         ) : question.kind === 'choice' ? (
-          <select
-            value={text}
-            onChange={(event) => onChange(event.target.value)}
-            className={INPUT}
-          >
+          <select value={text} onChange={(event) => onChange(event.target.value)} className={INPUT}>
             <option value="">—</option>
             {question.options.map((option) => (
               <option key={option} value={option}>

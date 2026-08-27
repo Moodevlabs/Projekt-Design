@@ -100,12 +100,7 @@ export function DocumentsBlock({
  * „300 zł" to zobowiązanie, „300–1 200 zł" to widełki — różnica jest dla
  * klienta znacząca, więc jedna cena i przedział wyglądają inaczej.
  */
-function price(
-  minCents: number,
-  maxCents: number | null,
-  unit: string,
-  currency: string,
-): string {
+function price(minCents: number, maxCents: number | null, unit: string, currency: string): string {
   const suffix = unit ? ` / ${unit}` : '';
   if (maxCents === null || maxCents === minCents) {
     return `${formatMoney(minCents, currency)}${suffix}`;
