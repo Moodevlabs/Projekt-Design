@@ -199,11 +199,26 @@ export function useAutosave() {
       // Numer i klient nie siedza w `body`, wiec ich zmiany sledzimy osobno.
       // Bez `clientId` przypiecie klienta o danych identycznych z naglowkiem
       // nie ruszyloby `body` i autozapis by nie wystartowal.
+      //
+      // ⚠️ `schedule` i `documents` TEZ NIE SIEDZA W `body` — i ich brak na tej
+      // liscie byl bledem, ktory wyszedl dopiero u uzytkownika (2026-08-27).
+      //
+      // Objaw: zbudowanie wyceny, dodanie terminu i etapow, a potem
+      // udostepnienie klientowi BEZ wychodzenia z edytora dawalo link z sama
+      // wycena. Po wyjsciu i ponownym wejsciu ten sam link mial juz komplet.
+      //
+      // Mechanizm: zakladki „Termin" i „Dokumenty" ustawialy `saveState`
+      // na `dirty`, ale ta subskrypcja ich nie widziala, wiec NIE planowala
+      // zapisu. Zmiana lezala w pamieci az do odmontowania edytora, gdzie
+      // `flushPending()` zapisywal wszystko naraz — stad zludzenie, ze
+      // „zapisuje sie dopiero po wyjsciu".
       if (
         state.body === previous.body &&
         state.number === previous.number &&
         state.clientId === previous.clientId &&
-        state.projectId === previous.projectId
+        state.projectId === previous.projectId &&
+        state.schedule === previous.schedule &&
+        state.documents === previous.documents
       ) {
         return;
       }
