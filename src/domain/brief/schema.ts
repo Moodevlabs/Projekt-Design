@@ -100,10 +100,21 @@ export const SharedBriefPayloadSchema = z.discriminatedUnion('ok', [
       answers: BriefAnswersSchema.catch({}),
       submittedAt: z.string().nullable().default(null),
     }),
+    // Ten sam brand kit i ta sama pułapka co przy ofercie: kolor idzie
+    // prosto do zmiennej CSS, więc format sprawdzamy na granicy
+    // (uzasadnienie przy `SharedBrandSchema` w `domain/share/schema.ts`).
     brand: z.object({
       companyName: z.string().default(''),
-      accentColor: z.string().default('#33251E'),
-      bgColor: z.string().default('#EFECE8'),
+      accentColor: z
+        .string()
+        .regex(/^#[0-9A-Fa-f]{6}$/)
+        .catch('#33251E')
+        .default('#33251E'),
+      bgColor: z
+        .string()
+        .regex(/^#[0-9A-Fa-f]{6}$/)
+        .catch('#EFECE8')
+        .default('#EFECE8'),
       contacts: z.array(z.record(z.string(), z.unknown())).default([]),
       address: z.string().nullable().default(null),
       footerText: z.string().nullable().default(null),

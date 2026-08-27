@@ -16,6 +16,10 @@
 
 :root {
   --accent: #33251e;
+  /* Napis NA kolorze marki. Podmieniany w czasie działania razem
+     z `--accent` (kontrast liczy `contrastText`); wartość poniżej to
+     bezpieczna domyślna na czas wczytywania. */
+  --accent-ink: #ffffff;
   --canvas: #f7f4f0;
   --surface: #ffffff;
   --ink: #33251e;

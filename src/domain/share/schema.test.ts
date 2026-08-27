@@ -14,6 +14,7 @@ import {
   shareState,
   tokenFromPath,
   ShareSchema,
+  SharedBrandSchema,
   SharedQuotePayloadSchema,
   type Share,
 } from './schema';
@@ -212,5 +213,35 @@ describe('SharedQuotePayloadSchema', () => {
       if (przez_parser.ok) expect(przez_parser.body.title).toBe('Dom 164 m²');
       expect(wynik.brand.accentColor).toBe('#33251E');
     }
+  });
+});
+
+describe('SharedBrandSchema — kolor idzie do zmiennej CSS (2026-08-27)', () => {
+  function brand(partial: Record<string, unknown>) {
+    return SharedBrandSchema.parse({ companyName: 'Studio', ...partial });
+  }
+
+  it('przepuszcza poprawny kolor bez zmian', () => {
+    expect(brand({ accentColor: '#B0563C' }).accentColor).toBe('#B0563C');
+  });
+
+  it.each([
+    ['bez krzyzyka', '33251E'],
+    ['pusty', ''],
+    ['nazwa koloru', 'brown'],
+    ['skrocony zapis', '#333'],
+    ['smiec', 'rgb(1,2,3); background: red'],
+  ])('cofa sie do brazu marki, gdy wartosc jest niepoprawna: %s', (_opis, wartosc) => {
+    /*
+     * Sedno: zmienne CSS nie sa typowane. `--accent: 33251E` przechodzi
+     * bez szemrania, a `background-color: var(--accent)` z taka trescia jest
+     * nieprawidlowe — tlo wraca do przezroczystego i przycisk wyglada na
+     * SZARY, choc dziala. Nic w konsoli o tym nie powie.
+     */
+    expect(brand({ accentColor: wartosc }).accentColor).toBe('#33251E');
+  });
+
+  it('to samo dotyczy tla podsumowania', () => {
+    expect(brand({ bgColor: 'jasny' }).bgColor).toBe('#EFECE8');
   });
 });

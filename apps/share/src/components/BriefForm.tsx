@@ -135,7 +135,7 @@ function Field({
                 }
                 className={
                   on
-                    ? 'bg-accent rounded-lg px-3 py-2 text-sm font-medium text-white'
+                    ? 'bg-accent rounded-lg px-3 py-2 text-sm font-medium text-[var(--accent-ink)]'
                     : 'border-hair text-ink rounded-lg border px-3 py-2 text-sm transition-colors hover:bg-[var(--surface)]'
                 }
               >

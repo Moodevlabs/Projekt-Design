@@ -81,10 +81,34 @@ export const AcceptanceSchema = z.object({
 export type Acceptance = z.infer<typeof AcceptanceSchema>;
 
 /** Brand kit w okrojonej postaci, jaką dostaje strona klienta. */
+/**
+ * Kolor marki wpuszczany na stronę klienta.
+ *
+ * ⚠️ **Musi być sprawdzony co do formatu, a nie tylko „jakiś string".**
+ * Ta wartość ląduje w zmiennej CSS (`--accent`), a zmienne CSS nie są
+ * typowane: `--accent: cokolwiek` przechodzi bez szemrania i wywala się
+ * dopiero tam, gdzie się jej użyje. `background-color: var(--accent)` z taką
+ * treścią jest nieprawidłowe, więc tło wraca do wartości początkowej —
+ * przezroczystej. Przycisk zostaje wtedy SZARY (widać domyślne tło pola
+ * z przeglądarki), a biały napis na nim ledwo widać.
+ *
+ * Objaw wygląda jak zepsuty styl, a jest zepsutą daną — i nic w konsoli
+ * o tym nie powie. Stąd walidacja tutaj, na granicy, z odwrotem do brązu
+ * marki zamiast przepuszczania śmiecia dalej.
+ */
+const SharedHexSchema = z
+  .string()
+  .regex(/^#[0-9A-Fa-f]{6}$/)
+  .catch('#33251E');
+
 export const SharedBrandSchema = z.object({
   companyName: z.string().default(''),
-  accentColor: z.string().default('#33251E'),
-  bgColor: z.string().default('#EFECE8'),
+  accentColor: SharedHexSchema.default('#33251E'),
+  bgColor: z
+    .string()
+    .regex(/^#[0-9A-Fa-f]{6}$/)
+    .catch('#EFECE8')
+    .default('#EFECE8'),
   contacts: z.array(z.record(z.string(), z.unknown())).default([]),
   address: z.string().nullable().default(null),
   footerText: z.string().nullable().default(null),

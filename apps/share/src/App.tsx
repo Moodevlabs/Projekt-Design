@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { applyEnabledIds, enabledItemIds, type SharedQuotePayload } from '@/domain/share/schema';
 import { parseQuoteBody, type QuoteBody } from '@/domain/quote/schema';
 
+import { contrastText } from '@/domain/brand/color';
 import { parseScheduleBody } from '@/domain/schedule';
 import { parseQuoteDocuments } from '@/domain/documents';
 
@@ -212,7 +213,18 @@ export function App() {
   return (
     <div
       className="min-h-dvh px-4 py-8 sm:py-14"
-      style={{ ['--accent' as string]: brand.accentColor }}
+      /*
+        Dwie zmienne, nie jedna: kolor marki i kolor napisu NA nim.
+        Napis dobieramy kontrastem (`contrastText`) — tą samą funkcją, którą
+        liczy to generator PDF. Do 2026-08-27 przyciski miały `text-white`
+        na sztywno, więc studio z jasnym kolorem marki dostawało biały napis
+        na jasnym tle: przycisk wyglądał na wyszarzony i nieczynny, choć
+        działał. PDF adaptował się od początku, strona klienta nie.
+      */
+      style={{
+        ['--accent' as string]: brand.accentColor,
+        ['--accent-ink' as string]: contrastText(brand.accentColor),
+      }}
     >
       <main className="mx-auto w-full max-w-2xl">
         <header className="mb-6 flex items-center justify-between gap-4">
