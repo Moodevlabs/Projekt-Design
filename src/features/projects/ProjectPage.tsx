@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ProjectStagesTab } from './ProjectStagesTab';
+import { ProjectAcceptanceCard } from '@/features/share/ProjectAcceptanceCard';
 import { EmptyState, Money } from '@/components/shared';
 import { ProjectFormDialog } from './ProjectFormDialog';
 import { ProjectQuotesTab } from './ProjectQuotesTab';
@@ -122,6 +123,10 @@ export function ProjectPage() {
           </div>
         </div>
       </header>
+
+      {/* Nad zakladkami, bo to jest NAJWAZNIEJSZA rzecz, jaka moze sie
+          w projekcie wydarzyc — a nie szczegol jednej z list. */}
+      <ProjectAcceptanceCard projectId={data.id} />
 
       <Tabs defaultValue="quotes" className="space-y-4">
         <TabsList aria-label={pl.projects.title}>

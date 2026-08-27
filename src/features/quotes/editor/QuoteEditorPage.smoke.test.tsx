@@ -89,6 +89,14 @@ vi.mock('@/data/queries/useTemplates', () => ({
   useOverwriteTemplate: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }));
 
+// Karta „co wrocilo od klienta" (T-26) stoi teraz w prawej kolumnie edytora
+// i pyta o akceptacje oraz uwagi. Test dymny izoluje strone od warstwy danych.
+vi.mock('@/data/queries/useShares', () => ({
+  useQuoteAcceptance: () => ({ data: null }),
+  useQuoteComments: () => ({ data: [] }),
+  useMarkCommentRead: () => ({ mutate: vi.fn() }),
+}));
+
 vi.mock('@/data/queries/useBrandKit', () => ({
   useBrandKit: () => ({ data: null }),
 }));

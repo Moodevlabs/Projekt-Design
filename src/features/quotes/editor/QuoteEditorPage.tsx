@@ -20,6 +20,7 @@ import { DocumentsTab } from './documents/DocumentsTab';
 import { PricingBasisCard } from './components/PricingBasisCard';
 import { ClientCard } from './components/ClientCard';
 import { DocumentsCard } from './components/DocumentsCard';
+import { QuoteFeedback } from '@/features/share/QuoteFeedback';
 import { DiscountsSection } from './components/DiscountsSection';
 import { AddLink } from './components/AddLink';
 import { LibrarySheet } from './components/LibrarySheet';
@@ -783,6 +784,14 @@ function EditorSurface({
 
               {/* Archiwum dokumentow — skrot do tego, co juz poszlo do
                   inwestora. Sama karta chowa sie, gdy wycena nie ma klienta. */}
+              {/*
+                Co wrocilo od klienta — TU, a nie tylko w oknie „Udostepnij".
+                Do 2026-08-27 fakt akceptacji byl widoczny wylacznie po
+                otwarciu modala; kto nie wiedzial, ze tam jest, nie dowiadywal
+                sie o niej wcale. Karta milczy, dopoki nie ma czego pokazac.
+              */}
+              {quoteId ? <QuoteFeedback quoteId={quoteId} /> : null}
+
               {editing ? <DocumentsCard /> : null}
 
               <RoomsPanel

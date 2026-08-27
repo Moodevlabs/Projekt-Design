@@ -51,6 +51,14 @@ vi.mock('@/data/queries/useQuotes', () => ({
   useSetQuoteStatus: mutationStub,
 }));
 
+// Karta „klient przyjal oferte" (T-26) pyta o akceptacje i uwagi. To warstwa
+// danych — sama karta ma wlasny test.
+vi.mock('@/data/queries/useShares', () => ({
+  useQuoteAcceptance: () => ({ data: null }),
+  useQuoteComments: () => ({ data: [] }),
+  useMarkCommentRead: () => ({ mutate: vi.fn() }),
+}));
+
 vi.mock('@/data/queries/useWorkspace', () => ({
   useWorkspace: () => ({ data: { id: 'ws', settings: {} } }),
   useWorkspaceId: () => 'ws',
