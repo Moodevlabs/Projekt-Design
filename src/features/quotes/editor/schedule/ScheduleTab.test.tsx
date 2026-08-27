@@ -116,13 +116,25 @@ describe('ScheduleTab — wynik', () => {
      * Etapy zależne od pomieszczeń liczą się z tych samych `rooms` co cennik,
      * bo harmonogram mieszka w tym samym dokumencie.
      */
+    // Szablon startuje ODZNACZONY (2026-08-27), więc najpierw włączamy etap
+    // zależny od pomieszczeń — inaczej obie strony liczą zero i test nie ma
+    // czego porównać.
+    const wlaczEtapPerPokoj = () => {
+      const stages = useEditorStore.getState().schedule?.stages ?? [];
+      const perRoom = stages.find((stage) => stage.roomScope !== 'none');
+      if (!perRoom) throw new Error('szablon nie ma etapu zaleznego od pomieszczen');
+      useEditorStore.getState().updateStage(perRoom.id, { enabled: true });
+    };
+
     zaladuj();
+    wlaczEtapPerPokoj();
     const { unmount } = render(<ScheduleTab editing />);
     const bezPomieszczen = screen.getByText(pl.editor.scheduleProviderDays).parentElement
       ?.textContent;
     unmount();
 
     zaladuj([pokoj('Kuchnia', 3)]);
+    wlaczEtapPerPokoj();
     render(<ScheduleTab editing />);
     const zPomieszczeniami = screen.getByText(pl.editor.scheduleProviderDays).parentElement
       ?.textContent;
@@ -146,17 +158,20 @@ describe('ScheduleTab — wynik', () => {
 });
 
 describe('ScheduleTab — edycja etapów', () => {
-  it('wyłączenie etapu zeruje jego dni i brudzi dokument', async () => {
+  it('przełącznik etapu zmienia jego stan i brudzi dokument', async () => {
+    // Szablon startuje odznaczony (2026-08-27), więc pierwszy klik WŁĄCZA.
+    // Test pilnuje przełączenia i zapisu, nie konkretnej wartości startowej.
     const user = userEvent.setup();
     zaladuj();
     render(<ScheduleTab editing />);
 
     const etap = harmonogram()?.stages[0];
     if (!etap) throw new Error('brak etapu');
+    const przed = etap.enabled;
 
     await user.click(screen.getByLabelText(pl.editor.stageEnabled(etap.name)));
 
-    expect(harmonogram()?.stages[0]?.enabled).toBe(false);
+    expect(harmonogram()?.stages[0]?.enabled).toBe(!przed);
     expect(useEditorStore.getState().saveState).toBe('dirty');
   });
 

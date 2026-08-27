@@ -29,7 +29,20 @@ function etap(
   return {
     name,
     description,
-    included: true,
+    /*
+     * ODZNACZONE domyślnie (2026-08-27).
+     *
+     * Wcześniej większość etapów startowała z „ptaszkiem", więc dokument
+     * „Etapy współpracy" od pierwszego otwarcia twierdził, że oferta obejmuje
+     * niemal wszystko — łącznie z rzeczami, których nikt nie zamawiał.
+     * Sens tego dokumentu jest odwrotny: ma pokazać, co robimy i **czego nie
+     * robimy**, a to wymaga świadomego zaznaczenia zakresu, nie odklikiwania
+     * gotowej listy.
+     *
+     * Etapy nieobjęte i tak zostają widoczne (z krzyżykiem) — to jest cała
+     * wartość tego dokumentu dla inwestora.
+     */
+    included: false,
     sectionLabel,
     linkedItemTags: [],
     ...extra,
