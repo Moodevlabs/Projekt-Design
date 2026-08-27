@@ -1321,22 +1321,52 @@ Pozdrawiam`,
     title: 'Branding',
     companyName: 'Nazwa firmy',
     logo: 'Logo',
-    accentColor: 'Kolor akcentu',
-    bgColor: 'Kolor tła PDF',
+    /*
+     * NAZWY MÓWIĄCE, GDZIE TO WIDAĆ (poprawka 3, 2026-08-27).
+     *
+     * „Kolor akcentu" i „Kolor tła PDF" nie odpowiadały na jedyne pytanie,
+     * jakie się przy nich zadaje: co się zmieni na dokumencie. Etykieta nazywa
+     * teraz miejsce, a podpowiedź wylicza wszystkie miejsca, bo kolor marki
+     * pracuje w trzech.
+     */
+    accentColor: 'Kolor marki',
+    accentColorHint:
+      'Pas na górze każdej strony PDF — ten za logo i numerem oferty. Tym samym kolorem drukują się tytuły sekcji i linia nad podpisem. Tekst na pasie dobiera się sam: jasny na ciemnym kolorze, ciemny na jasnym.',
+    bgColor: 'Tło podsumowania kosztów',
+    bgColorHint:
+      'Wypełnienie ramki z sumą na końcu oferty — tej z kwotą netto, VAT-em i brutto. Kwoty drukujemy na niej ciemnym atramentem, więc trzymaj się jasnego odcienia.',
     font: 'Font',
+    fontHint: 'Krój całego dokumentu: tytuły, pozycje i stopka.',
     contacts: 'Kontakt',
     footer: 'Stopka',
 
     // Sekcje formularza.
     sectionIdentity: 'Firma',
     sectionLook: 'Wygląd PDF',
+    sectionLookHint:
+      'Trzy rzeczy, z których składa się dokument: znak na nagłówku, kolory i krój pisma. Zmiany widać od razu w podglądzie na dole strony.',
     sectionContact: 'Kontakt i stopka',
     sectionDefaults: 'Domyślne w wycenie',
 
     // Logo.
-    logoDark: 'Logo na jasne tło',
-    logoLight: 'Logo na ciemny nagłówek',
+    logoDark: 'Znak ciemny',
+    logoDarkHint: 'Wersja do położenia na JASNYM nagłówku.',
+    logoLight: 'Znak jasny',
+    logoLightHint: 'Wersja do położenia na CIEMNYM nagłówku.',
     logoHint: 'PNG, JPG, WEBP lub SVG, do 5 MB.',
+
+    // Wybór wariantu na nagłówku (poprawka 3).
+    headerLogo: 'Logo na nagłówku',
+    headerLogoHint:
+      'Który z dwóch znaków ma stanąć na pasie nagłówka. „Dobierz sam" patrzy na kolor marki: na ciemnym pasie kładzie znak jasny, na jasnym — ciemny.',
+    headerLogoAuto: 'Dobierz sam',
+    headerLogoLight: 'Zawsze znak jasny',
+    headerLogoDark: 'Zawsze znak ciemny',
+    headerLogoResolved: (variant: 'light' | 'dark') =>
+      variant === 'light'
+        ? 'Teraz na nagłówku stoi znak jasny.'
+        : 'Teraz na nagłówku stoi znak ciemny.',
+    headerLogoMissing: 'Ten wariant nie jest jeszcze wgrany — na pasie stanie sama nazwa firmy.',
     logoUpload: (variant: string) => `Wgraj: ${variant}`,
     logoRemove: (variant: string) => `Usuń: ${variant}`,
     logoEmpty: 'Brak logo',

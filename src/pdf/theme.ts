@@ -51,6 +51,21 @@ export function pdfFontFamily(font: FontFamily, registered: boolean): string {
   return registered ? font : 'Helvetica';
 }
 
+/**
+ * Który wariant logo trafia na pas nagłówka.
+ *
+ * Wydzielone z `buildPdfTheme`, bo tę samą odpowiedź musi znać podgląd
+ * w ustawieniach — a dwie kopie tej decyzji rozjechałyby się przy pierwszej
+ * zmianie i strona brandingu kłamałaby dokładnie w tym, po co się na nią patrzy.
+ *
+ * Wybór użytkownika (`light` / `dark`) wygrywa z regułą kontrastu. `auto` to
+ * reguła: na jasnym pasie jasne logo zniknie, więc bierzemy ciemne.
+ */
+export function headerLogoVariant(brandKit: BrandKit): 'dark' | 'light' {
+  if (brandKit.headerLogo !== 'auto') return brandKit.headerLogo;
+  return isLightBackground(brandKit.accentColor) ? 'dark' : 'light';
+}
+
 export function buildPdfTheme(brandKit: BrandKit, fontsRegistered = false): PdfTheme {
   const accent = brandKit.accentColor;
 
@@ -63,8 +78,7 @@ export function buildPdfTheme(brandKit: BrandKit, fontsRegistered = false): PdfT
     hair: HAIR,
     discount: DISCOUNT,
     fontFamily: pdfFontFamily(brandKit.fontFamily, fontsRegistered),
-    // Na jasnym nagłówku jasne logo zniknie — bierzemy ciemny wariant.
-    headerLogo: isLightBackground(accent) ? 'dark' : 'light',
+    headerLogo: headerLogoVariant(brandKit),
     sizes: {
       title: 22,
       sectionTitle: 12,

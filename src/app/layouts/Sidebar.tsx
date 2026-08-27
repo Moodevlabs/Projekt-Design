@@ -22,6 +22,7 @@ import {
   type NavItem,
 } from './nav-items';
 import { useSidebarExpanded } from './useSidebarExpanded';
+import { useOverlayRail } from './useOverlayRail';
 import { TrialBar } from '@/features/billing/TrialBar';
 import { routes } from '@/app/routes';
 import { pl } from '@/i18n/pl';
@@ -59,11 +60,14 @@ function SidebarLink({
   active,
   expanded,
   order,
+  onNavigate,
 }: {
   item: NavItem;
   active: boolean;
   expanded: boolean;
   order: number;
+  /** Wywoływane po przejściu — w trybie nakładki zwija szynę z widoku. */
+  onNavigate?: () => void;
 }) {
   const Icon = item.icon;
   const label = item.disabled ? `${item.label} (${pl.common.soon})` : item.label;
@@ -76,7 +80,11 @@ function SidebarLink({
       aria-current={active ? 'page' : undefined}
       aria-disabled={item.disabled}
       onClick={(event) => {
-        if (item.disabled) event.preventDefault();
+        if (item.disabled) {
+          event.preventDefault();
+          return;
+        }
+        onNavigate?.();
       }}
       style={{ height: NAV_ROW_HEIGHT }}
       className={cn(
@@ -172,16 +180,33 @@ export function Sidebar({ subscriptionOk = true }: { subscriptionOk?: boolean })
   const { pathname } = useLocation();
   const { expanded, toggle } = useSidebarExpanded();
   const activeIndex = activeNavIndex(pathname);
+  const narrow = useOverlayRail();
 
-  return (
+  /*
+   * WĄSKIE OKNO: rozwinięta szyna kładzie się NA treści (poprawka 1, 2026-08-27).
+   *
+   * Wcześniej szyna zawsze stała w układzie i zabierała swoje 244 px. Przy oknie
+   * 1024 px — a tyle wolno mieć najwęższemu — na pracę zostawało 780 px i to,
+   * co ma własną minimalną szerokość, wyjeżdżało poza krawędź. Rozwinięcie paska
+   * nawigacji nie może psuć widoku, po który się do niego sięga.
+   *
+   * W układzie zostaje wtedy zwinięty pas (76 px), a sama szyna jest
+   * pozycjonowana absolutnie względem powłoki i przykryta półprzezroczystym
+   * tłem. Powyżej progu nic się nie zmienia — szyna i treść stoją obok siebie.
+   */
+  const overlay = narrow && expanded;
+
+  const rail = (
     <nav
       aria-label={pl.app.name}
       data-expanded={expanded}
+      data-overlay={overlay || undefined}
       style={{ width: expanded ? 244 : 76 }}
       className={cn(
-        'rail relative z-10 flex shrink-0 flex-col py-5',
+        'rail z-10 flex shrink-0 flex-col py-5',
         expanded ? 'px-4' : 'items-center px-[15px]',
         'transition-[width] duration-[var(--dur-slide)] ease-[var(--ease-liquid)]',
+        overlay ? 'absolute inset-y-0 left-0 z-30 shadow-[8px_0_28px_rgba(51,37,30,0.28)]' : 'relative',
       )}
     >
       {/*
@@ -240,6 +265,7 @@ export function Sidebar({ subscriptionOk = true }: { subscriptionOk?: boolean })
                     order={offset + index}
                     active={offset + index === activeIndex}
                     expanded={expanded}
+                    onNavigate={overlay ? toggle : undefined}
                   />
                 ))}
               </div>
@@ -280,5 +306,31 @@ export function Sidebar({ subscriptionOk = true }: { subscriptionOk?: boolean })
         <AccountMenu subscriptionOk={subscriptionOk} expanded={expanded} />
       </div>
     </nav>
+  );
+
+  if (!overlay) return rail;
+
+  return (
+    <>
+      {/*
+        Miejsce, które szyna zajmowałaby zwinięta. Bez tego treść przeskakiwałaby
+        o 76 px w lewo w chwili rozwinięcia paska — a pasek ma się nasunąć,
+        nie przestawić strony.
+      */}
+      <div aria-hidden className="shrink-0" style={{ width: 76 }} />
+
+      {/*
+        Tło wyłącza treść pod spodem, a kliknięcie w nie zwija szynę. To jedyny
+        gest, którego się tu spodziewamy: pasek nawigacji przykrył pracę, więc
+        „gdziekolwiek obok" znaczy „schowaj go".
+      */}
+      <button
+        type="button"
+        aria-label={pl.nav.collapse}
+        onClick={toggle}
+        className="bg-ink/25 absolute inset-0 z-20 cursor-default"
+      />
+      {rail}
+    </>
   );
 }

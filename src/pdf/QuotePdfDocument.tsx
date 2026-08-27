@@ -64,8 +64,25 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
     marginBottom: 2,
   },
-  totals: { marginTop: 18, alignSelf: 'flex-end', width: 240, padding: 14 },
+  /*
+   * PODSUMOWANIE NA CAŁĄ SZEROKOŚĆ (poprawka 3, 2026-08-27).
+   *
+   * Do tej pory było to pudełko 240 pt dosunięte do prawej krawędzi. Wyglądało
+   * jak przypis, a jest jedyną rzeczą, której klient szuka w ofercie od razu.
+   * Wąska kolumna dodatkowo łamała dłuższe etykiety („Rabaty", „VAT 23%”)
+   * na dwie linijki i ściskała kwoty.
+   */
+  totals: { marginTop: 18, padding: 18 },
   totalsLine: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
+  /** Kwota do zapłaty: etykieta z lewej, liczba z prawej, na jednej linii. */
+  totalsNet: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+  },
   footer: {
     position: 'absolute',
     bottom: 20,
@@ -287,15 +304,17 @@ export function QuotePdfDocument({
               </View>
             ) : null}
 
-            <Text style={{ fontSize: theme.sizes.small, color: theme.inkSoft, marginTop: 6 }}>
-              {pl.editor.net}
-            </Text>
-            <Text style={{ fontSize: theme.sizes.total, fontWeight: 700, color: theme.ink }}>
-              {money(totals.netCents)}
-            </Text>
+            <View style={[styles.totalsNet, { borderTopColor: theme.hair }]}>
+              <Text style={{ fontSize: theme.sizes.sectionTitle, color: theme.inkSoft }}>
+                {pl.editor.net}
+              </Text>
+              <Text style={{ fontSize: theme.sizes.total, fontWeight: 700, color: theme.ink }}>
+                {money(totals.netCents)}
+              </Text>
+            </View>
 
             {body.vatRate > 0 ? (
-              <View style={{ marginTop: 6 }}>
+              <View style={{ marginTop: 8 }}>
                 <View style={styles.totalsLine}>
                   <Text style={{ fontSize: theme.sizes.small, color: theme.inkSoft }}>
                     {`${pl.editor.vat} ${body.vatRate}%`}

@@ -4,7 +4,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBrandPreview } from './useBrandPreview';
 import { fetchLogoAsDataUrl } from '@/pdf/logo';
-import { isLightBackground } from '@/domain/brand/color';
+import { headerLogoVariant } from '@/pdf/theme';
 import type { BrandKit } from '@/domain/brand/schema';
 import { pl } from '@/i18n/pl';
 
@@ -61,17 +61,15 @@ export function BrandPreview({ draft }: { draft: BrandKit | null }) {
 /**
  * Logo do podglądu, jako data URL.
  *
- * Wariant wybieramy **kontrastem względem koloru akcentu**, tak samo jak robi
- * to generator PDF — inaczej podgląd pokazywałby jasne logo tam, gdzie eksport
+ * Wariant bierzemy z `headerLogoVariant` — tej samej funkcji, z której korzysta
+ * generator PDF. Inaczej podgląd pokazywałby jasne logo tam, gdzie eksport
  * wstawi ciemne, i cała ta strona kłamałaby w najważniejszym miejscu.
  */
 function usePreviewLogo(draft: BrandKit | null): string | null {
   const [dataUrl, setDataUrl] = useState<string | null>(null);
 
-  // Ta sama reguła co w `buildPdfTheme` — użyta przez ten sam helper, a nie
-  // przepisana. Dwie kopie tej decyzji rozjechałyby się przy pierwszej zmianie.
   const path = draft
-    ? isLightBackground(draft.accentColor)
+    ? headerLogoVariant(draft) === 'dark'
       ? draft.logoDarkPath
       : draft.logoLightPath
     : null;

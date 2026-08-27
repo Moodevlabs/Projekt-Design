@@ -122,13 +122,29 @@ export function LibraryItemRow({
           />
         </div>
 
-        <ChevronDown
+        {/*
+          Ptaszek jest OSOBNYM przyciskiem, nie ikoną obok przycisku.
+          Do 2026-08-27 była to sama grafika, poza obszarem klikalnym: wiersz
+          rozwijał się kliknięciem w tekst, ale kliknięcie w strzałkę — czyli
+          w jedyny element, który WYGLĄDA jak „rozwiń" — nie robiło nic.
+
+          Dla czytnika ekranu jest niewidoczny (`aria-hidden`, poza tabulacją):
+          sterowanie zostaje przy przycisku z etykietą. Dwa przyciski z tą samą
+          etykietą byłyby gorsze niż jedna martwa ikona.
+        */}
+        <button
+          type="button"
           aria-hidden
-          className={cn(
-            'text-ink-soft size-4 justify-self-center transition-transform',
-            expanded && 'rotate-180',
-          )}
-        />
+          tabIndex={-1}
+          data-testid="library-item-chevron"
+          onClick={onToggle}
+          className="text-ink-soft hover:text-ink flex size-7 items-center justify-center justify-self-center rounded-[var(--radius-control)] transition-colors"
+        >
+          <ChevronDown
+            aria-hidden
+            className={cn('size-4 transition-transform', expanded && 'rotate-180')}
+          />
+        </button>
       </div>
 
       {expanded ? (

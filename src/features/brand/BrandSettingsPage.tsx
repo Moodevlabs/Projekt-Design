@@ -20,16 +20,30 @@ import {
   HexColorSchema,
   MAX_OPENING_HOURS_ROWS,
   type BrandKit,
+  type HeaderLogoChoice,
 } from '@/domain/brand/schema';
+import { headerLogoVariant } from '@/pdf/theme';
 import { pl } from '@/i18n/pl';
+import { cn } from '@/lib/utils';
 
 const FONTS = FontFamilySchema.options;
 
-/** Sekcja formularza — nagłówek plus siatka pól. */
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+/** Sekcja formularza — nagłówek, opcjonalne zdanie wprowadzające, siatka pól. */
+function Section({
+  title,
+  hint,
+  children,
+}: {
+  title: string;
+  hint?: string;
+  children: React.ReactNode;
+}) {
   return (
     <section className="card-surface space-y-4 p-5">
-      <h2 className="text-ink text-sm font-semibold">{title}</h2>
+      <div className="space-y-1">
+        <h2 className="text-ink text-sm font-semibold">{title}</h2>
+        {hint ? <p className="text-ink-soft max-w-prose text-xs">{hint}</p> : null}
+      </div>
       {children}
     </section>
   );
@@ -81,6 +95,10 @@ export function BrandSettingsPage() {
     HexColorSchema.safeParse(draft.accentColor).success &&
     HexColorSchema.safeParse(draft.bgColor).success;
 
+  // Ta sama funkcja, z której korzysta generator PDF — strona brandingu nie ma
+  // prawa zgadywać po swojemu, który znak stanie na nagłówku.
+  const headerVariant = headerLogoVariant(draft);
+
   const dirty = JSON.stringify(draft) !== JSON.stringify(brandKit.data);
 
   const save = () => {
@@ -122,11 +140,13 @@ export function BrandSettingsPage() {
         </div>
       </Section>
 
-      <Section title={pl.brand.sectionLook}>
+      <Section title={pl.brand.sectionLook} hint={pl.brand.sectionLookHint}>
         <div className="grid gap-4 sm:grid-cols-2">
           <LogoField
             variant="dark"
             label={pl.brand.logoDark}
+            hint={pl.brand.logoDarkHint}
+            active={headerVariant === 'dark'}
             path={draft.logoDarkPath}
             uploading={upload.isPending}
             onUpload={(file) =>
@@ -154,6 +174,8 @@ export function BrandSettingsPage() {
           <LogoField
             variant="light"
             label={pl.brand.logoLight}
+            hint={pl.brand.logoLightHint}
+            active={headerVariant === 'light'}
             path={draft.logoLightPath}
             uploading={upload.isPending}
             onUpload={(file) =>
@@ -179,21 +201,40 @@ export function BrandSettingsPage() {
           />
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-3">
+        <HeaderLogoField
+          value={draft.headerLogo}
+          resolved={headerVariant}
+          missing={headerVariant === 'dark' ? !draft.logoDarkPath : !draft.logoLightPath}
+          onChange={(headerLogo) => patch({ headerLogo })}
+        />
+
+        {/*
+          Kolory jeden pod drugim, nie w trzech kolumnach obok fontu: przy
+          każdym stoi teraz dwa zdania o tym, GDZIE to widać, a w kolumnie
+          szerokiej na jedną trzecią karty te zdania łamałyby się na sześć
+          linijek i nikt by ich nie przeczytał.
+        */}
+        <div className="grid gap-4 sm:grid-cols-2">
           <ColorField
             id="accent-color"
             label={pl.brand.accentColor}
+            hint={pl.brand.accentColorHint}
             value={draft.accentColor}
             onChange={(accentColor) => patch({ accentColor })}
           />
           <ColorField
             id="bg-color"
             label={pl.brand.bgColor}
+            hint={pl.brand.bgColorHint}
             value={draft.bgColor}
             onChange={(bgColor) => patch({ bgColor })}
           />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="font-family">{pl.brand.font}</Label>
+            <p className="text-ink-soft text-xs">{pl.brand.fontHint}</p>
             <select
               id="font-family"
               value={draft.fontFamily}
@@ -375,15 +416,80 @@ export function BrandSettingsPage() {
   );
 }
 
+/**
+ * Wybór wariantu logo na nagłówku (poprawka 3, 2026-08-27).
+ *
+ * Trzy przyciski zamiast listy rozwijanej: opcje są trzy i wszystkie mają się
+ * czytać naraz, bo to wybór między „niech program zdecyduje" a dwoma
+ * konkretami. Pod spodem stoi zdanie o tym, co z tego wyboru WYNIKA dzisiaj —
+ * przy `auto` odpowiedź zmienia się razem z kolorem marki, więc sama nazwa
+ * opcji jej nie zdradza.
+ */
+function HeaderLogoField({
+  value,
+  resolved,
+  missing,
+  onChange,
+}: {
+  value: HeaderLogoChoice;
+  resolved: 'light' | 'dark';
+  /** Czy wariant, który wypadł, nie ma wgranego pliku. */
+  missing: boolean;
+  onChange: (value: HeaderLogoChoice) => void;
+}) {
+  const options: Array<{ value: HeaderLogoChoice; label: string }> = [
+    { value: 'auto', label: pl.brand.headerLogoAuto },
+    { value: 'dark', label: pl.brand.headerLogoDark },
+    { value: 'light', label: pl.brand.headerLogoLight },
+  ];
+
+  // Jeden ciąg, nie dwa węzły tekstowe: rozbite zdanie źle się czyta zarówno
+  // czytnikowi ekranu, jak i testom.
+  const resolvedHint = missing
+    ? `${pl.brand.headerLogoResolved(resolved)} ${pl.brand.headerLogoMissing}`
+    : pl.brand.headerLogoResolved(resolved);
+
+  return (
+    <div className="space-y-2">
+      <Label>{pl.brand.headerLogo}</Label>
+      <p className="text-ink-soft max-w-prose text-xs">{pl.brand.headerLogoHint}</p>
+
+      <div role="radiogroup" aria-label={pl.brand.headerLogo} className="flex flex-wrap gap-2">
+        {options.map((option) => (
+          <button
+            key={option.value}
+            type="button"
+            role="radio"
+            aria-checked={value === option.value}
+            onClick={() => onChange(option.value)}
+            className={cn(
+              'focus-visible:ring-ring rounded-[var(--radius-pill)] border px-3 py-1.5 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none',
+              value === option.value
+                ? 'border-ink bg-ink text-surface'
+                : 'border-hair text-ink-soft hover:text-ink',
+            )}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+
+      <p className="text-ink-soft text-xs">{resolvedHint}</p>
+    </div>
+  );
+}
+
 /** Kolor: próbnik systemowy plus pole tekstowe, bo `#RRGGBB` bywa przepisywane z brandbooka. */
 function ColorField({
   id,
   label,
+  hint,
   value,
   onChange,
 }: {
   id: string;
   label: string;
+  hint?: string;
   value: string;
   onChange: (value: string) => void;
 }) {
@@ -392,6 +498,7 @@ function ColorField({
   return (
     <div className="space-y-2">
       <Label htmlFor={id}>{label}</Label>
+      {hint ? <p className="text-ink-soft max-w-prose text-xs">{hint}</p> : null}
       <div className="flex items-center gap-2">
         <input
           type="color"

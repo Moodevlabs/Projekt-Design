@@ -18,6 +18,7 @@ function parseBrandKit(row: BrandRow): BrandKit {
     companyName: row.company_name,
     logoDarkPath: row.logo_dark_path,
     logoLightPath: row.logo_light_path,
+    headerLogo: row.header_logo,
     accentColor: row.accent_color,
     bgColor: row.bg_color,
     fontFamily: row.font_family,
@@ -63,6 +64,7 @@ export async function updateBrandKit(workspaceId: string, patch: BrandKitPatch):
   if (patch.companyName !== undefined) update.company_name = patch.companyName;
   if (patch.logoDarkPath !== undefined) update.logo_dark_path = patch.logoDarkPath;
   if (patch.logoLightPath !== undefined) update.logo_light_path = patch.logoLightPath;
+  if (patch.headerLogo !== undefined) update.header_logo = patch.headerLogo;
   if (patch.accentColor !== undefined) update.accent_color = patch.accentColor;
   if (patch.bgColor !== undefined) update.bg_color = patch.bgColor;
   if (patch.fontFamily !== undefined) update.font_family = patch.fontFamily;

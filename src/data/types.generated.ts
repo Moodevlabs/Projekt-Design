@@ -46,6 +46,7 @@ export type Database = {
           default_valid_days: number
           font_family: string
           footer_text: string | null
+          header_logo: string
           logo_dark_path: string | null
           logo_light_path: string | null
           opening_hours: Json
@@ -66,6 +67,7 @@ export type Database = {
           default_valid_days?: number
           font_family?: string
           footer_text?: string | null
+          header_logo?: string
           logo_dark_path?: string | null
           logo_light_path?: string | null
           opening_hours?: Json
@@ -86,6 +88,7 @@ export type Database = {
           default_valid_days?: number
           font_family?: string
           footer_text?: string | null
+          header_logo?: string
           logo_dark_path?: string | null
           logo_light_path?: string | null
           opening_hours?: Json

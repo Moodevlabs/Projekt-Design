@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildPdfTheme, pdfFontFamily } from './theme';
+import { buildPdfTheme, headerLogoVariant, pdfFontFamily } from './theme';
 import { defaultBrandKit } from '@/domain/brand/schema';
 import { contrastRatio } from '@/domain/brand/color';
 
@@ -19,6 +19,17 @@ describe('buildPdfTheme', () => {
     // Jasne logo na jasnym tle znikneloby.
     expect(buildPdfTheme({ ...defaultBrandKit(), accentColor: '#FAF7F1' }).headerLogo).toBe('dark');
     expect(buildPdfTheme({ ...defaultBrandKit(), accentColor: '#21201C' }).headerLogo).toBe('light');
+  });
+
+  it('jawny wybor uzytkownika wygrywa z regula kontrastu (poprawka 3)', () => {
+    // Znak z wlasnym bialym tlem ma zostac taki, jaki jest — kontrast liczy
+    // sie wtedy z tla PLIKU, a nie z koloru pasa.
+    const jasnyPas = { ...defaultBrandKit(), accentColor: '#FAF7F1' } as const;
+
+    expect(headerLogoVariant({ ...jasnyPas, headerLogo: 'light' })).toBe('light');
+    expect(headerLogoVariant({ ...jasnyPas, headerLogo: 'dark' })).toBe('dark');
+    expect(headerLogoVariant({ ...jasnyPas, headerLogo: 'auto' })).toBe('dark');
+    expect(buildPdfTheme({ ...jasnyPas, headerLogo: 'light' }).headerLogo).toBe('light');
   });
 
   it('przepisuje kolory marki bez zmian', () => {
