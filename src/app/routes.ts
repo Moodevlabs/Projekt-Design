@@ -18,6 +18,8 @@ export const routes = {
   help: '/pomoc',
   settings: '/ustawienia',
   settingsBranding: '/ustawienia/branding',
+  /** Szablony briefu (T-96) — edytor formularza, nie sekcja „Aplikacji”. */
+  settingsBrief: '/ustawienia/brief',
   settingsAccount: '/ustawienia/konto',
   subscription: '/subskrypcja',
   login: '/logowanie',

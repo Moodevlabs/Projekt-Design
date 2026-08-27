@@ -20,6 +20,7 @@ import { TemplatesPage } from '@/features/templates/TemplatesPage';
 import { BrandSettingsPage } from '@/features/brand/BrandSettingsPage';
 import { SettingsAppPage } from '@/features/settings/SettingsAppPage';
 import { SettingsAccountPage } from '@/features/settings/SettingsAccountPage';
+import { BriefTemplatesPage } from '@/features/brief/templates/BriefTemplatesPage';
 import { TrashPage } from '@/features/files/TrashPage';
 import { SettingsLayout } from '@/features/settings/SettingsLayout';
 import { SubscriptionPage } from '@/features/billing/SubscriptionPage';
@@ -104,6 +105,7 @@ const routeTree = [
                 children: [
                   { index: true, element: <SettingsAppPage /> },
                   { path: 'branding', element: <BrandSettingsPage /> },
+                  { path: 'brief', element: <BriefTemplatesPage /> },
                   { path: 'konto', element: <SettingsAccountPage /> },
                 ],
               },

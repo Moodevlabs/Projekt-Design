@@ -49,6 +49,13 @@ export const queryKeys = {
   /** Linki klienta, uwagi i akceptacja — wszystko per wycena (T-25/T-26). */
   /** Briefy klienta (T-93) — pod kluczem klienta, bo to jego dokument. */
   briefs: (clientId: string) => ['clients', 'detail', clientId, 'briefs'] as const,
+  /**
+   * Szablony briefu (T-96) — konfiguracja pracowni, więc pod workspace'em,
+   * a nie pod klientem. Osobny prefiks: unieważnienie briefów jednego klienta
+   * nie ma powodu zrzucać listy szablonów.
+   */
+  briefTemplates: (workspaceId?: string) =>
+    workspaceId ? (['brief-templates', workspaceId] as const) : (['brief-templates'] as const),
   /** Wizje lokalne projektu (T-94). */
   siteVisits: (projectId: string) => ['projects', 'detail', projectId, 'site-visits'] as const,
   shares: (quoteId: string) => ['quotes', 'detail', quoteId, 'shares'] as const,

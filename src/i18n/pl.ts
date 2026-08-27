@@ -699,8 +699,7 @@ Pozdrawiam`,
      */
     roomsPurpose:
       'Lista pomieszczeń objętych projektem. Usługi wyceniane „za pomieszczenie" mnożą przez nią swoją stawkę — reszta pozycji jej nie używa.',
-    roomsCount: (count: number) =>
-      count === 1 ? '1 pomieszczenie' : `${count} pomieszczeń`,
+    roomsCount: (count: number) => (count === 1 ? '1 pomieszczenie' : `${count} pomieszczeń`),
     roomsColumnName: 'Pomieszczenie',
     roomsColumnQty: 'Ile',
     roomsSplit: (visual: number, technical: number) =>
@@ -1067,11 +1066,24 @@ Pozdrawiam`,
     tab: 'Brief',
     title: 'Brief klienta',
     intro:
-      'Kwestionariusz do wypełnienia przez klienta, zanim zaczniecie projekt. Wysyłasz link — klient odpowiada bez zakładania konta, na raty, kiedy mu wygodnie.',
-    create: 'Wyślij brief',
+      'Kwestionariusz wypełniany przez inwestora przed rozpoczęciem prac projektowych. Udostępniany linkiem — bez zakładania konta, z możliwością uzupełniania etapami.',
+    create: 'Wystaw brief',
     creating: 'Tworzenie…',
     createFailed: 'Nie udało się utworzyć briefu.',
-    empty: 'Ten klient nie dostał jeszcze briefu.',
+    empty: 'Dla tego klienta nie wystawiono jeszcze briefu.',
+
+    // Wybór szablonu i terminu ważności przy wystawianiu linku (T-96).
+    newTitle: 'Wystawienie briefu',
+    newDescription:
+      'Zestaw pytań zostanie skopiowany do briefu w chwili wystawienia. Późniejsze zmiany szablonu nie wpłyną na ten dokument.',
+    templateLabel: 'Szablon pytań',
+    templateBuiltIn: 'Zestaw wbudowany',
+    templateDefaultSuffix: ' (domyślny)',
+    templateManage: 'Szablony briefu można edytować w Ustawieniach.',
+    expiryLabel: 'Ważność linku',
+    expiryDays: (days: number) => `${days} dni`,
+    expiryNever: 'Bezterminowo',
+    submit: 'Wystaw i skopiuj link',
     linkLabel: 'Adres briefu dla klienta',
     copy: 'Kopiuj link',
     copied: 'Link skopiowany',
@@ -1079,33 +1091,119 @@ Pozdrawiam`,
     sendByMail: 'Wyślij mailem',
     revoke: 'Odwołaj link',
     revokeConfirm:
-      'Odwołany link przestaje działać natychmiast. Odpowiedzi, które już przyszły, zostają.',
+      'Odwołany link przestaje działać natychmiast. Odpowiedzi już przesłane pozostają zachowane.',
     revoked: 'Odwołany',
     expired: 'Wygasł',
-    waiting: 'Czeka na odpowiedzi',
+    waiting: 'Oczekuje na odpowiedzi',
     open: 'Otwarty',
     validFor: 'Ważny przez',
-    neverOpened: 'Klient jeszcze nie otworzył',
+    neverOpened: 'Nieotwarty przez klienta',
     openedTimes: (count: number) => (count === 1 ? 'Otwarty raz' : `Otwarty ${count} razy`),
-    submittedOn: (date: string) => `Odesłany ${date}`,
-    progress: (answered: number, total: number) => `Wypełnione ${answered} z ${total}`,
-    noAnswerYet: 'Bez odpowiedzi',
+    submittedOn: (date: string) => `Przesłany ${date}`,
+    progress: (answered: number, total: number) => `Uzupełnione ${answered} z ${total}`,
+    noAnswerYet: 'Brak odpowiedzi',
     answersTitle: 'Odpowiedzi klienta',
     delete: 'Usuń brief',
     deleteConfirm:
-      'Brief zniknie razem z odpowiedziami klienta. Tego nie da się cofnąć.',
+      'Brief zostanie usunięty wraz z odpowiedziami klienta. Operacji nie można cofnąć.',
 
     /** Treść maila — projektant wysyła go ze swojej poczty, jak przy ofercie. */
-    mailSubject: 'Brief przed rozpoczęciem projektu',
+    mailSubject: 'Brief przed rozpoczęciem prac projektowych',
     mailBody: (url: string) =>
       `Dzień dobry,
 
-zanim zaczniemy, prosimy o wypełnienie krótkiego briefu:
+przed rozpoczęciem prac projektowych uprzejmie prosimy o wypełnienie briefu:
 ${url}
 
-Nie trzeba zakładać konta ani odpowiadać za jednym razem — formularz zapamiętuje to, co już wpisane.
+Formularz nie wymaga zakładania konta, a wprowadzone odpowiedzi są zapisywane na bieżąco — można go uzupełniać etapami.
 
-Pozdrawiam`,
+Z wyrazami szacunku`,
+  },
+
+  /*
+   * SZABLONY BRIEFU (T-96).
+   *
+   * Zestaw pytań przestaje być stałą w kodzie i staje się konfiguracją
+   * pracowni. Teksty mówią o formularzu, nie o dokumencie — dokumentem jest
+   * brief z odpowiedziami i on ma własny, niezmienny snapshot pytań.
+   */
+  briefTemplates: {
+    tab: 'Brief',
+    title: 'Szablony briefu',
+    intro:
+      'Zestawy pytań kierowanych do inwestora. Szablonów może być kilka — osobny dla mieszkania, lokalu usługowego czy pojedynczego pomieszczenia. Zmiany obowiązują od kolejnego wystawionego briefu; dokumenty już przekazane klientom pozostają bez zmian.',
+    listTitle: 'Szablony',
+    add: 'Nowy szablon',
+    addFromDefault: 'Nowy na bazie wbudowanego',
+    duplicate: 'Duplikuj',
+    setDefault: 'Ustaw jako domyślny',
+    isDefault: 'Domyślny',
+    defaultHint: 'Szablon podpowiadany przy wystawianiu briefu.',
+    nameLabel: 'Nazwa szablonu',
+    namePlaceholder: 'Brief — mieszkanie',
+    nameHint: 'Widoczna wyłącznie w aplikacji. Klient otrzymuje pytania, nie nazwę formularza.',
+    empty: 'Nie utworzono jeszcze żadnego szablonu.',
+    emptyHint:
+      'Do czasu utworzenia własnego szablonu briefy wystawiane są na podstawie zestawu wbudowanego.',
+    defaultName: 'Brief klienta',
+    copySuffix: ' (kopia)',
+    remove: 'Usuń szablon',
+    removeConfirm:
+      'Szablon zostanie usunięty. Briefy wystawione na jego podstawie zachowują własną kopię pytań i pozostają nienaruszone.',
+
+    // Edytor
+    editorTitle: 'Treść formularza',
+    sections: 'Sekcje',
+    addSection: 'Dodaj sekcję',
+    sectionTitleLabel: 'Tytuł sekcji',
+    sectionHintLabel: 'Opis sekcji',
+    sectionHintPlaceholder: 'Zdanie wyjaśniające, czemu służy ten blok pytań.',
+    removeSection: 'Usuń sekcję',
+    removeSectionConfirm: 'Sekcja zostanie usunięta wraz ze wszystkimi zawartymi w niej pytaniami.',
+    moveUp: 'Przenieś wyżej',
+    moveDown: 'Przenieś niżej',
+    questions: 'Pytania',
+    addQuestion: 'Dodaj pytanie',
+    removeQuestion: 'Usuń pytanie',
+    questionLabel: 'Treść pytania',
+    questionLabelPlaceholder: 'O co pytamy inwestora?',
+    questionHint: 'Podpowiedź pod pytaniem',
+    questionHintPlaceholder: 'Wyjaśnienie, w jakim celu zadajemy to pytanie.',
+    questionPlaceholder: 'Przykładowa odpowiedź',
+    questionRequired: 'Odpowiedź wymagana',
+    questionRequiredHint:
+      'Pytań wymaganych powinno być jak najmniej — formularz uzupełniany etapami musi dać się zapisać w każdym momencie.',
+    questionOptions: 'Opcje odpowiedzi',
+    questionOptionsHint: 'Po jednej w wierszu. Wymagane są co najmniej dwie.',
+    /** Odmiana jak w polszczyźnie: 1 pytanie, 2–4 pytania, 5–21 pytań, 22 pytania. */
+    questionCount: (count: number) => {
+      if (count === 1) return '1 pytanie';
+      const ones = count % 10;
+      const tens = count % 100;
+      const few = ones >= 2 && ones <= 4 && !(tens >= 12 && tens <= 14);
+      return `${count} ${few ? 'pytania' : 'pytań'}`;
+    },
+    emptySection: 'Sekcja nie zawiera jeszcze pytań.',
+    kind: {
+      label: 'Rodzaj pola',
+      text: 'Krótka odpowiedź',
+      longtext: 'Odpowiedź opisowa',
+      choice: 'Wybór jednej opcji',
+      multi: 'Wybór wielu opcji',
+      number: 'Liczba',
+    },
+
+    // Zapis
+    save: 'Zapisz szablon',
+    saved: 'Szablon zapisany',
+    saveFailed: 'Nie udało się zapisać szablonu.',
+    unsaved: 'Zmiany niezapisane',
+    revert: 'Odrzuć zmiany',
+    restoreDefaults: 'Przywróć zestaw wbudowany',
+    restoreDefaultsConfirm:
+      'Treść szablonu zostanie zastąpiona zestawem wbudowanym. Zmiana wymaga zapisania.',
+    problemsTitle: 'Formularz wymaga uzupełnienia',
+    problemsHint: 'Zapis jest możliwy dopiero po usunięciu poniższych usterek.',
   },
 
   /*
@@ -1129,8 +1227,7 @@ Pozdrawiam`,
     notes: 'Notatka z wizji',
     notesPlaceholder: 'Obserwacje, ustalenia, ryzyka. Co wymaga decyzji inwestora.',
     delete: 'Usuń wizję',
-    deleteConfirm:
-      'Wizja zniknie razem z obmiarem i notatką. Zdjęcia zostaną w plikach projektu.',
+    deleteConfirm: 'Wizja zniknie razem z obmiarem i notatką. Zdjęcia zostaną w plikach projektu.',
 
     // Obmiar.
     rooms: 'Obmiar',
@@ -1193,8 +1290,7 @@ Pozdrawiam`,
      */
     activityTitle: 'Co nowego u klientów',
     activityUpToDate: 'Jesteś na bieżąco',
-    activityUnread: (count: number) =>
-      count === 1 ? '1 nowa uwaga' : `${count} nowych uwag`,
+    activityUnread: (count: number) => (count === 1 ? '1 nowa uwaga' : `${count} nowych uwag`),
     activityUnreadMark: 'nieprzeczytane',
     activityEmpty: 'Nic się jeszcze nie wydarzyło — pierwszy wysłany link pojawi się tutaj.',
 

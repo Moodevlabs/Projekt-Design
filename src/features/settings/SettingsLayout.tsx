@@ -35,6 +35,9 @@ import { cn } from '@/lib/utils';
 const SECTIONS = [
   { to: routes.settings, label: pl.settings.tabApp, end: true },
   { to: routes.settingsBranding, label: pl.nav.brand },
+  // Brief (T-96) — treść formularza, który dostaje inwestor. Stoi obok
+  // Brandingu, bo jedno i drugie odpowiada na pytanie „co widzi klient”.
+  { to: routes.settingsBrief, label: pl.briefTemplates.tab },
   { to: routes.settingsAccount, label: pl.settings.tabAccount },
 ] as const;
 

@@ -5,6 +5,7 @@ import {
   DEFAULT_BRIEF_TEMPLATE,
   expiryOrNull,
   type Brief,
+  type BriefTemplate,
 } from '@/domain/brief';
 import { RepoError, unwrap } from './errors';
 import { createLogger } from '@/lib/logger';
@@ -68,6 +69,11 @@ export interface CreateBriefInput {
   projectId?: string | null;
   /** `null` = link bezterminowy. */
   expiryDays: number | null;
+  /**
+   * Zestaw pytań do zapisania w briefie (T-96). Pominięty = zestaw wbudowany,
+   * co jest stanem poprawnym dla kont bez własnych szablonów.
+   */
+  template?: BriefTemplate;
 }
 
 /**
@@ -76,6 +82,8 @@ export interface CreateBriefInput {
  * Szablon **kopiujemy do wiersza** w chwili wystawienia. To jest sedno:
  * bez snapshotu brief sprzed pół roku pokazywałby dzisiejsze pytania obok
  * wczorajszych odpowiedzi — czyli kłamał o tym, na co klient odpowiadał.
+ * Od T-96 kopiowany zestaw pochodzi z szablonu pracowni; zasada się nie
+ * zmienia, zmienia się wyłącznie jego źródło.
  */
 export async function createBrief(input: CreateBriefInput): Promise<Brief> {
   const rows = unwrap(
@@ -85,7 +93,8 @@ export async function createBrief(input: CreateBriefInput): Promise<Brief> {
         workspace_id: input.workspaceId,
         client_id: input.clientId,
         project_id: input.projectId ?? null,
-        template: DEFAULT_BRIEF_TEMPLATE,
+        template:
+          input.template && input.template.length > 0 ? input.template : DEFAULT_BRIEF_TEMPLATE,
         expires_at: expiryOrNull(input.expiryDays),
       })
       .select('*'),
