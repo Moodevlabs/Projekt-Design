@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { contrastText } from '@/domain/brand/color';
 import {
   countAnswered,
   countQuestions,
@@ -111,7 +112,11 @@ export function BriefApp({ token }: { token: string }) {
   return (
     <div
       className="min-h-dvh px-4 py-8 sm:py-14"
-      style={{ ['--accent' as string]: brand.accentColor }}
+      // Jak w `App` — kolor marki plus kolor napisu na nim, dobrany kontrastem.
+      style={{
+        ['--accent' as string]: brand.accentColor,
+        ['--accent-ink' as string]: contrastText(brand.accentColor),
+      }}
     >
       <main className="mx-auto w-full max-w-2xl">
         <header className="mb-6 flex items-center justify-between gap-4">
@@ -146,7 +151,7 @@ export function BriefApp({ token }: { token: string }) {
               type="button"
               disabled={busy}
               onClick={() => void handleSubmit()}
-              className="bg-accent w-full rounded-lg px-4 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+              className="bg-accent w-full rounded-lg px-4 py-3 text-sm font-semibold text-[var(--accent-ink)] transition-opacity hover:opacity-90 disabled:opacity-50"
             >
               {busy ? 'Zapisywanie…' : 'Zapisz odpowiedzi'}
             </button>

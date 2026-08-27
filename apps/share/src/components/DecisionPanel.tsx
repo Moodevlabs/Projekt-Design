@@ -38,7 +38,7 @@ export function DecisionPanel({ onAccept, onReject, onComment, busy, error }: Pr
         <button
           type="button"
           onClick={() => setMode('accept')}
-          className="bg-accent w-full rounded-lg px-4 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+          className="bg-accent w-full rounded-lg px-4 py-3 text-sm font-semibold text-[var(--accent-ink)] transition-opacity hover:opacity-90"
         >
           Akceptuję ofertę
         </button>
@@ -91,7 +91,7 @@ export function DecisionPanel({ onAccept, onReject, onComment, busy, error }: Pr
           <button
             type="submit"
             disabled={busy}
-            className="bg-accent flex-1 rounded-lg px-4 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+            className="bg-accent flex-1 rounded-lg px-4 py-3 text-sm font-semibold text-[var(--accent-ink)] transition-opacity hover:opacity-90 disabled:opacity-50"
           >
             {busy ? 'Zapisywanie…' : 'Potwierdzam akceptację'}
           </button>
@@ -206,7 +206,7 @@ export function DecisionPanel({ onAccept, onReject, onComment, busy, error }: Pr
         <button
           type="submit"
           disabled={busy}
-          className="bg-accent flex-1 rounded-lg px-4 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+          className="bg-accent flex-1 rounded-lg px-4 py-3 text-sm font-semibold text-[var(--accent-ink)] transition-opacity hover:opacity-90 disabled:opacity-50"
         >
           {busy ? 'Wysyłanie…' : 'Wyślij uwagi'}
         </button>
