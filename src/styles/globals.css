@@ -426,6 +426,20 @@
   }
 
   /*
+   * Matowe szkło na CAŁYM zdjęciu w tle (2026-08-27).
+   *
+   * Te same wartości rozmycia co karta, tylko rzadsze wypełnienie: karta ma
+   * zasłaniać, tło ma prześwitywać. Rozmycie uśrednia jasność lokalnie, więc
+   * zdjęcie przestaje mieć miejsca wyraźnie ciemniejsze od reszty — i logotyp
+   * leżący bezpośrednio na nim nie potrzebuje własnej poświaty ani obwódki.
+   */
+  .auth-backdrop {
+    background: rgba(247, 244, 240, 0.42);
+    backdrop-filter: blur(24px) saturate(130%);
+    -webkit-backdrop-filter: blur(24px) saturate(130%);
+  }
+
+  /*
    * Bez `backdrop-filter` (starsze WebView2) szkło zamienia się w mleczną
    * biel. Nieprzezroczystą, nie półprzezroczystą: bez rozmycia zdjęcie
    * prześwitywałoby ostro przez kartę i zjadło czytelność formularza.
@@ -433,6 +447,15 @@
   @supports not (backdrop-filter: blur(1px)) {
     .auth-glass {
       background: rgba(255, 255, 255, 0.96);
+    }
+
+    /*
+     * Tło bez rozmycia zostaje ostre, więc samo krycie musi wyrównać jasność
+     * za logotypem — stąd skok z 0,42 na 0,66. Zdjęcie dalej widać, tylko
+     * słabiej: to jest ścieżka awaryjna, nie wygląd docelowy.
+     */
+    .auth-backdrop {
+      background: rgba(247, 244, 240, 0.66);
     }
   }
 }

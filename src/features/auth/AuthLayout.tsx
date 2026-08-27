@@ -33,16 +33,17 @@ export function AuthLayout({
   footer?: ReactNode;
 }) {
   return (
-    // `isolate` domyka warstwy w tym komponencie. Zdjęcie i welon leżą na
+    // `isolate` domyka warstwy w tym komponencie. Zdjęcie i szkło leżą na
     // ujemnym `z-index`, a taki element potrafi wpaść ZA tło elementu
     // nadrzędnego. Dziś nad tym ekranem nie ma nic z tłem, ale dołożenie
     // kiedykolwiek `bg-*` gdzieś wyżej wygasiłoby fotografię bez śladu
     // w tym pliku. Własny kontekst układania sprawia, że to niemożliwe.
     <div className="relative isolate flex min-h-full flex-col items-center justify-center overflow-hidden p-6">
       {/*
-        Zdjęcie jako osobna warstwa, nie `background` na kontenerze: dzięki
-        temu welon wyżej ma własne krycie i własny gradient, bez mieszania go
-        w tło razem z obrazem.
+        Zdjęcie jako osobna warstwa, nie `background` na kontenerze — bo szkło
+        wyżej działa przez `backdrop-filter`, a ten rozmywa to, co leży ZA
+        elementem. Tło kontenera nie jest „za" jego własnym dzieckiem, więc
+        przy `background` na kontenerze nie byłoby czego rozmywać.
       */}
       <img
         src={authBackground}
@@ -52,44 +53,16 @@ export function AuthLayout({
       />
 
       {/*
-        Welon nad zdjęciem — wrócił 2026-08-27, po tym jak logotyp zginął na
-        gołej fotografii. Nie jest ozdobą: logotyp i stopka leżą BEZPOŚREDNIO
-        na zdjęciu (poza szklaną kartą), więc ich kontrast zależy od tego, co
-        akurat wypadnie za nimi.
+        Matowe szkło na całym zdjęciu — jedna warstwa, równa na całej
+        powierzchni (2026-08-27). Wartości w `.auth-backdrop`, obok szkła
+        karty, żeby obie warstwy trzymały te same liczby.
 
-        ## Dlaczego nierówny, a nie jedno krycie na całość
-
-        Nowe zdjęcie (`auth-background2.jpg`) ma **ciemny kasetonowy sufit
-        w górnej części** i jasną drewnianą podłogę na dole. To najgorszy
-        możliwy układ dla tego ekranu, bo blok logo + karta + stopka jest
-        wyśrodkowany w pionie: logotyp — brązowy — ląduje mniej więcej tam,
-        gdzie sufit jest najciemniejszy, a stopka na jasnej podłodze, gdzie
-        pomocy nie potrzebuje wcale.
-
-        Stąd gradient robi dokładnie odwrotnie niż poprzedni (0,66 → 0,55 →
-        0,62, czyli prawie równy): **kryje tam, gdzie ciemno, i schodzi z drogi
-        tam, gdzie jasno.** Dół spada do 0,30 — o połowę mniej niż wcześniej —
-        więc wnętrza widać znacznie więcej mimo że logotyp jest bezpieczniejszy.
-
-        ## Dlaczego wolno tu zejść niżej niż kiedyś
-
-        Poprzednia wersja pilnowała progu 0,55 na CAŁEJ wysokości, bo napisy
-        nie miały żadnej własnej obrony. Teraz logotyp ma białą poświatę
-        (`drop-shadow` niżej), a stopka miała ją od początku — obie odklejają
-        litery od faktury zdjęcia i robią robotę, której wcześniej musiało
-        pilnować samo krycie.
-
-        ⚠️ Gdyby logotyp gdzieś jeszcze znikał: podnoś **górny** stop, nie całość.
-        Podniesienie dolnego nic mu nie da, a zabierze widok wnętrza.
+        Zastąpiło gradient o zmiennym kryciu i poświaty pod napisami. Rozmycie
+        robi tu robotę, której samo krycie zrobić nie umiało: zdjęcie ma ciemny
+        kasetonowy sufit tuż obok jasnych paneli świetlnych i to ten skok
+        jasności zjadał logotyp.
       */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10"
-        style={{
-          background:
-            'linear-gradient(180deg, rgba(247,244,240,0.60) 0%, rgba(247,244,240,0.52) 45%, rgba(247,244,240,0.34) 80%, rgba(247,244,240,0.30) 100%)',
-        }}
-      />
+      <div aria-hidden className="auth-backdrop pointer-events-none absolute inset-0 -z-10" />
 
       {/*
         Pełny lockup — jedyne miejsce, gdzie stoi w całości (08-REDESIGN D-2).
@@ -108,20 +81,9 @@ export function AuthLayout({
         Sterujemy SZEROKOŚCIĄ, nie wysokością: `w-full` pozwala logotypowi
         zwęzić się w wąskim oknie, zamiast wystawać poza ekran.
       */}
-      {/*
-        Biała poświata pod logotypem (2026-08-27) — ta sama sztuczka, co pod
-        stopką, tylko `drop-shadow` zamiast `text-shadow`, bo to SVG, a nie
-        tekst. `text-shadow` nie działa na kształty w krzywych.
-
-        Dzięki niej brąz nie zlewa się z ciemnym sufitem nawet tam, gdzie welon
-        jest najcieńszy, i to ona pozwoliła zejść z kryciem welonu poniżej
-        dawnego progu 0,55. Rozmycie 3 px: tyle wystarczy, żeby odkleić litery
-        od faktury zdjęcia, a mało, żeby nie zrobić wokół logotypu widocznej
-        białej obwódki.
-      */}
       <LogoLockup
         title={`${pl.app.name} — ${pl.app.tagline}`}
-        className="text-brown relative mb-10 w-full max-w-[460px] [filter:drop-shadow(0_1px_3px_rgba(255,255,255,0.75))]"
+        className="text-brown relative mb-10 w-full max-w-[460px]"
       />
 
       <div className="relative w-full max-w-[380px]">
@@ -132,19 +94,13 @@ export function AuthLayout({
         </div>
 
         {/*
-          Stopka leży bezpośrednio na FOTOGRAFII, nie na karcie — dlatego
-          `--ink`, a nie `--ink-soft` jak w reszcie aplikacji, i dlatego biała
-          poświata pod literami. `--ink-soft` dawał tu poniżej 3:1 nawet przy
-          grubym welonie.
-
-          Od 2026-08-27 welon na dole schodzi do 0,30, więc poświata jest tu
-          jeszcze ważniejsza niż była — nie usuwaj jej, dobierając krycie
-          welonu.
+          Stopka leży na szkle, nie na karcie — dlatego `--ink`, a nie
+          `--ink-soft` jak w reszcie aplikacji. Poświata pod literami zdjęta
+          razem z tą pod logotypem: rozmyte tło nie ma już ostrej faktury,
+          od której trzeba było odklejać napis.
         */}
         {footer ? (
-          <div className="text-ink relative mt-5 text-center text-sm [text-shadow:0_1px_2px_rgba(255,255,255,0.8)]">
-            {footer}
-          </div>
+          <div className="text-ink relative mt-5 text-center text-sm">{footer}</div>
         ) : null}
       </div>
     </div>
