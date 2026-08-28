@@ -1,15 +1,15 @@
-import { FileText } from 'lucide-react';
+import { FileText, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { EmptyState } from '@/components/shared';
 import { QuotesTable } from '@/features/quotes/list/QuotesTable';
-import { NewDocumentMenu } from '@/features/quotes/list/NewDocumentMenu';
 import { useQuotesList } from '@/data/queries/useQuotes';
 import { useNewQuoteForClient } from './useNewQuoteForClient';
 import type { Client } from '@/domain/client/schema';
 import { pl } from '@/i18n/pl';
 
 /**
- * Dokumenty jednego klienta (od T-100 wszystkie rodzaje, z kolumna „Rodzaj").
+ * Dokumentacja jednego klienta — teczki wycena + termin + etapy + cennik (T-111).
  *
  * Filtruje BAZA (`client_id`), a nie przeglądarka — ta sama zasada co na
  * liście wycen. Tabela jest ta sama co w rejestrze: dwa wyglądy tej samej
@@ -38,7 +38,10 @@ export function ClientQuotesTab({ client }: { client: Client }) {
   }
 
   const addButton = (
-    <NewDocumentMenu disabled={!ready} onSelect={(kind) => newQuote(client, kind)} />
+    <Button disabled={!ready} onClick={() => newQuote(client)}>
+      <Plus className="size-4" aria-hidden />
+      {pl.clients.newQuote}
+    </Button>
   );
 
   if (!quotes.isLoading && rows.length === 0) {
@@ -55,7 +58,7 @@ export function ClientQuotesTab({ client }: { client: Client }) {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">{addButton}</div>
-      <QuotesTable rows={rows} loading={quotes.isLoading} showKind />
+      <QuotesTable rows={rows} loading={quotes.isLoading} />
     </div>
   );
 }

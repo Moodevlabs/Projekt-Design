@@ -24,7 +24,6 @@ import {
   type QuoteStatus,
   type Room,
   type Section,
-  type DocKind,
 } from '@/domain/quote';
 import {
   newScheduleBody,
@@ -115,12 +114,6 @@ export interface EditorState {
   currency: string;
   number: string | null;
   status: QuoteStatus;
-  /**
-   * Rodzaj dokumentu (T-101). Decyduje, ktora powierzchnia jest „tym
-   * dokumentem": wycena ma cztery zakladki, pozostale rodzaje — jedna.
-   * Ustalany przy utworzeniu, store go tylko niesie.
-   */
-  docKind: DocKind;
   body: QuoteBody | null;
   /**
    * `updated_at` wiersza, na ktorym pracujemy. Autozapis wysyla go jako podstawe
@@ -234,6 +227,12 @@ export interface EditorState {
   removeSection: (sectionId: string) => void;
 
   addGroup: (sectionId: string) => void;
+  /**
+   * „Rozpisz na pomieszczenia" (T-51, przywrocone w T-111): zaklada w sekcji
+   * blok (grupe) dla kazdego pomieszczenia, ktorego jeszcze nie ma. Powtorne
+   * wywolanie nie dubluje blokow i nie brudzi dokumentu, gdy nie ma czego dodac.
+   */
+  addRoomBlocks: (sectionId: string) => void;
   renameGroup: (groupId: string, name: string) => void;
   removeGroup: (groupId: string) => void;
 
@@ -244,13 +243,9 @@ export interface EditorState {
   removeRoom: (roomId: string) => void;
 
   /*
-   * `addRoomBlocks` i `insertItemToRoomBlocks` USUNIĘTE 2026-08-27 (poprawka 7).
-   *
-   * Pierwsza zakładała bloki dla wszystkich pomieszczeń naraz („Rozpisz na
-   * pomieszczenia"), druga wstawiała jedną usługę do każdego z nich. Obie
-   * budowały strukturę dokumentu za autora i obie stały w pasku akcji jako
-   * przyciski, po których nie dało się przewidzieć, co się stanie. Bloki
-   * pomieszczeń dalej istnieją — zakłada się je pojedynczo, świadomie.
+   * `insertItemToRoomBlocks` („Do wszystkich pomieszczeń") USUNIĘTE 2026-08-27
+   * (poprawka 7). `addRoomBlocks` („Rozpisz na pomieszczenia") WRÓCIŁO w T-111
+   * na życzenie właściciela — deklaracja wyżej, przy `addGroup`.
    */
 
   // --- rabaty (T-36): osobny byt, nie pozycja wyceny ---
@@ -325,7 +320,6 @@ const INITIAL = {
   currency: 'PLN',
   number: null,
   status: 'draft' as QuoteStatus,
-  docKind: 'offer' as DocKind,
   body: null,
   schedule: null as ScheduleBody | null,
   documents: null as QuoteDocuments | null,
@@ -405,7 +399,6 @@ export const useEditorStore = create<EditorState>()(
         state.currency = safeCurrency(quote.currency);
         state.number = quote.number;
         state.status = quote.status;
-        state.docKind = quote.docKind;
         state.body = quote.body;
         state.schedule = quote.schedule;
         state.documents = quote.documents;
@@ -664,6 +657,29 @@ export const useEditorStore = create<EditorState>()(
         if (!state.body) return;
         state.body.sections = state.body.sections.filter((s) => s.id !== sectionId);
         state.saveState = 'dirty';
+      }),
+
+    addRoomBlocks: (sectionId) =>
+      set((state) => {
+        if (!state.body) return;
+        const section = findSection(state.body, sectionId);
+        if (!section) return;
+
+        const juzSa = new Set(
+          section.groups.map((group) => group.roomId).filter((id): id is string => id !== null),
+        );
+
+        let dodane = 0;
+        for (const room of state.body.rooms) {
+          if (juzSa.has(room.id)) continue;
+          // Nazwa bloku bierze sie z pomieszczenia przy renderowaniu, ale
+          // zapisujemy ja tez tutaj — zestaw zapisany do biblioteki albo wycena
+          // otwarta po usunieciu pomieszczenia dalej maja czytelny naglowek.
+          section.groups.push(newGroup({ name: room.label, roomId: room.id }));
+          dodane += 1;
+        }
+
+        if (dodane > 0) state.saveState = 'dirty';
       }),
 
     addGroup: (sectionId) =>

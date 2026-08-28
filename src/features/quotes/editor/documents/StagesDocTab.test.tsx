@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { newItem, newQuoteBody, newSection } from '@/domain/quote';
 import { pl } from '@/i18n/pl';
+import { newStagesDoc } from '@/domain/documents';
 
 const useWorkspace = vi.hoisted(() => vi.fn());
 const toastSuccess = vi.hoisted(() => vi.fn());
@@ -29,11 +30,15 @@ vi.mock('sonner', () => ({
 const { StagesDocTab } = await import('./StagesDocTab');
 const { useEditorStore } = await import('../editor.store');
 
-function zaladuj(items = [newItem({ name: 'Pozycja' })]) {
+/**
+ * `seed = true` zaklada dokument z WBUDOWANYM szablonem (19 etapow) — od T-111
+ * zakladka sama go nie wypelnia, a testy tresci dalej potrzebuja listy.
+ */
+function zaladuj(items = [newItem({ name: 'Pozycja' })], seed = true) {
   useEditorStore.setState({
     body: newQuoteBody({ sections: [newSection({ title: 'Sekcja', items })] }),
     schedule: null,
-    documents: null,
+    documents: seed ? { stages: newStagesDoc({}, null), priceList: null } : null,
     quoteId: 'q1',
     lastSeenUpdatedAt: '2026-08-01T10:00:00Z',
     saveState: 'idle',
@@ -51,15 +56,17 @@ beforeEach(() => {
 });
 
 describe('StagesDocTab — zakładanie dokumentu', () => {
-  it('pierwsze wejście w trybie edycji zakłada 19 etapów z szablonu', () => {
-    zaladuj();
+  it('pierwsze wejście w trybie edycji zakłada PUSTY dokument — etapy z biblioteki (T-111)', () => {
+    zaladuj(undefined, false);
     render(<StagesDocTab editing />);
-    expect(dokument()?.entries).toHaveLength(19);
+    expect(dokument()).not.toBeNull();
+    expect(dokument()?.entries).toHaveLength(0);
+    expect(screen.getByText(pl.editor.stagesDocEmptyEntriesEditing)).toBeInTheDocument();
   });
 
   it('NIE zakłada dokumentu w podglądzie', () => {
     // Obejrzenie oferty nie ma prawa dopisac jej dokumentu ani zabrudzic zapisu.
-    zaladuj();
+    zaladuj(undefined, false);
     render(<StagesDocTab editing={false} />);
 
     expect(dokument()).toBeNull();

@@ -3,8 +3,7 @@ import { ArrowLeft, Eye, MoreHorizontal, Pencil, Share2 } from 'lucide-react';
 import { InlineText } from './InlineText';
 import { SaveIndicator } from './SaveIndicator';
 import { StatusMark } from '@/components/shared';
-import { showsVersion, versionLabel, type DocKind } from '@/domain/quote';
-import { hasQuoteSurface } from '@/domain/documents';
+import { showsVersion, versionLabel } from '@/domain/quote';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -22,9 +21,6 @@ import { cn } from '@/lib/utils';
 export function EditorTopbar({
   backTo,
   backLabel,
-  docKind,
-  title,
-  onTitleChange,
   number,
   status,
   mode,
@@ -65,11 +61,6 @@ export function EditorTopbar({
    */
   backTo: string;
   backLabel: string;
-  /** Rodzaj dokumentu (T-101) — decyduje, ktore akcje maja sens. */
-  docKind: DocKind;
-  /** Tytul dokumentu — edytowany tu tylko, gdy nie ma naglowka wyceny. */
-  title: string;
-  onTitleChange: (next: string) => void;
   number: string | null;
   status: QuoteStatus;
   mode: EditorMode;
@@ -114,8 +105,6 @@ export function EditorTopbar({
   /** Historia wersji (T-22). `null` = wycena ma jedna wersje, nie ma czego porownywac. */
   onVersionHistory: (() => void) | null;
 }) {
-  const isOffer = hasQuoteSurface(docKind);
-
   return (
     <div className="surface-band relative z-10 flex h-[68px] shrink-0 items-center gap-4 px-7">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
@@ -138,17 +127,6 @@ export function EditorTopbar({
         {showsVersion(version) ? (
           <span className="text-ink-soft text-sm whitespace-nowrap">{versionLabel(version)}</span>
         ) : null}
-        {/* Termin, etapy i cennik nie maja naglowka z tytulem na arkuszu —
-            tytul (to, co widac w rejestrze) edytuje sie tutaj. */}
-        {isOffer ? null : (
-          <InlineText
-            value={title}
-            onCommit={onTitleChange}
-            placeholder={pl.editor.titlePlaceholder}
-            ariaLabel={pl.quotes.quoteTitle}
-            className="hover:bg-surface focus:bg-surface w-56 rounded-[var(--radius-control)] px-2 py-1 text-sm"
-          />
-        )}
         <StatusMark status={status} />
         <SaveIndicator
           state={saveState}
@@ -164,14 +142,10 @@ export function EditorTopbar({
           droga wyslania oferty do inwestora — schowanie jej pod trzema
           kropkami obok „Nadpisz szablon" mowilby, ze to czynnosc rzadka.
         */}
-        {/* Strona klienta czyta wycene — dokumentu innego rodzaju nie ma jak
-            tam pokazac, wiec przycisk znika, a nie prowadzi do pustej strony. */}
-        {isOffer ? (
-          <Button variant="outline" size="sm" onClick={onShare}>
-            <Share2 className="size-4" aria-hidden />
-            {pl.share.action}
-          </Button>
-        ) : null}
+        <Button variant="outline" size="sm" onClick={onShare}>
+          <Share2 className="size-4" aria-hidden />
+          {pl.share.action}
+        </Button>
 
         <div className="border-hair-strong bg-surface flex items-center rounded-[var(--radius-control)] border p-0.5">
           {(['edit', 'preview'] as const).map((value) => {
@@ -228,70 +202,49 @@ export function EditorTopbar({
                 <DropdownMenuSeparator />
               </>
             ) : null}
-            {/*
-              Eksport pokazuje tylko to, czym dokument JEST (T-101). Menu
-              „eksportuj termin" w dokumencie, ktory jest cennikiem, dawaloby
-              pusty PDF i pytanie „gdzie sie podzialy moje dane".
-            */}
-            {isOffer ? (
-              <DropdownMenuItem onSelect={onExportPdf} disabled={exportingPdf}>
-                {pl.editor.exportPdf}
+            <DropdownMenuItem onSelect={onExportPdf} disabled={exportingPdf}>
+              {pl.editor.exportPdf}
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={onExportSchedule} disabled={exportingSchedule}>
+              {pl.pdf.exportSchedule}
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={onExportStages} disabled={exportingStages}>
+              {pl.pdf.exportStages}
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={onExportPriceList} disabled={exportingPriceList}>
+              {pl.pdf.exportPriceList}
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={onExportPackage}>{pl.pdf.exportPackage}</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            {/* „Nowa wersja" kontynuuje TĘ SAMĄ linię (koncepcja §4 reguła 1);
+                „Duplikuj" z listy zakłada nową. Archiwalnej nie wersjonujemy —
+                linia poszła dalej i powstałyby dwie „najnowsze". */}
+            {onNewVersion ? (
+              <DropdownMenuItem
+                disabled={creatingVersion}
+                title={pl.quotes.newVersionHint}
+                onSelect={onNewVersion}
+              >
+                {pl.quotes.newVersion}
               </DropdownMenuItem>
             ) : null}
-            {docKind === 'offer' || docKind === 'schedule' ? (
-              <DropdownMenuItem onSelect={onExportSchedule} disabled={exportingSchedule}>
-                {pl.pdf.exportSchedule}
-              </DropdownMenuItem>
+            {/* Znika przy jednej wersji: pozycja menu, ktora zawsze prowadzi
+                do „nie ma czego porownywac", jest gorsza niz jej brak. */}
+            {onVersionHistory ? (
+              <DropdownMenuItem onSelect={onVersionHistory}>{pl.versions.open}</DropdownMenuItem>
             ) : null}
-            {docKind === 'offer' || docKind === 'stages' ? (
-              <DropdownMenuItem onSelect={onExportStages} disabled={exportingStages}>
-                {pl.pdf.exportStages}
+            <DropdownMenuItem onSelect={onOpenLibrary}>{pl.library.title}</DropdownMenuItem>
+            <DropdownMenuItem onSelect={onSaveAllToLibrary}>
+              {pl.editor.saveAllToLibrary}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={onSaveAsTemplate}>
+              {pl.templates.saveAsTemplate}
+            </DropdownMenuItem>
+            {canOverwriteTemplate ? (
+              <DropdownMenuItem onSelect={onOverwriteTemplate}>
+                {pl.templates.overwrite}
               </DropdownMenuItem>
-            ) : null}
-            {docKind === 'offer' || docKind === 'price_list' ? (
-              <DropdownMenuItem onSelect={onExportPriceList} disabled={exportingPriceList}>
-                {pl.pdf.exportPriceList}
-              </DropdownMenuItem>
-            ) : null}
-            {isOffer ? (
-              <>
-                <DropdownMenuItem onSelect={onExportPackage}>
-                  {pl.pdf.exportPackage}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                {/* „Nowa wersja" kontynuuje TĘ SAMĄ linię (koncepcja §4 reguła 1);
-                    „Duplikuj" z listy zakłada nową. Archiwalnej nie wersjonujemy —
-                    linia poszła dalej i powstałyby dwie „najnowsze". */}
-                {onNewVersion ? (
-                  <DropdownMenuItem
-                    disabled={creatingVersion}
-                    title={pl.quotes.newVersionHint}
-                    onSelect={onNewVersion}
-                  >
-                    {pl.quotes.newVersion}
-                  </DropdownMenuItem>
-                ) : null}
-                {/* Znika przy jednej wersji: pozycja menu, ktora zawsze prowadzi
-                    do „nie ma czego porownywac", jest gorsza niz jej brak. */}
-                {onVersionHistory ? (
-                  <DropdownMenuItem onSelect={onVersionHistory}>
-                    {pl.versions.open}
-                  </DropdownMenuItem>
-                ) : null}
-                <DropdownMenuItem onSelect={onOpenLibrary}>{pl.library.title}</DropdownMenuItem>
-                <DropdownMenuItem onSelect={onSaveAllToLibrary}>
-                  {pl.editor.saveAllToLibrary}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onSelect={onSaveAsTemplate}>
-                  {pl.templates.saveAsTemplate}
-                </DropdownMenuItem>
-                {canOverwriteTemplate ? (
-                  <DropdownMenuItem onSelect={onOverwriteTemplate}>
-                    {pl.templates.overwrite}
-                  </DropdownMenuItem>
-                ) : null}
-              </>
             ) : null}
           </DropdownMenuContent>
         </DropdownMenu>

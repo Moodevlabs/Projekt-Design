@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useCreateQuote } from '@/data/queries/useQuotes';
 import { useWorkspace } from '@/data/queries/useWorkspace';
-import { quoteBodyFromSettings, type DocKind } from '@/domain/quote';
-import { defaultTitleForKind } from '@/domain/documents';
+import { quoteBodyFromSettings } from '@/domain/quote';
 import { clientSnapshot, type Client } from '@/domain/client/schema';
 import { routes } from '@/app/routes';
 import { pl } from '@/i18n/pl';
@@ -27,14 +26,14 @@ export function useNewQuoteForClient() {
   const settings = workspace.data?.settings;
 
   const newQuote = useCallback(
-    (client: Client, docKind: DocKind = 'offer') => {
+    (client: Client) => {
       if (!settings) return;
 
-      const body = quoteBodyFromSettings(settings, { title: defaultTitleForKind(docKind) });
+      const body = quoteBodyFromSettings(settings);
       body.client = clientSnapshot(client);
 
       void create
-        .mutateAsync({ body, clientId: client.id, docKind })
+        .mutateAsync({ body, clientId: client.id })
         .then((quote) => navigate(routes.quote(quote.id)))
         .catch((reason: unknown) => {
           toast.error(reason instanceof Error ? reason.message : pl.quotes.loadError);

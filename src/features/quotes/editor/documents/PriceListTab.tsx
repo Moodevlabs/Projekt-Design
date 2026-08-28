@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
 import { InlineText } from '../components/InlineText';
@@ -11,11 +11,9 @@ import { DocLibraryPanel } from './DocLibraryPanel';
 import { useSaveDocToLibrary } from './useSaveDocToLibrary';
 import { AddToQuoteBridge } from './AddToQuoteBridge';
 import { useEditorStore } from '../editor.store';
-import { useWorkspace } from '@/data/queries/useWorkspace';
 import { groupPriceListItems, type PriceListItem } from '@/domain/documents';
 import { formatMoneyRange } from '@/domain/money';
 import { pl } from '@/i18n/pl';
-import { cn } from '@/lib/utils';
 
 /**
  * Zakładka „Dokumenty → Cennik usług dodatkowych" (F6.2).
@@ -27,17 +25,7 @@ import { cn } from '@/lib/utils';
 /** Stala referencja — patrz `ScheduleTab`. */
 const EMPTY_TEMPLATE: never[] = [];
 
-export function PriceListTab({
-  editing,
-  startEmpty = false,
-  aside,
-}: {
-  editing: boolean;
-  /** Dokument standalone (T-101) startuje pusty i buduje sie z biblioteki. */
-  startEmpty?: boolean;
-  /** Prawa kolumna (klient, archiwum) — tylko dla dokumentu standalone. */
-  aside?: ReactNode;
-}) {
+export function PriceListTab({ editing }: { editing: boolean }) {
   const { doc } = useEditorStore(
     useShallow((state) => ({ doc: state.documents?.priceList ?? null })),
   );
@@ -50,26 +38,20 @@ export function PriceListTab({
 
   const [libraryOpen, setLibraryOpen] = useState(false);
   const saveToLibrary = useSaveDocToLibrary('price_list');
-  const workspaceTemplate = useWorkspace().data?.settings.priceListTemplate ?? null;
-  const template = startEmpty ? EMPTY_TEMPLATE : workspaceTemplate;
 
   useEffect(() => {
     // Jak przy etapach: zakładamy przy pierwszym wejściu i tylko w edycji.
-    if (editing) ensureDoc(template);
-  }, [editing, ensureDoc, template]);
+    // PUSTY (T-111) — pozycje wstawia sie z biblioteki.
+    if (editing) ensureDoc(EMPTY_TEMPLATE);
+  }, [editing, ensureDoc]);
 
   if (!doc) {
     return <p className="text-ink-soft p-7 text-sm">{pl.editor.priceListEmpty}</p>;
   }
 
   return (
-    <div
-      className={cn(
-        'mx-auto w-full px-7 pt-6 pb-14',
-        aside ? 'grid max-w-[1320px] items-start gap-7 lg:grid-cols-[1fr_336px]' : 'max-w-[900px]',
-      )}
-    >
-      <div className="quote-doc quote-sheet min-w-0 px-10 py-9">
+    <div className="mx-auto w-full max-w-[900px] px-7 pt-6 pb-14">
+      <div className="quote-doc quote-sheet px-10 py-9">
         <h2 className="text-[22px] font-normal tracking-[-0.01em] uppercase">
           {pl.editor.priceListTitle}
         </h2>
@@ -86,6 +68,12 @@ export function PriceListTab({
               className="w-16 text-[14px] font-normal normal-case"
             />
           </label>
+        ) : null}
+
+        {doc.items.length === 0 ? (
+          <p className="mt-5 text-[12.5px] text-[var(--doc-ink-soft)]">
+            {editing ? pl.editor.priceListEmptyItemsEditing : pl.editor.priceListEmptyItems}
+          </p>
         ) : null}
 
         {groupPriceListItems(doc.items).map((group) => (
@@ -145,8 +133,6 @@ export function PriceListTab({
           </div>
         ) : null}
       </div>
-
-      {aside ? <div className="flex flex-col gap-4 lg:sticky lg:top-6">{aside}</div> : null}
     </div>
   );
 }

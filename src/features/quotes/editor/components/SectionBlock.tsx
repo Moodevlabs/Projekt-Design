@@ -2,7 +2,7 @@ import { memo, useState } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Plus, Trash2 } from 'lucide-react';
+import { LayoutGrid, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { InlineText } from './InlineText';
 import { ItemRow } from './ItemRow';
@@ -47,6 +47,8 @@ export interface SectionBlockProps {
   onRename: (sectionId: string, title: string) => void;
   onRemove: (sectionId: string) => void;
   onAddGroup: (sectionId: string) => void;
+  /** Rozpisz na pomieszczenia — blok na kazde pomieszczenie wyceny (T-111). */
+  onAddRoomBlocks: (sectionId: string) => void;
   onRenameGroup: (groupId: string, name: string) => void;
   onRemoveGroup: (groupId: string) => void;
   onToggleGroup: (groupId: string) => void;
@@ -73,6 +75,7 @@ export const SectionBlock = memo(function SectionBlock({
   onRename,
   onRemove,
   onAddGroup,
+  onAddRoomBlocks,
   onRenameGroup,
   onRemoveGroup,
   onToggleGroup,
@@ -209,10 +212,9 @@ export const SectionBlock = memo(function SectionBlock({
             więc pasek akcji zadawał pytanie „którym z dwóch sposobów chcesz
             zrobić tę samą rzecz".
 
-            Zniknęło też „Rozpisz na pomieszczenia": zakładało bloki dla
-            każdego pomieszczenia naraz, czyli robiło strukturę dokumentu
-            za autora — i nikt nie umiał powiedzieć, co się właściwie stanie
-            po kliknięciu.
+            „Rozpisz na pomieszczenia" WROCILO (T-111, decyzja wlasciciela):
+            przy ofertach per pomieszczenie zakladanie blokow recznie bylo
+            realna kara. Komunikat po kliknieciu mowi, ile blokow przybylo.
           */}
           <Button
             type="button"
@@ -225,6 +227,9 @@ export const SectionBlock = memo(function SectionBlock({
             {pl.editor.scopeOpen}
           </Button>
           <AddLink onClick={() => onAddItem(section.id, null)}>{pl.editor.addItemManual}</AddLink>
+          <AddLink icon={LayoutGrid} onClick={() => onAddRoomBlocks(section.id)}>
+            {pl.editor.addRoomBlocks}
+          </AddLink>
         </div>
       ) : null}
 

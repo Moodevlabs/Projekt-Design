@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState } from 'react';
 import { Plus } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
 import { StageRow } from './StageRow';
@@ -11,7 +11,6 @@ import { NumberField } from '../components/NumberField';
 import { useEditorStore } from '../editor.store';
 import { useStageAutoSync } from './useStageAutoSync';
 import { useRoomTypes } from '@/data/queries/useRoomTypes';
-import { useWorkspace } from '@/data/queries/useWorkspace';
 import { calcSchedule, calcStageDays } from '@/domain/schedule';
 import type { Room } from '@/domain/quote';
 import { pl } from '@/i18n/pl';
@@ -27,21 +26,7 @@ const EMPTY_TEMPLATE: never[] = [];
  * mieszka w tym samym dokumencie, a nie w osobnym bycie. Zmiana pomieszczeń
  * w zakładce „Wycena" natychmiast zmienia tutejszy wynik.
  */
-export function ScheduleTab({
-  editing,
-  startEmpty = false,
-  aside,
-}: {
-  editing: boolean;
-  /**
-   * Dokument standalone „Termin" (T-101) startuje BEZ etapow i buduje sie
-   * z biblioteki — jak wycena. Wewnatrz wyceny zostaje pre-wypelnienie
-   * z szablonu workspace'u.
-   */
-  startEmpty?: boolean;
-  /** Karty pod wynikiem w prawej kolumnie (klient, pomieszczenia, archiwum). */
-  aside?: ReactNode;
-}) {
+export function ScheduleTab({ editing }: { editing: boolean }) {
   const { schedule, rooms } = useEditorStore(
     useShallow((state) => ({
       schedule: state.schedule,
@@ -63,15 +48,13 @@ export function ScheduleTab({
   const [libraryOpen, setLibraryOpen] = useState(false);
   const saveToLibrary = useSaveDocToLibrary('schedule');
   const roomTypes = useRoomTypes();
-  const workspaceTemplate = useWorkspace().data?.settings.scheduleTemplate ?? null;
-  const template = startEmpty ? EMPTY_TEMPLATE : workspaceTemplate;
-
   useEffect(() => {
     // Harmonogram zakładamy dopiero przy pierwszym wejściu na zakładkę —
-    // większość ofert obejdzie się bez terminu, a pusta kolumna w bazie jest
-    // uczciwszą informacją niż domyślne jedenaście etapów w każdej wycenie.
-    if (editing) ensureSchedule(template);
-  }, [editing, ensureSchedule, template]);
+    // i PUSTY (T-111): etapy dodaje się z biblioteki, jak usługi do wyceny.
+    // Pre-wypełnianie szablonem dawało listę, której nikt nie czytał, bo
+    // wyglądała na wynik, a nie na propozycję.
+    if (editing) ensureSchedule(EMPTY_TEMPLATE);
+  }, [editing, ensureSchedule]);
 
   if (!schedule) {
     return <p className="text-ink-soft p-7 text-sm">{pl.editor.scheduleEmpty}</p>;
@@ -156,6 +139,12 @@ export function ScheduleTab({
           <span className="w-[22px] shrink-0" aria-hidden />
         </div>
 
+        {schedule.stages.length === 0 ? (
+          <p className="mt-2 text-[12.5px] text-[var(--doc-ink-soft)]">
+            {editing ? pl.editor.scheduleEmptyStagesEditing : pl.editor.scheduleEmptyStages}
+          </p>
+        ) : null}
+
         <ul className="flex flex-col border-t border-[var(--doc-ink)] pt-1">
           {schedule.stages.map((stage) => (
             <StageRow
@@ -231,9 +220,8 @@ export function ScheduleTab({
         ) : null}
       </div>
 
-      <div className="flex flex-col gap-4 lg:sticky lg:top-6">
+      <div className="lg:sticky lg:top-6">
         <ScheduleResultCard result={result} />
-        {aside}
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState } from 'react';
 import { Check, Plus, Trash2, X } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
 import { InlineText } from '../components/InlineText';
@@ -10,7 +10,6 @@ import { DocLibraryPanel } from './DocLibraryPanel';
 import { useSaveDocToLibrary } from './useSaveDocToLibrary';
 import { useEditorStore } from '../editor.store';
 import { useStageEntryAutoSync } from './useStageEntryAutoSync';
-import { useWorkspace } from '@/data/queries/useWorkspace';
 import { groupStageEntries, type StageEntry } from '@/domain/documents';
 import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
@@ -26,17 +25,7 @@ import { cn } from '@/lib/utils';
 /** Stala referencja — patrz `ScheduleTab`. */
 const EMPTY_TEMPLATE: never[] = [];
 
-export function StagesDocTab({
-  editing,
-  startEmpty = false,
-  aside,
-}: {
-  editing: boolean;
-  /** Dokument standalone (T-101) startuje pusty i buduje sie z biblioteki. */
-  startEmpty?: boolean;
-  /** Prawa kolumna (klient, archiwum) — tylko dla dokumentu standalone. */
-  aside?: ReactNode;
-}) {
+export function StagesDocTab({ editing }: { editing: boolean }) {
   const { doc } = useEditorStore(useShallow((state) => ({ doc: state.documents?.stages ?? null })));
 
   const ensureStagesDoc = useEditorStore((state) => state.ensureStagesDoc);
@@ -47,8 +36,6 @@ export function StagesDocTab({
 
   const [libraryOpen, setLibraryOpen] = useState(false);
   const saveToLibrary = useSaveDocToLibrary('stages');
-  const workspaceTemplate = useWorkspace().data?.settings.stagesTemplate ?? null;
-  const template = startEmpty ? EMPTY_TEMPLATE : workspaceTemplate;
 
   useStageEntryAutoSync(editing);
 
@@ -56,8 +43,9 @@ export function StagesDocTab({
     // Zakładamy dopiero przy pierwszym wejściu i tylko w edycji — samo
     // obejrzenie oferty nie ma prawa dopisać jej dokumentu ani zabrudzić
     // autozapisu (ta sama zasada co przy harmonogramie).
-    if (editing) ensureStagesDoc(template);
-  }, [editing, ensureStagesDoc, template]);
+    // PUSTY (T-111) — etapy wstawia sie z biblioteki ("Dodaj wszystkie" daje caly szablon).
+    if (editing) ensureStagesDoc(EMPTY_TEMPLATE);
+  }, [editing, ensureStagesDoc]);
 
   if (!doc) {
     return <p className="text-ink-soft p-7 text-sm">{pl.editor.stagesDocEmpty}</p>;
@@ -66,13 +54,8 @@ export function StagesDocTab({
   const objete = doc.entries.filter((entry) => entry.included).length;
 
   return (
-    <div
-      className={cn(
-        'mx-auto w-full px-7 pt-6 pb-14',
-        aside ? 'grid max-w-[1320px] items-start gap-7 lg:grid-cols-[1fr_336px]' : 'max-w-[900px]',
-      )}
-    >
-      <div className="quote-doc quote-sheet min-w-0 px-10 py-9">
+    <div className="mx-auto w-full max-w-[900px] px-7 pt-6 pb-14">
+      <div className="quote-doc quote-sheet px-10 py-9">
         <h2 className="text-[22px] font-normal tracking-[-0.01em] uppercase">
           {pl.editor.stagesDocTitle}
         </h2>
@@ -91,6 +74,12 @@ export function StagesDocTab({
               className="w-16 text-[14px] font-normal normal-case"
             />
           </label>
+        ) : null}
+
+        {doc.entries.length === 0 ? (
+          <p className="mt-5 text-[12.5px] text-[var(--doc-ink-soft)]">
+            {editing ? pl.editor.stagesDocEmptyEntriesEditing : pl.editor.stagesDocEmptyEntries}
+          </p>
         ) : null}
 
         {groupStageEntries(doc.entries).map((group) => (
@@ -153,8 +142,6 @@ export function StagesDocTab({
           </div>
         ) : null}
       </div>
-
-      {aside ? <div className="flex flex-col gap-4 lg:sticky lg:top-6">{aside}</div> : null}
     </div>
   );
 }

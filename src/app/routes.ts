@@ -4,16 +4,14 @@ export const routes = {
   /** Kalendarz terminów (T-98). */
   calendar: '/kalendarz',
   /**
-   * Rejestr dokumentow (T-100): wyceny, terminy, etapy wspolpracy, cenniki.
-   * Do Fazy 5 `/wyceny` — stary adres przekierowuje.
+   * Rejestr dokumentacji (T-100/T-111): teczki wycena + termin + etapy +
+   * cennik. Do Fazy 5 `/wyceny` — stary adres przekierowuje.
    */
   quotes: '/dokumenty',
   quotesLegacy: '/wyceny',
   /** Edytor dokumentu. Adres zostal przy `/wyceny/:id` — wiersz w bazie to dalej `quotes`. */
   quote: (id: string) => `/wyceny/${id}`,
   quoteNew: '/wyceny/nowa',
-  /** Nowy dokument innego rodzaju niz wycena: `?rodzaj=schedule|stages|price_list`. */
-  documentNew: (kind: string) => (kind === 'offer' ? '/wyceny/nowa' : `/wyceny/nowa?rodzaj=${kind}`),
   clients: '/klienci',
   client: (id: string) => `/klienci/${id}`,
   project: (clientId: string, projectId: string) => `/klienci/${clientId}/projekty/${projectId}`,

@@ -6,7 +6,6 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { newItem, newQuoteBody, newSection } from '@/domain/quote';
 import { defaultWorkspaceSettings } from '@/domain/brand/schema';
 import type { Quote } from '@/data/repos/quotes.repo';
-import { pl } from '@/i18n/pl';
 
 /**
  * Test dymny edytora: **czy strona w ogóle się otwiera**.
@@ -268,40 +267,5 @@ describe('QuoteEditorPage — otwieranie', () => {
     // Najczęstszy przypadek: świeża wycena.
     renderEditor();
     expect(screen.getByTestId('item-row')).toBeInTheDocument();
-  });
-});
-
-describe('QuoteEditorPage — dokument innego rodzaju niz wycena (T-101)', () => {
-  it('etapy wspolpracy otwieraja sie bez zakladek, od razu na swojej powierzchni', async () => {
-    useQuote.mockReturnValue({
-      data: { ...quote(), docKind: 'stages' as const, title: 'Etapy współpracy' },
-      isLoading: false,
-      isError: false,
-      error: null,
-      refetch: vi.fn(),
-    });
-    renderEditor();
-
-    // Dokument JEST etapami — nie ma czego przelaczac.
-    expect(screen.queryByRole('tab', { name: pl.editor.tabQuote })).not.toBeInTheDocument();
-    expect(await screen.findByText(pl.editor.stagesDocTitle)).toBeInTheDocument();
-    // Arkusz wyceny (pozycje, sumy) nie istnieje dla etapow.
-    expect(screen.queryByTestId('item-row')).not.toBeInTheDocument();
-    // Udostepnianie czyta wycene — przycisk znika, zamiast prowadzic do pustej strony.
-    expect(screen.queryByRole('button', { name: pl.share.action })).not.toBeInTheDocument();
-  });
-
-  it('standalone termin ma panel pomieszczen, bo liczy z nich dni', async () => {
-    useQuote.mockReturnValue({
-      data: { ...quote(), docKind: 'schedule' as const, title: 'Termin' },
-      isLoading: false,
-      isError: false,
-      error: null,
-      refetch: vi.fn(),
-    });
-    renderEditor();
-
-    expect(await screen.findByText(pl.editor.scheduleTitle)).toBeInTheDocument();
-    expect(screen.getAllByText(pl.editor.rooms).length).toBeGreaterThan(0);
   });
 });

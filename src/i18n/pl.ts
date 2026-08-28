@@ -64,39 +64,8 @@ export const pl = {
   },
   quotes: {
     title: 'Dokumenty',
-    new: 'Nowa wycena',
-    /** Zakladki rejestru „Dokumenty" (T-100) — jedna na rodzaj dokumentu. */
-    kindTabs: {
-      offer: 'Wyceny',
-      schedule: 'Terminy',
-      stages: 'Etapy współpracy',
-      price_list: 'Cenniki dodatkowe',
-    },
-    kindTabsLabel: 'Rodzaj dokumentu',
-    newOfKind: {
-      offer: 'Nowa wycena',
-      schedule: 'Nowy termin',
-      stages: 'Nowe etapy współpracy',
-      price_list: 'Nowy cennik dodatkowy',
-    },
-    newDocument: 'Nowy dokument',
-    kindColumn: 'Rodzaj',
-    emptyKindTitle: {
-      offer: 'Nie utworzono jeszcze żadnej wyceny',
-      schedule: 'Nie utworzono jeszcze żadnego terminu',
-      stages: 'Nie utworzono jeszcze etapów współpracy',
-      price_list: 'Nie utworzono jeszcze cennika dodatkowego',
-    },
-    emptyKindDescription: {
-      offer:
-        'Przygotuj pierwszą ofertę z pozycjami do wyboru TAK/NIE i przekaż ją inwestorowi w formie dokumentu PDF.',
-      schedule:
-        'Policz szacowany termin z etapów i pomieszczeń — dokument PDF pokaże inwestorowi optymalne i najpóźniejsze zakończenie.',
-      stages:
-        'Opisz inwestorowi, co wchodzi w zakres współpracy, a co nie — zanim sam się tego domyśli.',
-      price_list:
-        'Zbierz usługi dodatkowe z widełkami cen i terminami — cennik jest ofertą na rozmowę.',
-    },
+    /** Jedna teczka = wycena + termin + etapy + cennik (T-111). */
+    new: 'Nowa dokumentacja',
     newDialogHint: 'Wskaż klienta i projekt — dane inwestora zostaną uzupełnione automatycznie.',
     // Start z szablonu przy zakładaniu wyceny (T-70).
     startFrom: 'Zacznij od',
@@ -109,9 +78,9 @@ export const pl = {
     quoteTitle: 'Tytuł',
     total: 'Suma',
     updated: 'Zaktualizowano',
-    emptyTitle: 'Nie utworzono jeszcze żadnej wyceny',
+    emptyTitle: 'Nie utworzono jeszcze żadnej dokumentacji',
     emptyDescription:
-      'Przygotuj pierwszą ofertę z pozycjami do wyboru TAK/NIE i przekaż ją inwestorowi w formie dokumentu PDF.',
+      'Dokumentacja to wycena z pozycjami TAK/NIE oraz termin, etapy współpracy i cennik dodatkowy w zakładkach — komplet dla inwestora w PDF i pod jednym linkiem.',
     exportPdf: 'Eksportuj PDF',
     noResultsTitle: 'Brak wyników',
     noResultsDescription: 'Zmień filtr albo wyczyść wyszukiwanie.',
@@ -382,7 +351,7 @@ export const pl = {
     searchPlaceholder: 'Szukaj po nazwie, e-mailu, telefonie lub mieście',
     clearSearch: 'Wyczyść wyszukiwanie',
     rowActions: 'Akcje klienta',
-    newQuote: 'Nowa wycena',
+    newQuote: 'Nowa dokumentacja',
 
     emptyTitle: 'Kartoteka klientów jest pusta',
     emptyDescription:
@@ -396,9 +365,9 @@ export const pl = {
 
     tabQuotes: 'Dokumenty',
     tabNotes: 'Notatki',
-    quotesEmptyTitle: 'Brak dokumentów dla tego klienta',
+    quotesEmptyTitle: 'Brak dokumentacji dla tego klienta',
     quotesEmptyDescription:
-      'Utwórz pierwszą wycenę, termin, etapy współpracy albo cennik — dane inwestora zostaną uzupełnione automatycznie.',
+      'Utwórz pierwszą dokumentację — dane inwestora zostaną uzupełnione automatycznie.',
     notesEmpty: 'Brak notatek.',
     notesSaved: 'Zapisano notatkę',
 
@@ -468,7 +437,7 @@ export const pl = {
     noValue: '—',
 
     rowActions: 'Akcje projektu',
-    newQuote: 'Nowa wycena',
+    newQuote: 'Nowa dokumentacja',
     open: 'Otwórz projekt',
 
     created: 'Dodano projekt',
@@ -486,9 +455,9 @@ export const pl = {
 
     tabQuotes: 'Dokumenty',
     tabNotes: 'Notatki',
-    quotesEmptyTitle: 'Brak dokumentów w tym projekcie',
+    quotesEmptyTitle: 'Brak dokumentacji w tym projekcie',
     quotesEmptyDescription:
-      'Utwórz pierwszą wycenę, termin, etapy współpracy albo cennik — dane inwestora zostaną uzupełnione automatycznie.',
+      'Utwórz pierwszą dokumentację — dane inwestora zostaną uzupełnione automatycznie.',
 
     // Przenoszenie wyceny między teczkami.
     moveTitle: 'Przenieś do projektu',
@@ -835,6 +804,12 @@ Z wyrazami szacunku`,
         ? 'Usługi według pomieszczeń policzą się dla 1 pomieszczenia wyceny.'
         : `Usługi według pomieszczeń policzą się dla ${count} pomieszczeń wyceny.`,
     addItemManual: 'Pozycja ręcznie',
+    /** Bloki per pomieszczenie w sekcji (T-51, przywrocone w T-111). */
+    addRoomBlocks: 'Rozpisz na pomieszczenia',
+    addRoomBlocksDone: (count: number) =>
+      count === 1 ? 'Dodano blok 1 pomieszczenia' : `Dodano bloki ${count} pomieszczeń`,
+    addRoomBlocksNothing: 'Wszystkie pomieszczenia mają już swoje bloki.',
+    addRoomBlocksNoRooms: 'Najpierw dodaj pomieszczenia w panelu obok.',
     // Nagłówek kolumn nad pozycjami w trybie edycji.
     itemsColName: 'Usługa',
     itemsColQty: 'Ilość',
@@ -926,6 +901,9 @@ Z wyrazami szacunku`,
     stagesDocIntro: (objete: number, wszystkie: number) =>
       `Zakres oferty obejmuje ${objete} z ${wszystkie} etapów. Pozostałe pozostają na liście, aby zakres wyłączony z oferty był jednoznaczny.`,
     stagesDocEmpty: 'Dokument zostanie utworzony po przejściu w tryb edycji.',
+    stagesDocEmptyEntries: 'Dokument nie ma jeszcze etapów.',
+    stagesDocEmptyEntriesEditing:
+      'Dokument nie ma jeszcze etapów. Dodaj je z biblioteki — „Dodaj wszystkie” wstawia cały szablon, a potem odznaczasz to, czego nie robisz.',
     stagesDocValidDays: 'Ważny (dni)',
     stagesDocFootnote: 'Przypis',
     stagesDocFootnotePlaceholder: 'Uwagi do zakresu, zastrzeżenia…',
@@ -943,6 +921,9 @@ Z wyrazami szacunku`,
     priceListIntro:
       'Usługi wykraczające poza zakres niniejszej oferty. Ceny podano w widełkach — ostateczna kwota ustalana jest po określeniu szczegółowego zakresu.',
     priceListEmpty: 'Cennik zostanie utworzony po przejściu w tryb edycji.',
+    priceListEmptyItems: 'Cennik nie ma jeszcze pozycji.',
+    priceListEmptyItemsEditing:
+      'Cennik nie ma jeszcze pozycji. Dodaj je z biblioteki albo wpisz własne.',
     priceListValidDays: 'Ważny (dni)',
     priceListFootnote: 'Przypis',
     priceListFootnotePlaceholder: 'Uwagi do cennika, zastrzeżenia…',
@@ -1009,6 +990,9 @@ Z wyrazami szacunku`,
     scheduleOwnerLegend:
       'ARCH. — czas pracy pracowni, INW. — czas po stronie inwestora (decyzje, akceptacje, dobór materiałów). Rozdzielenie tych wartości jest istotne: to czas inwestora najczęściej wydłuża termin realizacji.',
     scheduleEmpty: 'Harmonogram zostanie utworzony po przejściu w tryb edycji.',
+    scheduleEmptyStages: 'Termin nie ma jeszcze etapów.',
+    scheduleEmptyStagesEditing:
+      'Termin nie ma jeszcze etapów. Dodaj je z biblioteki — „Dodaj wszystkie” wstawia cały szablon jednym kliknięciem — albo wpisz własny.',
     /**
      * Etapy szablonu startuja ODZNACZONE (2026-08-27) — bez tej podpowiedzi
      * uzytkownik dodaje pomieszczenia i widzi 0 dni, nie wiedzac dlaczego.

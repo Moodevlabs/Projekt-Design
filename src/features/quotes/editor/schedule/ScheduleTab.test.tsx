@@ -71,7 +71,7 @@ beforeEach(() => {
 });
 
 describe('ScheduleTab — zakładanie harmonogramu', () => {
-  it('pierwsze wejście w trybie edycji zakłada etapy z szablonu', () => {
+  it('pierwsze wejście w trybie edycji zakłada PUSTY harmonogram — etapy z biblioteki (T-111)', () => {
     useEditorStore.setState({
       body: newQuoteBody({}),
       schedule: null,
@@ -82,7 +82,9 @@ describe('ScheduleTab — zakładanie harmonogramu', () => {
     });
 
     render(<ScheduleTab editing />);
-    expect(harmonogram()?.stages.length).toBeGreaterThanOrEqual(11);
+    expect(harmonogram()).not.toBeNull();
+    expect(harmonogram()?.stages).toHaveLength(0);
+    expect(screen.getByText(pl.editor.scheduleEmptyStagesEditing)).toBeInTheDocument();
   });
 
   it('NIE zakłada harmonogramu w podglądzie', () => {

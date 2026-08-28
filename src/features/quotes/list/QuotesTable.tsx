@@ -18,35 +18,20 @@ import { formatRelativeDay } from '@/lib/dates';
 import { pl } from '@/i18n/pl';
 
 /** Liczba kolumn — trzyma `colSpan` szkieletu w zgodzie z nagłówkiem. */
-const COLUMNS = 10;
+const COLUMNS = 9;
 
-export interface QuotesTableProps {
-  rows: QuoteSummary[];
-  loading: boolean;
-  /**
-   * Kolumna „Rodzaj" (T-100). Rejestr ma zakladki per rodzaj, wiec jej nie
-   * potrzebuje; listy klienta i projektu mieszaja rodzaje i musza je nazwac.
-   */
-  showKind?: boolean;
-  /** Kolumna „Suma" — tylko wycena ma co sumowac. */
-  showTotal?: boolean;
-}
-
-export function QuotesTable({ rows, loading, showKind = false, showTotal = true }: QuotesTableProps) {
+export function QuotesTable({ rows, loading }: { rows: QuoteSummary[]; loading: boolean }) {
   return (
     <div className="card-surface overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
             <TableHead className="w-40">{pl.quotes.number}</TableHead>
-            {showKind ? <TableHead className="w-40">{pl.quotes.kindColumn}</TableHead> : null}
             <TableHead>{pl.quotes.quoteTitle}</TableHead>
             <TableHead className="w-48">{pl.quotes.client}</TableHead>
             <TableHead className="w-36">{pl.quotes.cityColumn}</TableHead>
             <TableHead className="w-32">{pl.quotes.statusColumn}</TableHead>
-            {showTotal ? (
-              <TableHead className="w-36 text-right">{pl.quotes.total}</TableHead>
-            ) : null}
+            <TableHead className="w-36 text-right">{pl.quotes.total}</TableHead>
             <TableHead className="w-36">{pl.quotes.updated}</TableHead>
             <TableHead className="w-10" />
             <TableHead className="w-12" />
@@ -70,11 +55,6 @@ export function QuotesTable({ rows, loading, showKind = false, showTotal = true 
                     </span>
                   ) : null}
                 </TableCell>
-                {showKind ? (
-                  <TableCell className="text-ink-soft text-sm">
-                    {pl.quotes.docKind[quote.docKind]}
-                  </TableCell>
-                ) : null}
                 <TableCell className="max-w-0 truncate">
                   <Link to={routes.quote(quote.id)} className="underline-offset-4 hover:underline">
                     {quote.title}
@@ -102,16 +82,9 @@ export function QuotesTable({ rows, loading, showKind = false, showTotal = true 
                 <TableCell>
                   <StatusMark status={quote.status} />
                 </TableCell>
-                {showTotal ? (
-                  <TableCell className="text-right">
-                    {/* Termin, etapy i cennik nie maja sumy — kreska zamiast „0,00 zl". */}
-                    {quote.docKind === 'offer' ? (
-                      <Money cents={quote.totalNetCents} currency={quote.currency} />
-                    ) : (
-                      <span className="text-ink-soft">—</span>
-                    )}
-                  </TableCell>
-                ) : null}
+                <TableCell className="text-right">
+                  <Money cents={quote.totalNetCents} currency={quote.currency} />
+                </TableCell>
                 <TableCell className="text-ink-soft text-sm">
                   {formatRelativeDay(quote.updatedAt)}
                 </TableCell>

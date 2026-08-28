@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { newQuoteBody, newSection } from '@/domain/quote';
 import { pl } from '@/i18n/pl';
+import { newPriceListDoc } from '@/domain/documents';
 
 const useWorkspace = vi.hoisted(() => vi.fn());
 const toastSuccess = vi.hoisted(() => vi.fn());
@@ -24,11 +25,15 @@ vi.mock('sonner', () => ({
 const { PriceListTab } = await import('./PriceListTab');
 const { useEditorStore } = await import('../editor.store');
 
-function zaladuj(body = newQuoteBody({ sections: [newSection({ title: 'Etap wizualny' })] })) {
+/** `seed = true` zaklada cennik z wbudowanym szablonem — patrz StagesDocTab.test. */
+function zaladuj(
+  body = newQuoteBody({ sections: [newSection({ title: 'Etap wizualny' })] }),
+  seed = true,
+) {
   useEditorStore.setState({
     body,
     schedule: null,
-    documents: null,
+    documents: seed ? { stages: null, priceList: newPriceListDoc({}, null) } : null,
     quoteId: 'q1',
     lastSeenUpdatedAt: '2026-08-01T10:00:00Z',
     saveState: 'idle',
@@ -50,14 +55,16 @@ beforeEach(() => {
 });
 
 describe('PriceListTab — zakładanie cennika', () => {
-  it('pierwsze wejście w trybie edycji zakłada cennik z szablonu', () => {
-    zaladuj();
+  it('pierwsze wejście w trybie edycji zakłada PUSTY cennik — pozycje z biblioteki (T-111)', () => {
+    zaladuj(undefined, false);
     render(<PriceListTab editing />);
-    expect(cennik()?.items.length).toBeGreaterThanOrEqual(10);
+    expect(cennik()).not.toBeNull();
+    expect(cennik()?.items).toHaveLength(0);
+    expect(screen.getByText(pl.editor.priceListEmptyItemsEditing)).toBeInTheDocument();
   });
 
   it('NIE zakłada cennika w podglądzie', () => {
-    zaladuj();
+    zaladuj(undefined, false);
     render(<PriceListTab editing={false} />);
 
     expect(cennik()).toBeNull();

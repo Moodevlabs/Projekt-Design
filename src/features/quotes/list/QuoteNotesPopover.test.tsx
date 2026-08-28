@@ -64,9 +64,7 @@ describe('QuoteNotesPopover — zapis notatki', () => {
 describe('QuoteNotesPopover — widoczność notatki na liście', () => {
   it('wiersz z notatką wygląda inaczej niż bez', () => {
     // Bez tego rejestr wyglada identycznie z notatkami i bez nich.
-    const { unmount } = render(
-      <QuoteNotesPopover quoteId="q1" title="A" notes="jest" />,
-    );
+    const { unmount } = render(<QuoteNotesPopover quoteId="q1" title="A" notes="jest" />);
     const zNotatka = screen.getByLabelText(pl.quotes.notesFor('A')).getAttribute('title');
     unmount();
 

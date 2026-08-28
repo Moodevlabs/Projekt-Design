@@ -7,23 +7,25 @@ Wersje zgodne z [SemVer](https://semver.org/lang/pl/).
 
 ### Zmienione
 
-**„Dokumenty” zamiast „Wyceny” — wycena jest jednym z czterech rodzajów
-dokumentu.** Pozycja nawigacji nazywa się teraz „Dokumenty” i prowadzi do
-rejestru z zakładkami Wyceny · Terminy · Etapy współpracy · Cenniki dodatkowe.
-Do tego wydania termin, etapy i cennik istniały wyłącznie jako zakładki
-wewnątrz wyceny; teraz każdy z nich może być **samodzielnym dokumentem**
-z własnym numerem (`WYC/`, `TER/`, `ETP/`, `CEN/` — jeden wspólny licznik,
-wzorce w Ustawieniach), klientem, projektem i archiwum PDF. Dokument
-samodzielny otwiera się od razu na swojej treści, bez zakładek wyceny i bez
-sum; termin zachowuje panel pomieszczeń, bo z nich liczy dni. Wycena nadal
-może nieść pozostałe dokumenty jako pakiet — zakładki edytora są teraz
-płaskie: Wycena · Termin · Etapy współpracy · Cennik dodatkowy. Stary adres
-rejestru (`/wyceny`) przekierowuje. Rodzaj dokumentu ustala się przy
-utworzeniu i nie zmienia z listy — do tej pory był tylko etykietą rejestru.
+**„Dokumenty” zamiast „Wyceny”, przycisk „Nowa dokumentacja”.** Pozycja
+nawigacji nazywa się teraz „Dokumenty” i prowadzi do rejestru dokumentacji.
+Jedna dokumentacja to teczka z czterema zakładkami — Wycena · Termin · Etapy
+współpracy · Cennik dodatkowy — z jednym numerem, klientem, wersją, linkiem
+dla inwestora i pakietem PDF. Zakładki edytora są płaskie (koniec drugiego
+poziomu „Dokumenty → Etapy | Cennik”). Stary adres rejestru (`/wyceny`)
+przekierowuje.
 
-**Zakładka „Dokumenty” u klienta i w projekcie to teraz wszystkie rodzaje
-dokumentów** (z kolumną „Rodzaj” i przyciskiem „Nowy dokument ▾”), a archiwum
-plików PDF przekazanych inwestorowi nazywa się **„Dokumentacja”**.
+**Termin, etapy i cennik startują puste i buduje się je z biblioteki.**
+Do tej pory każda zakładka wypełniała się szablonem z ustawień — listą, której
+nikt nie czytał, bo wyglądała na wynik, a nie na propozycję. Teraz działa
+dokładnie jak wycena: „Dodaj z biblioteki” otwiera panel z wyszukiwarką
+i „Dodaj wszystkie”; „Etap ręcznie” / „Pozycja ręcznie” dodaje pusty wiersz;
+ikona zakładki przy wierszu zapisuje go do biblioteki. Etap z biblioteki wchodzi
+zaznaczony / objęty zakresem.
+
+**„Rozpisz na pomieszczenia” wróciło** do sekcji wyceny: zakłada blok dla
+każdego pomieszczenia z panelu, którego jeszcze nie ma. Powtórne kliknięcie
+niczego nie dubluje.
 
 **Biblioteka ma sekcje dla każdego rodzaju dokumentu.** Obok usług doszły
 zakładki Termin · Etapy współpracy · Cennik dodatkowy. Przy pierwszym otwarciu
@@ -58,10 +60,13 @@ zostaje tylko karta formularza.
 
 ### Baza danych
 
-Migracje `0042` (rodzaj dokumentu jako typ, funkcja `next_document_number`)
-i `0043` (tabela `library_doc_entries` z RLS i funkcją `seed_doc_library`).
-Stare wartości `schedule_only` / `price_list_only` mapowane na `schedule` /
-`price_list`.
+Migracje `0042`–`0044`. `0043` dodaje tabelę `library_doc_entries` (biblioteka
+etapów terminu, etapów współpracy i pozycji cennika) z RLS i funkcją
+`seed_doc_library`. `0042` i `0044` to ślad po jednodniowej próbie
+rozdzielenia terminu / etapów / cennika na osobne dokumenty — cofniętej tego
+samego dnia: `0044` sprowadza wszystkie wiersze do jednego rodzaju (teczka),
+a treść założonych w międzyczasie „samodzielnych” dokumentów zostaje w swojej
+zakładce.
 
 ## [1.1.6] – 2026-08-28
 
@@ -334,7 +339,7 @@ sekcji lub grupy docelowej, szukajką, pigułkami grup i zakładką „Zestawy�
 Panel zostaje otwarty, aż klikniesz „Gotowe”; jedno ostrzeżenie nad listą mówi,
 że usługi liczone za pomieszczenie potrzebują pomieszczeń, i pozwala je dodać.
 W trybie edycji pola mają widoczną kreskowaną ramkę, a nad pozycjami stoi
-nagłówek kolumn *Usługa · Ilość · Cena*.
+nagłówek kolumn _Usługa · Ilość · Cena_.
 
 **Biblioteka → Usługi jako zwijane wiersze (T-72).** Zamiast siatki rozłożonych
 kart: jeden wiersz na usługę (nazwa · grupa · sposób wyceny · stawka ·

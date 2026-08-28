@@ -27,14 +27,13 @@ export const QuoteStatusSchema = z.enum([
 export type QuoteStatus = z.infer<typeof QuoteStatusSchema>;
 
 /**
- * Rodzaj dokumentu (T-99): wycena, termin, etapy wspolpracy, cennik dodatkowy.
+ * Rodzaj dokumentu — kolumna `quotes.doc_kind`.
  *
- * Do Fazy 5 byla to reczna etykieta rejestru (F7.1: `offer | schedule_only |
- * price_list_only`), ktorej nic nie czytalo. Teraz rodzaj **decyduje**, co
- * edytor pokazuje i ktory PDF wychodzi — wiersz w `quotes` jest dokumentem,
- * a `doc_kind` mowi, ktorym. Wycena (`offer`) dalej moze niesc termin, etapy
- * i cennik jako pakiet; pozostale rodzaje sa tym jednym dokumentem i niczym
- * wiecej. Stare wartosci mapuje `documentKindFromLegacy` w `domain/documents`.
+ * Historia: etykieta rejestru (F7.1), potem przez jeden dzien (T-99…T-101)
+ * prawdziwy typ z osobnymi dokumentami „termin / etapy / cennik". Cofniete
+ * w T-111: kazdy wiersz jest TECZKA (wycena + termin + etapy + cennik),
+ * a migracja `0044` sprowadza wszystkie wiersze do `offer`. Enum zostaje,
+ * bo kolumna i jej check w bazie zostaja; aplikacja niczego nim nie steruje.
  */
 export const DocKindSchema = z.enum(['offer', 'schedule', 'stages', 'price_list']);
 export type DocKind = z.infer<typeof DocKindSchema>;

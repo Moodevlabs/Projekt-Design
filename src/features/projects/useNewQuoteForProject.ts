@@ -4,8 +4,7 @@ import { toast } from 'sonner';
 import { useCreateQuote, useQuotesList } from '@/data/queries/useQuotes';
 import { useWorkspace } from '@/data/queries/useWorkspace';
 import { getQuote } from '@/data/repos/quotes.repo';
-import { newRoom, quoteBodyFromSettings, type DocKind, type Room } from '@/domain/quote';
-import { defaultTitleForKind, usesRooms } from '@/domain/documents';
+import { newRoom, quoteBodyFromSettings, type Room } from '@/domain/quote';
 import { clientSnapshot, type Client } from '@/domain/client/schema';
 import type { Project } from '@/domain/project/schema';
 import { routes } from '@/app/routes';
@@ -40,12 +39,12 @@ export function useNewQuoteForProject(project: Project | null, client: Client | 
   const [working, setWorking] = useState(false);
 
   const createWith = useCallback(
-    async (rooms: Room[], docKind: DocKind = 'offer') => {
+    async (rooms: Room[]) => {
       if (!settings || !project || !client) return;
       setWorking(true);
 
       try {
-        const body = quoteBodyFromSettings(settings, { title: defaultTitleForKind(docKind) });
+        const body = quoteBodyFromSettings(settings);
         body.client = clientSnapshot(client);
         // Adres inwestycji jest przy projekcie, a miasto w dokumencie —
         // teczka wygrywa z kartoteką, bo wycena dotyczy TEJ inwestycji.
@@ -56,7 +55,6 @@ export function useNewQuoteForProject(project: Project | null, client: Client | 
           body,
           clientId: client.id,
           projectId: project.id,
-          docKind,
         });
         void navigate(routes.quote(quote.id));
       } catch (error) {
@@ -76,17 +74,12 @@ export function useNewQuoteForProject(project: Project | null, client: Client | 
     project ? { projectId: project.id, status: 'all' } : { projectId: '__none__' },
   );
 
-  const [pendingKind, setPendingKind] = useState<DocKind>('offer');
-
-  const newQuote = useCallback(async (docKind: DocKind = 'offer') => {
+  const newQuote = useCallback(async () => {
     if (!settings || !project || !client) return;
-    setPendingKind(docKind);
 
-    // Etapy i cennik nie licza sie z pomieszczen — nie ma o co pytac (T-100).
-    // Pomieszczenia podpowiadamy z ostatniego dokumentu, ktory je ma.
-    const latest = (projectQuotes.data ?? []).find((row) => usesRooms(row.docKind));
-    if (!latest || !usesRooms(docKind)) {
-      await createWith([], docKind);
+    const latest = (projectQuotes.data ?? [])[0];
+    if (!latest) {
+      await createWith([]);
       return;
     }
 
@@ -97,14 +90,14 @@ export function useNewQuoteForProject(project: Project | null, client: Client | 
       const source = await getQuote(latest.id);
       const rooms = source.body?.rooms ?? [];
       if (rooms.length === 0) {
-        await createWith([], docKind);
+        await createWith([]);
         return;
       }
       setPendingRooms({ quoteTitle: source.title, rooms });
     } catch {
       // Nie udało się zajrzeć do poprzedniej wyceny — to nie powód, żeby nie
       // dało się założyć nowej. Zakładamy pustą i nie zawracamy głowy.
-      await createWith([], docKind);
+      await createWith([]);
     } finally {
       setWorking(false);
     }
@@ -114,8 +107,8 @@ export function useNewQuoteForProject(project: Project | null, client: Client | 
     newQuote,
     /** `null` = nie ma o co pytać. Obiekt = pokaż dialog kopiowania pomieszczeń. */
     pendingRooms,
-    confirmCopy: () => void createWith(pendingRooms?.rooms ?? [], pendingKind),
-    skipCopy: () => void createWith([], pendingKind),
+    confirmCopy: () => void createWith(pendingRooms?.rooms ?? []),
+    skipCopy: () => void createWith([]),
     cancelCopy: () => setPendingRooms(null),
     ready: Boolean(settings && project && client),
     working: working || create.isPending,

@@ -98,6 +98,7 @@ function Harness() {
     <SectionBlock
       section={section}
       editing={false}
+      onAddRoomBlocks={() => undefined}
       currency="PLN"
       vatRate={23}
       pricesInclude="net"

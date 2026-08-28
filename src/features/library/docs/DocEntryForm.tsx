@@ -347,7 +347,9 @@ function PriceListFields({
           onChange={(event) =>
             onPatch({
               addedDays:
-                event.target.value === '' ? null : Math.max(0, Math.trunc(Number(event.target.value))),
+                event.target.value === ''
+                  ? null
+                  : Math.max(0, Math.trunc(Number(event.target.value))),
             })
           }
         />
