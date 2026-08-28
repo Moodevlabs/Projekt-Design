@@ -190,7 +190,11 @@ export function ScheduleTab({
           kind="schedule"
           open={libraryOpen}
           onOpenChange={setLibraryOpen}
-          onInsert={(payload) => addStage(payload)}
+          // Etap wybrany z biblioteki wchodzi ZAZNACZONY. Szablon trzyma
+          // `enabled: false` (lista-propozycja, 2026-08-27), ale swiadome
+          // dodanie jednego etapu to juz decyzja — wylaczony wygladalby jak
+          // „dodalem i nic sie nie stalo".
+          onInsert={(payload) => addStage({ ...payload, enabled: true })}
         />
 
         {/*
@@ -207,6 +211,22 @@ export function ScheduleTab({
           // powiedziec to wprost, zanim ktos uzna termin za zanizony.
           <p className="mt-6 text-[12.5px] text-[var(--doc-ink-soft)]">
             {pl.editor.scheduleNoRooms}
+          </p>
+        ) : null}
+
+        {/*
+          Dwie pulapki, ktore wygladaja jak „pomieszczenia nie dzialaja":
+          wszystkie etapy odznaczone (szablon startuje tak celowo) albo zadny
+          zaznaczony etap nie zalezy od pomieszczen. Mowimy, ktora to.
+        */}
+        {schedule.stages.length > 0 && !schedule.stages.some((stage) => stage.enabled) ? (
+          <p role="status" className="mt-4 text-[12.5px] text-[var(--doc-terracotta)]">
+            {pl.editor.scheduleNoneEnabled}
+          </p>
+        ) : rooms.length > 0 &&
+          !schedule.stages.some((stage) => stage.enabled && stage.roomScope !== 'none') ? (
+          <p role="status" className="mt-4 text-[12.5px] text-[var(--doc-ink-soft)]">
+            {pl.editor.scheduleNoRoomStages}
           </p>
         ) : null}
       </div>

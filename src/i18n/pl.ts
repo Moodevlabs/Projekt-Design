@@ -1000,6 +1000,14 @@ Z wyrazami szacunku`,
     scheduleOwnerLegend:
       'ARCH. — czas pracy pracowni, INW. — czas po stronie inwestora (decyzje, akceptacje, dobór materiałów). Rozdzielenie tych wartości jest istotne: to czas inwestora najczęściej wydłuża termin realizacji.',
     scheduleEmpty: 'Harmonogram zostanie utworzony po przejściu w tryb edycji.',
+    /**
+     * Etapy szablonu startuja ODZNACZONE (2026-08-27) — bez tej podpowiedzi
+     * uzytkownik dodaje pomieszczenia i widzi 0 dni, nie wiedzac dlaczego.
+     */
+    scheduleNoneEnabled:
+      'Żaden etap nie jest zaznaczony — termin liczy wyłącznie zaznaczone etapy. Zaznacz pole przy etapach, które wchodzą w zakres.',
+    scheduleNoRoomStages:
+      'Żaden zaznaczony etap nie zależy od pomieszczeń — dodane pomieszczenia nie zmienią wyniku. Zakres ustawia się w wierszu etapu („bez pomieszczeń” → wszystkie / wizualne / techniczne).',
     scheduleNoRooms:
       'Wycena nie zawiera pomieszczeń — etapy zależne od pomieszczeń uwzględniają wyłącznie dni bazowe.',
     scheduleResult: 'Wynik',
@@ -1656,7 +1664,8 @@ Z wyrazami szacunku`,
       summary: {
         days: 'dni',
         perRoom: 'za pomieszczenie',
-        overrides: (n: number) => `${n} ${n === 1 ? 'własna stawka' : n < 5 ? 'własne stawki' : 'własnych stawek'}`,
+        overrides: (n: number) =>
+          `${n} ${n === 1 ? 'własna stawka' : n < 5 ? 'własne stawki' : 'własnych stawek'}`,
       },
       editLabel: (name: string) => `Edytuj: ${name}`,
       deleteLabel: (name: string) => `Usuń: ${name}`,

@@ -106,6 +106,10 @@ export function DocLibraryPanel<K extends DocLibraryKind>({
         <div className="min-h-0 flex-1 overflow-y-auto px-6 py-3">
           {library.isLoading ? (
             <p className="text-ink-soft px-3 py-8 text-center text-sm">{pl.common.loading}</p>
+          ) : library.isError ? (
+            <p className="px-3 py-8 text-center text-sm text-[var(--doc-terracotta)]">
+              {pl.library.docs.loadError}
+            </p>
           ) : visible.length === 0 ? (
             <p className="text-ink-soft px-3 py-8 text-center text-sm">{t.empty}</p>
           ) : (

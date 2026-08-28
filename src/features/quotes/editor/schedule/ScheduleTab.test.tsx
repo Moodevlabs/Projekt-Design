@@ -15,9 +15,15 @@ vi.mock('@/data/queries/useWorkspace', () => ({ useWorkspace, useWorkspaceId: ()
 
 // Biblioteka dokumentow (T-103): panel „Dodaj z biblioteki" i zapis wiersza
 // pytaja o wpisy — test komponentu izoluje sie od TanStack Query.
+const docEntries = vi.hoisted(() => ({ current: [] as unknown[] }));
 vi.mock('@/data/queries/useLibraryDocs', () => ({
   useDocLibrary: () => ({ data: [], isLoading: false, isError: false }),
-  useDocLibraryEntries: () => ({ entries: [], data: [], isLoading: false, isError: false }),
+  useDocLibraryEntries: () => ({
+    entries: docEntries.current,
+    data: [],
+    isLoading: false,
+    isError: false,
+  }),
   useCreateDocLibraryEntry: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 vi.mock('sonner', () => ({
@@ -25,6 +31,7 @@ vi.mock('sonner', () => ({
 }));
 
 const { ScheduleTab } = await import('./ScheduleTab');
+const { calcSchedule } = await import('@/domain/schedule');
 const { useEditorStore } = await import('../editor.store');
 
 const TYPY: RoomType[] = [
@@ -280,5 +287,53 @@ describe('ScheduleTab — etap zbiorczy „Usługi dodatkowe" (T-64)', () => {
     );
 
     expect(harmonogram()?.stages.some((stage) => stage.kind === 'extras')).toBe(false);
+  });
+});
+
+describe('ScheduleTab — etapy z biblioteki i podpowiedzi (T-108)', () => {
+  it('etap wstawiony z biblioteki jest ZAZNACZONY, mimo ze szablon trzyma enabled:false', async () => {
+    const user = userEvent.setup();
+    docEntries.current = [
+      {
+        id: 'e1',
+        workspaceId: 'ws',
+        kind: 'schedule',
+        name: 'Wizualizacje 3D',
+        payload: {
+          name: 'Wizualizacje 3D',
+          owner: 'provider',
+          baseDays: 0,
+          perRoomDays: {},
+          defaultPerRoomDays: 2,
+          roomScope: 'visual',
+          enabled: false,
+          linkedItemTags: [],
+        },
+        sortOrder: 0,
+        isSample: true,
+      },
+    ];
+    zaladuj([pokoj('Kuchnia'), pokoj('Salon', 2)]);
+    useEditorStore.getState().patchSchedule({ stages: [] });
+    render(<ScheduleTab editing />);
+
+    await user.click(screen.getByRole('button', { name: pl.editor.docLibrary.open }));
+    await user.click(
+      screen.getByRole('button', { name: pl.editor.docLibrary.addLabel('Wizualizacje 3D') }),
+    );
+
+    const etap = harmonogram()?.stages[0];
+    expect(etap?.enabled).toBe(true);
+    // 3 pomieszczenia (kuchnia + salon x2) x 2 dni = 6 dni — pomieszczenia DZIALAJA.
+    expect(calcSchedule(harmonogram()!, useEditorStore.getState().body!.rooms).providerDays).toBe(
+      6,
+    );
+  });
+
+  it('gdy wszystkie etapy sa odznaczone, mowi to wprost', () => {
+    docEntries.current = [];
+    zaladuj([pokoj('Kuchnia')]);
+    render(<ScheduleTab editing />);
+    expect(screen.getByText(pl.editor.scheduleNoneEnabled)).toBeInTheDocument();
   });
 });

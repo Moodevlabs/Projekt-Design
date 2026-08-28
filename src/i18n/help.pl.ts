@@ -364,7 +364,7 @@ export const helpPl = {
           kind: 'steps',
           items: [
             'Blok „Założenia” obejmuje datę rozpoczęcia prac, liczbę dni roboczych w tygodniu po stronie pracowni i inwestora oraz sposób traktowania dni ustawowo wolnych. Na podstawie tych czterech wartości wyznaczane są daty w podsumowaniu.',
-            'Etapy dodaje się poleceniem „Dodaj z biblioteki” (Biblioteka → Termin) albo „Etap ręcznie”. Każdy etap ma dni bazowe („cały projekt”), a etap zależny od pomieszczeń — dodatkowo dni doliczane za każde pomieszczenie.',
+            'Etapy dodaje się poleceniem „Dodaj z biblioteki” (Biblioteka → Termin) albo „Etap ręcznie”. Termin liczy WYŁĄCZNIE etapy zaznaczone polem po lewej stronie wiersza: szablon w wycenie startuje z etapami odznaczonymi (lista jest propozycją zakresu), etap dodany z biblioteki wchodzi zaznaczony. Każdy etap ma dni bazowe („cały projekt”), a etap zależny od pomieszczeń — dodatkowo dni doliczane za każde pomieszczenie.',
             'Dni etapu = dni bazowe + Σ (stawka typu pomieszczenia × ilość) dla pomieszczeń objętych zakresem etapu. Zakres „Wizualne” liczy pomieszczenia z zaznaczoną częścią wizualną, „Techniczne” — z częścią techniczną, „Wszystkie” — każde; „Nie zależy od pomieszczeń” liczy same dni bazowe. Pomieszczenie bez typu oraz typ bez własnej stawki biorą stawkę domyślną etapu; puste pole w macierzy oznacza „domyślna”, a zero — „ten typ nie dokłada dni”. Pozycja „salon ×2” liczy się dwukrotnie — tak samo jak w cenniku parametrycznym.',
             'Lista pomieszczeń jest wspólna z wyceną (pomieszczenia leżą w dokumencie, nie w projekcie). Zmiana w panelu „Pomieszczenia” od razu zmienia wynik terminu; termin samodzielny ma własny panel pomieszczeń w prawej kolumnie, a nowy termin w projekcie proponuje skopiowanie pomieszczeń z ostatniego dokumentu, który je miał.',
             'Włączona pozycja wyceny opatrzona etykietą (przykładowo „wizualizacje”) włącza odpowiadający jej etap. Mechanizm wyłącznie włącza etapy, nigdy ich nie wyłącza, a komunikat umożliwia cofnięcie zmiany.',
@@ -593,7 +593,7 @@ export const helpPl = {
             },
             {
               q: 'Termin nie zmienia się po dodaniu pomieszczenia.',
-              a: 'Dni za pomieszczenie liczą wyłącznie etapy z zakresem innym niż „Nie zależy od pomieszczeń” — i tylko dla pomieszczeń objętych tym zakresem (część wizualna / techniczna). Należy sprawdzić zakres etapu, zaznaczenia przy pomieszczeniu oraz stawkę: puste pole w macierzy oznacza stawkę domyślną etapu, która może wynosić 0.',
+              a: 'Najczęstsza przyczyna: etapy są odznaczone — termin liczy tylko etapy z zaznaczonym polem po lewej stronie wiersza (szablon startuje odznaczony). Dalej: dni za pomieszczenie liczą wyłącznie etapy z zakresem innym niż „Nie zależy od pomieszczeń” — i tylko dla pomieszczeń objętych tym zakresem (część wizualna / techniczna). Należy sprawdzić zakres etapu, zaznaczenia przy pomieszczeniu oraz stawkę: puste pole w macierzy oznacza stawkę domyślną etapu, która może wynosić 0.',
             },
             {
               q: 'Usługa rozliczana według pomieszczenia nalicza 0 zł.',
