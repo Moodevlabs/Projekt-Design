@@ -8,7 +8,6 @@ import { pl } from '@/i18n/pl';
 const useQuotesList = vi.hoisted(() => vi.fn());
 const mutationStub = vi.hoisted(() => () => ({ mutate: vi.fn(), isPending: false }));
 
-const useQuoteCities = vi.hoisted(() => vi.fn(() => ({ data: [] as string[] })));
 const useQuoteRegisterExport = vi.hoisted(() =>
   vi.fn(() => ({
     mutateAsync: vi.fn(() => Promise.resolve([])),
@@ -16,7 +15,7 @@ const useQuoteRegisterExport = vi.hoisted(() =>
   })),
 );
 
-// Filtr klienta (T-53) pyta o kartotekę — lista wycen testuje się bez niej.
+// Menu wiersza siega po kartoteke — lista wycen testuje sie bez niej.
 const useClients = vi.hoisted(() => vi.fn(() => ({ data: [] as { id: string; name: string }[] })));
 
 vi.mock('@/data/queries/useClients', () => ({
@@ -34,7 +33,6 @@ vi.mock('@/data/queries/useProjects', () => ({
 
 vi.mock('@/data/queries/useQuotes', () => ({
   useQuotesList,
-  useQuoteCities,
   useQuoteRegisterExport,
   useSetQuoteRegisterFields: mutationStub,
   useDuplicateQuote: mutationStub,
@@ -131,17 +129,6 @@ describe('QuotesListPage', () => {
 
     expect(screen.getByText('Anna Kowalska')).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /Anna Kowalska/ })).not.toBeInTheDocument();
-  });
-
-  it('przekazuje filtr klienta do zapytania', async () => {
-    const user = userEvent.setup();
-    useClients.mockReturnValue({ data: [{ id: 'c1', name: 'Anna Kowalska' }] });
-    mockResult([summary()]);
-    renderPage();
-
-    await user.click(screen.getByRole('combobox', { name: pl.quotes.filterByClient }));
-    await user.click(screen.getByRole('option', { name: 'Anna Kowalska' }));
-    expect(lastFilters().clientId).toBe('c1');
   });
 
   it('przekazuje filtr statusu do zapytania, a nie filtruje w przegladarce', async () => {

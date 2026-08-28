@@ -6,6 +6,7 @@ import { AuthLayout } from './AuthLayout';
 import { GoogleButton } from './GoogleButton';
 import { LoginFormSchema, type LoginForm } from './schema';
 import { Button } from '@/components/ui/button';
+import { ExternalLink } from '@/components/shared';
 import { Input } from '@/components/ui/input';
 import {
   Form,
@@ -46,13 +47,26 @@ export function LoginPage() {
       title={pl.auth.login}
       footer={
         <>
-          {pl.auth.noAccount}{' '}
-          <Link
-            to={routes.register}
-            className="font-medium text-white underline underline-offset-4"
-          >
-            {pl.auth.register}
-          </Link>
+          <p>
+            {pl.auth.noAccount}{' '}
+            <Link
+              to={routes.register}
+              className="font-medium text-white underline underline-offset-4"
+            >
+              {pl.auth.register}
+            </Link>
+          </p>
+          {/* Strona produktu (2026-08-28): jedyne miejsce w aplikacji, gdzie
+              ktoś jeszcze niezalogowany może o niej doczytać. */}
+          <p className="mt-2 text-white/80">
+            {pl.app.websiteHint}{' '}
+            <ExternalLink
+              href={pl.app.websiteUrl}
+              className="font-medium text-white underline underline-offset-4"
+            >
+              {pl.app.websiteLabel}
+            </ExternalLink>
+          </p>
         </>
       }
     >

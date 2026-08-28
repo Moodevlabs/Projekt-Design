@@ -1,3 +1,4 @@
+import { ExternalLink } from '@/components/shared';
 import { pl } from '@/i18n/pl';
 
 /**
@@ -13,8 +14,10 @@ import { pl } from '@/i18n/pl';
  * przechodził nad arkuszem wyceny (papier nie ma `position`), choć karty
  * z `position: relative` już go poprawnie zasłaniały.
  *
- * Podpis ma być częścią powierzchni, a nie elementem interfejsu.
- * `aria-hidden`, bo to sygnatura, nie treść.
+ * Od 2026-08-28 podpis jest **linkiem do strony produktu** (toolier.pl).
+ * Kontener dalej nie łapie kliknięć (`pointer-events-none`), żeby pasek na
+ * całą szerokość nie zasłaniał niczego pod sobą; klikalny jest tylko sam
+ * napis. Bez `aria-hidden` — link, którego czytnik nie widzi, nie jest linkiem.
  *
  * Wytłoczenie robią dwie warstwy naraz: ciepły atrament w niskiej kryciu
  * i biały odblask **pod** literą. Sam kolor dałby napis leżący NA tle;
@@ -22,15 +25,18 @@ import { pl } from '@/i18n/pl';
  */
 export function AppCredit() {
   return (
-    <p
-      aria-hidden
-      className="pointer-events-none fixed inset-x-0 bottom-3 text-center text-[10.5px] font-semibold tracking-[0.2em] uppercase select-none"
-      style={{
-        color: 'rgba(51, 37, 30, 0.38)',
-        textShadow: '0 1px 0 rgba(255, 255, 255, 0.7)',
-      }}
-    >
-      {pl.app.credit}
+    <p className="pointer-events-none fixed inset-x-0 bottom-3 text-center text-[10.5px] font-semibold tracking-[0.2em] uppercase select-none">
+      <ExternalLink
+        href={pl.app.websiteUrl}
+        aria-label={pl.app.openWebsite}
+        className="pointer-events-auto transition-colors hover:text-[rgba(51,37,30,0.7)]"
+        style={{
+          color: 'rgba(51, 37, 30, 0.38)',
+          textShadow: '0 1px 0 rgba(255, 255, 255, 0.7)',
+        }}
+      >
+        {pl.app.credit}
+      </ExternalLink>
     </p>
   );
 }
