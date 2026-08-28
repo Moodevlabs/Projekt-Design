@@ -44,6 +44,8 @@ import {
 } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import type { Item, Room } from '@/domain/quote';
+import { scheduleHasContent } from '@/domain/schedule';
+import { priceListHasContent, stagesHasContent } from '@/domain/documents';
 
 /** Stała referencja — pusta lista nie może przebijać `memo` na wierszach. */
 const NO_ROOMS: Room[] = [];
@@ -708,9 +710,11 @@ function EditorSurface({
           open={packageOpen}
           onOpenChange={setPackageOpen}
           contents={{
-            hasSchedule: schedule !== null,
-            hasStages: documents?.stages != null,
-            hasPriceList: documents?.priceList != null,
+            // Po TREŚCI, nie po istnieniu (T-115): pusta powłoka zakładki
+            // nie jest dokumentem i nie ma czego drukować.
+            hasSchedule: scheduleHasContent(schedule),
+            hasStages: stagesHasContent(documents?.stages),
+            hasPriceList: priceListHasContent(documents?.priceList),
           }}
           exporting={exportingPackage}
           onExport={(selected, single) => {

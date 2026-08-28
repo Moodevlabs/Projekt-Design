@@ -8,28 +8,42 @@ import { cn } from '@/lib/utils';
  *
  * Wartość trzymamy w **groszach**; string jest tylko reprezentacją do edycji.
  * Niepoprawne wejście przywraca ostatnią dobrą wartość, zamiast zapisywać `NaN`.
+ *
+ * `nullable` (T-115): `cents: null` = „wycena indywidualna" — pole jest wtedy
+ * PUSTE z podpowiedzią, a nie „0,00 zł" (zero znaczy „gratis"). Wpisanie
+ * kwoty nadaje cenę, wyczyszczenie pola wraca do `null`. Bez `nullable`
+ * puste pole traktujemy jak śmieci i przywracamy ostatnią dobrą wartość.
  */
 export function InlineMoney({
   cents,
   onCommit,
   currency = 'PLN',
   readOnly = false,
+  nullable = false,
+  onClear,
+  placeholder,
   className,
   ariaLabel,
 }: {
-  cents: number;
+  cents: number | null;
   onCommit: (nextCents: number) => void;
   currency?: string;
   readOnly?: boolean;
+  /** Pozwala wyczyścić pole do `null` („wycena indywidualna") — woła `onClear`. */
+  nullable?: boolean;
+  onClear?: () => void;
+  /** Podpowiedź w pustym polu — tylko sensowna z `nullable`. */
+  placeholder?: string;
   className?: string;
   ariaLabel: string;
 }) {
-  const [draft, setDraft] = useState(() => formatMoney(cents, currency));
+  const format = (value: number | null) => (value === null ? '' : formatMoney(value, currency));
+  const [draft, setDraft] = useState(() => format(cents));
   const [editing, setEditing] = useState(false);
-  const committed = useRef(cents);
+  const committed = useRef<number | null>(cents);
   // Kopia szkicu w refie — `onBlur` po Escape czytalby stan sprzed `setDraft`
   // (aktualizacje Reacta sa asynchroniczne) i zapisalby cofnieta wartosc.
-  const draftRef = useRef(formatMoney(cents, currency));
+  const draftRef = useRef(format(cents));
   const revertedRef = useRef(false);
 
   const setDraftBoth = (next: string) => {
@@ -40,7 +54,7 @@ export function InlineMoney({
   useEffect(() => {
     if (cents !== committed.current) {
       committed.current = cents;
-      if (!editing) setDraftBoth(formatMoney(cents, currency));
+      if (!editing) setDraftBoth(cents === null ? '' : formatMoney(cents, currency));
     }
   }, [cents, currency, editing]);
 
@@ -51,19 +65,23 @@ export function InlineMoney({
       return;
     }
 
-    const parsed = parseMoney(draftRef.current);
-    if (parsed === null) {
+    const blank = draftRef.current.trim() === '';
+    // Puste pole w trybie `nullable` to świadome „ustalimy osobno".
+    const clearing = blank && nullable;
+    const parsed = clearing ? null : parseMoney(draftRef.current);
+    if (parsed === null && !clearing) {
       // Śmieci w polu nie mogą wyzerować ceny — wracamy do ostatniej dobrej.
-      setDraftBoth(formatMoney(committed.current, currency));
+      setDraftBoth(format(committed.current));
       return;
     }
     if (parsed === committed.current) {
-      setDraftBoth(formatMoney(parsed, currency));
+      setDraftBoth(format(parsed));
       return;
     }
     committed.current = parsed;
-    setDraftBoth(formatMoney(parsed, currency));
-    onCommit(parsed);
+    setDraftBoth(format(parsed));
+    if (parsed === null) onClear?.();
+    else onCommit(parsed);
   };
 
   return (
@@ -72,13 +90,16 @@ export function InlineMoney({
       inputMode="decimal"
       value={draft}
       readOnly={readOnly}
+      placeholder={placeholder}
       aria-label={ariaLabel}
       onFocus={(event) => {
         if (readOnly) return;
         setEditing(true);
         revertedRef.current = false;
         // W edycji pokazujemy samą liczbę — łatwiej nadpisać niż „1 200,00 zł".
-        setDraftBoth((committed.current / 100).toFixed(2).replace('.', ','));
+        setDraftBoth(
+          committed.current === null ? '' : (committed.current / 100).toFixed(2).replace('.', ','),
+        );
         event.currentTarget.select();
       }}
       onChange={(event) => setDraftBoth(event.target.value)}
@@ -92,7 +113,7 @@ export function InlineMoney({
           event.preventDefault();
           setEditing(false);
           revertedRef.current = true;
-          setDraftBoth(formatMoney(committed.current, currency));
+          setDraftBoth(format(committed.current));
           event.currentTarget.blur();
         }
       }}

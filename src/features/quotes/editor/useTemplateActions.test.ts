@@ -4,7 +4,7 @@ import { newItem, newQuoteBody, newSection, type QuoteBody } from '@/domain/quot
 import type { Quote } from '@/data/repos/quotes.repo';
 import type { Template } from '@/data/repos/templates.repo';
 import { newScheduleBody, type ScheduleBody } from '@/domain/schedule';
-import type { QuoteDocuments } from '@/domain/documents';
+import { newStagesDoc, type QuoteDocuments } from '@/domain/documents';
 import { useEditorStore } from './editor.store';
 
 const createMutate = vi.hoisted(() => vi.fn());
@@ -156,7 +156,8 @@ describe('useTemplateActions — pakiet (T-63)', () => {
     return {
       ...quote,
       schedule: newScheduleBody({ startDate: '2026-03-01' }),
-      documents: { stages: null, priceList: null },
+      // Etapy Z TRESCIA: pusta powloka zakladki nie liczy sie jako dokument (T-115).
+      documents: { stages: newStagesDoc(), priceList: null },
     };
   }
 

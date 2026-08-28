@@ -4,7 +4,7 @@
  */
 
 /** Domyślny wzorzec numeru wyceny (identyczny z fallbackiem w SQL). */
-export const DEFAULT_NUMBER_PATTERN = 'WYC/{YYYY}/{MM}/{seq}';
+export const DEFAULT_NUMBER_PATTERN = 'DOK/{YYYY}/{MM}/{seq}';
 
 /** Domyślna długość dopełnienia licznika zerami. */
 const DEFAULT_SEQ_PAD = 4;

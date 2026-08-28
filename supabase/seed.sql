@@ -82,7 +82,7 @@ update public.workspaces
          'currency', 'PLN',
          'vatRate', 23,
          'pricesInclude', 'net',
-         'numberPattern', 'WYC/{YYYY}/{MM}/{seq}',
+         'numberPattern', 'DOK/{YYYY}/{MM}/{seq}',
          'showDisabledItems', true
        )
  where owner_id = '11111111-1111-4111-8111-111111111111';

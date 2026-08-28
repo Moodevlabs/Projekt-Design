@@ -118,7 +118,7 @@ export const helpPl = {
             'Zdjęcie klienta dodaje się w oknie edycji kartoteki. Przy jego braku karta prezentuje inicjały.',
             'Karta klienta zawiera nagłówek z danymi kontaktowymi i adresem oraz zakładki: Projekty · Brief · Dokumenty · Pliki · Notatki. Zakładka „Dokumenty” zawiera wyceny, terminy, etapy współpracy i cenniki klienta; „Pliki” — materiały wgrane przez pracownię oraz wygenerowane PDF-y (filtr rodzaju nad listą).',
             'Projekt opisują: nazwa, adres, metraż, typ inwestycji oraz status zmieniany bezpośrednio w nagłówku. Zakładki: Dokumenty · Wizja lokalna · Etapy · Pliki · Notatki.',
-            'Dokumenty w projekcie grupowane są według linii wersji: wiersz prezentuje wersję najnowszą, a jego rozwinięcie — wersje wcześniejsze. Przycisk „Nowy dokument ▾” zakłada wycenę, termin, etapy współpracy albo cennik dodatkowy.',
+            'Dokumenty w projekcie grupowane są według linii wersji: wiersz prezentuje wersję najnowszą, a jego rozwinięcie — wersje wcześniejsze. Przycisk „Nowa dokumentacja” zakłada teczkę z zakładkami Wycena · Termin · Etapy współpracy · Cennik dodatkowy.',
           ],
         },
         {
@@ -332,7 +332,7 @@ export const helpPl = {
             'Statusy „Zaakceptowana” i „Odrzucona” rejestrowane są wyłącznie przez inwestora, pod przekazanym linkiem. Dzięki temu data i przyjęty zakres stanowią jego oświadczenie, a nie zapis wprowadzony po stronie pracowni.',
             'Polecenie „Nowa wersja” (menu „⋯” w edytorze albo w rejestrze) tworzy wersję v2 o tej samej treści i numerze; wersja v1 pozostaje w linii wersji. Numer wersji w dokumencie jest domyślnie ukryty (Ustawienia), natomiast w nazwie pliku występuje zawsze.',
             'Polecenie „Duplikuj” tworzy niezależną wycenę z nowym numerem, a „Przenieś do projektu” zmienia przypisanie do teczki.',
-            'Rejestr (Dokumenty) dzieli się na zakładki Wyceny · Terminy · Etapy współpracy · Cenniki dodatkowe i udostępnia filtry statusów (wersje archiwalne domyślnie ukryte), filtr klienta i miasta, wyszukiwarkę oraz sortowanie. Kolumna notatek zawiera notatki wewnętrzne, które nie trafiają do dokumentów PDF ani do szablonów.',
+            'Rejestr (Dokumenty) to jedna lista teczek z filtrami statusów (wersje archiwalne domyślnie ukryte), wyszukiwarką (numer, tytuł, klient, miasto) oraz sortowaniem. Kolumna notatek zawiera notatki wewnętrzne, które nie trafiają do dokumentów PDF ani do szablonów.',
             'Polecenie „Eksportuj rejestr” zapisuje bieżący widok po filtrach w formacie otwieranym w arkuszu kalkulacyjnym bez konieczności konwersji kodowania.',
           ],
         },
@@ -389,13 +389,13 @@ export const helpPl = {
       id: 'documents',
       icon: 'documents',
       title: 'Dokumenty dla inwestora',
-      lead: 'Wycena, termin, etapy współpracy i cennik dodatkowy to cztery rodzaje dokumentu. Wycena może nieść pozostałe jako zakładki (pakiet), a każdy z nich może też istnieć samodzielnie — z własnym numerem (WYC/, TER/, ETP/, CEN/), klientem i archiwum.',
+      lead: 'Dokumentacja to jedna teczka z czterema zakładkami: Wycena · Termin · Etapy współpracy · Cennik dodatkowy. Ma jeden numer (domyślnie DOK/RRRR/MM/0001 — wzorzec zmienia się w Ustawieniach), jednego klienta, jedną wersję i jedno archiwum PDF.',
       blocks: [
         {
           kind: 'list',
           items: [
-            'Dokument samodzielny (np. „Nowy termin” z rejestru albo z teczki projektu) otwiera się od razu na swojej treści, bez zakładek wyceny, i startuje pusty — pozycje dodaje się poleceniem „Dodaj z biblioteki” (panel z wyszukiwarką i „Dodaj wszystkie”) albo ręcznie. Ikona zakładki przy wierszu zapisuje go do biblioteki.',
-            'Etapy współpracy: 19 etapów w 5 częściach. Wskazuje się etapy objęte zakresem; etapy pozostające poza zakresem zachowywane są w dokumencie z odpowiednim oznaczeniem, aby zakres wyłączony z oferty był dla inwestora jednoznaczny. Domyślny okres ważności wynosi 14 dni i podlega zmianie.',
+            'Zakładki Termin, Etapy i Cennik startują puste — treść dodaje się poleceniem „Dodaj z biblioteki” (panel z wyszukiwarką i „Dodaj wszystkie”) albo ręcznie. Pusta zakładka nie trafia do PDF, na stronę dla inwestora ani do podsumowania: dokument pokazuje wyłącznie to, co zostało w nim wpisane.',
+            'Etapy współpracy: biblioteka podpowiada 19 etapów w 5 częściach, a dokument zawiera tylko te, które zostały do niego dodane. Wskazuje się etapy objęte zakresem; etapy pozostające poza zakresem zachowywane są w dokumencie z odpowiednim oznaczeniem, aby zakres wyłączony z oferty był dla inwestora jednoznaczny. Domyślny okres ważności wynosi 14 dni i podlega zmianie.',
             'Cennik usług dodatkowych obejmuje nazwę, opis, cenę podaną jako przedział („300–1200 zł”) lub kwotę, jednostkę (zł/h, szt., ryczałt), termin realizacji oraz liczbę dni doliczanych do harmonogramu. Dokument nie zawiera sumy — suma widełek nie niosłaby informacji.',
             'Polecenie „Dodaj do wyceny” przy pozycji cennika udostępnia dwa zakresy zmiany: koszt (pozycja z dolną granicą przedziału trafia do ostatniej sekcji) oraz termin (dni doliczane są do harmonogramu).',
             'Menu „⋯” → „Eksportuj pakiet dokumentów…” pozwala wskazać dokumenty wchodzące w skład pakietu (wyłącznie te, które wycena zawiera) oraz wybrać jeden plik z ciągłą numeracją stron albo osobne pliki zapisywane do wskazanego folderu. Nazwy plików: `{numer}-wycena.pdf`, `-termin`, `-etapy`, `-cennik`.',
@@ -473,7 +473,7 @@ export const helpPl = {
         },
         {
           kind: 'tip',
-          text: 'Szablonu wyceny nie należy mylić z szablonem etapów w Ustawieniach: pierwszy obejmuje całą ofertę, drugi wyłącznie listę etapów harmonogramu dla nowych wycen.',
+          text: 'Szablon obejmuje całą dokumentację: pozycje wyceny oraz — jeśli zostały wypełnione — termin, etapy i cennik. Pusta zakładka nie trafia do szablonu.',
         },
       ],
     },

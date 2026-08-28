@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 import { useBrandKit } from '@/data/queries/useBrandKit';
 import { defaultBrandKit } from '@/domain/brand/schema';
-import type { ScheduleBody } from '@/domain/schedule';
+import { scheduleHasContent, type ScheduleBody } from '@/domain/schedule';
 import type { Room } from '@/domain/quote';
 import { createLogger } from '@/lib/logger';
 import { fetchLogoAsDataUrl } from './logo';
@@ -47,9 +47,10 @@ export function useExportSchedulePdf() {
       archive,
       version,
     }: ExportScheduleArgs) => {
-      if (!schedule) {
-        // Bez harmonogramu nie ma czego drukowac — mowimy, gdzie go ustawic,
-        // zamiast wypuszczac pusty dokument.
+      if (!scheduleHasContent(schedule) || !schedule) {
+        // Bez harmonogramu (albo z pusta powloka zakladki — T-115) nie ma
+        // czego drukowac — mowimy, gdzie go ustawic, zamiast wypuszczac
+        // pusty dokument.
         toast.info(pl.pdf.scheduleMissing);
         return;
       }

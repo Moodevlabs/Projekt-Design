@@ -106,3 +106,73 @@ describe('InlineMoney', () => {
     expect(input.value).toMatch(/1\s?200,00/);
   });
 });
+
+describe('InlineMoney nullable (T-115)', () => {
+  function setupNullable(initial: number | null) {
+    const onCommit = vi.fn();
+    const onClear = vi.fn();
+
+    function Harness() {
+      const [cents, setCents] = useState<number | null>(initial);
+      return (
+        <InlineMoney
+          cents={cents}
+          nullable
+          placeholder="wycena indywidualna"
+          onCommit={(next) => {
+            onCommit(next);
+            setCents(next);
+          }}
+          onClear={() => {
+            onClear();
+            setCents(null);
+          }}
+          ariaLabel="Cena"
+        />
+      );
+    }
+
+    render(<Harness />);
+    return { onCommit, onClear, input: screen.getByLabelText<HTMLInputElement>('Cena') };
+  }
+
+  it('`null` to puste pole z podpowiedzia, nie „0,00 zl"', () => {
+    const { input } = setupNullable(null);
+    expect(input).toHaveValue('');
+    expect(input).toHaveAttribute('placeholder', 'wycena indywidualna');
+  });
+
+  it('wpisanie kwoty w puste pole nadaje cene', async () => {
+    const user = userEvent.setup();
+    const { input, onCommit } = setupNullable(null);
+
+    await user.type(input, '350');
+    await user.tab();
+
+    expect(onCommit).toHaveBeenCalledWith(35_000);
+    expect(input).toHaveValue('350,00\u00a0zł');
+  });
+
+  it('wyczyszczenie pola wola onClear, a nie zapisuje zera', async () => {
+    const user = userEvent.setup();
+    const { input, onCommit, onClear } = setupNullable(35_000);
+
+    await user.clear(input);
+    await user.tab();
+
+    expect(onClear).toHaveBeenCalledTimes(1);
+    expect(onCommit).not.toHaveBeenCalled();
+    expect(input).toHaveValue('');
+  });
+
+  it('bez `nullable` puste pole dalej przywraca ostatnia dobra wartosc', async () => {
+    const user = userEvent.setup();
+    const { input, onCommit } = setup(35_000);
+
+    await user.clear(input);
+    await user.tab();
+
+    expect(onCommit).not.toHaveBeenCalled();
+    expect(input).toHaveValue('350,00\u00a0zł');
+  });
+});

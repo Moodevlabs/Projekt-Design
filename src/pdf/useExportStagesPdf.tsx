@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 import { useBrandKit } from '@/data/queries/useBrandKit';
 import { defaultBrandKit } from '@/domain/brand/schema';
-import type { StagesDoc } from '@/domain/documents';
+import { stagesHasContent, type StagesDoc } from '@/domain/documents';
 import { createLogger } from '@/lib/logger';
 import { fetchLogoAsDataUrl } from './logo';
 import { buildPdfTheme } from './theme';
@@ -36,8 +36,9 @@ export function useExportStagesPdf() {
 
   const exportStages = useCallback(
     async ({ doc, number, issueDate, archive, version }: ExportStagesArgs) => {
-      if (!doc) {
-        // Nie wypuszczamy pustego dokumentu — mowimy, gdzie go zlozyc.
+      if (!stagesHasContent(doc) || !doc) {
+        // Nie wypuszczamy pustego dokumentu (takze pustej powloki zakladki,
+        // T-115) — mowimy, gdzie go zlozyc.
         toast.info(pl.pdf.stagesMissing);
         return;
       }

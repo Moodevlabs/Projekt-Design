@@ -5,8 +5,8 @@ const date = new Date(2026, 7, 22); // 22 sierpnia 2026 (czas lokalny, jak to_ch
 
 describe('generateQuoteNumber', () => {
   it('używa domyślnego wzorca zgodnego z SQL next_quote_number', () => {
-    expect(DEFAULT_NUMBER_PATTERN).toBe('WYC/{YYYY}/{MM}/{seq}');
-    expect(generateQuoteNumber(DEFAULT_NUMBER_PATTERN, 12, date)).toBe('WYC/2026/08/0012');
+    expect(DEFAULT_NUMBER_PATTERN).toBe('DOK/{YYYY}/{MM}/{seq}');
+    expect(generateQuoteNumber(DEFAULT_NUMBER_PATTERN, 12, date)).toBe('DOK/2026/08/0012');
   });
 
   it('dopełnia licznik do 4 cyfr', () => {
@@ -44,8 +44,8 @@ describe('generateQuoteNumber', () => {
   });
 
   it('wraca do domyślnego wzorca przy pustym wejściu', () => {
-    expect(generateQuoteNumber('', 12, date)).toBe('WYC/2026/08/0012');
-    expect(generateQuoteNumber('   ', 12, date)).toBe('WYC/2026/08/0012');
+    expect(generateQuoteNumber('', 12, date)).toBe('DOK/2026/08/0012');
+    expect(generateQuoteNumber('   ', 12, date)).toBe('DOK/2026/08/0012');
   });
 
   it('normalizuje licznik ujemny i ułamkowy', () => {

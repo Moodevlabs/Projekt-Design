@@ -237,8 +237,12 @@ describe('ItemRow — pozycja liczona za pomieszczenie', () => {
     expect(screen.getByText(/baza .* \+ 3 pom\./)).toBeInTheDocument();
   });
 
-  it('w trybie edycji NIE daje pola ceny jednostkowej', () => {
-    // Cena wynika z reguly — pole sugerowaloby, ze da sie ja nadpisac.
+  it('w trybie edycji pole ceny edytuje BAZE reguly (T-115)', async () => {
+    // Dotad pole nie istnialo („cena wynika z reguly"). Szablon startowy sklada
+    // sie w polowie z pozycji za pomieszczenie bez cen — bez tego pola nie
+    // daloby sie wycenic oferty bez wycieczki do biblioteki.
+    const user = userEvent.setup();
+    const onPatch = vi.fn();
     render(
       <Dnd ids={[parametryczna.id]}>
         <ItemRow
@@ -247,14 +251,48 @@ describe('ItemRow — pozycja liczona za pomieszczenie', () => {
           currency="PLN"
           rooms={rooms}
           onToggle={vi.fn()}
-          onPatch={vi.fn()}
+          onPatch={onPatch}
           onRemove={vi.fn()}
           {...BEZ_WARIANTOW}
         />
       </Dnd>,
     );
 
-    expect(screen.queryByLabelText(pl.editor.itemPriceLabel)).not.toBeInTheDocument();
+    const pole = screen.getByLabelText(pl.editor.itemPriceLabel);
+    expect(pole).toHaveValue('200,00\u00a0zł');
+    await user.clear(pole);
+    await user.type(pole, '500');
+    await user.tab();
+
+    expect(onPatch).toHaveBeenCalledWith(
+      parametryczna.id,
+      expect.objectContaining({
+        unitPriceCents: 50_000,
+        pricing: expect.objectContaining({ mode: 'per_room', baseCents: 50_000 }),
+      }),
+    );
+  });
+
+  it('pozycja bez ceny ma w edycji PUSTE pole z podpowiedzia, a wpisanie nadaje cene', async () => {
+    const user = userEvent.setup();
+    const { item, onPatch } = setup({ unitPriceCents: null }, true);
+
+    const pole = screen.getByLabelText(pl.editor.itemPriceLabel);
+    expect(pole).toHaveValue('');
+    expect(pole).toHaveAttribute('placeholder', pl.editor.individualPrice);
+
+    await user.type(pole, '1200');
+    await user.tab();
+    expect(onPatch).toHaveBeenCalledWith(item.id, { unitPriceCents: 120_000 });
+  });
+
+  it('wyczyszczenie pola ceny wraca do wyceny indywidualnej', async () => {
+    const user = userEvent.setup();
+    const { item, onPatch } = setup({ unitPriceCents: 25_000 }, true);
+
+    await user.clear(screen.getByLabelText(pl.editor.itemPriceLabel));
+    await user.tab();
+    expect(onPatch).toHaveBeenCalledWith(item.id, { unitPriceCents: null });
   });
 
   it('zwykla pozycja dalej ma pole ceny i zaden dopisek', () => {

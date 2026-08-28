@@ -1107,9 +1107,14 @@ Z wyrazami szacunku`,
     discountsEmpty: 'Brak rabatów.',
     discountSectionMissing: 'Wskaż sekcję',
 
-    perSection: 'Per etap',
-    perSectionShow: 'Pokaż podział na etapy',
-    perSectionHide: 'Ukryj podział na etapy',
+    /**
+     * Podział sumy po SEKCJACH wyceny. Do 2026-08-28 stało tu „etapy" — i
+     * wyglądało, jakby podsumowanie brało etapy z zakładki „Etapy", której
+     * nikt nie wypełnił. To są nagłówki sekcji z arkusza wyceny.
+     */
+    perSection: 'Per sekcja',
+    perSectionShow: 'Pokaż podział na sekcje',
+    perSectionHide: 'Ukryj podział na sekcje',
     perSectionUnnamed: 'Bez nazwy',
 
     exportPdf: 'Eksportuj PDF',
@@ -2168,7 +2173,7 @@ Z wyrazami szacunku`,
     hourlyRateHint:
       'Wycena zapisuje kopię stawki w chwili utworzenia — późniejsza zmiana nie wpływa na oferty już przekazane inwestorom.',
     numberPattern: 'Wzorzec numeracji',
-    numberPatternPreview: 'Następna wycena dostanie numer',
+    numberPatternPreview: 'Następna dokumentacja dostanie numer',
     numberPatternHint: 'Tokeny: {YYYY}, {YY}, {MM}, {DD}, {seq}, {seq:6}.',
     numberPatternReset: 'Przywróć domyślny wzorzec',
     showVersionOnPdf: 'Numer wersji na dokumencie',
