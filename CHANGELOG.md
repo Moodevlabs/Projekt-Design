@@ -3,7 +3,59 @@
 Format wg [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/).
 Wersje zgodne z [SemVer](https://semver.org/lang/pl/).
 
-## [1.1.3] – 2026-08-28
+## [1.1.4] – 2026-08-28
+
+### Naprawione
+
+**Podgląd oferty w ustawieniach brandingu.** Na macOS wyświetlało się białe
+pole. Dokument powstawał poprawnie, ale osadzano go jako
+`<object type="application/pdf">`, a WKWebView — silnik, na którym aplikacja
+działa na tym systemie — plików PDF w ramkach nie renderuje i nie zgłasza przy
+tym błędu. Strony rysowane są teraz na kanwie i pokazywane jako obrazki, więc
+podgląd wygląda tak samo niezależnie od systemu. Obok stanął przycisk
+otwierający prawdziwy plik w czytniku systemowym — do obejrzenia w pełnej
+skali i wydruku próbnego.
+
+**Przycisk „Otwórz" w zakładce Dokumenty.** Zamiast otwierać dokument,
+pokazywał systemowe okno zapisu i nie otwierał niczego: wołał tę samą ścieżkę
+co „Pobierz". Teraz plik trafia do katalogu podręcznego aplikacji i od razu do
+systemowego czytnika PDF, bez pytania o miejsce zapisu. Zapisywanie u siebie
+pozostaje pod „Pobierz" w menu wiersza.
+
+**Logo pracowni na stronie briefu.** Brief otwarty z magic linka pokazywał samą
+nazwę firmy. Polityka odczytu logo dla gości powstała, zanim briefy istniały,
+i wpuszczała wyłącznie posiadaczy żywego linku do oferty — więc inwestor na
+pierwszym etapie współpracy, przed jakąkolwiek wyceną, znaku nie widział.
+Migracja `0040`.
+
+**Napis „wycena indywidualna" w wygenerowanym PDF.** Nie mieścił się w kolumnie
+kwoty i łamał się przez dywiz w środku wyrazu („wycena indywidual-na"). Dostał
+własny, mniejszy rozmiar; test mierzy jego szerokość metrykami wszystkich
+krojów dostępnych w ustawieniach marki.
+
+**Tytuł karty przeglądarki przy briefie.** Strona klienta obsługuje dwa adresy
+jednym plikiem HTML, więc brief podpisywał się w karcie i historii jako
+„Oferta".
+
+### Zmienione
+
+**Wybór znaku na nagłówku dokumentu.** Opcja „Dobór automatyczny" została
+wycofana. Wyliczała wariant z kontrastu koloru marki, przez co przy znakach
+z własnym tłem albo wielobarwnych wybierała źle, a rezultat było widać dopiero
+w wygenerowanym PDF-ie. Pozostał wybór między znakiem jasnym a ciemnym, wraz
+z instrukcją, który do którego nagłówka pasuje. Ustawienia zapisane wcześniej
+jako automatyczne przeliczono dotychczasową regułą, więc dokumenty wyglądają
+tak jak przed aktualizacją. Migracja `0039`.
+
+**Notatki w kalendarzu można edytować.** Dotąd dawały się wyłącznie dodać
+i usunąć, więc literówka albo przesunięty montaż oznaczały skasowanie wpisu
+razem z oznaczeniem „wykonane".
+
+**Pola koloru marki w ustawieniach.** Próbniki stały na różnych wysokościach,
+bo opisy nad nimi mają różną długość. Wiersze sterujące wyrównano do dołu
+kolumn.
+
+## [1.1.3] – 2026-08-27
 
 ### Dodane
 
@@ -42,54 +94,6 @@ Zmieniono również domyślne pytania briefu.
 Przy okazji poprawiono dwa zdania, które przestały być prawdą: podręcznik nadal
 twierdził, że usunięty plik znika bezpowrotnie, choć kosz istnieje od wersji
 z lipca, i nie wspominał o czterech kartach Ustawień.
-
-**Wybór znaku na nagłówku dokumentu.** Opcja „Dobór automatyczny" została
-wycofana. Wyliczała wariant z kontrastu koloru marki, przez co przy znakach
-z własnym tłem albo wielobarwnych wybierała źle, a rezultat było widać dopiero
-w wygenerowanym PDF-ie. Pozostał wybór między znakiem jasnym a ciemnym, wraz
-z instrukcją, który do którego nagłówka pasuje. Ustawienia zapisane wcześniej
-jako automatyczne przeliczono dotychczasową regułą, więc dokumenty wyglądają
-tak jak przed aktualizacją. Migracja `0039`.
-
-**Notatki w kalendarzu można edytować.** Dotąd dawały się wyłącznie dodać
-i usunąć, więc literówka albo przesunięty montaż oznaczały skasowanie wpisu
-razem z oznaczeniem „wykonane".
-
-**Pola koloru marki w ustawieniach.** Próbniki stały na różnych wysokościach,
-bo opisy nad nimi mają różną długość. Wiersze sterujące wyrównano do dołu
-kolumn.
-
-### Naprawione
-
-**Podgląd oferty w ustawieniach brandingu.** Na macOS wyświetlało się białe
-pole. Dokument powstawał poprawnie, ale osadzano go jako
-`<object type="application/pdf">`, a WKWebView — silnik, na którym aplikacja
-działa na tym systemie — plików PDF w ramkach nie renderuje i nie zgłasza przy
-tym błędu. Strony rysowane są teraz na kanwie i pokazywane jako obrazki, więc
-podgląd wygląda tak samo niezależnie od systemu. Obok stanął przycisk
-otwierający prawdziwy plik w czytniku systemowym — do obejrzenia w pełnej
-skali i wydruku próbnego.
-
-**Przycisk „Otwórz" w zakładce Dokumenty.** Zamiast otwierać dokument,
-pokazywał systemowe okno zapisu i nie otwierał niczego: wołał tę samą ścieżkę
-co „Pobierz". Teraz plik trafia do katalogu podręcznego aplikacji i od razu do
-systemowego czytnika PDF, bez pytania o miejsce zapisu. Zapisywanie u siebie
-pozostaje pod „Pobierz" w menu wiersza.
-
-**Logo pracowni na stronie briefu.** Brief otwarty z magic linka pokazywał samą
-nazwę firmy. Polityka odczytu logo dla gości powstała, zanim briefy istniały,
-i wpuszczała wyłącznie posiadaczy żywego linku do oferty — więc inwestor na
-pierwszym etapie współpracy, przed jakąkolwiek wyceną, znaku nie widział.
-Migracja `0040`.
-
-**Napis „wycena indywidualna" w wygenerowanym PDF.** Nie mieścił się w kolumnie
-kwoty i łamał się przez dywiz w środku wyrazu („wycena indywidual-na"). Dostał
-własny, mniejszy rozmiar; test mierzy jego szerokość metrykami wszystkich
-krojów dostępnych w ustawieniach marki.
-
-**Tytuł karty przeglądarki przy briefie.** Strona klienta obsługuje dwa adresy
-jednym plikiem HTML, więc brief podpisywał się w karcie i historii jako
-„Oferta".
 
 ## [1.1.1] – 2026-08-27
 
