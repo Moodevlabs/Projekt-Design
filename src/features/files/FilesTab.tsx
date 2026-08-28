@@ -11,6 +11,9 @@ import type { StoredFile } from '@/domain/files/schema';
 import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
 
+type KindFilter = 'all' | 'upload' | 'generated';
+const KIND_FILTERS: KindFilter[] = ['all', 'upload', 'generated'];
+
 export interface FilesTabProps {
   clientId: string;
   /** `null` = zakładka klienta (wszystkie jego pliki). Id = zakładka projektu. */
@@ -23,14 +26,20 @@ export interface FilesTabProps {
  * U klienta pokazuje **wszystkie** jego pliki (także te przypięte do teczek,
  * decyzja D2), w projekcie tylko jego własne. Wrzucone z poziomu projektu
  * dostają `project_id`, więc widać je w obu miejscach.
+ *
+ * Od T-110 to JEDYNE miejsce z plikami: osobna zakładka „Dokumentacja"
+ * (wygenerowane PDF-y) zniknęła, bo te same pliki pojawiały się w obu
+ * listach i nikt nie wiedział, gdzie szukać. Rodzaj filtruje się pigułkami.
  */
 export function FilesTab({ clientId, projectId = null }: FilesTabProps) {
   const files = useFiles(projectId ? { projectId } : { clientId });
   const upload = useFileUpload({ clientId, projectId });
   const inputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<StoredFile | null>(null);
+  const [kind, setKind] = useState<KindFilter>('all');
 
-  const rows = files.data ?? [];
+  const all = files.data ?? [];
+  const rows = kind === 'all' ? all : all.filter((file) => file.kind === kind);
 
   /**
    * „Dodaj pliki". W Tauri otwiera dialog systemowy; w przeglądarce
@@ -122,12 +131,51 @@ export function FilesTab({ clientId, projectId = null }: FilesTabProps) {
         }}
       />
 
-      {!files.isLoading && rows.length === 0 ? (
+      {all.length > 0 ? (
+        <div
+          className="flex flex-wrap items-center gap-2"
+          role="group"
+          aria-label={pl.files.kindFilterLabel}
+        >
+          {KIND_FILTERS.map((value) => {
+            const active = value === kind;
+            return (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={active}
+                onClick={() => setKind(value)}
+                className={cn(
+                  'rounded-[var(--radius-pill)] px-3 py-1.5 text-sm transition-colors',
+                  'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',
+                  active
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-surface text-ink-soft border-hair hover:text-ink border',
+                )}
+              >
+                {value === 'all'
+                  ? pl.files.kindAll
+                  : value === 'upload'
+                    ? pl.files.kindUpload
+                    : pl.files.kindGenerated}
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+
+      {!files.isLoading && all.length === 0 ? (
         <EmptyState
           icon={FileUp}
           title={pl.files.emptyTitle}
           description={pl.files.emptyDescription}
           action={addButton}
+        />
+      ) : !files.isLoading && rows.length === 0 ? (
+        <EmptyState
+          icon={FileUp}
+          title={pl.files.noResultsTitle}
+          description={pl.files.noResultsDescription}
         />
       ) : (
         <FilesTable

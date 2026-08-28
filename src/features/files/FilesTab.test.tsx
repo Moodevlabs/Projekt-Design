@@ -169,3 +169,41 @@ describe('FilesTab', () => {
     expect(screen.getByRole('button', { name: pl.common.retry })).toBeInTheDocument();
   });
 });
+
+describe('FilesTab — jedna lista, filtr rodzaju (T-110)', () => {
+  it('wygenerowany PDF lezy w tej samej liscie co pliki wgrane, z typem i wersja', () => {
+    mockResult([
+      file({ id: 'u1', name: 'rzut.dwg', kind: 'upload', docType: null }),
+      file({
+        id: 'g1',
+        name: 'WYC-0001-wycena.pdf',
+        kind: 'generated',
+        docType: 'quote',
+        quoteVersion: 2,
+      }),
+    ]);
+    render(<FilesTab clientId="c1" />);
+
+    expect(screen.getByText('rzut.dwg')).toBeInTheDocument();
+    expect(screen.getByText('WYC-0001-wycena.pdf')).toBeInTheDocument();
+    expect(screen.getByText(pl.documents.types.quote)).toBeInTheDocument();
+    expect(screen.getByText('v2')).toBeInTheDocument();
+  });
+
+  it('filtr „Wygenerowane PDF” chowa pliki wgrane', async () => {
+    const user = userEvent.setup();
+    mockResult([
+      file({ id: 'u1', name: 'rzut.dwg', kind: 'upload', docType: null }),
+      file({ id: 'g1', name: 'termin.pdf', kind: 'generated', docType: 'schedule' }),
+    ]);
+    render(<FilesTab clientId="c1" />);
+
+    await user.click(screen.getByRole('button', { name: pl.files.kindGenerated }));
+    expect(screen.queryByText('rzut.dwg')).not.toBeInTheDocument();
+    expect(screen.getByText('termin.pdf')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: pl.files.kindUpload }));
+    expect(screen.getByText('rzut.dwg')).toBeInTheDocument();
+    expect(screen.queryByText('termin.pdf')).not.toBeInTheDocument();
+  });
+});

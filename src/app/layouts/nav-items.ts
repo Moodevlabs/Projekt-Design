@@ -33,7 +33,7 @@ export const NAV_ROW_GAP = 6;
 export const NAV_ROW_STEP = NAV_ROW_HEIGHT + NAV_ROW_GAP;
 
 /*
- * Kolejnosc z 05-UI §2: **Pulpit · Klienci · Dokumenty · Biblioteka · Szablony**,
+ * Kolejnosc: **Pulpit · Kalendarz · Klienci · Dokumenty · Biblioteka · Szablony**,
  * a pod kreska **Pomoc · Ustawienia**. Klienci PRZED wycenami, bo od T-53 to
  * oni sa osia aplikacji — wycena zyje wewnatrz projektu klienta.
  *
@@ -57,10 +57,10 @@ export const NAV_ITEMS: NavItem[] = [
     end: true,
     group: 'main',
   },
-  { to: routes.clients, label: pl.nav.clients, icon: Users, group: 'main' },
-  // Kalendarz (T-98) stoi PO klientach i wycenach: to widok na terminy tego,
-  // co już w aplikacji jest, a nie miejsce, w którym powstaje praca.
+  // Kalendarz DRUGI, zaraz pod Pulpitem (decyzja właściciela 2026-08-28):
+  // to pierwsza rzecz, na którą patrzy się rano, zanim wejdzie się w klienta.
   { to: routes.calendar, label: pl.nav.calendar, icon: CalendarDays, group: 'main' },
+  { to: routes.clients, label: pl.nav.clients, icon: Users, group: 'main' },
   // „Dokumenty" (T-100): rejestr wycen, terminow, etapow i cennikow. Edytor
   // zostal pod `/wyceny/:id`, wiec podswietlamy pozycje takze tam.
   {

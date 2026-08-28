@@ -8,11 +8,12 @@ import {
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { FileRowMenu } from './FileRowMenu';
+import { docTypeLabel } from './doc-type-label';
 import { formatBytes, isPreviewableImage, type StoredFile } from '@/domain/files/schema';
 import { formatRelativeDay } from '@/lib/dates';
 import { pl } from '@/i18n/pl';
 
-const COLUMNS = 5;
+const COLUMNS = 6;
 
 export function FilesTable({
   rows,
@@ -32,6 +33,7 @@ export function FilesTable({
         <TableHeader>
           <TableRow className="hover:bg-transparent">
             <TableHead>{pl.files.name}</TableHead>
+            <TableHead className="w-36">{pl.files.typeColumn}</TableHead>
             {showScope ? <TableHead className="w-32">{pl.files.scope}</TableHead> : null}
             <TableHead className="w-32 text-right">{pl.files.size}</TableHead>
             <TableHead className="w-36">{pl.files.added}</TableHead>
@@ -56,6 +58,14 @@ export function FilesTable({
                   ) : (
                     <span className="block truncate font-medium">{file.name}</span>
                   )}
+                </TableCell>
+                {/* Wygenerowany PDF mowi, czym jest (Wycena / Termin / …) i z ktorej
+                    wersji — od T-110 lezy w tej samej liscie co pliki wgrane. */}
+                <TableCell className="text-ink-soft text-sm">
+                  {file.kind === 'generated' ? docTypeLabel(file.docType) : pl.files.typeUpload}
+                  {file.kind === 'generated' && file.quoteVersion !== null ? (
+                    <span className="ml-1 text-xs">v{file.quoteVersion}</span>
+                  ) : null}
                 </TableCell>
                 {showScope ? (
                   <TableCell className="text-ink-soft text-sm">

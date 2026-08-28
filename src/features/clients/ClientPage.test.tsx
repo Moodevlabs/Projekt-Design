@@ -134,7 +134,6 @@ describe('ClientPage', () => {
       // pierwszy — dopiero z jego odpowiedzi wiadomo, co wycenic.
       pl.brief.tab,
       pl.clients.tabQuotes,
-      pl.documents.tab,
       pl.files.tab,
       pl.clients.tabNotes,
     ]);

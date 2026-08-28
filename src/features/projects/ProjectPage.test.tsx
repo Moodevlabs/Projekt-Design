@@ -158,7 +158,6 @@ describe('ProjectPage', () => {
       // ani lista zadan. Dotyczy MIEJSCA, wiec zyje przy teczce.
       pl.siteVisit.tab,
       pl.stages.tab,
-      pl.documents.tab,
       pl.files.tab,
       pl.projects.tabNotes,
     ]);

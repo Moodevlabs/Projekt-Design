@@ -16,11 +16,12 @@ import {
 } from '@/components/ui/dropdown-menu';
 import type { EditorMode, SaveState } from '../editor.store';
 import type { QuoteStatus } from '@/domain/quote';
-import { routes } from '@/app/routes';
 import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
 
 export function EditorTopbar({
+  backTo,
+  backLabel,
   docKind,
   title,
   onTitleChange,
@@ -57,6 +58,13 @@ export function EditorTopbar({
   onShare,
   onVersionHistory,
 }: {
+  /**
+   * Dokad prowadzi „Wstecz" (T-110): do teczki projektu albo karty klienta,
+   * z ktorej sie tu przyszlo — nie do rejestru. Powrot do rejestru po
+   * kazdym dokumencie zmuszal do ponownego szukania tego samego klienta.
+   */
+  backTo: string;
+  backLabel: string;
   /** Rodzaj dokumentu (T-101) — decyduje, ktore akcje maja sens. */
   docKind: DocKind;
   /** Tytul dokumentu — edytowany tu tylko, gdy nie ma naglowka wyceny. */
@@ -111,9 +119,9 @@ export function EditorTopbar({
   return (
     <div className="surface-band relative z-10 flex h-[68px] shrink-0 items-center gap-4 px-7">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
-        <Link to={routes.quotes}>
+        <Link to={backTo}>
           <ArrowLeft className="size-4" aria-hidden />
-          {pl.editor.backToList}
+          {backLabel}
         </Link>
       </Button>
 

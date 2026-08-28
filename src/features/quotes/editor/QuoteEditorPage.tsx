@@ -305,6 +305,8 @@ function EditorSurface({
     lineageId,
     currency,
     docKind,
+    clientId,
+    projectId,
   } = useEditorStore(
     useShallow((state) => ({
       body: state.body,
@@ -318,8 +320,18 @@ function EditorSurface({
       lineageId: state.lineageId,
       currency: state.currency,
       docKind: state.docKind,
+      clientId: state.clientId,
+      projectId: state.projectId,
     })),
   );
+  // „Wstecz" wraca tam, skad sie przyszlo (T-110): teczka → karta klienta →
+  // rejestr. Dokument bez klienta nie ma dokad wracac poza rejestr.
+  const back =
+    clientId && projectId
+      ? { to: routes.project(clientId, projectId), label: pl.editor.backToProject }
+      : clientId
+        ? { to: routes.client(clientId), label: pl.editor.backToClient }
+        : { to: routes.quotes, label: pl.editor.backToList };
   // Wycena ma cztery zakladki; termin, etapy i cennik sa JEDNA powierzchnia
   // (T-101). Zakladki bez tresci bylyby obietnica, ktorej nie da sie kliknac.
   const isOffer = hasQuoteSurface(docKind);
@@ -478,6 +490,8 @@ function EditorSurface({
     <QuoteDndProvider enabled={editing}>
       <div className="flex h-full min-h-0 flex-col">
         <EditorTopbar
+          backTo={back.to}
+          backLabel={back.label}
           docKind={docKind}
           title={body.title}
           onTitleChange={(title) => patchHeader({ title })}

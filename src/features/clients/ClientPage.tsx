@@ -12,7 +12,6 @@ import { ClientNotesTab } from './ClientNotesTab';
 import { ClientProjectsTab } from '@/features/projects/ClientProjectsTab';
 import { ClientBriefTab } from '@/features/brief/ClientBriefTab';
 import { FilesTab } from '@/features/files/FilesTab';
-import { DocumentsTab } from '@/features/files/DocumentsTab';
 import { ClientRowMenu } from './ClientRowMenu';
 import { useClientOverview } from '@/data/queries/useClients';
 import { useNewQuoteForClient } from './useNewQuoteForClient';
@@ -129,7 +128,6 @@ export function ClientPage() {
           */}
           <TabsTrigger value="brief">{pl.brief.tab}</TabsTrigger>
           <TabsTrigger value="quotes">{pl.clients.tabQuotes}</TabsTrigger>
-          <TabsTrigger value="documents">{pl.documents.tab}</TabsTrigger>
           <TabsTrigger value="files">{pl.files.tab}</TabsTrigger>
           <TabsTrigger value="notes">{pl.clients.tabNotes}</TabsTrigger>
         </TabsList>
@@ -142,9 +140,6 @@ export function ClientPage() {
         </TabsContent>
         <TabsContent value="quotes">
           <ClientQuotesTab client={data} />
-        </TabsContent>
-        <TabsContent value="documents">
-          <DocumentsTab clientId={data.id} />
         </TabsContent>
         <TabsContent value="files">
           <FilesTab clientId={data.id} />

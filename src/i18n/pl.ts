@@ -538,6 +538,15 @@ export const pl = {
     scope: 'Zakres',
     scopeClient: 'Klient',
     scopeProject: 'Projekt',
+    /** Filtr rodzaju pliku (T-110): jedna zakladka „Pliki" zamiast dwoch. */
+    kindFilterLabel: 'Rodzaj plików',
+    kindAll: 'Wszystkie',
+    kindUpload: 'Wgrane',
+    kindGenerated: 'Wygenerowane PDF',
+    typeColumn: 'Typ',
+    typeUpload: 'Plik',
+    noResultsTitle: 'Brak plików tego rodzaju',
+    noResultsDescription: 'Zmień filtr nad listą.',
 
     uploading: (done: number, total: number) => `Wysyłanie ${done} z ${total}…`,
     uploaded: (count: number) =>
@@ -632,7 +641,7 @@ export const pl = {
     archiveFailed: 'Nie udało się zapisać w dokumentach klienta.',
 
     // Karta w prawej kolumnie edytora.
-    recent: 'Dokumenty',
+    recent: 'Wygenerowane PDF',
     recentEmpty: 'Wyeksportowane dokumenty PDF pojawią się w tym miejscu.',
     seeAll: 'Pokaż wszystkie',
     hint: 'Archiwum udostępnia zapisany plik — dokument nie jest generowany ponownie.',
@@ -1233,6 +1242,8 @@ Z wyrazami szacunku`,
     corruptedDescription:
       'Odczytanie treści wyceny nie powiodło się. Dane pozostają bezpieczne, lecz edytor nie jest w stanie ich otworzyć — prosimy o kontakt z pomocą techniczną.',
     backToList: 'Dokumenty',
+    backToProject: 'Projekt',
+    backToClient: 'Klient',
     itemsCount: (count: number) => `${count} poz.`,
   },
   /*

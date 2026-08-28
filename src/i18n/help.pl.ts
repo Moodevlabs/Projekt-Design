@@ -89,7 +89,7 @@ export const helpPl = {
         },
         {
           kind: 'p',
-          text: 'Nawigacja znajduje się po lewej stronie: Pulpit, Klienci, Kalendarz, Dokumenty, Biblioteka, Szablony — są to obszary pracy. Pod linią oddzielającą umieszczono Kosz, Pomoc i Ustawienia. Pasek rozwija się przyciskiem w dolnej części, co odsłania etykiety pozycji. W wąskim oknie rozwinięty pasek nasuwa się na treść i zamyka po kliknięciu poza nim lub po przejściu do innego ekranu.',
+          text: 'Nawigacja znajduje się po lewej stronie: Pulpit, Kalendarz, Klienci, Dokumenty, Biblioteka, Szablony — są to obszary pracy. Pod linią oddzielającą umieszczono Kosz, Pomoc i Ustawienia. Pasek rozwija się przyciskiem w dolnej części, co odsłania etykiety pozycji. W wąskim oknie rozwinięty pasek nasuwa się na treść i zamyka po kliknięciu poza nim lub po przejściu do innego ekranu.',
         },
         {
           kind: 'p',
@@ -116,8 +116,8 @@ export const helpPl = {
           items: [
             'Lista klientów prezentowana jest w formie kart zawierających zdjęcie, dane kontaktowe, miasto, liczbę wycen, wartość zaakceptowanych ofert oraz datę ostatniej aktywności. Nad listą znajdują się wyszukiwarka (nazwa, e-mail, telefon, miasto) oraz filtry Aktywni / Zarchiwizowani. Menu „⋯” na karcie udostępnia opcje: Nowy projekt, Nowa wycena, Archiwizuj.',
             'Zdjęcie klienta dodaje się w oknie edycji kartoteki. Przy jego braku karta prezentuje inicjały.',
-            'Karta klienta zawiera nagłówek z danymi kontaktowymi i adresem oraz zakładki: Projekty · Brief · Dokumenty · Dokumentacja · Pliki · Notatki. Zakładka „Dokumenty” zawiera wyceny, terminy, etapy współpracy i cenniki klienta; „Dokumentacja” — pliki PDF przekazane inwestorowi.',
-            'Projekt opisują: nazwa, adres, metraż, typ inwestycji oraz status zmieniany bezpośrednio w nagłówku. Zakładki: Dokumenty · Wizja lokalna · Etapy · Dokumentacja · Pliki · Notatki.',
+            'Karta klienta zawiera nagłówek z danymi kontaktowymi i adresem oraz zakładki: Projekty · Brief · Dokumenty · Pliki · Notatki. Zakładka „Dokumenty” zawiera wyceny, terminy, etapy współpracy i cenniki klienta; „Pliki” — materiały wgrane przez pracownię oraz wygenerowane PDF-y (filtr rodzaju nad listą).',
+            'Projekt opisują: nazwa, adres, metraż, typ inwestycji oraz status zmieniany bezpośrednio w nagłówku. Zakładki: Dokumenty · Wizja lokalna · Etapy · Pliki · Notatki.',
             'Dokumenty w projekcie grupowane są według linii wersji: wiersz prezentuje wersję najnowszą, a jego rozwinięcie — wersje wcześniejsze. Przycisk „Nowy dokument ▾” zakłada wycenę, termin, etapy współpracy albo cennik dodatkowy.',
           ],
         },
@@ -253,13 +253,14 @@ export const helpPl = {
             'Dokument samodzielny (inny niż wycena) otwiera się od razu na swojej treści: bez zakładek wyceny, bez pozycji i sum. W prawej kolumnie znajduje się karta klienta oraz archiwum, a w terminie także lista pomieszczeń. Tytuł widoczny w rejestrze edytuje się w górnym pasku, obok numeru.',
             'Dla dokumentów samodzielnych nie ma polecenia „Udostępnij”, „Nowa wersja” ani zapisu jako szablon — strona przekazywana inwestorowi obsługuje wyłącznie wycenę. Menu eksportu zawiera tylko dokument PDF danego rodzaju.',
             'Wycena nadal może zawierać pozostałe dokumenty jako zakładki (Wycena · Termin · Etapy współpracy · Cennik dodatkowy) i eksportować je pakietem. Zakładka otwarta po raz pierwszy w trybie edycji wypełnia się szablonem z Ustawień; dokument samodzielny startuje pusty i buduje się z biblioteki.',
-            'Na karcie klienta i w projekcie zakładka „Dokumenty” obejmuje wszystkie rodzaje (kolumna „Rodzaj”), natomiast „Dokumentacja” to archiwum plików PDF przekazanych inwestorowi.',
+            'Na karcie klienta i w projekcie zakładka „Dokumenty” obejmuje wszystkie rodzaje (kolumna „Rodzaj”), a wygenerowane pliki PDF leżą w zakładce „Pliki” pod filtrem „Wygenerowane PDF”.',
+            'Przycisk „Wstecz” w edytorze wraca do teczki projektu albo karty klienta, z której dokument został otwarty — kolejny dokument tego samego klienta zakłada się bez ponownego szukania go w rejestrze.',
           ],
         },
         {
           kind: 'tip',
-          title: 'Dokumenty a Dokumentacja',
-          text: '„Dokumenty” to rzeczy, nad którymi się pracuje (wycena, termin, etapy, cennik). „Dokumentacja” to to, co już poszło do inwestora — zapisany plik PDF w wersji, którą otrzymał. Archiwum nie generuje pliku ponownie.',
+          title: 'Dokumenty a Pliki',
+          text: '„Dokumenty” to rzeczy, nad którymi się pracuje (wycena, termin, etapy, cennik). „Pliki” to to, co leży na dysku pracowni i u inwestora — materiały wgrane oraz zapisane pliki PDF w wersji, którą inwestor otrzymał. Archiwum nie generuje pliku ponownie.',
         },
       ],
     },
@@ -412,7 +413,7 @@ export const helpPl = {
           items: [
             'Ustawienia → Branding: logo, kolor marki, dane pracowni, osoba kontaktowa, stopka. Podgląd oferty generuje się przyciskiem — „Otwórz podgląd” otwiera go w systemowej przeglądarce PDF, „Zapisz podgląd” zapisuje plik we wskazanym miejscu.',
             'Dokument wyceny zawiera nagłówek ze znakiem graficznym, dane inwestora, sekcje i pozycje wraz z ilością i jednostką, pozycje wyłączone prezentowane jako opcje (o ile ustawienie to jest włączone), rabaty, podsumowanie netto/VAT/brutto oraz adnotację o pozycjach wycenianych indywidualnie.',
-            'Po zakończonym eksporcie plik zapisywany jest w Dokumentacji klienta i projektu (zakładka „Dokumentacja”). Archiwum udostępnia zapisany plik, a nie generuje go ponownie. Karta w edytorze prezentuje trzy ostatnie pozycje.',
+            'Po zakończonym eksporcie plik zapisywany jest w Plikach klienta i projektu (filtr „Wygenerowane PDF”). Archiwum udostępnia zapisany plik, a nie generuje go ponownie. Karta „Wygenerowane PDF” w edytorze prezentuje trzy ostatnie pozycje.',
             'Opisy pozycji obsługują pola automatyczne: {rooms} wstawia listę pomieszczeń („kuchnia, salon ×2”), a {frames|kadr|kadry|kadrów} liczbę kadrów z poprawną odmianą. Pole nierozpoznane pozostaje w treści dosłownie, aby błąd zapisu był widoczny. Listę pól udostępnia przycisk „{ }”.',
           ],
         },
@@ -477,15 +478,15 @@ export const helpPl = {
     {
       id: 'files',
       icon: 'files',
-      title: 'Pliki i dokumentacja klienta',
-      lead: 'Każdy klient i projekt udostępnia zakładki Pliki (materiały wgrane przez pracownię) oraz Dokumentacja (pliki PDF wygenerowane w aplikacji i przekazane inwestorowi).',
+      title: 'Pliki klienta',
+      lead: 'Każdy klient i projekt udostępnia zakładkę Pliki: materiały wgrane przez pracownię oraz pliki PDF wygenerowane w aplikacji i przekazane inwestorowi — w jednej liście, z filtrem rodzaju.',
       blocks: [
         {
           kind: 'list',
           items: [
             'Pliki dodaje się przeciągnięciem na zakładkę albo poleceniem „Dodaj pliki”. Lista obejmuje typ, nazwę (edytowaną w miejscu), rozmiar, datę oraz osobę wgrywającą. Dostępne operacje: Pobierz, Podgląd (obrazy i dokumenty PDF), Usuń — z potwierdzeniem.',
             'Limity: 25 MB na pojedynczy plik oraz 2 GB na workspace. Pasek zużycia dostępny jest w Ustawieniach → Pliki, a ostrzeżenie pojawia się po przekroczeniu 90 % limitu. Komunikat o przekroczeniu rozmiaru albo braku miejsca wyświetlany jest przed rozpoczęciem wysyłki.',
-            'Dokumentacja prezentowana jest chronologicznie; wiersz obejmuje typ (Wycena / Termin / Etapy / Cennik / Pakiet), numer, wersję, datę oraz polecenie otwarcia.',
+            'Filtr nad listą: Wszystkie · Wgrane · Wygenerowane PDF. Kolumna „Typ” wskazuje rodzaj pliku wygenerowanego (Wycena / Termin / Etapy / Cennik / Pakiet) wraz z wersją dokumentu.',
             'Usunięty plik trafia do Kosza, dostępnego jako osobna pozycja nawigacji, i przechowywany jest tam przez 30 dni. W tym czasie możliwe jest jego przywrócenie; zajmowane miejsce zwalniane jest dopiero po trwałym usunięciu.',
           ],
         },

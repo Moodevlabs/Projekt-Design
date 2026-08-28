@@ -34,6 +34,18 @@ otwiera panel z wyszukiwarką i „Dodaj wszystkie” — dokładnie tak, jak wy
 ma „Dodaj usługi”; „Etap ręcznie” / „Pozycja ręcznie” zostają jako drugie
 wejście, a ikona zakładki przy wierszu zapisuje go do biblioteki.
 
+**Jedna zakładka „Pliki” zamiast „Pliki” + „Dokumentacja”.** Wygenerowany PDF
+pojawiał się w obu listach naraz, więc nie było wiadomo, gdzie go szukać.
+Zakładka „Dokumentacja” zniknęła z karty klienta i z projektu; „Pliki” mają
+filtr Wszystkie · Wgrane · Wygenerowane PDF oraz kolumnę „Typ” (Wycena /
+Termin / Etapy / Cennik / Pakiet z wersją dokumentu).
+
+**„Wstecz” w edytorze wraca tam, skąd się przyszło** — do teczki projektu
+albo karty klienta, nie do rejestru. Kolejny dokument tego samego klienta
+zakłada się bez ponownego szukania go na liście.
+
+**Kalendarz stoi drugi w nawigacji, zaraz pod Pulpitem.**
+
 **Podgląd brandingu można zapisać jako plik.** Obok „Otwórz podgląd” stoi
 „Zapisz podgląd (PDF)”, który idzie przez systemowy dialog zapisu — tą samą
 drogą co eksport prawdziwej oferty. Na macOS otwieranie z katalogu

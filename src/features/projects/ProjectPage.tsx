@@ -12,7 +12,6 @@ import { ProjectFormDialog } from './ProjectFormDialog';
 import { ProjectQuotesTab } from './ProjectQuotesTab';
 import { ProjectNotesTab } from './ProjectNotesTab';
 import { FilesTab } from '@/features/files/FilesTab';
-import { DocumentsTab } from '@/features/files/DocumentsTab';
 import { ProjectRowMenu } from './ProjectRowMenu';
 import { ProjectStatusSelect } from './ProjectStatusSelect';
 import { kindLabel } from './kind-label';
@@ -138,7 +137,6 @@ export function ProjectPage() {
           */}
           <TabsTrigger value="visit">{pl.siteVisit.tab}</TabsTrigger>
           <TabsTrigger value="stages">{pl.stages.tab}</TabsTrigger>
-          <TabsTrigger value="documents">{pl.documents.tab}</TabsTrigger>
           <TabsTrigger value="files">{pl.files.tab}</TabsTrigger>
           <TabsTrigger value="notes">{pl.projects.tabNotes}</TabsTrigger>
         </TabsList>
@@ -151,9 +149,6 @@ export function ProjectPage() {
         </TabsContent>
         <TabsContent value="stages">
           <ProjectStagesTab projectId={data.id} stageProgress={data.stageProgress} />
-        </TabsContent>
-        <TabsContent value="documents">
-          <DocumentsTab clientId={data.clientId} projectId={data.id} />
         </TabsContent>
         <TabsContent value="files">
           <FilesTab clientId={data.clientId} projectId={data.id} />
