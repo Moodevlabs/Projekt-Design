@@ -3,6 +3,54 @@
 Format wg [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/).
 Wersje zgodne z [SemVer](https://semver.org/lang/pl/).
 
+## [1.2.0] – 2026-08-28
+
+### Zmienione
+
+**„Dokumenty” zamiast „Wyceny” — wycena jest jednym z czterech rodzajów
+dokumentu.** Pozycja nawigacji nazywa się teraz „Dokumenty” i prowadzi do
+rejestru z zakładkami Wyceny · Terminy · Etapy współpracy · Cenniki dodatkowe.
+Do tego wydania termin, etapy i cennik istniały wyłącznie jako zakładki
+wewnątrz wyceny; teraz każdy z nich może być **samodzielnym dokumentem**
+z własnym numerem (`WYC/`, `TER/`, `ETP/`, `CEN/` — jeden wspólny licznik,
+wzorce w Ustawieniach), klientem, projektem i archiwum PDF. Dokument
+samodzielny otwiera się od razu na swojej treści, bez zakładek wyceny i bez
+sum; termin zachowuje panel pomieszczeń, bo z nich liczy dni. Wycena nadal
+może nieść pozostałe dokumenty jako pakiet — zakładki edytora są teraz
+płaskie: Wycena · Termin · Etapy współpracy · Cennik dodatkowy. Stary adres
+rejestru (`/wyceny`) przekierowuje. Rodzaj dokumentu ustala się przy
+utworzeniu i nie zmienia z listy — do tej pory był tylko etykietą rejestru.
+
+**Zakładka „Dokumenty” u klienta i w projekcie to teraz wszystkie rodzaje
+dokumentów** (z kolumną „Rodzaj” i przyciskiem „Nowy dokument ▾”), a archiwum
+plików PDF przekazanych inwestorowi nazywa się **„Dokumentacja”**.
+
+**Biblioteka ma sekcje dla każdego rodzaju dokumentu.** Obok usług doszły
+zakładki Termin · Etapy współpracy · Cennik dodatkowy. Przy pierwszym otwarciu
+sekcja wypełnia się wbudowanym szablonem (dotąd ukrytym w ustawieniach
+i nieedytowalnym z aplikacji), oznaczonym jako przykładowy; wpisy edytuje się
+w miejscu, a kolejność ustawia strzałkami. W dokumencie „Dodaj z biblioteki”
+otwiera panel z wyszukiwarką i „Dodaj wszystkie” — dokładnie tak, jak wycena
+ma „Dodaj usługi”; „Etap ręcznie” / „Pozycja ręcznie” zostają jako drugie
+wejście, a ikona zakładki przy wierszu zapisuje go do biblioteki.
+
+**Podgląd brandingu można zapisać jako plik.** Obok „Otwórz podgląd” stoi
+„Zapisz podgląd (PDF)”, który idzie przez systemowy dialog zapisu — tą samą
+drogą co eksport prawdziwej oferty. Na macOS otwieranie z katalogu
+podręcznego po raz kolejny nie zadziałało; zapisany plik otwiera się z dysku
+jak każdy inny.
+
+**Ekran logowania: zdjęcie bez efektów, biały logotyp i biały tekst pod
+kartą.** Matowe szkło rozciągnięte na całą fotografię zostało zdjęte; szklana
+zostaje tylko karta formularza.
+
+### Baza danych
+
+Migracje `0042` (rodzaj dokumentu jako typ, funkcja `next_document_number`)
+i `0043` (tabela `library_doc_entries` z RLS i funkcją `seed_doc_library`).
+Stare wartości `schedule_only` / `price_list_only` mapowane na `schedule` /
+`price_list`.
+
 ## [1.1.6] – 2026-08-28
 
 ### Zmienione

@@ -89,7 +89,7 @@ export const helpPl = {
         },
         {
           kind: 'p',
-          text: 'Nawigacja znajduje się po lewej stronie: Pulpit, Klienci, Kalendarz, Wyceny, Biblioteka, Szablony — są to obszary pracy. Pod linią oddzielającą umieszczono Kosz, Pomoc i Ustawienia. Pasek rozwija się przyciskiem w dolnej części, co odsłania etykiety pozycji. W wąskim oknie rozwinięty pasek nasuwa się na treść i zamyka po kliknięciu poza nim lub po przejściu do innego ekranu.',
+          text: 'Nawigacja znajduje się po lewej stronie: Pulpit, Klienci, Kalendarz, Dokumenty, Biblioteka, Szablony — są to obszary pracy. Pod linią oddzielającą umieszczono Kosz, Pomoc i Ustawienia. Pasek rozwija się przyciskiem w dolnej części, co odsłania etykiety pozycji. W wąskim oknie rozwinięty pasek nasuwa się na treść i zamyka po kliknięciu poza nim lub po przejściu do innego ekranu.',
         },
         {
           kind: 'p',
@@ -116,9 +116,9 @@ export const helpPl = {
           items: [
             'Lista klientów prezentowana jest w formie kart zawierających zdjęcie, dane kontaktowe, miasto, liczbę wycen, wartość zaakceptowanych ofert oraz datę ostatniej aktywności. Nad listą znajdują się wyszukiwarka (nazwa, e-mail, telefon, miasto) oraz filtry Aktywni / Zarchiwizowani. Menu „⋯” na karcie udostępnia opcje: Nowy projekt, Nowa wycena, Archiwizuj.',
             'Zdjęcie klienta dodaje się w oknie edycji kartoteki. Przy jego braku karta prezentuje inicjały.',
-            'Karta klienta zawiera nagłówek z danymi kontaktowymi i adresem oraz zakładki: Projekty · Brief · Wyceny · Dokumenty · Pliki · Notatki.',
-            'Projekt opisują: nazwa, adres, metraż, typ inwestycji oraz status zmieniany bezpośrednio w nagłówku. Zakładki: Wyceny · Wizja lokalna · Etapy · Dokumenty · Pliki · Notatki.',
-            'Wyceny w projekcie grupowane są według linii wersji: wiersz prezentuje wersję najnowszą, a jego rozwinięcie — wersje wcześniejsze.',
+            'Karta klienta zawiera nagłówek z danymi kontaktowymi i adresem oraz zakładki: Projekty · Brief · Dokumenty · Dokumentacja · Pliki · Notatki. Zakładka „Dokumenty” zawiera wyceny, terminy, etapy współpracy i cenniki klienta; „Dokumentacja” — pliki PDF przekazane inwestorowi.',
+            'Projekt opisują: nazwa, adres, metraż, typ inwestycji oraz status zmieniany bezpośrednio w nagłówku. Zakładki: Dokumenty · Wizja lokalna · Etapy · Dokumentacja · Pliki · Notatki.',
+            'Dokumenty w projekcie grupowane są według linii wersji: wiersz prezentuje wersję najnowszą, a jego rozwinięcie — wersje wcześniejsze. Przycisk „Nowy dokument ▾” zakłada wycenę, termin, etapy współpracy albo cennik dodatkowy.',
           ],
         },
         {
@@ -304,7 +304,7 @@ export const helpPl = {
             'Statusy „Zaakceptowana” i „Odrzucona” rejestrowane są wyłącznie przez inwestora, pod przekazanym linkiem. Dzięki temu data i przyjęty zakres stanowią jego oświadczenie, a nie zapis wprowadzony po stronie pracowni.',
             'Polecenie „Nowa wersja” (menu „⋯” w edytorze albo w rejestrze) tworzy wersję v2 o tej samej treści i numerze; wersja v1 pozostaje w linii wersji. Numer wersji w dokumencie jest domyślnie ukryty (Ustawienia), natomiast w nazwie pliku występuje zawsze.',
             'Polecenie „Duplikuj” tworzy niezależną wycenę z nowym numerem, a „Przenieś do projektu” zmienia przypisanie do teczki.',
-            'Rejestr (Wyceny) udostępnia filtry statusów (wersje archiwalne domyślnie ukryte), filtr klienta i miasta, wyszukiwarkę oraz sortowanie. Kolumna notatek zawiera notatki wewnętrzne, które nie trafiają do dokumentów PDF ani do szablonów.',
+            'Rejestr (Dokumenty) dzieli się na zakładki Wyceny · Terminy · Etapy współpracy · Cenniki dodatkowe i udostępnia filtry statusów (wersje archiwalne domyślnie ukryte), filtr klienta i miasta, wyszukiwarkę oraz sortowanie. Kolumna notatek zawiera notatki wewnętrzne, które nie trafiają do dokumentów PDF ani do szablonów.',
             'Polecenie „Eksportuj rejestr” zapisuje bieżący widok po filtrach w formacie otwieranym w arkuszu kalkulacyjnym bez konieczności konwersji kodowania.',
           ],
         },
@@ -358,11 +358,12 @@ export const helpPl = {
       id: 'documents',
       icon: 'documents',
       title: 'Dokumenty dla inwestora',
-      lead: 'Zakładka „Dokumenty” w edytorze obejmuje Etapy współpracy oraz Cennik usług dodatkowych. Wraz z wyceną i terminem tworzą one komplet dokumentacji ofertowej.',
+      lead: 'Wycena, termin, etapy współpracy i cennik dodatkowy to cztery rodzaje dokumentu. Wycena może nieść pozostałe jako zakładki (pakiet), a każdy z nich może też istnieć samodzielnie — z własnym numerem (WYC/, TER/, ETP/, CEN/), klientem i archiwum.',
       blocks: [
         {
           kind: 'list',
           items: [
+            'Dokument samodzielny (np. „Nowy termin” z rejestru albo z teczki projektu) otwiera się od razu na swojej treści, bez zakładek wyceny, i startuje pusty — pozycje dodaje się poleceniem „Dodaj z biblioteki” (panel z wyszukiwarką i „Dodaj wszystkie”) albo ręcznie. Ikona zakładki przy wierszu zapisuje go do biblioteki.',
             'Etapy współpracy: 19 etapów w 5 częściach. Wskazuje się etapy objęte zakresem; etapy pozostające poza zakresem zachowywane są w dokumencie z odpowiednim oznaczeniem, aby zakres wyłączony z oferty był dla inwestora jednoznaczny. Domyślny okres ważności wynosi 14 dni i podlega zmianie.',
             'Cennik usług dodatkowych obejmuje nazwę, opis, cenę podaną jako przedział („300–1200 zł”) lub kwotę, jednostkę (zł/h, szt., ryczałt), termin realizacji oraz liczbę dni doliczanych do harmonogramu. Dokument nie zawiera sumy — suma widełek nie niosłaby informacji.',
             'Polecenie „Dodaj do wyceny” przy pozycji cennika udostępnia dwa zakresy zmiany: koszt (pozycja z dolną granicą przedziału trafia do ostatniej sekcji) oraz termin (dni doliczane są do harmonogramu).',
@@ -380,9 +381,9 @@ export const helpPl = {
         {
           kind: 'list',
           items: [
-            'Ustawienia → Branding: logo, kolor marki, dane pracowni, osoba kontaktowa, stopka. Podgląd dokumentu PDF po prawej stronie aktualizowany jest na bieżąco.',
+            'Ustawienia → Branding: logo, kolor marki, dane pracowni, osoba kontaktowa, stopka. Podgląd oferty generuje się przyciskiem — „Otwórz podgląd” otwiera go w systemowej przeglądarce PDF, „Zapisz podgląd” zapisuje plik we wskazanym miejscu.',
             'Dokument wyceny zawiera nagłówek ze znakiem graficznym, dane inwestora, sekcje i pozycje wraz z ilością i jednostką, pozycje wyłączone prezentowane jako opcje (o ile ustawienie to jest włączone), rabaty, podsumowanie netto/VAT/brutto oraz adnotację o pozycjach wycenianych indywidualnie.',
-            'Po zakończonym eksporcie plik zapisywany jest w Dokumentach klienta i projektu (zakładka „Dokumenty”). Archiwum udostępnia zapisany plik, a nie generuje go ponownie. Karta „Dokumenty” w edytorze prezentuje trzy ostatnie pozycje.',
+            'Po zakończonym eksporcie plik zapisywany jest w Dokumentacji klienta i projektu (zakładka „Dokumentacja”). Archiwum udostępnia zapisany plik, a nie generuje go ponownie. Karta w edytorze prezentuje trzy ostatnie pozycje.',
             'Opisy pozycji obsługują pola automatyczne: {rooms} wstawia listę pomieszczeń („kuchnia, salon ×2”), a {frames|kadr|kadry|kadrów} liczbę kadrów z poprawną odmianą. Pole nierozpoznane pozostaje w treści dosłownie, aby błąd zapisu był widoczny. Listę pól udostępnia przycisk „{ }”.',
           ],
         },
@@ -392,7 +393,7 @@ export const helpPl = {
       id: 'library',
       icon: 'library',
       title: 'Biblioteka',
-      lead: 'Cennik pracowni. Zakładki: Usługi · Grupy · Zestawy · Pomieszczenia · Stawki. Ustawienia wprowadzone w tym miejscu obowiązują w nowych wycenach.',
+      lead: 'Cennik pracowni. Zakładki: Usługi · Grupy · Zestawy · Pomieszczenia · Stawki · Termin · Etapy współpracy · Cennik dodatkowy. Ustawienia wprowadzone w tym miejscu obowiązują w nowych dokumentach.',
       blocks: [
         {
           kind: 'p',
@@ -409,6 +410,7 @@ export const helpPl = {
             'Zestawy stanowią komplet pozycji wstawiany do wyceny jako grupa (przykładowo „Kuchnia — pakiet”). Tworzone są ikoną zakładki przy grupie w edytorze albo w zakładce Zestawy.',
             'Pomieszczenia obejmują słownik typów (kuchnia, salon, łazienka i pozostałe), na podstawie którego cennik dobiera stawkę. Zmiana nazwy nie modyfikuje klucza technicznego, więc nie wpływa na ceny w zapisanych wycenach. Słownik edytuje się wyłącznie w tym miejscu.',
             'Stawki prezentują pełną macierz usługa × typ pomieszczenia na jednym ekranie, wraz z importem z pliku CSV.',
+            'Sekcje Termin, Etapy współpracy i Cennik dodatkowy to biblioteki pozostałych rodzajów dokumentu: przy pierwszym otwarciu wypełniają się wbudowanym szablonem (oznaczonym jako przykładowy), a wpisy edytuje się w miejscu. Z tych list korzysta panel „Dodaj z biblioteki” w dokumentach.',
           ],
         },
         {
@@ -446,15 +448,15 @@ export const helpPl = {
     {
       id: 'files',
       icon: 'files',
-      title: 'Pliki i dokumenty klienta',
-      lead: 'Każdy klient i projekt udostępnia zakładki Pliki (materiały wgrane przez pracownię) oraz Dokumenty (pliki PDF wygenerowane w aplikacji).',
+      title: 'Pliki i dokumentacja klienta',
+      lead: 'Każdy klient i projekt udostępnia zakładki Pliki (materiały wgrane przez pracownię) oraz Dokumentacja (pliki PDF wygenerowane w aplikacji i przekazane inwestorowi).',
       blocks: [
         {
           kind: 'list',
           items: [
             'Pliki dodaje się przeciągnięciem na zakładkę albo poleceniem „Dodaj pliki”. Lista obejmuje typ, nazwę (edytowaną w miejscu), rozmiar, datę oraz osobę wgrywającą. Dostępne operacje: Pobierz, Podgląd (obrazy i dokumenty PDF), Usuń — z potwierdzeniem.',
             'Limity: 25 MB na pojedynczy plik oraz 2 GB na workspace. Pasek zużycia dostępny jest w Ustawieniach → Pliki, a ostrzeżenie pojawia się po przekroczeniu 90 % limitu. Komunikat o przekroczeniu rozmiaru albo braku miejsca wyświetlany jest przed rozpoczęciem wysyłki.',
-            'Dokumenty prezentowane są chronologicznie; wiersz obejmuje typ (Wycena / Termin / Etapy / Cennik / Pakiet), numer, wersję, datę oraz polecenie otwarcia.',
+            'Dokumentacja prezentowana jest chronologicznie; wiersz obejmuje typ (Wycena / Termin / Etapy / Cennik / Pakiet), numer, wersję, datę oraz polecenie otwarcia.',
             'Usunięty plik trafia do Kosza, dostępnego jako osobna pozycja nawigacji, i przechowywany jest tam przez 30 dni. W tym czasie możliwe jest jego przywrócenie; zajmowane miejsce zwalniane jest dopiero po trwałym usunięciu.',
           ],
         },
@@ -606,7 +608,7 @@ export const helpPl = {
             },
             {
               q: 'Podgląd brandingu nie działa w systemie macOS.',
-              a: 'Przyczyną była konfiguracja zabezpieczeń okna aplikacji (generator dokumentów PDF wymaga technologii WebAssembly). Zagadnienie zostało rozwiązane — w przypadku starszej wersji zalecana jest aktualizacja aplikacji.',
+              a: 'Jeśli przycisk „Otwórz podgląd” nie otwiera dokumentu, należy użyć „Zapisz podgląd (PDF)” — plik zapisany we wskazanym miejscu otwiera się z dysku jak każdy inny. Wcześniejszą przyczyną była konfiguracja zabezpieczeń okna aplikacji (generator PDF wymaga technologii WebAssembly); w starszej wersji zalecana jest aktualizacja.',
             },
             {
               q: 'Po rozwinięciu paska nawigacji treść wykracza poza obszar okna.',
