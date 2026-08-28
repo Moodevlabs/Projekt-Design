@@ -83,7 +83,7 @@ export const helpPl = {
           items: [
             'Ustawienia → Branding: wgranie logo, ustalenie koloru marki i danych pracowni. Elementy te trafiają do każdego dokumentu PDF.',
             'Biblioteka → Usługi: nowe konto zawiera 38 usług przykładowych w 8 grupach, bez stawek. Po rozwinięciu wiersza należy wprowadzić własne ceny lub dodać usługi zdefiniowane samodzielnie.',
-            'Klienci → „Nowy klient” → na karcie klienta „Nowy projekt” → w projekcie „Nowa wycena”.',
+            'Klienci → „Nowy klient” → na karcie klienta „Nowy projekt” → w projekcie „Nowy dokument ▾” → „Nowa wycena”. Tym samym przyciskiem zakłada się termin, etapy współpracy albo cennik dodatkowy jako osobne dokumenty.',
             'W edytorze: „Dodaj usługi”, określenie zakresu, uzupełnienie listy pomieszczeń w prawej kolumnie, a następnie eksport do PDF.',
           ],
         },
@@ -238,6 +238,32 @@ export const helpPl = {
       ],
     },
     {
+      id: 'registry',
+      icon: 'documents',
+      title: 'Dokumenty — rejestr i rodzaje',
+      lead: 'Pozycja „Dokumenty” w nawigacji (do wersji 1.2 „Wyceny”) prowadzi do rejestru wszystkich dokumentów pracowni. Dokument ma jeden z czterech rodzajów: Wycena, Termin, Etapy współpracy, Cennik dodatkowy.',
+      blocks: [
+        {
+          kind: 'list',
+          items: [
+            'Rejestr ma cztery zakładki — po jednej na rodzaj — a w ich obrębie filtry statusu, klienta i miasta, wyszukiwarkę i sortowanie. Kolumna „Suma” występuje wyłącznie w zakładce Wyceny: termin, etapy i cennik nie mają czego sumować.',
+            'Przycisk „Nowa wycena” / „Nowy termin” / „Nowe etapy współpracy” / „Nowy cennik dodatkowy” zależy od aktywnej zakładki. Ten sam wybór dostępny jest na karcie klienta i w teczce projektu pod „Nowy dokument ▾” — dokument założony tam otrzymuje dane inwestora i przypisanie do teczki.',
+            'Numer nadawany jest przy utworzeniu według wzorca rodzaju: WYC/ dla wyceny (wzorzec z Ustawień), TER/ dla terminu, ETP/ dla etapów, CEN/ dla cennika. Licznik jest wspólny, więc numery czterech rejestrów nigdy się nie powtarzają.',
+            'Rodzaj dokumentu ustala się przy utworzeniu i nie podlega zmianie — decyduje o tym, co pokazuje edytor i który dokument PDF powstaje.',
+            'Dokument samodzielny (inny niż wycena) otwiera się od razu na swojej treści: bez zakładek wyceny, bez pozycji i sum. W prawej kolumnie znajduje się karta klienta oraz archiwum, a w terminie także lista pomieszczeń. Tytuł widoczny w rejestrze edytuje się w górnym pasku, obok numeru.',
+            'Dla dokumentów samodzielnych nie ma polecenia „Udostępnij”, „Nowa wersja” ani zapisu jako szablon — strona przekazywana inwestorowi obsługuje wyłącznie wycenę. Menu eksportu zawiera tylko dokument PDF danego rodzaju.',
+            'Wycena nadal może zawierać pozostałe dokumenty jako zakładki (Wycena · Termin · Etapy współpracy · Cennik dodatkowy) i eksportować je pakietem. Zakładka otwarta po raz pierwszy w trybie edycji wypełnia się szablonem z Ustawień; dokument samodzielny startuje pusty i buduje się z biblioteki.',
+            'Na karcie klienta i w projekcie zakładka „Dokumenty” obejmuje wszystkie rodzaje (kolumna „Rodzaj”), natomiast „Dokumentacja” to archiwum plików PDF przekazanych inwestorowi.',
+          ],
+        },
+        {
+          kind: 'tip',
+          title: 'Dokumenty a Dokumentacja',
+          text: '„Dokumenty” to rzeczy, nad którymi się pracuje (wycena, termin, etapy, cennik). „Dokumentacja” to to, co już poszło do inwestora — zapisany plik PDF w wersji, którą otrzymał. Archiwum nie generuje pliku ponownie.',
+        },
+      ],
+    },
+    {
       id: 'quote',
       icon: 'quote',
       title: 'Wycena — edytor',
@@ -332,15 +358,18 @@ export const helpPl = {
       id: 'schedule',
       icon: 'schedule',
       title: 'Termin realizacji',
-      lead: 'Zakładka „Termin” w edytorze wyznacza datę zakończenia prac na podstawie etapów, listy pomieszczeń oraz kalendarza dni roboczych uwzględniającego polskie dni ustawowo wolne.',
+      lead: 'Termin — jako zakładka wyceny albo samodzielny dokument — wyznacza datę zakończenia prac na podstawie etapów, listy pomieszczeń oraz kalendarza dni roboczych uwzględniającego polskie dni ustawowo wolne.',
       blocks: [
         {
           kind: 'steps',
           items: [
             'Blok „Założenia” obejmuje datę rozpoczęcia prac, liczbę dni roboczych w tygodniu po stronie pracowni i inwestora oraz sposób traktowania dni ustawowo wolnych. Na podstawie tych czterech wartości wyznaczane są daty w podsumowaniu.',
-            'Etapy (inwentaryzacja, rzuty, koncepcja, wizualizacje, rysunki techniczne i pozostałe) posiadają dni bazowe, a etapy zależne od pomieszczeń — również liczbę dni przypadającą na typ pomieszczenia. Lista tworzona jest na podstawie szablonu z Ustawień.',
+            'Etapy dodaje się poleceniem „Dodaj z biblioteki” (Biblioteka → Termin) albo „Etap ręcznie”. Każdy etap ma dni bazowe („cały projekt”), a etap zależny od pomieszczeń — dodatkowo dni doliczane za każde pomieszczenie.',
+            'Dni etapu = dni bazowe + Σ (stawka typu pomieszczenia × ilość) dla pomieszczeń objętych zakresem etapu. Zakres „Wizualne” liczy pomieszczenia z zaznaczoną częścią wizualną, „Techniczne” — z częścią techniczną, „Wszystkie” — każde; „Nie zależy od pomieszczeń” liczy same dni bazowe. Pomieszczenie bez typu oraz typ bez własnej stawki biorą stawkę domyślną etapu; puste pole w macierzy oznacza „domyślna”, a zero — „ten typ nie dokłada dni”. Pozycja „salon ×2” liczy się dwukrotnie — tak samo jak w cenniku parametrycznym.',
+            'Lista pomieszczeń jest wspólna z wyceną (pomieszczenia leżą w dokumencie, nie w projekcie). Zmiana w panelu „Pomieszczenia” od razu zmienia wynik terminu; termin samodzielny ma własny panel pomieszczeń w prawej kolumnie, a nowy termin w projekcie proponuje skopiowanie pomieszczeń z ostatniego dokumentu, który je miał.',
             'Włączona pozycja wyceny opatrzona etykietą (przykładowo „wizualizacje”) włącza odpowiadający jej etap. Mechanizm wyłącznie włącza etapy, nigdy ich nie wyłącza, a komunikat umożliwia cofnięcie zmiany.',
             'Kolumna „Kto” określa stronę wykorzystującą czas: ARCH. oznacza pracę pracowni, INW. — czas po stronie inwestora (decyzje, akceptacje, dobór materiałów). Rozdzielenie tych wartości jest istotne, ponieważ to czas inwestora najczęściej wydłuża termin realizacji.',
+            'W liście etapów każdy wiersz pokazuje własną liczbę dni już po uwzględnieniu pomieszczeń, a karta wyniku — sumy po stronie pracowni i inwestora. Bez pomieszczeń etapy zależne od nich liczą wyłącznie dni bazowe, o czym informuje komunikat pod listą.',
             'Wynik obejmuje termin optymalny (zakładający niezwłoczne decyzje inwestora) oraz najpóźniejszy (uwzględniający jego dni w pełnym wymiarze). Rzeczywisty termin mieści się pomiędzy tymi wartościami, stąd widełki zamiast jednej daty. Bez podanej daty rozpoczęcia prezentowana jest wyłącznie liczba dni wraz z przelicznikiem orientacyjnym.',
           ],
         },
@@ -410,7 +439,7 @@ export const helpPl = {
             'Zestawy stanowią komplet pozycji wstawiany do wyceny jako grupa (przykładowo „Kuchnia — pakiet”). Tworzone są ikoną zakładki przy grupie w edytorze albo w zakładce Zestawy.',
             'Pomieszczenia obejmują słownik typów (kuchnia, salon, łazienka i pozostałe), na podstawie którego cennik dobiera stawkę. Zmiana nazwy nie modyfikuje klucza technicznego, więc nie wpływa na ceny w zapisanych wycenach. Słownik edytuje się wyłącznie w tym miejscu.',
             'Stawki prezentują pełną macierz usługa × typ pomieszczenia na jednym ekranie, wraz z importem z pliku CSV.',
-            'Sekcje Termin, Etapy współpracy i Cennik dodatkowy to biblioteki pozostałych rodzajów dokumentu: przy pierwszym otwarciu wypełniają się wbudowanym szablonem (oznaczonym jako przykładowy), a wpisy edytuje się w miejscu. Z tych list korzysta panel „Dodaj z biblioteki” w dokumentach.',
+            'Sekcje Termin, Etapy współpracy i Cennik dodatkowy to biblioteki pozostałych rodzajów dokumentu: przy pierwszym otwarciu wypełniają się wbudowanym szablonem (oznaczonym jako przykładowy), a wpisy edytuje się w miejscu (ikona ołówka) i porządkuje strzałkami. Wpis terminu przechowuje stronę (ARCH./INW.), dni bazowe, zakres pomieszczeń, stawkę domyślną oraz dni według typu pomieszczenia; wpis etapów — opis, nagłówek grupy i domyślne objęcie zakresem; wpis cennika — przedział cen, jednostkę, termin realizacji i dni doliczane do terminu. Z tych list korzysta panel „Dodaj z biblioteki”; ikona zakładki przy wierszu dokumentu działa w drugą stronę.',
           ],
         },
         {
@@ -558,6 +587,14 @@ export const helpPl = {
         {
           kind: 'faq',
           items: [
+            {
+              q: 'Gdzie jest pozycja „Wyceny”?',
+              a: 'Od wersji 1.2 nazywa się „Dokumenty” i zawiera cztery zakładki: Wyceny, Terminy, Etapy współpracy, Cenniki dodatkowe. Zapisane adresy `/wyceny` przekierowują. Wycena jest jednym z rodzajów dokumentu; pozostałe można zakładać także samodzielnie.',
+            },
+            {
+              q: 'Termin nie zmienia się po dodaniu pomieszczenia.',
+              a: 'Dni za pomieszczenie liczą wyłącznie etapy z zakresem innym niż „Nie zależy od pomieszczeń” — i tylko dla pomieszczeń objętych tym zakresem (część wizualna / techniczna). Należy sprawdzić zakres etapu, zaznaczenia przy pomieszczeniu oraz stawkę: puste pole w macierzy oznacza stawkę domyślną etapu, która może wynosić 0.',
+            },
             {
               q: 'Usługa rozliczana według pomieszczenia nalicza 0 zł.',
               a: 'Wycena nie zawiera pomieszczeń albo pomieszczenia nie są oznaczone w części, której usługa dotyczy (flagi W/T). Należy uzupełnić listę pomieszczeń w prawej kolumnie oraz zweryfikować zakres usługi na jej stronie w Bibliotece.',
