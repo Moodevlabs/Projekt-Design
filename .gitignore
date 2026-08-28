@@ -44,7 +44,7 @@ supabase/.temp
 # ---------------------------------------------------------------------------
 
 # Dokumentacja projektowa: PRD, architektura, schemat bazy, plan zadań.
-docs/
+/docs/
 
 # Materiały źródłowe od klienta: koncepcje, inspiracje, arkusz, prototyp.
 reference/
