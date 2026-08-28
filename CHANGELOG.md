@@ -3,6 +3,35 @@
 Format wg [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/).
 Wersje zgodne z [SemVer](https://semver.org/lang/pl/).
 
+## [1.1.6] – 2026-08-28
+
+### Zmienione
+
+**Strona klienta przeniesiona na własną subdomenę.** Oferty i briefy stoją od
+tego wydania pod `klient.toolier.pl`, a adres główny `toolier.pl` zostaje
+zwolniony pod stronę produktu. Rozdzielenie jest celowe i nie jest kosmetyką:
+strona klienta wysyła nagłówki `noindex, nofollow`, `X-Frame-Options: DENY`
+i `Referrer-Policy: no-referrer` dla **całej** domeny, bez wyjątków. Gdyby
+dzieliła adres ze stroną produktu, te reguły trzeba by zawęzić do wybranych
+ścieżek, czyli otworzyć drogę do przypadkowego zaindeksowania cudzej oferty.
+Osobny adres oznacza też, że publikacja strony produktu nie ma jak ruszyć
+strony, na której inwestor akceptuje ofertę.
+
+Adres pochodzi ze zmiennej `VITE_SHARE_BASE_URL` i jest **wkompilowywany
+w aplikację** przy budowaniu wydania — linki utworzone w starszych wersjach
+wskazują na poprzedni adres i pozostają ważne tak długo, jak długo prowadzi
+z niego przekierowanie.
+
+### Naprawione
+
+**Wydanie ze złym adresem strony klienta nie zbuduje się.** Brak albo literówka
+w `VITE_SHARE_BASE_URL` nie objawiały się niczym widocznym: aplikacja
+budowała się poprawnie, a dopiero przy wysyłce oferty pokazywała projektantowi
+sam token zamiast adresu. Ponieważ wartość wchodzi do paczki na stałe, naprawa
+oznaczała nowe wydanie. Build produkcyjny sprawdza teraz tę zmienną, zanim
+cokolwiek skompiluje, i przerywa się z komunikatem mówiącym, co poprawić —
+tak samo jak przy niezgodności numeru wersji z tagiem.
+
 ## [1.1.5] – 2026-08-28
 
 ### Naprawione
