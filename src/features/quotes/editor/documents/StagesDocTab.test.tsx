@@ -11,9 +11,15 @@ vi.mock('@/data/queries/useWorkspace', () => ({ useWorkspace, useWorkspaceId: ()
 
 // Biblioteka dokumentow (T-103): panel „Dodaj z biblioteki" i zapis wiersza
 // pytaja o wpisy — test komponentu izoluje sie od TanStack Query.
+const docEntries = vi.hoisted(() => ({ current: [] as unknown[] }));
 vi.mock('@/data/queries/useLibraryDocs', () => ({
   useDocLibrary: () => ({ data: [], isLoading: false, isError: false }),
-  useDocLibraryEntries: () => ({ entries: [], data: [], isLoading: false, isError: false }),
+  useDocLibraryEntries: () => ({
+    entries: docEntries.current,
+    data: [],
+    isLoading: false,
+    isError: false,
+  }),
   useCreateDocLibraryEntry: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 vi.mock('sonner', () => ({
@@ -216,5 +222,38 @@ describe('StagesDocTab — edycja', () => {
     await user.type(pole, '30');
 
     expect(dokument()?.validDays).toBe(30);
+  });
+});
+
+describe('StagesDocTab — etap z biblioteki (T-109)', () => {
+  it('etap wstawiony z biblioteki jest OBJETY zakresem, mimo ze szablon trzyma included:false', async () => {
+    const user = userEvent.setup();
+    docEntries.current = [
+      {
+        id: 'e1',
+        workspaceId: 'ws',
+        kind: 'stages',
+        name: 'Nadzór autorski XYZ',
+        payload: {
+          name: 'Nadzór autorski XYZ',
+          description: '',
+          included: false,
+          sectionLabel: 'Nadzór i realizacja',
+          linkedItemTags: [],
+        },
+        sortOrder: 0,
+        isSample: true,
+      },
+    ];
+    zaladuj();
+    render(<StagesDocTab editing />);
+
+    await user.click(screen.getByRole('button', { name: pl.editor.docLibrary.open }));
+    await user.click(
+      screen.getByRole('button', { name: pl.editor.docLibrary.addLabel('Nadzór autorski XYZ') }),
+    );
+
+    const etap = dokument()?.entries.find((entry) => entry.name === 'Nadzór autorski XYZ');
+    expect(etap?.included).toBe(true);
   });
 });

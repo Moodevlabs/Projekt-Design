@@ -133,7 +133,10 @@ export function StagesDocTab({
           kind="stages"
           open={libraryOpen}
           onOpenChange={setLibraryOpen}
-          onInsert={(payload) => addEntry(payload)}
+          // Etap wybrany z biblioteki wchodzi OBJETY zakresem. Szablon trzyma
+          // `included: false` (lista-propozycja), ale swiadome dodanie jednego
+          // etapu to decyzja — jak `enabled` w terminie (T-108).
+          onInsert={(payload) => addEntry({ ...payload, included: true })}
         />
 
         {editing || doc.footnote ? (
