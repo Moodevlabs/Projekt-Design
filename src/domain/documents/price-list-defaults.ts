@@ -120,6 +120,15 @@ const SZABLON: PriceListTemplateItem[] = [
 ];
 
 /** Pozycje szablonu ze świeżymi identyfikatorami. */
+
+/**
+ * Wbudowany szablon jako lista wpisów — treść seedu biblioteki dokumentów
+ * (T-102). Kopia, nie referencja: biblioteka może ją potem edytować.
+ */
+export function builtInPriceListTemplate(): PriceListTemplateItem[] {
+  return structuredClone(SZABLON);
+}
+
 export function defaultPriceListItems(
   template: PriceListTemplateItem[] | null = null,
 ): PriceListItem[] {

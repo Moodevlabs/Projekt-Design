@@ -97,6 +97,15 @@ const SZABLON: StageTemplateEntry[] = [
 ];
 
 /** Etapy szablonu ze świeżymi identyfikatorami. */
+
+/**
+ * Wbudowany szablon jako lista wpisów — treść seedu biblioteki dokumentów
+ * (T-102). Kopia, nie referencja: biblioteka może ją potem edytować.
+ */
+export function builtInStagesTemplate(): StageTemplateEntry[] {
+  return structuredClone(SZABLON);
+}
+
 export function defaultStageEntries(template: StageTemplateEntry[] | null = null): StageEntry[] {
   return (template ?? SZABLON).map((entry) => ({ ...entry, id: newId() }));
 }

@@ -549,6 +549,53 @@ export type Database = {
           },
         ]
       }
+      library_doc_entries: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          id: string
+          is_sample: boolean
+          kind: string
+          name: string
+          payload: Json
+          sort_order: number
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          is_sample?: boolean
+          kind: string
+          name: string
+          payload?: Json
+          sort_order?: number
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          is_sample?: boolean
+          kind?: string
+          name?: string
+          payload?: Json
+          sort_order?: number
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_doc_entries_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       library_groups: {
         Row: {
           created_at: string
@@ -1423,6 +1470,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      seed_doc_library: { Args: { ws: string; kind: string; entries: Json }; Returns: number }
       seed_library_sample: { Args: { ws: string }; Returns: undefined }
       seed_room_types: { Args: { ws: string }; Returns: undefined }
       share_status: { Args: { p_token: string }; Returns: string }

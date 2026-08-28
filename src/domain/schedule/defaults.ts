@@ -168,6 +168,15 @@ const SZABLON: StageTemplate[] = [
  * `template` pozwala podstawić własny szablon workspace'u
  * (`settings.scheduleTemplate`); `null` znaczy „użyj wbudowanego".
  */
+
+/**
+ * Wbudowany szablon jako lista wpisów — treść seedu biblioteki dokumentów
+ * (T-102). Kopia, nie referencja: biblioteka może ją potem edytować.
+ */
+export function builtInScheduleTemplate(): StageTemplate[] {
+  return structuredClone(SZABLON);
+}
+
 export function defaultScheduleStages(template: StageTemplate[] | null = null): ScheduleStage[] {
   return (template ?? SZABLON).map((stage) => ({
     ...stage,

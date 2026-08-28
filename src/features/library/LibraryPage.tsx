@@ -4,6 +4,7 @@ import { LibraryCategoriesTab } from './categories/LibraryCategoriesTab';
 import { LibraryGroupsTab } from './groups/LibraryGroupsTab';
 import { PricingMatrixTab } from './pricing/PricingMatrixTab';
 import { RoomTypesSection } from '@/features/settings/RoomTypesSection';
+import { LibraryDocsTab } from './docs/LibraryDocsTab';
 import { pl } from '@/i18n/pl';
 
 /**
@@ -19,6 +20,10 @@ import { pl } from '@/i18n/pl';
  * „Pomieszczenia" to ten sam `RoomTypesSection` co w Ustawieniach — jeden
  * komponent w dwóch miejscach, bo słownik jest jeden. Radix odmontowuje
  * nieaktywne zakładki, więc dane ciągną się dopiero po wejściu.
+ *
+ * Od T-102 dochodzą trzy sekcje dokumentów: **Termin · Etapy współpracy ·
+ * Cennik dodatkowy** — każdy rodzaj dokumentu ma swoją bibliotekę, tak jak
+ * wycena ma usługi. Jeden komponent `LibraryDocsTab` z parametrem rodzaju.
  */
 export function LibraryPage() {
   return (
@@ -29,6 +34,9 @@ export function LibraryPage() {
         <TabsTrigger value="sets">{pl.library.sets}</TabsTrigger>
         <TabsTrigger value="rooms">{pl.library.rooms}</TabsTrigger>
         <TabsTrigger value="rates">{pl.library.rates}</TabsTrigger>
+        <TabsTrigger value="doc-schedule">{pl.library.docs.tabs.schedule}</TabsTrigger>
+        <TabsTrigger value="doc-stages">{pl.library.docs.tabs.stages}</TabsTrigger>
+        <TabsTrigger value="doc-price-list">{pl.library.docs.tabs.price_list}</TabsTrigger>
       </TabsList>
 
       <TabsContent value="items">
@@ -45,6 +53,15 @@ export function LibraryPage() {
       </TabsContent>
       <TabsContent value="rates">
         <PricingMatrixTab />
+      </TabsContent>
+      <TabsContent value="doc-schedule">
+        <LibraryDocsTab kind="schedule" />
+      </TabsContent>
+      <TabsContent value="doc-stages">
+        <LibraryDocsTab kind="stages" />
+      </TabsContent>
+      <TabsContent value="doc-price-list">
+        <LibraryDocsTab kind="price_list" />
       </TabsContent>
     </Tabs>
   );

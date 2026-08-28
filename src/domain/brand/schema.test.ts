@@ -104,6 +104,8 @@ describe('WorkspaceSettingsSchema', () => {
       currency: 'PLN',
       vatRate: 23,
       numberPattern: DEFAULT_NUMBER_PATTERN,
+      // Wzorce pozostalych rodzajow dokumentu (T-99) — puste = wbudowane.
+      numberPatterns: {},
       showDisabledItems: true,
       // Wersja na dokumencie klienta — domyslnie NIE (T-57).
       showVersionOnPdf: false,

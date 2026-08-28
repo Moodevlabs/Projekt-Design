@@ -44,6 +44,13 @@ export const queryKeys = {
     workspaceId ? (['library', 'usage', workspaceId] as const) : (['library', 'usage'] as const),
   librarySample: (workspaceId?: string) =>
     workspaceId ? (['library', 'sample', workspaceId] as const) : (['library', 'sample'] as const),
+  /** Biblioteka dokumentow (T-102) — osobno per rodzaj. */
+  libraryDocs: (kind?: string, workspaceId?: string) =>
+    kind && workspaceId
+      ? (['library', 'docs', kind, workspaceId] as const)
+      : kind
+        ? (['library', 'docs', kind] as const)
+        : (['library', 'docs'] as const),
   libraryGroups: (workspaceId?: string) =>
     workspaceId ? (['library', 'groups', workspaceId] as const) : (['library', 'groups'] as const),
   /** Linki klienta, uwagi i akceptacja — wszystko per wycena (T-25/T-26). */
