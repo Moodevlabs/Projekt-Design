@@ -124,7 +124,7 @@ pnpm build:share          # build produkcyjny do dist-share/
 3. Otaguj i wypchnij:
 
    ```bash
-   git tag v1.2.1 && git push origin v1.2.1
+   git tag v1.2.2 && git push origin v1.2.2
    ```
 
 Workflow zbuduje paczki dla macOS (Apple Silicon i Intel) oraz Windows,
