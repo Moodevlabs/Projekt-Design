@@ -101,6 +101,11 @@ const routeTree = [
                 handle: { title: pl.templates.title },
               },
               {
+                path: 'szablony/:templateId',
+                element: <QuoteEditorPage />,
+                handle: { title: pl.templates.title, hideTopbar: true },
+              },
+              {
                 /*
                  * Alias sprzed T-58: Branding byl osobna pozycja sidebara.
                  * Zostaje, zeby zapisane linki i stare testy dalej dzialaly.

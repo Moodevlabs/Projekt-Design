@@ -49,6 +49,7 @@ import {
   type StageTemplateEntry,
 } from '@/domain/documents';
 import type { Quote } from '@/data/repos/quotes.repo';
+import type { Template } from '@/data/repos/templates.repo';
 
 /**
  * Pola, które kaskadują z biblioteki do wyceny. Świadomie WĄSKI zestaw:
@@ -95,6 +96,12 @@ export type EditorMode = 'edit' | 'preview';
 
 export interface EditorState {
   quoteId: string | null;
+  /**
+   * Szablon otwarty w edytorze (T-113). Wyklucza sie z `quoteId`: ten sam
+   * store i te same akcje, inne zrodlo zapisu (`quote_templates`). Bez klienta,
+   * numeru, statusu, wersji i udostepniania — szablon to tresc, nie dokument.
+   */
+  templateId: string | null;
   /**
    * Klient z kartoteki (T-53). Kolumna, nie `body` — snapshot danych siedzi
    * osobno w `body.client` i to on idzie do PDF. Tu jest wylacznie
@@ -145,6 +152,7 @@ export interface EditorState {
 
   // --- cykl zycia ---
   load: (quote: Quote) => void;
+  loadTemplate: (template: Template) => void;
   reset: () => void;
   setMode: (mode: EditorMode) => void;
   /**
@@ -313,6 +321,7 @@ export interface EditorState {
 
 const INITIAL = {
   quoteId: null,
+  templateId: null as string | null,
   clientId: null as string | null,
   projectId: null as string | null,
   lineageId: null as string | null,
@@ -389,8 +398,29 @@ export const useEditorStore = create<EditorState>()(
   immer((set) => ({
     ...INITIAL,
 
+    loadTemplate: (template) =>
+      set((state) => {
+        state.templateId = template.id;
+        state.quoteId = null;
+        state.clientId = null;
+        state.projectId = null;
+        state.lineageId = null;
+        state.version = 1;
+        state.currency = 'PLN';
+        state.number = null;
+        state.status = 'draft';
+        state.body = template.body;
+        state.schedule = template.schedule;
+        state.documents = template.documents;
+        state.lastSeenUpdatedAt = template.updatedAt;
+        state.saveState = 'idle';
+        state.saveError = null;
+        state.hasConflict = false;
+      }),
+
     load: (quote) =>
       set((state) => {
+        state.templateId = null;
         state.quoteId = quote.id;
         state.clientId = quote.clientId;
         state.projectId = quote.projectId;

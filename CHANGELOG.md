@@ -23,6 +23,18 @@ i „Dodaj wszystkie”; „Etap ręcznie” / „Pozycja ręcznie” dodaje pus
 ikona zakładki przy wierszu zapisuje go do biblioteki. Etap z biblioteki wchodzi
 zaznaczony / objęty zakresem.
 
+**Szablony buduje się w edytorze.** Szablony → „Nowy szablon” otwiera pusty
+szablon w tym samym edytorze co dokumentację (zakładki, „Dodaj usługi”,
+„Rozpisz na pomieszczenia”, „Dodaj z biblioteki”, autozapis); karta szablonu
+ma „Edytuj”. Dotąd szablon powstawał wyłącznie z gotowej oferty — ta droga
+(„Zapisz jako szablon…”) zostaje.
+
+**Zniknął przycisk „zakładki” przy wierszach.** Przy pozycjach wyceny, grupach,
+etapach terminu, etapach współpracy i pozycjach cennika stał przycisk zapisu do
+biblioteki, który w części miejsc robił coś, a w części nie — i mylił. Do
+biblioteki zapisuje się z menu „⋯” → „Zapisz wszystko do biblioteki” albo
+w samej Bibliotece.
+
 **„Rozpisz na pomieszczenia” wróciło** do sekcji wyceny: zakłada blok dla
 każdego pomieszczenia z panelu, którego jeszcze nie ma. Powtórne kliknięcie
 niczego nie dubluje.

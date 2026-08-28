@@ -1222,6 +1222,7 @@ Z wyrazami szacunku`,
     backToList: 'Dokumenty',
     backToProject: 'Projekt',
     backToClient: 'Klient',
+    backToTemplates: 'Szablony',
     itemsCount: (count: number) => `${count} poz.`,
   },
   /*
@@ -1834,6 +1835,12 @@ Z wyrazami szacunku`,
   },
   templates: {
     title: 'Szablony',
+    /** Edytor szablonow (T-113). */
+    new: 'Nowy szablon',
+    newName: 'Nowy szablon',
+    editLabel: 'Edytuj',
+    edit: (name: string) => `Edytuj szablon: ${name}`,
+    badge: 'Szablon',
     emptyTitle: 'Brak szablonów',
     emptyDescription:
       'Gotową wycenę można zapisać jako szablon, aby kolejne oferty przygotowywać na podstawie sprawdzonego układu.',

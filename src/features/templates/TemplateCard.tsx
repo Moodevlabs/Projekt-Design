@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { CalendarClock, FilePlus2, FileText, Trash2 } from 'lucide-react';
+import { CalendarClock, FilePlus2, FileText, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Money } from '@/components/shared';
@@ -20,12 +20,15 @@ export function TemplateCard({
   saving,
   onRename,
   onUse,
+  onEdit,
   onDelete,
 }: {
   template: Template;
   saving?: boolean;
   onRename: (name: string) => void;
   onUse: () => void;
+  /** Otwiera szablon w edytorze (T-113). */
+  onEdit: () => void;
   onDelete: () => void;
 }) {
   const [name, setName] = useState(template.name);
@@ -114,17 +117,28 @@ export function TemplateCard({
       ) : null}
 
       {!broken ? (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          aria-label={pl.templates.use(label)}
-          onClick={onUse}
-          className="self-start"
-        >
-          <FilePlus2 className="size-4" aria-hidden />
-          {pl.templates.newFromTemplate}
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            aria-label={pl.templates.edit(label)}
+            onClick={onEdit}
+          >
+            <Pencil className="size-4" aria-hidden />
+            {pl.templates.editLabel}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            aria-label={pl.templates.use(label)}
+            onClick={onUse}
+          >
+            <FilePlus2 className="size-4" aria-hidden />
+            {pl.templates.newFromTemplate}
+          </Button>
+        </div>
       ) : null}
     </article>
   );

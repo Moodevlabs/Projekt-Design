@@ -28,6 +28,7 @@ import { LibrarySheet } from './components/LibrarySheet';
 import { ScopePanel } from './scope/ScopePanel';
 import { OverwriteTemplateDialog, SaveAsTemplateDialog } from './components/TemplateDialogs';
 import { useCreateQuote, useCreateQuoteVersion, useQuote } from '@/data/queries/useQuotes';
+import { useTemplate } from '@/data/queries/useTemplates';
 import { useWorkspace } from '@/data/queries/useWorkspace';
 import { canCreateVersion, quoteBodyFromSettings, versionLabel } from '@/domain/quote';
 import { ConfirmDialog, EmptyState } from '@/components/shared';
@@ -65,9 +66,85 @@ import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
 
 export function QuoteEditorPage() {
-  const { id } = useParams<{ id: string }>();
+  const { id, templateId } = useParams<{ id?: string; templateId?: string }>();
 
+  if (templateId) return <ExistingTemplateEditor templateId={templateId} />;
   return id ? <ExistingQuoteEditor quoteId={id} /> : <NewQuoteRedirect />;
+}
+
+/**
+ * Edytor SZABLONU (T-113): ta sama powierzchnia co dokumentacja, inne zrodlo.
+ * Szablon buduje sie tak samo jak wycene — z biblioteki, z terminem, etapami
+ * i cennikiem w zakladkach — zamiast „zapisz jako szablon" z gotowej oferty.
+ */
+function ExistingTemplateEditor({ templateId }: { templateId: string }) {
+  const template = useTemplate(templateId);
+  const { saveNow } = useAutosave();
+  const loadTemplate = useEditorStore((state) => state.loadTemplate);
+  const reset = useEditorStore((state) => state.reset);
+
+  const loadedVersion = useRef<string | null>(null);
+  useEffect(() => {
+    const data = template.data;
+    if (!data || !data.body) return;
+    const version = `${data.id}:${data.updatedAt}`;
+    const state = useEditorStore.getState();
+    // Ten sam zabezpieczajacy warunek co w `ExistingQuoteEditor`: raz
+    // wczytany szablon nie jest nadpisywany przez wlasne zapisy (kazdy
+    // `overwrite` zmienia `updatedAt` w cache).
+    if (state.templateId === data.id && state.body !== null) {
+      if (loadedVersion.current?.startsWith(`${data.id}:`)) return;
+    }
+    loadedVersion.current = version;
+    loadTemplate(data);
+  }, [template.data, loadTemplate]);
+
+  useEffect(() => () => reset(), [reset]);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 's') {
+        event.preventDefault();
+        saveNow();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [saveNow]);
+
+  if (template.isLoading) return <EditorSkeleton />;
+
+  if (template.isError) {
+    return (
+      <div className="p-7">
+        <Alert variant="destructive">
+          <AlertDescription>{template.error.message}</AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  if (template.data?.bodyError) {
+    return (
+      <div className="p-7">
+        <EmptyState
+          icon={AlertTriangle}
+          title={pl.editor.corruptedTitle}
+          description={pl.editor.corruptedDescription}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <EditorSurface
+      createdAt={template.data?.createdAt ?? new Date().toISOString()}
+      sentAt={null}
+      templateName={template.data?.name ?? null}
+      onReload={() => void template.refetch()}
+      onRetry={saveNow}
+    />
+  );
 }
 
 /** `/wyceny/nowa` zakłada pustą dokumentację i od razu przechodzi na jej adres. */
@@ -264,12 +341,15 @@ function ExistingQuoteEditor({ quoteId }: { quoteId: string }) {
 function EditorSurface({
   createdAt,
   sentAt,
+  templateName = null,
   onReload,
   onRetry,
 }: {
   createdAt: string;
   /** `quotes.sent_at` — pierwszy krok ścieżki decyzji klienta (poprawka 7a). */
   sentAt: string | null;
+  /** Nazwa szablonu = tryb szablonu (T-113). `null` = zwykla dokumentacja. */
+  templateName?: string | null;
   onReload: () => void;
   onRetry: () => void;
 }) {
@@ -304,8 +384,10 @@ function EditorSurface({
   );
   // „Wstecz" wraca tam, skad sie przyszlo (T-110): teczka → karta klienta →
   // rejestr. Dokument bez klienta nie ma dokad wracac poza rejestr.
-  const back =
-    clientId && projectId
+  const templateMode = templateName !== null;
+  const back = templateMode
+    ? { to: routes.templates, label: pl.editor.backToTemplates }
+    : clientId && projectId
       ? { to: routes.project(clientId, projectId), label: pl.editor.backToProject }
       : clientId
         ? { to: routes.client(clientId), label: pl.editor.backToClient }
@@ -470,6 +552,7 @@ function EditorSurface({
         <EditorTopbar
           backTo={back.to}
           backLabel={back.label}
+          templateName={templateName}
           number={number}
           status={status}
           mode={editing ? mode : 'preview'}
@@ -786,7 +869,7 @@ function EditorSurface({
               {/* Karta klienta tylko w edycji: przypisanie do kartoteki jest
                   informacja robocza, a nie trescia oferty. W podgladzie liczy
                   sie to, co w naglowku dokumentu. */}
-              {editing ? <ClientCard /> : null}
+              {editing && !templateMode ? <ClientCard /> : null}
 
               {/* Archiwum dokumentow — skrot do tego, co juz poszlo do
                   inwestora. Sama karta chowa sie, gdy wycena nie ma klienta. */}
@@ -798,7 +881,7 @@ function EditorSurface({
               */}
               {quoteId ? <QuoteFeedback quoteId={quoteId} sentAt={sentAt} /> : null}
 
-              {editing ? <DocumentsCard /> : null}
+              {editing && !templateMode ? <DocumentsCard /> : null}
 
               <RoomsPanel
                 rooms={body.rooms}

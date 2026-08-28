@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutTemplate } from 'lucide-react';
+import { LayoutTemplate, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { ConfirmDialog, EmptyState } from '@/components/shared';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -8,7 +9,14 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { TemplateCard } from './TemplateCard';
 import { useCreateQuote } from '@/data/queries/useQuotes';
 import { scheduleFromTemplate } from '@/domain/schedule';
-import { useDeleteTemplate, useRenameTemplate, useTemplates } from '@/data/queries/useTemplates';
+import {
+  useCreateTemplate,
+  useDeleteTemplate,
+  useRenameTemplate,
+  useTemplates,
+} from '@/data/queries/useTemplates';
+import { useWorkspace } from '@/data/queries/useWorkspace';
+import { quoteBodyFromSettings } from '@/domain/quote';
 import type { Template } from '@/data/repos/templates.repo';
 import { routes } from '@/app/routes';
 import { pl } from '@/i18n/pl';
@@ -23,7 +31,32 @@ export function TemplatesPage() {
   const rename = useRenameTemplate();
   const remove = useDeleteTemplate();
   const createQuote = useCreateQuote();
+  const createTemplate = useCreateTemplate();
+  const settings = useWorkspace().data?.settings;
   const [pendingDelete, setPendingDelete] = useState<Template | null>(null);
+
+  /**
+   * „Nowy szablon" (T-113): pusty szablon otwiera sie od razu w edytorze
+   * i buduje jak dokumentacje — z biblioteki, z terminem, etapami i cennikiem.
+   * Dotad szablon powstawal wylacznie z gotowej oferty („Zapisz jako szablon").
+   */
+  const newTemplate = () => {
+    if (!settings) return;
+    createTemplate.mutate(
+      { name: pl.templates.newName, body: quoteBodyFromSettings(settings) },
+      {
+        onSuccess: (template) => void navigate(routes.template(template.id)),
+        onError: (error) => toast.error(error.message),
+      },
+    );
+  };
+
+  const newButton = (
+    <Button disabled={!settings || createTemplate.isPending} onClick={newTemplate}>
+      <Plus className="size-4" aria-hidden />
+      {pl.templates.new}
+    </Button>
+  );
 
   const rows = templates.data ?? [];
 
@@ -77,12 +110,14 @@ export function TemplatesPage() {
         icon={LayoutTemplate}
         title={pl.templates.emptyTitle}
         description={pl.templates.emptyDescription}
+        action={newButton}
       />
     );
   }
 
   return (
     <div className="space-y-5">
+      <div className="flex justify-end">{newButton}</div>
       {/* `items-start`, żeby karta nie rozciągała sąsiadek w wierszu. */}
       <div className="grid items-start gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {rows.map((template) => (
@@ -92,6 +127,7 @@ export function TemplatesPage() {
             saving={rename.isPending}
             onRename={(name) => rename.mutate({ id: template.id, name })}
             onUse={() => createFromTemplate(template)}
+            onEdit={() => void navigate(routes.template(template.id))}
             onDelete={() => setPendingDelete(template)}
           />
         ))}

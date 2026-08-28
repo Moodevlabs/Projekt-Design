@@ -248,7 +248,7 @@ export const helpPl = {
           items: [
             'Cztery zakładki są rozdziałami jednej oferty, nie osobnymi dokumentami: termin liczy dni z pomieszczeń wyceny, cennik dosprzedaje pozycje do wyceny i dni do terminu, etapy mówią, co z wyceny wchodzi w zakres. Dlatego zakłada się je razem — przyciskiem „Nowa dokumentacja”.',
             'Najkrótsza droga: Klienci → karta klienta → projekt → „Nowa dokumentacja”. Dokument dostaje dane inwestora i przypisanie do teczki; „Wstecz” w edytorze wraca do projektu, więc kolejną dokumentację tego samego klienta zakłada się bez szukania go w rejestrze. Z rejestru i pulpitu ten sam przycisk pyta o klienta i projekt.',
-            'Każda zakładka poza wyceną startuje pusta i buduje się z biblioteki — „Dodaj z biblioteki” otwiera panel z wyszukiwarką, a „Dodaj wszystkie” wstawia cały szablon jednym kliknięciem (w etapach współpracy: wstaw wszystko, potem odznacz to, czego nie robisz). „Etap ręcznie” / „Pozycja ręcznie” dodaje pusty wiersz, a ikona zakładki przy wierszu zapisuje go do biblioteki.',
+            'Każda zakładka poza wyceną startuje pusta i buduje się z biblioteki — „Dodaj z biblioteki” otwiera panel z wyszukiwarką, a „Dodaj wszystkie” wstawia cały szablon jednym kliknięciem (w etapach współpracy: wstaw wszystko, potem odznacz to, czego nie robisz). „Etap ręcznie” / „Pozycja ręcznie” dodaje pusty wiersz. Do biblioteki zapisuje się z menu „⋯” → „Zapisz wszystko do biblioteki” albo bezpośrednio w Bibliotece.',
             'Rejestr pokazuje numer, tytuł, klienta, miasto, status, sumę wyceny i datę; filtry statusu, klienta i miasta, wyszukiwarka, sortowanie i eksport rejestru działają jak dotąd. Suma dotyczy wyceny — pozostałe zakładki nie mają czego sumować.',
             'Na karcie klienta i w projekcie zakładka „Dokumenty” listuje dokumentacje (w projekcie zwinięte do linii wersji), a wygenerowane pliki PDF leżą w zakładce „Pliki” pod filtrem „Wygenerowane PDF”.',
           ],
@@ -438,10 +438,10 @@ export const helpPl = {
             'Cena „od” prezentowana jest na listach oraz w panelu „Dodaj usługi” i nie wpływa na obliczenia. Przy braku wartości wprowadzonej ręcznie lista prezentuje najniższą stawkę wynikającą z reguły.',
             'Usługa nieaktywna nie jest dostępna w edytorze, lecz pozostaje w wycenach, które już ją zawierają.',
             'Grupy opisują: kod („01”), nazwa, kolor z palety oraz kolejność ustalana przeciągnięciem. Kolejność grup odpowiada kolejności w panelu „Dodaj usługi”. Usunięcie grupy przenosi przypisane do niej usługi do kategorii „Bez grupy”.',
-            'Zestawy stanowią komplet pozycji wstawiany do wyceny jako grupa (przykładowo „Kuchnia — pakiet”). Tworzone są ikoną zakładki przy grupie w edytorze albo w zakładce Zestawy.',
+            'Zestawy stanowią komplet pozycji wstawiany do wyceny jako grupa (przykładowo „Kuchnia — pakiet”). Tworzone są w zakładce Zestawy albo poleceniem „Zapisz wszystko do biblioteki” z menu edytora.',
             'Pomieszczenia obejmują słownik typów (kuchnia, salon, łazienka i pozostałe), na podstawie którego cennik dobiera stawkę. Zmiana nazwy nie modyfikuje klucza technicznego, więc nie wpływa na ceny w zapisanych wycenach. Słownik edytuje się wyłącznie w tym miejscu.',
             'Stawki prezentują pełną macierz usługa × typ pomieszczenia na jednym ekranie, wraz z importem z pliku CSV.',
-            'Sekcje Termin, Etapy współpracy i Cennik dodatkowy to biblioteki pozostałych rodzajów dokumentu: przy pierwszym otwarciu wypełniają się wbudowanym szablonem (oznaczonym jako przykładowy), a wpisy edytuje się w miejscu (ikona ołówka) i porządkuje strzałkami. Wpis terminu przechowuje stronę (ARCH./INW.), dni bazowe, zakres pomieszczeń, stawkę domyślną oraz dni według typu pomieszczenia; wpis etapów — opis, nagłówek grupy i domyślne objęcie zakresem; wpis cennika — przedział cen, jednostkę, termin realizacji i dni doliczane do terminu. Z tych list korzysta panel „Dodaj z biblioteki”; ikona zakładki przy wierszu dokumentu działa w drugą stronę.',
+            'Sekcje Termin, Etapy współpracy i Cennik dodatkowy to biblioteki pozostałych rodzajów dokumentu: przy pierwszym otwarciu wypełniają się wbudowanym szablonem (oznaczonym jako przykładowy), a wpisy edytuje się w miejscu (ikona ołówka) i porządkuje strzałkami. Wpis terminu przechowuje stronę (ARCH./INW.), dni bazowe, zakres pomieszczeń, stawkę domyślną oraz dni według typu pomieszczenia; wpis etapów — opis, nagłówek grupy i domyślne objęcie zakresem; wpis cennika — przedział cen, jednostkę, termin realizacji i dni doliczane do terminu. Z tych list korzysta panel „Dodaj z biblioteki”.',
           ],
         },
         {
@@ -460,12 +460,13 @@ export const helpPl = {
       id: 'templates',
       icon: 'templates',
       title: 'Szablony',
-      lead: 'Szablon stanowi gotowy układ wyceny — „Projekt kompleksowy”, „Konsultacja” — wraz z terminem i dokumentami towarzyszącymi.',
+      lead: 'Szablon to gotowa dokumentacja-wzorzec — „Projekt kompleksowy”, „Konsultacja” — z wyceną, terminem, etapami i cennikiem. Buduje się go w tym samym edytorze co dokumentację.',
       blocks: [
         {
           kind: 'list',
           items: [
-            'Zapis: w edytorze menu „⋯” → „Zapisz jako szablon…”. Okno pozwala wskazać zakres: układ wyceny, termin, dokumenty. Opcja „Nadpisz szablon…” aktualizuje szablon istniejący.',
+            'Tworzenie: Szablony → „Nowy szablon” otwiera pusty szablon w edytorze — z tymi samymi zakładkami, panelem „Dodaj usługi”, „Rozpisz na pomieszczenia” i „Dodaj z biblioteki”; zmiany zapisują się same. Karta szablonu ma przycisk „Edytuj”. Nazwę zmienia się na karcie. Druga droga zostaje: z gotowej dokumentacji menu „⋯” → „Zapisz jako szablon…” (z wyborem zakresu) albo „Nadpisz szablon…”.',
+            'W edytorze szablonu nie ma numeru, statusu, klienta, udostępniania, wersji ani eksportu PDF — szablon to treść, nie dokument dla inwestora.',
             'Użycie: „Nowa wycena” → wybór szablonu jako punktu wyjścia, albo w sekcji Szablony polecenie „Nowa wycena z szablonu”. Dane klienta nie są kopiowane — uzupełnia je projekt.',
             'Karta szablonu prezentuje liczbę pozycji, sumę oraz oznaczenia zawartości (wycena · termin · dokumenty).',
           ],

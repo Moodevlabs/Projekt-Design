@@ -21,6 +21,7 @@ import { cn } from '@/lib/utils';
 export function EditorTopbar({
   backTo,
   backLabel,
+  templateName = null,
   number,
   status,
   mode,
@@ -61,6 +62,12 @@ export function EditorTopbar({
    */
   backTo: string;
   backLabel: string;
+  /**
+   * Nazwa szablonu (T-113) = edytujemy SZABLON, nie dokument. Znika numer,
+   * status, udostepnianie, wersje, eksporty i zapis jako szablon — zostaje
+   * tresc, biblioteka i przelacznik podgladu.
+   */
+  templateName?: string | null;
   number: string | null;
   status: QuoteStatus;
   mode: EditorMode;
@@ -105,6 +112,8 @@ export function EditorTopbar({
   /** Historia wersji (T-22). `null` = wycena ma jedna wersje, nie ma czego porownywac. */
   onVersionHistory: (() => void) | null;
 }) {
+  const templateMode = templateName !== null;
+
   return (
     <div className="surface-band relative z-10 flex h-[68px] shrink-0 items-center gap-4 px-7">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
@@ -115,19 +124,28 @@ export function EditorTopbar({
       </Button>
 
       <div className="flex min-w-0 items-center gap-3">
-        <InlineText
-          value={number ?? ''}
-          onCommit={onNumberChange}
-          placeholder={pl.quotes.noNumber}
-          ariaLabel={pl.quotes.number}
-          className="tabular hover:bg-surface focus:bg-surface w-52 rounded-[var(--radius-control)] px-2 py-1 text-sm font-medium"
-        />
+        {templateMode ? (
+          <>
+            <span className="bg-surface-2 text-ink-soft rounded-[var(--radius-pill)] px-2 py-0.5 text-[11px] font-semibold tracking-[0.06em] uppercase">
+              {pl.templates.badge}
+            </span>
+            <span className="text-ink truncate text-sm font-medium">{templateName}</span>
+          </>
+        ) : (
+          <InlineText
+            value={number ?? ''}
+            onCommit={onNumberChange}
+            placeholder={pl.quotes.noNumber}
+            ariaLabel={pl.quotes.number}
+            className="tabular hover:bg-surface focus:bg-surface w-52 rounded-[var(--radius-control)] px-2 py-1 text-sm font-medium"
+          />
+        )}
         {/* Wersja przy numerze, jak w 05-UI §3: `WYC/2026/08/0012 · v2`.
             Dopiero od v2 — „· v1" przy każdej wycenie byłby szumem. */}
-        {showsVersion(version) ? (
+        {!templateMode && showsVersion(version) ? (
           <span className="text-ink-soft text-sm whitespace-nowrap">{versionLabel(version)}</span>
         ) : null}
-        <StatusMark status={status} />
+        {templateMode ? null : <StatusMark status={status} />}
         <SaveIndicator
           state={saveState}
           lastSavedAt={lastSavedAt}
@@ -142,10 +160,12 @@ export function EditorTopbar({
           droga wyslania oferty do inwestora — schowanie jej pod trzema
           kropkami obok „Nadpisz szablon" mowilby, ze to czynnosc rzadka.
         */}
-        <Button variant="outline" size="sm" onClick={onShare}>
-          <Share2 className="size-4" aria-hidden />
-          {pl.share.action}
-        </Button>
+        {templateMode ? null : (
+          <Button variant="outline" size="sm" onClick={onShare}>
+            <Share2 className="size-4" aria-hidden />
+            {pl.share.action}
+          </Button>
+        )}
 
         <div className="border-hair-strong bg-surface flex items-center rounded-[var(--radius-control)] border p-0.5">
           {(['edit', 'preview'] as const).map((value) => {
@@ -184,68 +204,83 @@ export function EditorTopbar({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-64">
-            {/*
-              Checkbox nad listą eksportów, a nie osobny dialog przed każdym:
-              zapis do archiwum jest domyślny i rzadko się go wyłącza, więc
-              modal przed jednoklikową akcją byłby karą za normalne użycie.
-              Bez klienta nie ma go wcale — zasada z 05-UI §3a.8.
-            */}
-            {archiveAvailable ? (
+            {templateMode ? (
               <>
-                <DropdownMenuCheckboxItem
-                  checked={archiveEnabled}
-                  onCheckedChange={onArchiveChange}
-                  onSelect={(event) => event.preventDefault()}
-                >
-                  {pl.documents.saveToClient}
-                </DropdownMenuCheckboxItem>
-                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={onOpenLibrary}>{pl.library.title}</DropdownMenuItem>
+                <DropdownMenuItem onSelect={onSaveAllToLibrary}>
+                  {pl.editor.saveAllToLibrary}
+                </DropdownMenuItem>
               </>
-            ) : null}
-            <DropdownMenuItem onSelect={onExportPdf} disabled={exportingPdf}>
-              {pl.editor.exportPdf}
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={onExportSchedule} disabled={exportingSchedule}>
-              {pl.pdf.exportSchedule}
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={onExportStages} disabled={exportingStages}>
-              {pl.pdf.exportStages}
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={onExportPriceList} disabled={exportingPriceList}>
-              {pl.pdf.exportPriceList}
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={onExportPackage}>{pl.pdf.exportPackage}</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            {/* „Nowa wersja" kontynuuje TĘ SAMĄ linię (koncepcja §4 reguła 1);
-                „Duplikuj" z listy zakłada nową. Archiwalnej nie wersjonujemy —
-                linia poszła dalej i powstałyby dwie „najnowsze". */}
-            {onNewVersion ? (
-              <DropdownMenuItem
-                disabled={creatingVersion}
-                title={pl.quotes.newVersionHint}
-                onSelect={onNewVersion}
-              >
-                {pl.quotes.newVersion}
-              </DropdownMenuItem>
-            ) : null}
-            {/* Znika przy jednej wersji: pozycja menu, ktora zawsze prowadzi
-                do „nie ma czego porownywac", jest gorsza niz jej brak. */}
-            {onVersionHistory ? (
-              <DropdownMenuItem onSelect={onVersionHistory}>{pl.versions.open}</DropdownMenuItem>
-            ) : null}
-            <DropdownMenuItem onSelect={onOpenLibrary}>{pl.library.title}</DropdownMenuItem>
-            <DropdownMenuItem onSelect={onSaveAllToLibrary}>
-              {pl.editor.saveAllToLibrary}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onSelect={onSaveAsTemplate}>
-              {pl.templates.saveAsTemplate}
-            </DropdownMenuItem>
-            {canOverwriteTemplate ? (
-              <DropdownMenuItem onSelect={onOverwriteTemplate}>
-                {pl.templates.overwrite}
-              </DropdownMenuItem>
-            ) : null}
+            ) : (
+              <>
+                {/*
+                  Checkbox nad listą eksportów, a nie osobny dialog przed każdym:
+                  zapis do archiwum jest domyślny i rzadko się go wyłącza, więc
+                  modal przed jednoklikową akcją byłby karą za normalne użycie.
+                  Bez klienta nie ma go wcale — zasada z 05-UI §3a.8.
+                */}
+                {archiveAvailable ? (
+                  <>
+                    <DropdownMenuCheckboxItem
+                      checked={archiveEnabled}
+                      onCheckedChange={onArchiveChange}
+                      onSelect={(event) => event.preventDefault()}
+                    >
+                      {pl.documents.saveToClient}
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuSeparator />
+                  </>
+                ) : null}
+                <DropdownMenuItem onSelect={onExportPdf} disabled={exportingPdf}>
+                  {pl.editor.exportPdf}
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={onExportSchedule} disabled={exportingSchedule}>
+                  {pl.pdf.exportSchedule}
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={onExportStages} disabled={exportingStages}>
+                  {pl.pdf.exportStages}
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={onExportPriceList} disabled={exportingPriceList}>
+                  {pl.pdf.exportPriceList}
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={onExportPackage}>
+                  {pl.pdf.exportPackage}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                {/* „Nowa wersja" kontynuuje TĘ SAMĄ linię (koncepcja §4 reguła 1);
+                    „Duplikuj" z listy zakłada nową. Archiwalnej nie wersjonujemy —
+                    linia poszła dalej i powstałyby dwie „najnowsze". */}
+                {onNewVersion ? (
+                  <DropdownMenuItem
+                    disabled={creatingVersion}
+                    title={pl.quotes.newVersionHint}
+                    onSelect={onNewVersion}
+                  >
+                    {pl.quotes.newVersion}
+                  </DropdownMenuItem>
+                ) : null}
+                {/* Znika przy jednej wersji: pozycja menu, ktora zawsze prowadzi
+                    do „nie ma czego porownywac", jest gorsza niz jej brak. */}
+                {onVersionHistory ? (
+                  <DropdownMenuItem onSelect={onVersionHistory}>
+                    {pl.versions.open}
+                  </DropdownMenuItem>
+                ) : null}
+                <DropdownMenuItem onSelect={onOpenLibrary}>{pl.library.title}</DropdownMenuItem>
+                <DropdownMenuItem onSelect={onSaveAllToLibrary}>
+                  {pl.editor.saveAllToLibrary}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={onSaveAsTemplate}>
+                  {pl.templates.saveAsTemplate}
+                </DropdownMenuItem>
+                {canOverwriteTemplate ? (
+                  <DropdownMenuItem onSelect={onOverwriteTemplate}>
+                    {pl.templates.overwrite}
+                  </DropdownMenuItem>
+                ) : null}
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

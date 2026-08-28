@@ -19,6 +19,8 @@ export const routes = {
   libraryItem: (id: string) => `/biblioteka/uslugi/${id}`,
   libraryItemNew: '/biblioteka/uslugi/nowa',
   templates: '/szablony',
+  /** Edytor szablonu (T-113) — ten sam edytor co dokumentacja, inne zrodlo danych. */
+  template: (id: string) => `/szablony/${id}`,
   /** Alias sprzed T-58 — Branding jest teraz sekcja Ustawien. */
   brand: '/branding',
   /** Kosz na pliki — wlasny ekran, nie sekcja Ustawien (2026-08-27). */

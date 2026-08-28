@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useEditorStore } from './editor.store';
 import { useSaveQuote } from '@/data/queries/useQuotes';
+import { useOverwriteTemplate } from '@/data/queries/useTemplates';
 import { ConflictError } from '@/data/repos/errors';
 import { onWindowCloseRequested, runningInTauri } from '@/lib/tauri';
 import { useEntitlement } from '@/features/billing/useEntitlement';
@@ -30,6 +31,7 @@ export const AUTOSAVE_DELAY_MS = 800;
  */
 export function useAutosave() {
   const save = useSaveQuote();
+  const overwrite = useOverwriteTemplate();
   /**
    * Bez prawa zapisu nie wysylamy niczego.
    *
@@ -48,6 +50,31 @@ export function useAutosave() {
 
   const runSave = useCallback(async () => {
     const state = useEditorStore.getState();
+
+    /*
+     * SZABLON (T-113): ten sam autozapis, inne zrodlo. Bez blokady
+     * optymistycznej (szablon edytuje jedna osoba) i bez kolejki offline —
+     * szablon nie jest dokumentem klienta, ktorego nie wolno zgubic; nieudany
+     * zapis pokazuje blad i czeka na „ponow".
+     */
+    if (state.templateId) {
+      const { templateId, body, schedule, documents } = state;
+      if (!body || !canWriteRef.current) return;
+      state.markSaving();
+      try {
+        const saved = await overwrite.mutateAsync({ id: templateId, body, schedule, documents });
+        if (useEditorStore.getState().templateId !== templateId) return;
+        useEditorStore.getState().markSaved(saved.updatedAt, new Date().toISOString());
+      } catch (error) {
+        if (useEditorStore.getState().templateId !== templateId) return;
+        log.error('Autozapis szablonu nieudany', error);
+        const message = error instanceof Error ? error.message : 'Nieznany błąd';
+        useEditorStore.getState().markError(message);
+        toast.error(`${pl.editor.saveError}: ${message}`);
+      }
+      return;
+    }
+
     const {
       quoteId,
       clientId,
@@ -150,7 +177,7 @@ export function useAutosave() {
         toast.error(`${pl.editor.saveError}: ${message}`);
       }
     }
-  }, [save]);
+  }, [save, overwrite]);
 
   /**
    * `wait` rozstrzyga, co zrobić z zapisem, który już leci.
