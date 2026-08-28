@@ -1399,6 +1399,7 @@ export type Database = {
           quotes_count: number
         }[]
       }
+      next_document_number: { Args: { ws: string; kind: string }; Returns: string }
       next_quote_number: { Args: { ws: string }; Returns: string }
       quote_can_write: { Args: { q: string }; Returns: boolean }
       request_ip: { Args: never; Returns: unknown }

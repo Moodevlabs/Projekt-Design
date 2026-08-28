@@ -27,13 +27,16 @@ export const QuoteStatusSchema = z.enum([
 export type QuoteStatus = z.infer<typeof QuoteStatusSchema>;
 
 /**
- * Rodzaj dokumentu wyslanego inwestorowi (F7.1, arkusz `OFERTY` — RODZAJ).
+ * Rodzaj dokumentu (T-99): wycena, termin, etapy wspolpracy, cennik dodatkowy.
  *
- * **Nie wyliczamy tego z zawartosci wyceny.** Wycena, ktora ma cennik
- * dodatkowy, nie jest „samym cennikiem" — o tym, co naprawde poszlo do
- * inwestora, wie tylko czlowiek.
+ * Do Fazy 5 byla to reczna etykieta rejestru (F7.1: `offer | schedule_only |
+ * price_list_only`), ktorej nic nie czytalo. Teraz rodzaj **decyduje**, co
+ * edytor pokazuje i ktory PDF wychodzi — wiersz w `quotes` jest dokumentem,
+ * a `doc_kind` mowi, ktorym. Wycena (`offer`) dalej moze niesc termin, etapy
+ * i cennik jako pakiet; pozostale rodzaje sa tym jednym dokumentem i niczym
+ * wiecej. Stare wartosci mapuje `documentKindFromLegacy` w `domain/documents`.
  */
-export const DocKindSchema = z.enum(['offer', 'schedule_only', 'price_list_only']);
+export const DocKindSchema = z.enum(['offer', 'schedule', 'stages', 'price_list']);
 export type DocKind = z.infer<typeof DocKindSchema>;
 
 /** Rodzaj pozycji: zwykła pozycja albo rabat. */

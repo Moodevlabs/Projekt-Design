@@ -93,7 +93,6 @@ export function QuotesTable({ rows, loading }: { rows: QuoteSummary[]; loading: 
                     quoteId={quote.id}
                     title={quote.title}
                     notes={quote.internalNotes}
-                    docKind={quote.docKind}
                   />
                 </TableCell>
                 <TableCell>

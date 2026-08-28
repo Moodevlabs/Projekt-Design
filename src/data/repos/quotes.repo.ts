@@ -1,5 +1,4 @@
 import {
-  DocKindSchema,
   QuoteStatusSchema,
   calcQuoteTotals,
   duplicateQuoteBody,
@@ -10,7 +9,12 @@ import {
   type QuoteStatus,
 } from '@/domain/quote';
 import { parseScheduleBody, type ScheduleBody } from '@/domain/schedule';
-import { parseQuoteDocuments, type QuoteDocuments } from '@/domain/documents';
+import {
+  defaultTitleForKind,
+  documentKindFromLegacy,
+  parseQuoteDocuments,
+  type QuoteDocuments,
+} from '@/domain/documents';
 import { getSupabase } from '@/data/supabase';
 import type { TablesUpdate } from '@/data/types.generated';
 import { ConflictError, RepoError, unwrap } from './errors';
@@ -46,7 +50,7 @@ export interface QuoteSummary {
   city: string | null;
   /** Notatki wewnetrzne. **Nigdy nie ida do PDF ani do duplikatu wyceny.** */
   internalNotes: string | null;
-  /** Rodzaj dokumentu wyslanego inwestorowi — ustawia czlowiek, nie automat. */
+  /** Rodzaj dokumentu (T-99). Ustalany przy utworzeniu, potem staly. */
   docKind: DocKind;
   validUntil: string | null;
   sentAt: string | null;
@@ -86,6 +90,8 @@ export interface QuoteFilters {
   projectId?: string;
   /** Wszystkie wersje jednej linii (T-57). */
   lineageId?: string;
+  /** Jeden rodzaj dokumentu — zakladki rejestru „Dokumenty" (T-99). Pusty = wszystkie. */
+  docKind?: DocKind;
   includeArchived?: boolean;
   sort?: QuoteSort;
 }
@@ -116,7 +122,7 @@ function mapSummary(row: Row): QuoteSummary {
     clientName: (row.client_name as string | null) ?? null,
     city: (row.city as string | null) ?? null,
     internalNotes: (row.internal_notes as string | null) ?? null,
-    docKind: DocKindSchema.catch('offer').parse(row.doc_kind),
+    docKind: documentKindFromLegacy(row.doc_kind),
     validUntil: (row.valid_until as string | null) ?? null,
     sentAt: (row.sent_at as string | null) ?? null,
     acceptedAt: (row.accepted_at as string | null) ?? null,
@@ -184,6 +190,7 @@ export async function listQuotes(filters: QuoteFilters): Promise<QuoteSummary[]>
   if (filters.clientId) query = query.eq('client_id', filters.clientId);
   if (filters.projectId) query = query.eq('project_id', filters.projectId);
   if (filters.lineageId) query = query.eq('lineage_id', filters.lineageId);
+  if (filters.docKind) query = query.eq('doc_kind', filters.docKind);
 
   const term = filters.search?.trim();
   if (term) {
@@ -237,7 +244,7 @@ export async function listQuoteRegister(filters: QuoteFilters): Promise<QuoteReg
     return {
       number: (row.number as string | null) ?? null,
       createdAt: row.created_at as string,
-      docKind: DocKindSchema.catch('offer').parse(row.doc_kind),
+      docKind: documentKindFromLegacy(row.doc_kind),
       clientName: (row.client_name as string | null) ?? null,
       clientPhone: typeof client?.phone === 'string' ? client.phone : '',
       clientEmail: typeof client?.email === 'string' ? client.email : '',
@@ -291,6 +298,23 @@ export async function nextQuoteNumber(workspaceId: string): Promise<string> {
   return data;
 }
 
+/**
+ * Numer dokumentu innego rodzaju niz wycena (T-99): `TER/…`, `ETP/…`, `CEN/…`.
+ *
+ * Wycena idzie dalej przez `next_quote_number` — ta funkcja ma wlasna
+ * historie, testy i wzorzec z ustawien, ktorego nie ma po co dublowac.
+ * Licznik jest wspolny (`workspaces.quote_seq`), wiec numery nie koliduja.
+ */
+export async function nextDocumentNumber(workspaceId: string, kind: DocKind): Promise<string> {
+  if (kind === 'offer') return nextQuoteNumber(workspaceId);
+  const { data, error } = await getSupabase().rpc('next_document_number', {
+    ws: workspaceId,
+    kind,
+  });
+  if (error) throw new RepoError('Nadanie numeru dokumentu: ' + error.message, error);
+  return data;
+}
+
 export interface CreateQuoteInput {
   workspaceId: string;
   body?: QuoteBody;
@@ -307,12 +331,19 @@ export interface CreateQuoteInput {
    */
   schedule?: ScheduleBody | null;
   documents?: QuoteDocuments | null;
+  /**
+   * Rodzaj dokumentu (T-99). Pominiety = wycena. Dla pozostalych rodzajow
+   * `body` jest tylko naglowkiem (tytul, klient, data) — tresc siedzi
+   * w `schedule` albo `documents`.
+   */
+  docKind?: DocKind;
 }
 
 export async function createQuote(input: CreateQuoteInput): Promise<Quote> {
-  const body = input.body ?? newQuoteBody({ title: input.title ?? 'Wycena' });
+  const docKind = input.docKind ?? 'offer';
+  const body = input.body ?? newQuoteBody({ title: input.title ?? defaultTitleForKind(docKind) });
   const totals = calcQuoteTotals(body);
-  const number = await nextQuoteNumber(input.workspaceId);
+  const number = await nextDocumentNumber(input.workspaceId, docKind);
 
   /*
    * Identyfikator nadajemy TUTAJ, a nie zostawiamy bazie.
@@ -337,6 +368,7 @@ export async function createQuote(input: CreateQuoteInput): Promise<Quote> {
         number,
         title: body.title,
         status: 'draft',
+        doc_kind: docKind,
         body,
         total_net_cents: totals.netCents,
         total_gross_cents: totals.grossCents,

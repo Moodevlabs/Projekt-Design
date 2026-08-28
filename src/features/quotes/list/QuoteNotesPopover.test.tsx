@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { pl } from '@/i18n/pl';
@@ -11,7 +11,7 @@ vi.mock('@/data/queries/useQuotes', () => ({ useSetQuoteRegisterFields }));
 const { QuoteNotesPopover } = await import('./QuoteNotesPopover');
 
 function pokaz(notes: string | null = null) {
-  render(<QuoteNotesPopover quoteId="q1" title="Remont kuchni" notes={notes} docKind="offer" />);
+  render(<QuoteNotesPopover quoteId="q1" title="Remont kuchni" notes={notes} />);
 }
 
 beforeEach(() => {
@@ -35,7 +35,9 @@ describe('QuoteNotesPopover — zapis notatki', () => {
 
     expect(mutate).not.toHaveBeenCalled();
 
-    await user.tab();
+    // Po T-99 pole notatki jest jedynym w popoverze, wiec Tab nie ma dokad
+    // przeniesc fokusu — opuszczenie pola symulujemy wprost.
+    fireEvent.blur(pole);
     expect(mutate).toHaveBeenCalledTimes(1);
     expect(mutate).toHaveBeenCalledWith({ id: 'q1', internalNotes: 'dzwonić po 16' });
   });
@@ -63,12 +65,12 @@ describe('QuoteNotesPopover — widoczność notatki na liście', () => {
   it('wiersz z notatką wygląda inaczej niż bez', () => {
     // Bez tego rejestr wyglada identycznie z notatkami i bez nich.
     const { unmount } = render(
-      <QuoteNotesPopover quoteId="q1" title="A" notes="jest" docKind="offer" />,
+      <QuoteNotesPopover quoteId="q1" title="A" notes="jest" />,
     );
     const zNotatka = screen.getByLabelText(pl.quotes.notesFor('A')).getAttribute('title');
     unmount();
 
-    render(<QuoteNotesPopover quoteId="q1" title="A" notes={null} docKind="offer" />);
+    render(<QuoteNotesPopover quoteId="q1" title="A" notes={null} />);
     const bezNotatki = screen.getByLabelText(pl.quotes.notesFor('A')).getAttribute('title');
 
     expect(zNotatka).toBe(pl.quotes.hasNotes);
@@ -76,23 +78,10 @@ describe('QuoteNotesPopover — widoczność notatki na liście', () => {
   });
 
   it('sama biała spacja to nie notatka', () => {
-    render(<QuoteNotesPopover quoteId="q1" title="A" notes="   " docKind="offer" />);
+    render(<QuoteNotesPopover quoteId="q1" title="A" notes="   " />);
     expect(screen.getByLabelText(pl.quotes.notesFor('A'))).toHaveAttribute(
       'title',
       pl.quotes.notes,
     );
-  });
-});
-
-describe('QuoteNotesPopover — rodzaj dokumentu', () => {
-  it('zmiana rodzaju zapisuje się od razu', async () => {
-    const user = userEvent.setup();
-    pokaz();
-
-    await user.click(screen.getByLabelText(pl.quotes.notesFor('Remont kuchni')));
-    await user.click(screen.getByLabelText(pl.quotes.docKindLabel));
-    await user.click(screen.getByRole('option', { name: pl.quotes.docKind.schedule_only }));
-
-    expect(mutate).toHaveBeenCalledWith({ id: 'q1', docKind: 'schedule_only' });
   });
 });

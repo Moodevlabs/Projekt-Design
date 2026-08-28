@@ -47,9 +47,9 @@ describe('registerCsv — układ arkusza `OFERTY`', () => {
   });
 
   it('rodzaj dokumentu jest po polsku, nie kluczem bazy', () => {
-    const csv = registerCsv([wiersz({ docKind: 'schedule_only' })]);
-    expect(csv).toContain(pl.quotes.docKind.schedule_only);
-    expect(csv).not.toContain('schedule_only');
+    const csv = registerCsv([wiersz({ docKind: 'schedule' })]);
+    expect(csv).toContain(pl.quotes.docKind.schedule);
+    expect(csv).not.toContain('schedule');
   });
 
   it('telefon i e-mail biorą się z dokumentu', () => {

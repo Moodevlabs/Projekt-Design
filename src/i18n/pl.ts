@@ -105,9 +105,10 @@ export const pl = {
     hasNotes: 'Ma notatkę',
     docKindLabel: 'Rodzaj dokumentu',
     docKind: {
-      offer: 'Oferta',
-      schedule_only: 'Sam termin',
-      price_list_only: 'Sam cennik',
+      offer: 'Wycena',
+      schedule: 'Termin',
+      stages: 'Etapy współpracy',
+      price_list: 'Cennik dodatkowy',
     },
     exportRegister: 'Eksportuj rejestr (CSV)',
     registerExported: (count: number) => `Wyeksportowano ${count} pozycji rejestru`,

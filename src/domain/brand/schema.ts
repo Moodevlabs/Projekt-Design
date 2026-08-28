@@ -112,6 +112,13 @@ export const WorkspaceSettingsSchema = z.object({
   currency: z.string().length(3).default('PLN'),
   vatRate: z.number().min(0).max(100).default(23),
   numberPattern: z.string().min(1).default(DEFAULT_NUMBER_PATTERN),
+  /**
+   * Wzorce numerów pozostałych rodzajów dokumentu (T-99): `schedule`,
+   * `stages`, `price_list`. Brak wpisu = wzorzec wbudowany (`TER/…`, `ETP/…`,
+   * `CEN/…` — parytet z `next_document_number` w SQL). Wycena zostaje przy
+   * `numberPattern`, bo ten wzorzec użytkownik mógł już zmienić.
+   */
+  numberPatterns: z.record(z.string(), z.string().min(1)).default({}),
   showDisabledItems: z.boolean().default(true),
   /**
    * Czy numer wersji ma trafiać na dokument klienta (T-57).
