@@ -22,6 +22,33 @@ w aplikację** przy budowaniu wydania — linki utworzone w starszych wersjach
 wskazują na poprzedni adres i pozostają ważne tak długo, jak długo prowadzi
 z niego przekierowanie.
 
+**Podgląd oferty w ustawieniach brandingu zamiast osadzonego — otwierany
+przyciskiem.** Dokument był dotąd odświeżany po każdej zmianie i wyświetlany
+wewnątrz strony: najpierw ramką PDF, potem stronami rysowanymi na kanwie.
+Na macOS żadne z tych rozwiązań nie pokazywało dokumentu i — co gorsza — nie
+zgłaszało błędu, więc zostawało białe pole bez wskazówki, co poszło nie tak.
+Zamiast trzeciego podejścia do osadzania aplikacja generuje teraz prawdziwy
+plik na tym komputerze i otwiera go w systemowej przeglądarce PDF, która na
+pewno umie go wyświetlić, powiększyć i wydrukować próbnie. Przy okazji zniknęło
+przerysowywanie dokumentu przy każdym naciśnięciu klawisza w polu koloru.
+
+**Pas z logo pracowni na stronie oferty i briefu.** Dokument PDF otwiera pas
+wypełniony kolorem marki ze znakiem po lewej stronie; strona przekazywana
+inwestorowi pokazywała dotąd nagi obrazek na tle strony, czyli to samo pismo
+w dwóch różnych papeteriach. Teraz obie strony zaczynają się tym samym pasem.
+Wariant znaku pochodzi z ustawienia „Znak na nagłówku dokumentu", a gdy
+wskazanego wariantu nie wgrano, stosowany jest ten drugi — pracownia mająca
+jeden plik zobaczy go zamiast samej nazwy firmy. Migracja `0041`.
+
+**Podpis w stopce prowadzi na stronę produktu.** Słowo „Toolier" w stopce
+oferty i briefu jest odnośnikiem do `toolier.pl`, otwieranym w nowej karcie,
+żeby nie zabierać inwestorowi formularza w połowie wypełniania.
+
+**Opisy w ustawieniach brandingu zgodne ze stanem faktycznym.** Usunięto
+zdanie o automatycznym doborze koloru oraz wzmianki o podglądzie odświeżanym
+na żywo. Opis znaku na nagłówku mówi też wprost, że wybór dotyczy nie tylko
+dokumentu PDF, ale i strony przekazywanej inwestorowi.
+
 ### Naprawione
 
 **Wydanie ze złym adresem strony klienta nie zbuduje się.** Brak albo literówka

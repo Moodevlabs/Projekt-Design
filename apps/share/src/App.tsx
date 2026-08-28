@@ -21,6 +21,8 @@ import { REJECTION_TEXT } from './messages';
 import { QuoteDocument } from './components/QuoteDocument';
 import { ScheduleBlock } from './components/ScheduleBlock';
 import { DocumentsBlock } from './components/DocumentsBlock';
+import { ToolierLink } from './components/ToolierLink';
+import { BrandHeader } from './components/BrandHeader';
 import { Summary } from './components/Summary';
 
 type Screen =
@@ -231,16 +233,11 @@ export function App() {
       }}
     >
       <main className="mx-auto w-full max-w-2xl">
-        <header className="mb-6 flex items-center justify-between gap-4">
-          {logo ? (
-            <img src={logo} alt={brand.companyName} className="max-h-12 w-auto" />
-          ) : (
-            <span className="font-display text-lg tracking-tight">{brand.companyName}</span>
-          )}
-          {quote.number ? (
-            <span className="text-ink-faint tabular text-xs">{quote.number}</span>
-          ) : null}
-        </header>
+        <BrandHeader
+          companyName={brand.companyName}
+          logoUrl={logo}
+          aside={quote.number ?? undefined}
+        />
 
         <article className="rounded-2xl bg-[var(--surface)] p-6 shadow-[0_1px_2px_rgba(51,37,30,0.06),0_8px_24px_-12px_rgba(51,37,30,0.18)] sm:p-10">
           <h1 className="font-display text-2xl tracking-tight sm:text-3xl">
@@ -305,7 +302,9 @@ export function App() {
         <footer className="text-ink-faint mt-6 space-y-1 text-center text-xs">
           {brand.address ? <p>{brand.address}</p> : null}
           {brand.footerText ? <p>{brand.footerText}</p> : null}
-          <p className="pt-2">Oferta przygotowana w Toolier</p>
+          <p className="pt-2">
+            Oferta przygotowana w <ToolierLink />
+          </p>
         </footer>
       </main>
     </div>
