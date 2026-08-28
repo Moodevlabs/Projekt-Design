@@ -8,7 +8,6 @@ import { ItemRow } from './ItemRow';
 import { ItemToggle } from './ItemToggle';
 import { AddLink } from './AddLink';
 
-import { SaveToLibraryButton } from './SaveToLibraryButton';
 import { DragHandle } from './DragHandle';
 import { ItemsColumnsHeader } from './ItemsColumnsHeader';
 import { useStableIds } from '../dnd/useStableIds';
@@ -51,8 +50,6 @@ export interface GroupBlockProps {
   onToggleItem: (itemId: string) => void;
   onPatchItem: (itemId: string, patch: Partial<Item>) => void;
   onRemoveItem: (itemId: string) => void;
-  onSaveItemToLibrary: (item: Item) => void;
-  onSaveGroupToLibrary: (group: Group) => void;
 }
 
 export const GroupBlock = memo(function GroupBlock({
@@ -74,18 +71,12 @@ export const GroupBlock = memo(function GroupBlock({
   onToggleItem,
   onPatchItem,
   onRemoveItem,
-  onSaveItemToLibrary,
-  onSaveGroupToLibrary,
 }: GroupBlockProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const openScope = useScopePanel((state) => state.openFor);
   // `rooms` są konieczne: bez nich pozycja `per_room` policzyłaby samą bazę
   // i nagłówek pokazałby inną kwotę niż podsumowanie wyceny.
   const totals = calcGroupTotals(group, pricing, { vatRate, pricesInclude, rooms });
-
-  // Do biblioteki idą tylko nazwane pozycje (snapshot wymaga nazwy), więc po
-  // nich poznajemy też, czy jest w ogóle co zapisywać.
-  const namedItems = group.items.filter((item) => item.name.trim().length > 0);
 
   // Blok pomieszczenia: nazwa i stan biora sie z `Room`, nie z samej grupy.
   const room = group.roomId ? (rooms.find((r) => r.id === group.roomId) ?? null) : null;
@@ -181,17 +172,6 @@ export const GroupBlock = memo(function GroupBlock({
         </span>
 
         {editing ? (
-          <SaveToLibraryButton
-            label={`${pl.editor.saveGroupToLibrary}: ${group.name || pl.editor.newGroupName}`}
-            savedLabel={`${pl.editor.savedGroupToLibrary}: ${group.name || pl.editor.newGroupName}`}
-            // Zestaw bez nazwy albo bez pozycji nie ma czego zapisać —
-            // snapshot wymaga nazwy, a pusty zestaw nic nie wnosi do biblioteki.
-            disabled={group.name.trim().length === 0 || namedItems.length === 0}
-            onSave={() => onSaveGroupToLibrary(group)}
-          />
-        ) : null}
-
-        {editing ? (
           <button
             type="button"
             aria-label={`${pl.editor.removeGroup}: ${group.name}`}
@@ -226,7 +206,6 @@ export const GroupBlock = memo(function GroupBlock({
               onToggle={onToggleItem}
               onPatch={onPatchItem}
               onRemove={onRemoveItem}
-              onSaveToLibrary={onSaveItemToLibrary}
               rooms={rooms}
               textInfo={textInfo}
               pricing={pricing}

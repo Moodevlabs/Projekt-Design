@@ -730,14 +730,10 @@ Z wyrazami szacunku`,
     addItem: 'Dodaj pozycję',
     fromLibrary: 'Z biblioteki',
     fromLibraryGroup: 'Grupa z biblioteki',
-    saveToLibrary: 'Zapisz do biblioteki',
-    savedToLibrary: 'Zapisano w bibliotece',
     saveAllToLibrary: 'Zapisz wszystko do biblioteki',
     saveAllToLibraryDone: (count: number) =>
       count === 1 ? 'Zapisano 1 pozycję w bibliotece' : `Zapisano ${count} pozycji w bibliotece`,
     saveAllToLibraryEmpty: 'Brak pozycji do zapisania — pozycje wymagają wcześniejszego nazwania.',
-    saveGroupToLibrary: 'Zapisz zestaw do biblioteki',
-    savedGroupToLibrary: 'Zapisano zestaw w bibliotece',
     saveGroupToLibraryDone: (name: string) => `Zestaw „${name}” zapisano w bibliotece`,
     saveGroupToLibraryEmpty: 'Zestaw jest pusty — dodaj pozycje przed zapisaniem.',
     saveGroupToLibraryUnnamed:
@@ -892,8 +888,6 @@ Z wyrazami szacunku`,
         stages: 'Etap ręcznie',
         price_list: 'Pozycja ręcznie',
       },
-      saveRow: (name: string) => `Zapisz do biblioteki: ${name}`,
-      savedRow: (name: string) => `Zapisano w bibliotece: ${name}`,
     },
 
     // Dokument „Etapy wspolpracy" (F6.1).

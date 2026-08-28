@@ -47,7 +47,6 @@ function renderRow(editing: boolean, description = OPIS) {
         onToggle={vi.fn()}
         onPatch={vi.fn()}
         onRemove={vi.fn()}
-        onSaveToLibrary={vi.fn()}
       />
     </Dnd>,
   );

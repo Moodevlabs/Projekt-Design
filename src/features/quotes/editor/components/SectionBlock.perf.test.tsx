@@ -117,8 +117,6 @@ function Harness() {
       onToggleItem={toggleItem}
       onPatchItem={updateItem}
       onRemoveItem={removeItem}
-      onSaveItemToLibrary={noop}
-      onSaveGroupToLibrary={noop}
     />
   );
 }

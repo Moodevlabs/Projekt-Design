@@ -19,7 +19,6 @@ import type { ItemVariant } from '../editor.store';
 import { ConfirmDialog } from '@/components/shared';
 import {
   calcSectionTotals,
-  type Group,
   type Item,
   type PricesInclude,
   type Room,
@@ -56,8 +55,6 @@ export interface SectionBlockProps {
   onToggleItem: (itemId: string) => void;
   onPatchItem: (itemId: string, patch: Partial<Item>) => void;
   onRemoveItem: (itemId: string) => void;
-  onSaveItemToLibrary: (item: Item) => void;
-  onSaveGroupToLibrary: (group: Group) => void;
   /** „Rozpisz na pomieszczenia” — po jednym bloku na każde pomieszczenie wyceny. */
 }
 
@@ -83,8 +80,6 @@ export const SectionBlock = memo(function SectionBlock({
   onToggleItem,
   onPatchItem,
   onRemoveItem,
-  onSaveItemToLibrary,
-  onSaveGroupToLibrary,
 }: SectionBlockProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   // Akcja ze store'u ma stałą referencję — nie przebija `memo` na bloku.
@@ -190,7 +185,6 @@ export const SectionBlock = memo(function SectionBlock({
               onToggle={onToggleItem}
               onPatch={onPatchItem}
               onRemove={onRemoveItem}
-              onSaveToLibrary={onSaveItemToLibrary}
               rooms={rooms}
               textInfo={textInfo}
               pricing={pricing}
@@ -262,8 +256,6 @@ export const SectionBlock = memo(function SectionBlock({
               onToggleItem={onToggleItem}
               onPatchItem={onPatchItem}
               onRemoveItem={onRemoveItem}
-              onSaveItemToLibrary={onSaveItemToLibrary}
-              onSaveGroupToLibrary={onSaveGroupToLibrary}
             />
           ))}
         </SortableContext>

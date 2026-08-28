@@ -4,10 +4,8 @@ import { useShallow } from 'zustand/react/shallow';
 import { InlineText } from '../components/InlineText';
 import { NumberField } from '../components/NumberField';
 import { AddLink } from '../components/AddLink';
-import { SaveToLibraryButton } from '../components/SaveToLibraryButton';
 import { Button } from '@/components/ui/button';
 import { DocLibraryPanel } from './DocLibraryPanel';
-import { useSaveDocToLibrary } from './useSaveDocToLibrary';
 import { useEditorStore } from '../editor.store';
 import { useStageEntryAutoSync } from './useStageEntryAutoSync';
 import { groupStageEntries, type StageEntry } from '@/domain/documents';
@@ -35,7 +33,6 @@ export function StagesDocTab({ editing }: { editing: boolean }) {
   const removeEntry = useEditorStore((state) => state.removeStageEntry);
 
   const [libraryOpen, setLibraryOpen] = useState(false);
-  const saveToLibrary = useSaveDocToLibrary('stages');
 
   useStageEntryAutoSync(editing);
 
@@ -98,7 +95,6 @@ export function StagesDocTab({ editing }: { editing: boolean }) {
                   editing={editing}
                   onPatch={(patch) => updateEntry(entry.id, patch)}
                   onRemove={() => removeEntry(entry.id)}
-                  onSaveToLibrary={() => saveToLibrary(entry)}
                 />
               ))}
             </ul>
@@ -151,13 +147,11 @@ function StageEntryRow({
   editing,
   onPatch,
   onRemove,
-  onSaveToLibrary,
 }: {
   entry: StageEntry;
   editing: boolean;
   onPatch: (patch: Partial<StageEntry>) => void;
   onRemove: () => void;
-  onSaveToLibrary: () => void;
 }) {
   const label = entry.name || pl.editor.newStageEntryName;
 
@@ -211,15 +205,6 @@ function StageEntryRow({
           />
         ) : null}
       </div>
-
-      {editing ? (
-        <SaveToLibraryButton
-          label={pl.editor.docLibrary.saveRow(label)}
-          savedLabel={pl.editor.docLibrary.savedRow(label)}
-          disabled={entry.name.trim().length === 0}
-          onSave={onSaveToLibrary}
-        />
-      ) : null}
 
       {editing ? (
         <button

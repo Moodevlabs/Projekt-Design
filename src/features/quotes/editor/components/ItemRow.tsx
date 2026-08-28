@@ -6,7 +6,6 @@ import { InlineText } from './InlineText';
 import { InlineMoney } from './InlineMoney';
 import { ItemToggle } from './ItemToggle';
 import { DragHandle } from './DragHandle';
-import { SaveToLibraryButton } from './SaveToLibraryButton';
 import { ItemVariantSelect } from './ItemVariantSelect';
 import type { VariantOptions } from '../useVariantOptions';
 import type { ItemVariant } from '../editor.store';
@@ -66,7 +65,6 @@ export interface ItemRowProps {
   onToggle: (itemId: string) => void;
   onPatch: (itemId: string, patch: Partial<Item>) => void;
   onRemove: (itemId: string) => void;
-  onSaveToLibrary: (item: Item) => void;
   /** Pomieszczenia wyceny — pozycja parametryczna bez nich policzy samą bazę. */
   rooms: Room[];
   /** Dane dokumentu do placeholderów w opisie (F4.2). Stabilna referencja. */
@@ -95,7 +93,6 @@ export const ItemRow = memo(function ItemRow({
   onToggle,
   onPatch,
   onRemove,
-  onSaveToLibrary,
   rooms,
   textInfo,
   pricing,
@@ -321,15 +318,6 @@ export const ItemRow = memo(function ItemRow({
         ją kiedyś zaznaczono, dalej pokazują ten wiersz. Nowych już nie
         przybędzie — i o to chodziło.
       */}
-
-      {editing ? (
-        <SaveToLibraryButton
-          label={`${pl.editor.saveToLibrary}: ${item.name || pl.editor.newItemName}`}
-          savedLabel={`${pl.editor.savedToLibrary}: ${item.name || pl.editor.newItemName}`}
-          disabled={item.name.trim().length === 0}
-          onSave={() => onSaveToLibrary(item)}
-        />
-      ) : null}
 
       {editing ? (
         <button

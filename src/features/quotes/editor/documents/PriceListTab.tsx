@@ -5,10 +5,8 @@ import { InlineText } from '../components/InlineText';
 import { InlineMoney } from '../components/InlineMoney';
 import { NumberField } from '../components/NumberField';
 import { AddLink } from '../components/AddLink';
-import { SaveToLibraryButton } from '../components/SaveToLibraryButton';
 import { Button } from '@/components/ui/button';
 import { DocLibraryPanel } from './DocLibraryPanel';
-import { useSaveDocToLibrary } from './useSaveDocToLibrary';
 import { AddToQuoteBridge } from './AddToQuoteBridge';
 import { useEditorStore } from '../editor.store';
 import { groupPriceListItems, type PriceListItem } from '@/domain/documents';
@@ -37,7 +35,6 @@ export function PriceListTab({ editing }: { editing: boolean }) {
   const removeItem = useEditorStore((state) => state.removePriceListItem);
 
   const [libraryOpen, setLibraryOpen] = useState(false);
-  const saveToLibrary = useSaveDocToLibrary('price_list');
 
   useEffect(() => {
     // Jak przy etapach: zakładamy przy pierwszym wejściu i tylko w edycji.
@@ -92,7 +89,6 @@ export function PriceListTab({ editing }: { editing: boolean }) {
                   editing={editing}
                   onPatch={(patch) => updateItem(item.id, patch)}
                   onRemove={() => removeItem(item.id)}
-                  onSaveToLibrary={() => saveToLibrary(item)}
                 />
               ))}
             </ul>
@@ -142,13 +138,11 @@ function PriceListRow({
   editing,
   onPatch,
   onRemove,
-  onSaveToLibrary,
 }: {
   item: PriceListItem;
   editing: boolean;
   onPatch: (patch: Partial<PriceListItem>) => void;
   onRemove: () => void;
-  onSaveToLibrary: () => void;
 }) {
   const label = item.name || pl.editor.newPriceListItemName;
 
@@ -212,15 +206,6 @@ function PriceListRow({
             </label>
           ) : null}
         </div>
-
-        {editing ? (
-          <SaveToLibraryButton
-            label={pl.editor.docLibrary.saveRow(label)}
-            savedLabel={pl.editor.docLibrary.savedRow(label)}
-            disabled={item.name.trim().length === 0}
-            onSave={onSaveToLibrary}
-          />
-        ) : null}
 
         {editing ? (
           <button

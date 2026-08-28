@@ -738,8 +738,6 @@ function EditorSurface({
                       onToggleItem={toggleItem}
                       onPatchItem={updateItem}
                       onRemoveItem={removeItem}
-                      onSaveItemToLibrary={library.saveItem}
-                      onSaveGroupToLibrary={library.saveGroup}
                     />
                   ))}
                 </SortableContext>

@@ -6,7 +6,6 @@ import { ScheduleResultCard } from './ScheduleResultCard';
 import { AddLink } from '../components/AddLink';
 import { Button } from '@/components/ui/button';
 import { DocLibraryPanel } from '../documents/DocLibraryPanel';
-import { useSaveDocToLibrary } from '../documents/useSaveDocToLibrary';
 import { NumberField } from '../components/NumberField';
 import { useEditorStore } from '../editor.store';
 import { useStageAutoSync } from './useStageAutoSync';
@@ -46,7 +45,6 @@ export function ScheduleTab({ editing }: { editing: boolean }) {
   useStageAutoSync(editing && schedule !== null);
 
   const [libraryOpen, setLibraryOpen] = useState(false);
-  const saveToLibrary = useSaveDocToLibrary('schedule');
   const roomTypes = useRoomTypes();
   useEffect(() => {
     // Harmonogram zakładamy dopiero przy pierwszym wejściu na zakładkę —
@@ -157,7 +155,6 @@ export function ScheduleTab({ editing }: { editing: boolean }) {
               onRemove={() => removeStage(stage.id)}
               onRemoveExtra={removeExtra}
               onExtraDays={updateExtraDays}
-              onSaveToLibrary={stage.kind === 'extras' ? undefined : () => saveToLibrary(stage)}
             />
           ))}
         </ul>

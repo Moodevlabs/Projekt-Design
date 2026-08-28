@@ -33,7 +33,6 @@ function setup(overrides: Partial<Item> = {}, editing = true) {
     onToggle: vi.fn(),
     onPatch: vi.fn(),
     onRemove: vi.fn(),
-    onSaveToLibrary: vi.fn(),
   };
 
   render(
@@ -111,7 +110,6 @@ describe('ItemRow', () => {
           onToggle={vi.fn()}
           onPatch={vi.fn()}
           onRemove={vi.fn()}
-          onSaveToLibrary={vi.fn()}
           {...BEZ_WARIANTOW}
         />
       </Dnd>,
@@ -130,7 +128,6 @@ describe('ItemRow', () => {
           onToggle={vi.fn()}
           onPatch={vi.fn()}
           onRemove={vi.fn()}
-          onSaveToLibrary={vi.fn()}
           {...BEZ_WARIANTOW}
         />
       </Dnd>,
@@ -155,26 +152,8 @@ describe('ItemRow', () => {
     expect(handle).toBeInTheDocument();
   });
 
-  it('zapisuje pozycje do biblioteki i potwierdza to ptaszkiem', async () => {
-    const user = userEvent.setup();
-    const { item, onSaveToLibrary } = setup();
-
-    const przycisk = screen.getByRole('button', { name: /Zapisz do biblioteki/ });
-    await user.click(przycisk);
-
-    expect(onSaveToLibrary).toHaveBeenCalledWith(item);
-    // Potwierdzenie zamiast wyskakujacego komunikatu — przycisk na chwile
-    // zmienia etykiete i jest nieaktywny, zeby nie dalo sie klikac w kolko.
-    expect(screen.getByRole('button', { name: /Zapisano w bibliotece/ })).toBeDisabled();
-  });
-
-  it('pozycji bez nazwy nie da sie zapisac do biblioteki', () => {
-    setup({ name: '' });
-    expect(screen.getByRole('button', { name: /Zapisz do biblioteki/ })).toBeDisabled();
-  });
-
-  it('w podgladzie nie ma zapisu do biblioteki', () => {
-    setup({}, false);
+  it('przy pozycji nie ma juz przycisku zapisu do biblioteki (T-112)', () => {
+    setup({});
     expect(screen.queryByRole('button', { name: /Zapisz do biblioteki/ })).not.toBeInTheDocument();
   });
 
@@ -230,7 +209,6 @@ describe('ItemRow — pozycja liczona za pomieszczenie', () => {
           onToggle={vi.fn()}
           onPatch={vi.fn()}
           onRemove={vi.fn()}
-          onSaveToLibrary={vi.fn()}
           {...BEZ_WARIANTOW}
         />
       </Dnd>,
@@ -251,7 +229,6 @@ describe('ItemRow — pozycja liczona za pomieszczenie', () => {
           onToggle={vi.fn()}
           onPatch={vi.fn()}
           onRemove={vi.fn()}
-          onSaveToLibrary={vi.fn()}
           {...BEZ_WARIANTOW}
         />
       </Dnd>,
@@ -272,7 +249,6 @@ describe('ItemRow — pozycja liczona za pomieszczenie', () => {
           onToggle={vi.fn()}
           onPatch={vi.fn()}
           onRemove={vi.fn()}
-          onSaveToLibrary={vi.fn()}
           {...BEZ_WARIANTOW}
         />
       </Dnd>,
@@ -293,7 +269,6 @@ describe('ItemRow — pozycja liczona za pomieszczenie', () => {
           onToggle={vi.fn()}
           onPatch={vi.fn()}
           onRemove={vi.fn()}
-          onSaveToLibrary={vi.fn()}
           {...BEZ_WARIANTOW}
         />
       </Dnd>,
