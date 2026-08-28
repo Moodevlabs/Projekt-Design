@@ -3,21 +3,7 @@
 Format wg [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/).
 Wersje zgodne z [SemVer](https://semver.org/lang/pl/).
 
-## [1.2.1] – 2026-08-28
-
-### Dodane
-
-**Pięć szablonów startowych na nowym koncie.** Zamiast pustej listy: Mieszkanie
-od dewelopera · Dom jednorodzinny · Remont mieszkania · Kuchnia lub łazienka ·
-Lokal komercyjny. Każdy to gotowa oferta w etapach (przygotowanie → układ →
-koncepcja i wizualizacje → dokumentacja wykonawcza → realizacja) z usługami
-z biblioteki przykładowej — te same nazwy, więc cena wpisana w bibliotece
-kaskaduje do szablonu. Ceny są puste (wycena indywidualna), pozycje opcjonalne
-startują wyłączone. Konta założone wcześniej nic nie dostają — „Nowy szablon”
-i „Zapisz jako szablon” działają jak dotąd.
-
-**Link do toolier.pl** na ekranie logowania; podpis w tle aplikacji brzmi
-„Developed by Toolier” i po kliknięciu otwiera stronę produktu.
+## [1.2.2] – 2026-08-28
 
 ### Zmienione
 
@@ -36,6 +22,24 @@ po sekcjach jako „etapy” — teraz „sekcje”. „Dodaj do terminu” z ce
 harmonogram z pełnym szablonem studia — teraz sam etap zbiorczy. Zakładka, na
 którą tylko wejrzano, nie trafia do PDF, pakietu ani szablonu. Teksty Pomocy
 opisujące osobne dokumenty (WYC/TER/ETP/CEN) poprawione.
+
+## [1.2.1] – 2026-08-28
+
+### Dodane
+
+**Pięć szablonów startowych na nowym koncie.** Zamiast pustej listy: Mieszkanie
+od dewelopera · Dom jednorodzinny · Remont mieszkania · Kuchnia lub łazienka ·
+Lokal komercyjny. Każdy to gotowa oferta w etapach (przygotowanie → układ →
+koncepcja i wizualizacje → dokumentacja wykonawcza → realizacja) z usługami
+z biblioteki przykładowej — te same nazwy, więc cena wpisana w bibliotece
+kaskaduje do szablonu. Ceny są puste (wycena indywidualna), pozycje opcjonalne
+startują wyłączone. Konta założone wcześniej nic nie dostają — „Nowy szablon”
+i „Zapisz jako szablon” działają jak dotąd.
+
+**Link do toolier.pl** na ekranie logowania; podpis w tle aplikacji brzmi
+„Developed by Toolier” i po kliknięciu otwiera stronę produktu.
+
+### Zmienione
 
 **Rejestr Dokumentów bez list „miasto” i „klient”.** Zostają: statusy,
 wyszukiwarka (numer, tytuł, klient — i od teraz także miasto) oraz sortowanie.
