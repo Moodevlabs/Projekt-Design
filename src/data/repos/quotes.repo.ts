@@ -187,8 +187,9 @@ export async function listQuotes(filters: QuoteFilters): Promise<QuoteSummary[]>
 
   const term = filters.search?.trim();
   if (term) {
-    // Szukamy po numerze, tytule i nazwie klienta — te trzy pola widac na liscie.
-    query = query.or(ilikeAnyOf(['number', 'title', 'client_name'], term));
+    // Szukamy po numerze, tytule, nazwie klienta i miescie — to, co widac na
+    // liscie. Miasto doszlo, gdy z paska znikl osobny filtr miast (2026-08-28).
+    query = query.or(ilikeAnyOf(['number', 'title', 'client_name', 'city'], term));
   }
 
   const rows = unwrap(
@@ -245,33 +246,6 @@ export async function listQuoteRegister(filters: QuoteFilters): Promise<QuoteReg
       internalNotes: (row.internal_notes as string | null) ?? null,
     };
   });
-}
-
-/**
- * Miasta obecne w rejestrze — do listy wyboru w filtrze.
- *
- * Postgres nie da nam `distinct` przez PostgREST, wiec sciagamy JEDNA kolumne
- * i odsiewamy duplikaty tutaj. To kilka bajtow na wiersz; ciagniecie calych
- * wierszy tylko po to, zeby poznac miasta, byloby marnotrawstwem.
- */
-export async function listQuoteCities(workspaceId: string): Promise<string[]> {
-  const rows = unwrap(
-    await getSupabase()
-      .from('quotes')
-      .select('city')
-      .eq('workspace_id', workspaceId)
-      .is('deleted_at', null)
-      .not('city', 'is', null),
-    'Miasta w rejestrze',
-  );
-
-  const miasta = new Set(
-    (rows as unknown as Row[])
-      .map((row) => (row.city as string | null)?.trim())
-      .filter((city): city is string => Boolean(city)),
-  );
-
-  return [...miasta].sort((a, b) => a.localeCompare(b, 'pl'));
 }
 
 export async function getQuote(id: string): Promise<Quote> {

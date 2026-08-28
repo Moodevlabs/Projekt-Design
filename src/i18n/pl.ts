@@ -8,13 +8,18 @@ export const pl = {
     // Podpis pod logo na ekranach logowania. Hasło marki — nie tłumaczymy.
     tagline: 'Tools for Atelier',
     /**
-     * Podpis wytłoczony w tle aplikacji. Nazwy własne — nie tłumaczymy.
-     *
-     * „AnzorgeDesign" zostaje po rebrandingu (T-65) **celowo**: to nazwa
-     * studia, które zamówiło aplikację, a nie dawna nazwa produktu. Produkt
-     * nazywa się Toolier, autorzy nazywają się tak, jak się nazywają.
+     * Podpis wytłoczony w tle aplikacji — od 2026-08-28 „Developed by Toolier"
+     * i jest LINKIEM do strony produktu. Do tej daty stało tu „Developed by
+     * AnzorgeDesign & Moodevlabs" (nazwy studiów); decyzja właściciela.
+     * Nazwy własne — nie tłumaczymy.
      */
-    credit: 'Developed by AnzorgeDesign & Moodevlabs',
+    credit: 'Developed by Toolier',
+    /** Strona produktu. Jedyne miejsce z tym adresem — linki biorą go stąd. */
+    websiteUrl: 'https://toolier.pl',
+    websiteLabel: 'toolier.pl',
+    /** Ekran logowania: zdanie z linkiem do strony. */
+    websiteHint: 'Więcej o aplikacji na',
+    openWebsite: 'Otwórz stronę Toolier',
   },
   nav: {
     /** Kosz na pliki — wlasna pozycja w szynie, nad Pomoca (2026-08-27). */
@@ -84,7 +89,7 @@ export const pl = {
     exportPdf: 'Eksportuj PDF',
     noResultsTitle: 'Brak wyników',
     noResultsDescription: 'Zmień filtr albo wyczyść wyszukiwanie.',
-    searchPlaceholder: 'Szukaj po numerze, tytule lub kliencie',
+    searchPlaceholder: 'Szukaj po numerze, tytule, kliencie lub mieście',
     clearSearch: 'Wyczyść wyszukiwanie',
     rowActions: 'Akcje wyceny',
     noNumber: 'bez numeru',
@@ -94,8 +99,6 @@ export const pl = {
 
     // Rejestr ofert (F7.1).
     cityColumn: 'Miasto',
-    filterByCity: 'Filtruj po mieście',
-    allCities: 'Wszystkie miasta',
     noCity: '—',
     notes: 'Notatki',
     notesFor: (name: string) => `Notatki i rodzaj: ${name}`,
@@ -124,7 +127,6 @@ export const pl = {
       total_desc: 'Najwyższa kwota',
       number_asc: 'Numer rosnąco',
     },
-    filterByClient: 'Filtruj po kliencie',
 
     // Wersje wycen (T-57).
     newVersion: 'Nowa wersja',
@@ -145,7 +147,6 @@ export const pl = {
     moveToProject: 'Przenieś do projektu',
     markAs: 'Oznacz jako',
     statusChanged: 'Status wyceny zmieniony',
-    allClients: 'Wszyscy klienci',
     openClient: (name: string) => `Otwórz kartę klienta: ${name}`,
     archived: 'Usunięte',
     /*

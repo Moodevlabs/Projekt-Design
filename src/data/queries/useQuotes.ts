@@ -7,7 +7,6 @@ import {
   duplicateQuote,
   getQuote,
   listQuotes,
-  listQuoteCities,
   listQuoteRegister,
   saveQuote,
   setQuoteRegisterFields,
@@ -306,16 +305,5 @@ export function useQuoteRegisterExport() {
   return useMutation({
     mutationFn: (filters: QuoteListFilters) =>
       listQuoteRegister({ workspaceId: requireWorkspaceId(workspaceId), ...filters }),
-  });
-}
-
-/** Miasta do filtra rejestru (F7.1). */
-export function useQuoteCities() {
-  const workspaceId = useWorkspaceId();
-
-  return useQuery({
-    queryKey: queryKeys.quotes({ workspaceId, kind: 'cities' }),
-    queryFn: () => listQuoteCities(requireWorkspaceId(workspaceId)),
-    enabled: Boolean(workspaceId),
   });
 }

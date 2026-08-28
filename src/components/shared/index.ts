@@ -7,3 +7,4 @@ export { NotesPanel } from './NotesPanel';
 export { PlaceholderMenu } from './PlaceholderMenu';
 export { AvatarPicker } from './AvatarPicker';
 export { initialsOf } from './initials';
+export { ExternalLink } from './ExternalLink';

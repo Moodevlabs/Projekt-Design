@@ -1472,6 +1472,7 @@ export type Database = {
       }
       seed_doc_library: { Args: { ws: string; kind: string; entries: Json }; Returns: number }
       seed_library_sample: { Args: { ws: string }; Returns: undefined }
+      seed_quote_templates: { Args: { ws: string }; Returns: undefined }
       seed_room_types: { Args: { ws: string }; Returns: undefined }
       share_status: { Args: { p_token: string }; Returns: string }
       show_limit: { Args: never; Returns: number }

@@ -4,11 +4,10 @@ import { FileText, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { EmptyState } from '@/components/shared';
-import { QuotesToolbar, ALL_CITIES, ALL_CLIENTS, type StatusFilter } from './QuotesToolbar';
+import { QuotesToolbar, type StatusFilter } from './QuotesToolbar';
 import { QuotesTable } from './QuotesTable';
 import { useRegisterExport } from './useRegisterExport';
-import { useQuoteCities, useQuotesList } from '@/data/queries/useQuotes';
-import { useClients } from '@/data/queries/useClients';
+import { useQuotesList } from '@/data/queries/useQuotes';
 import type { QuoteSort } from '@/data/repos/quotes.repo';
 import { routes } from '@/app/routes';
 import { pl } from '@/i18n/pl';
@@ -23,8 +22,6 @@ export function QuotesListPage() {
   const [status, setStatus] = useState<StatusFilter>('all');
   const [sort, setSort] = useState<QuoteSort>('updated_desc');
   const [search, setSearch] = useState('');
-  const [city, setCity] = useState<string>(ALL_CITIES);
-  const [clientId, setClientId] = useState<string>(ALL_CLIENTS);
 
   // Filtry idą do zapytania, więc filtrowanie i sortowanie robi Postgres,
   // a nie przeglądarka — lista może urosnąć do tysięcy wycen.
@@ -33,28 +30,19 @@ export function QuotesListPage() {
       status,
       sort,
       search: search.trim() || undefined,
-      city: city === ALL_CITIES ? undefined : city,
-      clientId: clientId === ALL_CLIENTS ? undefined : clientId,
     }),
-    [status, sort, search, city, clientId],
+    [status, sort, search],
   );
 
   const quotes = useQuotesList(filters);
-  const cities = useQuoteCities();
-  // Do filtra bierzemy takze zarchiwizowanych: wyceny sprzed zamkniecia
-  // wspolpracy dalej sa w rejestrze i trzeba je umiec odfiltrowac.
-  const clients = useClients({ status: 'all', sort: 'name_asc' });
   const register = useRegisterExport();
 
-  const hasFilters =
-    status !== 'all' || search.trim().length > 0 || city !== ALL_CITIES || clientId !== ALL_CLIENTS;
+  const hasFilters = status !== 'all' || search.trim().length > 0;
   const rows = quotes.data ?? [];
 
   const resetFilters = () => {
     setStatus('all');
     setSearch('');
-    setCity(ALL_CITIES);
-    setClientId(ALL_CLIENTS);
   };
 
   return (
@@ -64,12 +52,6 @@ export function QuotesListPage() {
         onStatusChange={setStatus}
         search={search}
         onSearchChange={setSearch}
-        city={city}
-        onCityChange={setCity}
-        cities={cities.data ?? []}
-        clientId={clientId}
-        onClientChange={setClientId}
-        clients={clients.data ?? []}
         sort={sort}
         onSortChange={setSort}
         // Eksportujemy TO, CO WIDAC po filtrach — plik inny niż lista na
