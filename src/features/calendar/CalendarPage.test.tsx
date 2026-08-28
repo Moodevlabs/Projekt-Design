@@ -8,12 +8,13 @@ import { pl } from '@/i18n/pl';
 
 const useCalendarMonth = vi.hoisted(() => vi.fn());
 const createMutate = vi.hoisted(() => vi.fn());
+const updateMutate = vi.hoisted(() => vi.fn());
 const toastError = vi.hoisted(() => vi.fn());
 
 vi.mock('@/data/queries/useCalendar', () => ({
   useCalendarMonth,
   useCreateCalendarNote: () => ({ mutate: createMutate, isPending: false }),
-  useUpdateCalendarNote: () => ({ mutate: vi.fn(), isPending: false }),
+  useUpdateCalendarNote: () => ({ mutate: updateMutate, isPending: false }),
   useDeleteCalendarNote: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
@@ -142,6 +143,50 @@ describe('CalendarPage', () => {
       { day: '2026-09-18', text: 'Montaż zabudowy', time: '10:00' },
       expect.anything(),
     );
+  });
+
+  it('pozwala poprawic tresc i godzine istniejacej notatki', async () => {
+    // Do 2026-08-28 notatke dalo sie tylko dodac i usunac, wiec literowka
+    // znaczyla skasowanie wpisu razem ze stanem „wykonane".
+    const user = userEvent.setup();
+    renderPage([
+      event({
+        kind: 'note',
+        day: '2026-09-14',
+        id: 'note:abc',
+        title: 'Montaz zabudowy',
+        time: '10:00',
+      }),
+    ]);
+
+    await user.click(screen.getByRole('button', { name: pl.calendar.noteEdit }));
+
+    const tresc = screen.getByLabelText(pl.calendar.noteTextLabel);
+    expect(tresc).toHaveValue('Montaz zabudowy');
+    expect(screen.getByLabelText(pl.calendar.noteTimeLabel)).toHaveValue('10:00');
+
+    await user.clear(tresc);
+    await user.type(tresc, 'Montaz zabudowy kuchennej');
+    await user.click(screen.getByRole('button', { name: pl.calendar.noteSave }));
+
+    expect(updateMutate).toHaveBeenCalledWith(
+      { id: 'abc', patch: { text: 'Montaz zabudowy kuchennej', time: '10:00' } },
+      expect.anything(),
+    );
+  });
+
+  it('edycja nie przyjmuje pustej tresci', async () => {
+    const user = userEvent.setup();
+    renderPage([
+      event({ kind: 'note', day: '2026-09-14', id: 'note:abc', title: 'Montaz zabudowy' }),
+    ]);
+
+    await user.click(screen.getByRole('button', { name: pl.calendar.noteEdit }));
+    await user.clear(screen.getByLabelText(pl.calendar.noteTextLabel));
+    await user.click(screen.getByRole('button', { name: pl.calendar.noteSave }));
+
+    expect(updateMutate).not.toHaveBeenCalled();
+    expect(toastError).toHaveBeenCalledWith(pl.calendar.noteEmpty);
   });
 
   it('kratka niesie po jednej kropce na rodzaj, nie na zdarzenie', () => {

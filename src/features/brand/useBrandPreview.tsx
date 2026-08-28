@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { BrandKit } from '@/domain/brand/schema';
+import type { RasterPage } from '@/pdf/rasterize';
 import { createLogger } from '@/lib/logger';
 
 const log = createLogger('brand.preview');
@@ -8,11 +9,18 @@ const log = createLogger('brand.preview');
 const DEBOUNCE_MS = 500;
 
 export interface BrandPreviewState {
-  /** Adres blobu do wyświetlenia; `null`, dopóki nic nie wyrenderowano. */
-  url: string | null;
+  /** Strony dokumentu jako obrazki; pusta lista, dopóki nic nie wyrenderowano. */
+  pages: RasterPage[];
+  /**
+   * Bajty wygenerowanego PDF-u — do otwarcia w czytniku systemowym.
+   * `null`, dopóki pierwszy render się nie skończy.
+   */
+  bytes: Uint8Array | null;
   rendering: boolean;
   error: string | null;
 }
+
+const EMPTY: BrandPreviewState = { pages: [], bytes: null, rendering: false, error: null };
 
 /**
  * Podgląd oferty na żywo dla ustawień brandingu.
@@ -24,22 +32,21 @@ export interface BrandPreviewState {
  *    dobierania kolorów.
  *  - **Debounce.** Pełny render PDF przy każdym naciśnięciu klawisza w polu
  *    koloru zamieniłby formularz w pokaz slajdów.
- *  - **Zwalniamy poprzedni adres blobu.** Bez tego każda zmiana zostawia
- *    kilkusetkilobajtowy plik w pamięci karty aż do przeładowania.
  *  - **Wyścig renderów.** Wolniejszy render rozpoczęty wcześniej nie może
  *    nadpisać świeższego wyniku — stąd licznik pokoleń.
+ *
+ * Wynikiem są **obrazki stron**, a nie adres blobu (poprawka z 2026-08-28).
+ * Blob trafiał do `<object type="application/pdf">`, a WKWebView — czyli
+ * webview Tauri na macOS — PDF-ów w ramkach nie renderuje. Efektem było białe
+ * pole bez żadnego błędu. Rysunek na canvasie wygląda tak samo wszędzie.
+ * Bajty zwracamy obok, bo przycisk „otwórz w czytniku systemowym" ma pokazać
+ * PRAWDZIWY plik, a nie jego obrazek.
  */
 export function useBrandPreview(draft: BrandKit | null, logoDataUrl: string | null) {
-  const [state, setState] = useState<BrandPreviewState>({
-    url: null,
-    rendering: false,
-    error: null,
-  });
+  const [state, setState] = useState<BrandPreviewState>(EMPTY);
 
   /** Numer najnowszego żądania — starsze wyniki odrzucamy. */
   const generation = useRef(0);
-  /** Adres pokazywany w tej chwili; zwalniamy go dopiero po podmianie. */
-  const currentUrl = useRef<string | null>(null);
 
   const signature = draft ? JSON.stringify([draft, logoDataUrl]) : null;
 
@@ -60,12 +67,14 @@ export function useBrandPreview(draft: BrandKit | null, logoDataUrl: string | nu
             { buildPdfTheme },
             { isPdfFontRegistered, registerPdfFonts },
             { sampleQuoteBody },
+            { rasterizePdf },
           ] = await Promise.all([
             import('@react-pdf/renderer'),
             import('@/pdf/QuotePdfDocument'),
             import('@/pdf/theme'),
             import('@/pdf/fonts/register'),
             import('@/pdf/sample-quote'),
+            import('@/pdf/rasterize'),
           ]);
 
           registerPdfFonts();
@@ -86,10 +95,11 @@ export function useBrandPreview(draft: BrandKit | null, logoDataUrl: string | nu
 
           if (generation.current !== mine) return;
 
-          const url = URL.createObjectURL(blob);
-          if (currentUrl.current) URL.revokeObjectURL(currentUrl.current);
-          currentUrl.current = url;
-          setState({ url, rendering: false, error: null });
+          const bytes = new Uint8Array(await blob.arrayBuffer());
+          const pages = await rasterizePdf(bytes);
+
+          if (generation.current !== mine) return;
+          setState({ pages, bytes, rendering: false, error: null });
         } catch (error) {
           if (generation.current !== mine) return;
           log.error('Podglad brandingu nieudany', error);
@@ -102,15 +112,6 @@ export function useBrandPreview(draft: BrandKit | null, logoDataUrl: string | nu
     // `signature` zastępuje `draft`: obiekt szkicu ma nową referencję przy
     // każdym renderze formularza, więc porównujemy zawartość.
   }, [signature, draft, logoDataUrl]);
-
-  // Sprzątanie ostatniego blobu przy odmontowaniu — osobno, bo efekt wyżej
-  // czyści tylko timer i biegnie przy każdej zmianie szkicu.
-  useEffect(() => {
-    return () => {
-      if (currentUrl.current) URL.revokeObjectURL(currentUrl.current);
-      currentUrl.current = null;
-    };
-  }, []);
 
   return state;
 }

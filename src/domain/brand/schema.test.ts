@@ -8,6 +8,7 @@ import {
   WorkspaceSettingsSchema,
   defaultBrandKit,
   defaultWorkspaceSettings,
+  resolveHeaderLogo,
 } from './schema';
 
 describe('HexColorSchema', () => {
@@ -47,7 +48,7 @@ describe('BrandKitSchema', () => {
       logoLightPath: null,
       // Parytet z `0030_brand_header_logo.sql`: domyślnie o wariancie decyduje
       // kontrast do koloru marki, tak jak przed wprowadzeniem tego pola.
-      headerLogo: 'auto',
+      headerLogo: 'dark',
       accentColor: '#33251E',
       bgColor: '#EFECE8',
       fontFamily: 'Lato',
@@ -74,6 +75,26 @@ describe('BrandKitSchema', () => {
 
   it('odrzuca niepoprawny kolor akcentu', () => {
     expect(BrandKitSchema.safeParse({ accentColor: 'terakota' }).success).toBe(false);
+  });
+});
+
+describe('resolveHeaderLogo — wiersze sprzed migracji 0039', () => {
+  it('przepisuje jawny wybor bez zmian', () => {
+    expect(resolveHeaderLogo('light', '#FAF7F1')).toBe('light');
+    expect(resolveHeaderLogo('dark', '#21201C')).toBe('dark');
+  });
+
+  it('stare `auto` odtwarza dawna regula kontrastu, a nie domyslna', () => {
+    // Gdyby `auto` sprowadzalo sie po prostu do wartosci domyslnej, workspace
+    // z ciemna marka dostalby po aktualizacji ciemny znak na ciemnym pasie —
+    // czyli oferte z niewidocznym logo.
+    expect(resolveHeaderLogo('auto', '#FAF7F1')).toBe('dark');
+    expect(resolveHeaderLogo('auto', '#21201C')).toBe('light');
+  });
+
+  it('smiec w kolumnie tez ma odpowiedz, bo PDF musi sie wygenerowac', () => {
+    expect(resolveHeaderLogo(null, '#FAF7F1')).toBe('dark');
+    expect(resolveHeaderLogo('cokolwiek', '#21201C')).toBe('light');
   });
 });
 

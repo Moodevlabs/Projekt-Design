@@ -240,6 +240,8 @@ export const pl = {
     noteSave: 'Zapisz notatkę',
     noteSaved: 'Notatka zapisana',
     noteFailed: 'Nie udało się zapisać notatki.',
+    noteEdit: 'Edytuj notatkę',
+    noteEdited: 'Notatka zaktualizowana',
     noteDelete: 'Usuń notatkę',
     noteDeleteConfirm: 'Notatka zostanie usunięta. Operacji nie można cofnąć.',
     noteDone: 'Oznacz jako wykonane',
@@ -510,6 +512,7 @@ export const pl = {
     uploadFailed: 'Nie udało się wysłać pliku.',
     downloaded: 'Zapisano plik',
     downloadFailed: 'Nie udało się pobrać pliku.',
+    openFailed: 'Nie udało się otworzyć pliku.',
 
     // Odbicia PRZED wysyłką — po polsku i z nazwą pliku, bo Storage odrzuci
     // to samo po angielsku i bez kontekstu (pułapka z T-12).
@@ -1784,13 +1787,12 @@ Z wyrazami szacunku`,
     logoLightHint: 'Wersja do położenia na CIEMNYM nagłówku.',
     logoHint: 'PNG, JPG, WEBP lub SVG, do 5 MB.',
 
-    // Wybór wariantu na nagłówku (poprawka 3).
-    headerLogo: 'Logo na nagłówku',
+    // Wybór wariantu na nagłówku (poprawka 3; dobór automatyczny wycofany).
+    headerLogo: 'Znak na nagłówku dokumentu',
     headerLogoHint:
-      'Wariant znaku umieszczanego na pasie nagłówka. Opcja „Dobór automatyczny" uwzględnia kolor marki: na ciemnym pasie stosuje znak jasny, na jasnym — ciemny.',
-    headerLogoAuto: 'Dobór automatyczny',
-    headerLogoLight: 'Zawsze znak jasny',
-    headerLogoDark: 'Zawsze znak ciemny',
+      'Proszę wskazać wersję znaku umieszczaną na pasie nagłówka. Wybór zależy od koloru marki: na pasie ciemnym czytelny pozostaje znak jasny, na pasie jasnym — znak ciemny. Rezultat prezentowany jest w podglądzie w dolnej części strony.',
+    headerLogoLight: 'Znak jasny',
+    headerLogoDark: 'Znak ciemny',
     headerLogoResolved: (variant: 'light' | 'dark') =>
       variant === 'light'
         ? 'Na nagłówku stosowany jest obecnie znak jasny.'
@@ -1840,7 +1842,8 @@ Z wyrazami szacunku`,
     previewHint:
       'Przykładowa wycena wygenerowana na podstawie bieżących ustawień, w tym niezapisanych. Dane mają charakter poglądowy.',
     previewRendering: 'Generowanie podglądu…',
-    previewOpen: 'Otwórz podgląd w nowym oknie',
+    previewOpen: 'Otwórz plik PDF',
+    previewPage: (number: number) => `Podgląd oferty — strona ${number}`,
   },
   /** Teksty widoczne wyłącznie w wygenerowanych dokumentach. */
   pdf: {

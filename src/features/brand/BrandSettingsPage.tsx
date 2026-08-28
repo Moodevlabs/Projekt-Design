@@ -209,12 +209,16 @@ export function BrandSettingsPage() {
         />
 
         {/*
-          Kolory jeden pod drugim, nie w trzech kolumnach obok fontu: przy
-          każdym stoi teraz dwa zdania o tym, GDZIE to widać, a w kolumnie
-          szerokiej na jedną trzecią karty te zdania łamałyby się na sześć
-          linijek i nikt by ich nie przeczytał.
+          Kolory w dwóch kolumnach, nie w trzech obok fontu: przy każdym stoi
+          teraz dwa zdania o tym, GDZIE to widać, a w kolumnie szerokiej na
+          jedną trzecią karty te zdania łamałyby się na sześć linijek i nikt by
+          ich nie przeczytał.
+
+          `items-stretch` (domyślne w gridzie) plus `h-full` w `ColorField`
+          dają obu kolumnom tę samą wysokość, dzięki czemu próbniki stoją
+          w jednej linii mimo opisów różnej długości.
         */}
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid items-stretch gap-4 sm:grid-cols-2">
           <ColorField
             id="accent-color"
             label={pl.brand.accentColor}
@@ -413,11 +417,11 @@ export function BrandSettingsPage() {
 /**
  * Wybór wariantu logo na nagłówku (poprawka 3, 2026-08-27).
  *
- * Trzy przyciski zamiast listy rozwijanej: opcje są trzy i wszystkie mają się
- * czytać naraz, bo to wybór między „niech program zdecyduje" a dwoma
- * konkretami. Pod spodem stoi zdanie o tym, co z tego wyboru WYNIKA dzisiaj —
- * przy `auto` odpowiedź zmienia się razem z kolorem marki, więc sama nazwa
- * opcji jej nie zdradza.
+ * Dwa przyciski, bez opcji „dobór automatyczny" (wycofana 2026-08-28).
+ * Automat liczył kontrast z koloru marki i przy znakach z własnym tłem albo
+ * wielobarwnych wybierał źle — a użytkownik poznawał wynik dopiero po
+ * wygenerowaniu PDF-u. Decyzja należy teraz do niego, a instrukcja nad
+ * przyciskami mówi wprost, który wariant do którego pasa nagłówka pasuje.
  */
 function HeaderLogoField({
   value,
@@ -432,16 +436,16 @@ function HeaderLogoField({
   onChange: (value: HeaderLogoChoice) => void;
 }) {
   const options: Array<{ value: HeaderLogoChoice; label: string }> = [
-    { value: 'auto', label: pl.brand.headerLogoAuto },
     { value: 'dark', label: pl.brand.headerLogoDark },
     { value: 'light', label: pl.brand.headerLogoLight },
   ];
 
-  // Jeden ciąg, nie dwa węzły tekstowe: rozbite zdanie źle się czyta zarówno
-  // czytnikowi ekranu, jak i testom.
+  // Zdanie pod przyciskami zostaje TYLKO wtedy, gdy niesie coś, czego sam
+  // wybór nie mówi: że wskazany wariant nie ma jeszcze wgranego pliku.
+  // Powtarzanie wybranej opcji słowami byłoby szumem.
   const resolvedHint = missing
     ? `${pl.brand.headerLogoResolved(resolved)} ${pl.brand.headerLogoMissing}`
-    : pl.brand.headerLogoResolved(resolved);
+    : null;
 
   return (
     <div className="space-y-2">
@@ -468,12 +472,21 @@ function HeaderLogoField({
         ))}
       </div>
 
-      <p className="text-ink-soft text-xs">{resolvedHint}</p>
+      {resolvedHint ? <p className="text-ink-soft max-w-prose text-xs">{resolvedHint}</p> : null}
     </div>
   );
 }
 
-/** Kolor: próbnik systemowy plus pole tekstowe, bo `#RRGGBB` bywa przepisywane z brandbooka. */
+/**
+ * Kolor: próbnik systemowy plus pole tekstowe, bo `#RRGGBB` bywa przepisywane
+ * z brandbooka.
+ *
+ * Kolumna jest **flexem z rozciągliwym opisem**, a nie zwykłym stosem: dwa pola
+ * stoją obok siebie, a ich opisy mają różną długość, więc przy zwykłym stosie
+ * jeden próbnik lądował o linijkę niżej od drugiego. `mt-auto` spycha oba
+ * wiersze sterujące do dołu kolumny — próbniki są wtedy równo, niezależnie od
+ * tego, na ile linii złamie się który opis.
+ */
 function ColorField({
   id,
   label,
@@ -490,10 +503,10 @@ function ColorField({
   const valid = HexColorSchema.safeParse(value).success;
 
   return (
-    <div className="space-y-2">
+    <div className="flex h-full flex-col gap-2">
       <Label htmlFor={id}>{label}</Label>
       {hint ? <p className="text-ink-soft max-w-prose text-xs">{hint}</p> : null}
-      <div className="flex items-center gap-2">
+      <div className="mt-auto flex items-center gap-2">
         <input
           type="color"
           aria-label={`${label} — próbnik`}

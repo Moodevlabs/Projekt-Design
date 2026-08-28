@@ -14,7 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/shared';
 import { FileRowMenu } from './FileRowMenu';
 import { FilePreviewDialog } from './FilePreviewDialog';
-import { useFileDownload } from './useFileDownload';
+import { useFileOpen } from './useFileOpen';
 import { useFiles } from '@/data/queries/useFiles';
 import { docTypeLabel } from './doc-type-label';
 import { formatBytes, type StoredFile } from '@/domain/files/schema';
@@ -29,6 +29,12 @@ import { pl } from '@/i18n/pl';
  * plik i **nie renderuje go ponownie** — dokument sprzed miesiąca ma wyglądać
  * tak, jak wtedy wyglądał, mimo późniejszych zmian w brand kicie i bibliotece
  * (koncepcja §3 reguła 7).
+ *
+ * „Otwórz" naprawdę OTWIERA (poprawka z 2026-08-28): idzie przez `useFileOpen`,
+ * czyli katalog podręczny i systemowa przeglądarka PDF. Wcześniej wołało
+ * `useFileDownload` i pokazywało dialog zapisu, więc nazwa przycisku obiecywała
+ * co innego, niż robił. Zapis na dysk został tam, gdzie jego miejsce — pod
+ * „Pobierz" w menu wiersza.
  */
 export function DocumentsTab({
   clientId,
@@ -108,7 +114,7 @@ function DocumentRow({
   doc: StoredFile;
   onPreview: (file: StoredFile) => void;
 }) {
-  const { download, busy } = useFileDownload();
+  const { open, busy } = useFileOpen();
 
   return (
     <TableRow>
@@ -122,7 +128,7 @@ function DocumentRow({
       <TableCell className="text-right tabular-nums">{formatBytes(doc.sizeBytes)}</TableCell>
       <TableCell className="text-ink-soft text-sm">{formatRelativeDay(doc.createdAt)}</TableCell>
       <TableCell>
-        <Button variant="outline" size="sm" disabled={busy} onClick={() => void download(doc)}>
+        <Button variant="outline" size="sm" disabled={busy} onClick={() => void open(doc)}>
           {pl.documents.open}
         </Button>
       </TableCell>

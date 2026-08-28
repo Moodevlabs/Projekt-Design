@@ -1,4 +1,9 @@
-import { BrandKitSchema, defaultBrandKit, type BrandKit } from '@/domain/brand/schema';
+import {
+  BrandKitSchema,
+  defaultBrandKit,
+  resolveHeaderLogo,
+  type BrandKit,
+} from '@/domain/brand/schema';
 import { getSupabase } from '@/data/supabase';
 import type { Tables, TablesUpdate } from '@/data/types.generated';
 import { RepoError, unwrap } from './errors';
@@ -18,7 +23,10 @@ function parseBrandKit(row: BrandRow): BrandKit {
     companyName: row.company_name,
     logoDarkPath: row.logo_dark_path,
     logoLightPath: row.logo_light_path,
-    headerLogo: row.header_logo,
+    // Wiersz sprzed migracji 0039 może wciąż trzymać `auto`; przekładamy je na
+    // konkretny wariant TU, a nie w zodzie — inaczej jedna przestarzała
+    // wartość wywracałaby parsowanie i cofała cały brand kit do domyślnego.
+    headerLogo: resolveHeaderLogo(row.header_logo, row.accent_color),
     accentColor: row.accent_color,
     bgColor: row.bg_color,
     fontFamily: row.font_family,

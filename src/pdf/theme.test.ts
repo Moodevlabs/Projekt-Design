@@ -15,23 +15,18 @@ describe('buildPdfTheme', () => {
     expect(ciemny.onAccent).not.toBe(jasny.onAccent);
   });
 
-  it('na jasnym akcencie bierze CIEMNY wariant logo', () => {
-    // Jasne logo na jasnym tle znikneloby.
-    expect(buildPdfTheme({ ...defaultBrandKit(), accentColor: '#FAF7F1' }).headerLogo).toBe('dark');
-    expect(buildPdfTheme({ ...defaultBrandKit(), accentColor: '#21201C' }).headerLogo).toBe(
-      'light',
-    );
-  });
-
-  it('jawny wybor uzytkownika wygrywa z regula kontrastu (poprawka 3)', () => {
-    // Znak z wlasnym bialym tlem ma zostac taki, jaki jest — kontrast liczy
-    // sie wtedy z tla PLIKU, a nie z koloru pasa.
+  it('wariant logo bierze sie WYLACZNIE z ustawienia, nie z koloru marki', () => {
+    // Dobor automatyczny wycofany 2026-08-28: kontrast pasa naglowka nie mowi
+    // nic o znaku z wlasnym tlem. Ten sam kolor marki, dwa rozne ustawienia —
+    // i dwa rozne wyniki.
     const jasnyPas = { ...defaultBrandKit(), accentColor: '#FAF7F1' } as const;
+    const ciemnyPas = { ...defaultBrandKit(), accentColor: '#21201C' } as const;
 
     expect(headerLogoVariant({ ...jasnyPas, headerLogo: 'light' })).toBe('light');
     expect(headerLogoVariant({ ...jasnyPas, headerLogo: 'dark' })).toBe('dark');
-    expect(headerLogoVariant({ ...jasnyPas, headerLogo: 'auto' })).toBe('dark');
+    expect(headerLogoVariant({ ...ciemnyPas, headerLogo: 'light' })).toBe('light');
     expect(buildPdfTheme({ ...jasnyPas, headerLogo: 'light' }).headerLogo).toBe('light');
+    expect(buildPdfTheme({ ...ciemnyPas, headerLogo: 'dark' }).headerLogo).toBe('dark');
   });
 
   it('przepisuje kolory marki bez zmian', () => {

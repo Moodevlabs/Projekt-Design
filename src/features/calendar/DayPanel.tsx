@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Check, Plus, Trash2 } from 'lucide-react';
+import { Check, Pencil, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -38,22 +38,12 @@ export interface DayPanelProps {
 export function DayPanel({ day, events, canWrite }: DayPanelProps) {
   const create = useCreateCalendarNote();
   const [adding, setAdding] = useState(false);
-  const [text, setText] = useState('');
-  const [time, setTime] = useState('');
 
-  const submit = () => {
-    const trimmed = text.trim();
-    if (trimmed === '') {
-      toast.error(pl.calendar.noteEmpty);
-      return;
-    }
-
+  const submit = (draft: NoteDraft) => {
     create.mutate(
-      { day, text: trimmed, time: time === '' ? null : time },
+      { day, text: draft.text, time: draft.time },
       {
         onSuccess: () => {
-          setText('');
-          setTime('');
           setAdding(false);
           toast.success(pl.calendar.noteSaved);
         },
@@ -83,45 +73,12 @@ export function DayPanel({ day, events, canWrite }: DayPanelProps) {
 
       {canWrite ? (
         adding ? (
-          <form
-            className="border-hair space-y-3 rounded-[var(--radius-control)] border p-3"
-            onSubmit={(submitEvent) => {
-              submitEvent.preventDefault();
-              submit();
-            }}
-          >
-            <div className="space-y-1">
-              <Label htmlFor="calendar-note-text">{pl.calendar.noteTextLabel}</Label>
-              <Input
-                id="calendar-note-text"
-                value={text}
-                autoFocus
-                maxLength={500}
-                placeholder={pl.calendar.notePlaceholder}
-                onChange={(changeEvent) => setText(changeEvent.target.value)}
-              />
-            </div>
-            <div className="flex flex-wrap items-end gap-3">
-              <div className="space-y-1">
-                <Label htmlFor="calendar-note-time">{pl.calendar.noteTimeLabel}</Label>
-                <Input
-                  id="calendar-note-time"
-                  type="time"
-                  value={time}
-                  className="w-32"
-                  onChange={(changeEvent) => setTime(changeEvent.target.value)}
-                />
-              </div>
-              <div className="ml-auto flex items-center gap-2">
-                <Button type="button" variant="ghost" onClick={() => setAdding(false)}>
-                  {pl.common.cancel}
-                </Button>
-                <Button type="submit" disabled={create.isPending}>
-                  {pl.calendar.noteSave}
-                </Button>
-              </div>
-            </div>
-          </form>
+          <NoteForm
+            initial={{ text: '', time: null }}
+            busy={create.isPending}
+            onSubmit={submit}
+            onCancel={() => setAdding(false)}
+          />
         ) : (
           <Button type="button" variant="ghost" size="sm" onClick={() => setAdding(true)}>
             <Plus className="size-4" aria-hidden />
@@ -133,13 +90,129 @@ export function DayPanel({ day, events, canWrite }: DayPanelProps) {
   );
 }
 
+/** Treść i godzina notatki — jedyne, co użytkownik w niej wpisuje. */
+interface NoteDraft {
+  text: string;
+  /** `HH:MM` albo `null`, gdy notatka dotyczy całego dnia. */
+  time: string | null;
+}
+
+/**
+ * Formularz notatki — ten sam przy dodawaniu i przy poprawianiu (2026-08-28).
+ *
+ * Do tej pory notatkę dało się tylko dodać i usunąć. Literówka w treści albo
+ * przesunięty montaż oznaczały więc skasowanie wpisu i napisanie go od nowa,
+ * razem ze stanem „wykonane", który przy okazji przepadał. Skoro pola są
+ * identyczne w obu przypadkach, jest tu jeden komponent — dwa rozjechałyby się
+ * przy pierwszej zmianie i dodawanie zaczęłoby przyjmować co innego niż
+ * edycja.
+ */
+function NoteForm({
+  initial,
+  busy,
+  submitLabel = pl.calendar.noteSave,
+  onSubmit,
+  onCancel,
+}: {
+  initial: NoteDraft;
+  busy: boolean;
+  submitLabel?: string;
+  onSubmit: (draft: NoteDraft) => void;
+  onCancel: () => void;
+}) {
+  const [text, setText] = useState(initial.text);
+  const [time, setTime] = useState(initial.time ?? '');
+
+  // Formularz bywa na stronie w dwóch egzemplarzach naraz (dodawanie pod listą
+  // i edycja w wierszu), więc identyfikatory pól muszą być unikalne — inaczej
+  // kliknięcie w etykietę ustawia kursor w cudzym polu.
+  const fieldId = useId();
+
+  const submit = () => {
+    const trimmed = text.trim();
+    if (trimmed === '') {
+      toast.error(pl.calendar.noteEmpty);
+      return;
+    }
+    onSubmit({ text: trimmed, time: time === '' ? null : time });
+  };
+
+  return (
+    <form
+      className="border-hair space-y-3 rounded-[var(--radius-control)] border p-3"
+      onSubmit={(submitEvent) => {
+        submitEvent.preventDefault();
+        submit();
+      }}
+    >
+      <div className="space-y-1">
+        <Label htmlFor={`${fieldId}-text`}>{pl.calendar.noteTextLabel}</Label>
+        <Input
+          id={`${fieldId}-text`}
+          value={text}
+          autoFocus
+          maxLength={500}
+          placeholder={pl.calendar.notePlaceholder}
+          onChange={(changeEvent) => setText(changeEvent.target.value)}
+        />
+      </div>
+      <div className="flex flex-wrap items-end gap-3">
+        <div className="space-y-1">
+          <Label htmlFor={`${fieldId}-time`}>{pl.calendar.noteTimeLabel}</Label>
+          <Input
+            id={`${fieldId}-time`}
+            type="time"
+            value={time}
+            className="w-32"
+            onChange={(changeEvent) => setTime(changeEvent.target.value)}
+          />
+        </div>
+        <div className="ml-auto flex items-center gap-2">
+          <Button type="button" variant="ghost" onClick={onCancel}>
+            {pl.common.cancel}
+          </Button>
+          <Button type="submit" disabled={busy}>
+            {submitLabel}
+          </Button>
+        </div>
+      </div>
+    </form>
+  );
+}
+
 function EventRow({ event, canWrite }: { event: CalendarEvent; canWrite: boolean }) {
   const update = useUpdateCalendarNote();
   const remove = useDeleteCalendarNote();
   const [removeOpen, setRemoveOpen] = useState(false);
+  const [editing, setEditing] = useState(false);
 
   const Icon = EVENT_ICON[event.kind];
   const noteId = event.kind === 'note' ? event.id.slice('note:'.length) : null;
+  const editable = noteId !== null && canWrite;
+
+  if (editable && editing) {
+    return (
+      <li>
+        <NoteForm
+          initial={{ text: event.title, time: event.time }}
+          busy={update.isPending}
+          onSubmit={(draft) =>
+            update.mutate(
+              { id: noteId, patch: { text: draft.text, time: draft.time } },
+              {
+                onSuccess: () => {
+                  setEditing(false);
+                  toast.success(pl.calendar.noteEdited);
+                },
+                onError: (error) => toast.error(error.message || pl.calendar.noteFailed),
+              },
+            )
+          }
+          onCancel={() => setEditing(false)}
+        />
+      </li>
+    );
+  }
 
   return (
     <li className="border-hair flex items-start gap-3 rounded-[var(--radius-control)] border px-3 py-2">
@@ -165,7 +238,7 @@ function EventRow({ event, canWrite }: { event: CalendarEvent; canWrite: boolean
         </Link>
       ) : null}
 
-      {noteId && canWrite ? (
+      {editable ? (
         <span className="flex shrink-0 items-center gap-0.5">
           <Button
             type="button"
@@ -181,6 +254,15 @@ function EventRow({ event, canWrite }: { event: CalendarEvent; canWrite: boolean
             }
           >
             <Check className={cn('size-4', event.done && 'text-ink')} aria-hidden />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            aria-label={pl.calendar.noteEdit}
+            onClick={() => setEditing(true)}
+          >
+            <Pencil className="size-4" aria-hidden />
           </Button>
           <Button
             type="button"

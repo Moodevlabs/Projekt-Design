@@ -1,10 +1,14 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { StoredFile } from '@/domain/files/schema';
 import { pl } from '@/i18n/pl';
 
 const useFiles = vi.hoisted(() => vi.fn());
 const mutationStub = vi.hoisted(() => () => ({ mutate: vi.fn(), isPending: false }));
+const saveFileMock = vi.hoisted(() => vi.fn());
+const openBytesMock = vi.hoisted(() => vi.fn());
+const downloadFileMock = vi.hoisted(() => vi.fn(() => Promise.resolve(new Uint8Array([1, 2]))));
 
 vi.mock('@/data/queries/useFiles', () => ({
   useFiles,
@@ -16,8 +20,13 @@ vi.mock('@/data/queries/useFiles', () => ({
 
 vi.mock('@/lib/tauri', () => ({
   runningInTauri: () => false,
-  saveFile: vi.fn(),
+  saveFile: saveFileMock,
   openPath: vi.fn(),
+  openBytes: openBytesMock,
+}));
+
+vi.mock('@/data/repos/files.repo', () => ({
+  downloadFile: downloadFileMock,
 }));
 
 vi.mock('sonner', () => ({
@@ -116,6 +125,22 @@ describe('DocumentsTab', () => {
     mockResult([doc()]);
     render(<DocumentsTab clientId="c1" />);
     expect(screen.getByText(pl.documents.hint)).toBeInTheDocument();
+  });
+
+  it('„Otworz" pokazuje dokument, a nie dialog zapisu', async () => {
+    // Do 2026-08-28 przycisk szedl przez `useFileDownload`: systemowy dialog
+    // „zapisz jako" i zaden otwarty plik. Nazwa obiecywala co innego, niz robil.
+    const user = userEvent.setup();
+    const openTab = vi.spyOn(window, 'open').mockReturnValue(null);
+    mockResult([doc()]);
+    render(<DocumentsTab clientId="c1" />);
+
+    await user.click(screen.getByRole('button', { name: pl.documents.open }));
+
+    expect(downloadFileMock).toHaveBeenCalled();
+    expect(saveFileMock).not.toHaveBeenCalled();
+    await vi.waitFor(() => expect(openTab).toHaveBeenCalled());
+    openTab.mockRestore();
   });
 
   it('pusty stan tlumaczy, skad sie biora dokumenty', () => {

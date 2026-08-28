@@ -41,6 +41,46 @@ export async function openPath(path: string): Promise<void> {
 }
 
 /**
+ * Otwiera bajty w systemowej aplikacji od tego typu pliku (Podgląd, Acrobat…).
+ *
+ * Powstało, bo „Otwórz" w dokumentach otwierało **dialog zapisu**: jedyną
+ * drogą do pliku był `saveFile`, więc żeby zerknąć na wysłaną ofertę, trzeba
+ * było najpierw wskazać, gdzie ją zapisać, i dopiero potem kliknąć „Otwórz"
+ * w toaście. To dwa pytania na czynność, która żadnego nie potrzebuje.
+ *
+ * Plik ląduje w katalogu podręcznym aplikacji, a nie w miejscu wybranym przez
+ * użytkownika: to kopia do OBEJRZENIA, nie do trzymania. Zapisywaniem
+ * u siebie zajmuje się osobne „Pobierz", które dialog ma w pełni uzasadniony.
+ *
+ * Nazwę pliku oczyszczamy, bo trafia do ścieżki systemowej — nazwa dokumentu
+ * pochodzi z bazy i może zawierać cokolwiek, łącznie z separatorem katalogów.
+ */
+export async function openBytes(fileName: string, bytes: Uint8Array): Promise<string> {
+  const { appCacheDir } = await import('@tauri-apps/api/path');
+  const target = await joinPath(await appCacheDir(), 'podglad', safeFileName(fileName));
+  // `save_file` samo tworzy brakujące katalogi — stąd brak osobnego mkdir.
+  const saved = await saveFile(target, bytes);
+  await openPath(saved);
+  return saved;
+}
+
+/**
+ * Nazwa pliku bezpieczna dla ścieżki systemowej.
+ *
+ * Separatory i znaki zakazane w Windows zamieniamy na łącznik, zamiast je
+ * wycinać: „Wycena 1/2.pdf" ma zostać czytelną „Wycena 1-2.pdf", a nie zlepić
+ * się w „Wycena 12.pdf".
+ */
+export function safeFileName(name: string): string {
+  const cleaned = name
+    // eslint-disable-next-line no-control-regex -- znaki sterujące są w nazwach plików zakazane
+    .replace(/[\x00-\x1f<>:"/\\|?*]+/g, '-')
+    .replace(/^[.\s]+/, '')
+    .trim();
+  return cleaned === '' ? 'dokument' : cleaned.slice(0, 120);
+}
+
+/**
  * Sklejenie sciezki po stronie systemu.
  *
  * Recznie wstawiony `/` albo `\` dziala na jednym systemie i psuje sie na

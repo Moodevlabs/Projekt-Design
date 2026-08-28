@@ -1,4 +1,4 @@
-import { contrastText, isLightBackground } from '@/domain/brand/color';
+import { contrastText } from '@/domain/brand/color';
 import type { BrandKit, FontFamily } from '@/domain/brand/schema';
 
 /**
@@ -26,6 +26,15 @@ export interface PdfTheme {
     groupTitle: number;
     body: number;
     small: number;
+    /**
+     * Napis „wycena indywidualna" w kolumnie kwoty.
+     *
+     * Osobny rozmiar, bo to jedyny tekst, który musi zmieścic sie w 90 pt
+     * kolumny kwoty w JEDNEJ linii. W rozmiarze `body` nie miescil sie i
+     * `@react-pdf` lamal go przez dywiz w srodku wyrazu („indywidual-na"),
+     * co w dokumencie wychodzacym do inwestora wyglada na blad skladu.
+     */
+    individual: number;
     total: number;
   };
 }
@@ -54,16 +63,14 @@ export function pdfFontFamily(font: FontFamily, registered: boolean): string {
 /**
  * Który wariant logo trafia na pas nagłówka.
  *
- * Wydzielone z `buildPdfTheme`, bo tę samą odpowiedź musi znać podgląd
- * w ustawieniach — a dwie kopie tej decyzji rozjechałyby się przy pierwszej
- * zmianie i strona brandingu kłamałaby dokładnie w tym, po co się na nią patrzy.
- *
- * Wybór użytkownika (`light` / `dark`) wygrywa z regułą kontrastu. `auto` to
- * reguła: na jasnym pasie jasne logo zniknie, więc bierzemy ciemne.
+ * Od wycofania doboru automatycznego (2026-08-28) to zwykłe przepisanie
+ * ustawienia: program nie liczy już kontrastu za użytkownika. Funkcja zostaje,
+ * bo to nadal JEDNO miejsce, przez które pytają o tę odpowiedź generator PDF
+ * i podgląd w ustawieniach — a dwie kopie rozjechałyby się przy pierwszej
+ * zmianie i strona brandingu kłamałaby w tym, po co się na nią patrzy.
  */
 export function headerLogoVariant(brandKit: BrandKit): 'dark' | 'light' {
-  if (brandKit.headerLogo !== 'auto') return brandKit.headerLogo;
-  return isLightBackground(brandKit.accentColor) ? 'dark' : 'light';
+  return brandKit.headerLogo;
 }
 
 export function buildPdfTheme(brandKit: BrandKit, fontsRegistered = false): PdfTheme {
@@ -85,6 +92,7 @@ export function buildPdfTheme(brandKit: BrandKit, fontsRegistered = false): PdfT
       groupTitle: 9,
       body: 10,
       small: 8.5,
+      individual: 7.5,
       total: 18,
     },
   };

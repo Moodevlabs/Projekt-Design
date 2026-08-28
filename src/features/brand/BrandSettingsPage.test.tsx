@@ -40,20 +40,33 @@ describe('BrandSettingsPage', () => {
     expect(screen.getByLabelText(pl.brand.companyName)).toHaveValue('Studio Wnętrz');
   });
 
-  it('pozwala wymusic wariant logo na naglowku (poprawka 3)', async () => {
+  it('wariant logo wybiera uzytkownik — bez doboru automatycznego', async () => {
     const user = userEvent.setup();
-    // Domyslny kolor marki jest ciemny, wiec „dobierz sam" daje znak JASNY.
+    mockKit({ headerLogo: 'dark' });
     render(<BrandSettingsPage />);
-    // Zdanie niesie tez ostrzezenie o braku wgranego pliku, stad dopasowanie
-    // po fragmencie, a nie po calym ciagu.
-    expect(screen.getByText(/stosowany jest obecnie znak jasny/)).toBeInTheDocument();
 
-    await user.click(screen.getByRole('radio', { name: pl.brand.headerLogoDark }));
-    expect(screen.getByText(/stosowany jest obecnie znak ciemny/)).toBeInTheDocument();
+    // Opcja „dobierz sam" zostala wycofana 2026-08-28: zgadywala z koloru
+    // marki i przy znakach z wlasnym tlem wybierala zle, a wynik bylo widac
+    // dopiero w wygenerowanym PDF-ie.
+    const opcje = screen.getAllByRole('radio');
+    expect(opcje).toHaveLength(2);
+    expect(screen.getByRole('radio', { name: pl.brand.headerLogoDark })).toHaveAttribute(
+      'aria-checked',
+      'true',
+    );
 
+    await user.click(screen.getByRole('radio', { name: pl.brand.headerLogoLight }));
     await user.click(screen.getByRole('button', { name: pl.common.save }));
     const patch = updateMutate.mock.calls[0]?.[0] as BrandKit;
-    expect(patch.headerLogo).toBe('dark');
+    expect(patch.headerLogo).toBe('light');
+  });
+
+  it('ostrzega, gdy wybrany wariant nie ma wgranego pliku', () => {
+    // Bez tego zdania czlowiek dowiaduje sie o braku znaku dopiero z oferty,
+    // ktora juz poszla do inwestora.
+    mockKit({ headerLogo: 'light', logoLightPath: null });
+    render(<BrandSettingsPage />);
+    expect(screen.getByText(new RegExp(pl.brand.headerLogoMissing))).toBeInTheDocument();
   });
 
   it('mowi wprost, ktory kolor gdzie widac', () => {

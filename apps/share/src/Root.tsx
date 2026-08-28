@@ -1,10 +1,18 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import { briefTokenFromPath } from '@/domain/brief';
 import { tokenFromPath } from '@/domain/share/schema';
 
 import { App } from './App';
 import { BriefApp } from './BriefApp';
+
+/**
+ * Tytuł karty przeglądarki — jeden plik `index.html` obsługuje oba adresy,
+ * więc statyczny `<title>` musiałby kłamać przy jednym z nich. Brief podpisany
+ * „Oferta" wygląda na pomyłkę w wysyłce, a klient widzi ten napis na karcie
+ * i w historii przeglądarki jeszcze zanim strona się wczyta.
+ */
+const TITLES = { brief: 'Brief', quote: 'Oferta' } as const;
 
 /**
  * Wybór strony po adresie (T-93, poprawka 9).
@@ -23,6 +31,10 @@ export function Root() {
   const path = window.location.pathname;
   const briefToken = useMemo(() => briefTokenFromPath(path), [path]);
   const quoteToken = useMemo(() => tokenFromPath(path), [path]);
+
+  useEffect(() => {
+    document.title = briefToken ? TITLES.brief : TITLES.quote;
+  }, [briefToken]);
 
   if (briefToken) return <BriefApp token={briefToken} />;
 

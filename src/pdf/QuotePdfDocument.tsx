@@ -430,6 +430,7 @@ function ItemLine({
   // Wartość z domeny — patrz komentarz przy `QuotePdfDocument`.
   const valueCents = calcItemCents(item, rooms, pricing);
   const off = !item.enabled;
+  const individual = item.unitPriceCents === null;
 
   return (
     <View
@@ -461,15 +462,23 @@ function ItemLine({
         </Text>
       ) : null}
 
+      {/* „Wycena indywidualna" zamiast kwoty (T-60) — pozycja jest w ofercie,
+          ale ceny nie ma. Zero drukowałoby „0,00 zł", czyli „gratis".
+
+          Ten napis dostaje WŁASNY, mniejszy rozmiar: w kolumnie szerokiej na
+          90 pt nie mieścił się w rozmiarze kwoty i łamał się przez dywiz
+          w środku wyrazu („indywidual-na"). Kwoty zostają w `body` — to one
+          mają być czytelne z drugiego końca stołu. */}
       <Text
         style={[
           styles.rowAmount,
-          { fontSize: theme.sizes.body, color: off ? theme.inkSoft : theme.ink },
+          {
+            fontSize: individual ? theme.sizes.individual : theme.sizes.body,
+            color: off ? theme.inkSoft : theme.ink,
+          },
         ]}
       >
-        {/* „Wycena indywidualna" zamiast kwoty (T-60) — pozycja jest w ofercie,
-            ale ceny nie ma. Zero drukowałoby „0,00 zł", czyli „gratis". */}
-        {item.unitPriceCents === null ? pl.pdf.individualPrice : money(valueCents)}
+        {individual ? pl.pdf.individualPrice : money(valueCents)}
       </Text>
     </View>
   );

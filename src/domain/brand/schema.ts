@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { isLightBackground } from './color';
 import { DEFAULT_NUMBER_PATTERN } from '../numbering';
 import { PricesIncludeSchema, PricingBasisSchema } from '../quote/schema';
 import { ScheduleStageSchema } from '../schedule/schema';
@@ -45,12 +46,32 @@ export const MAX_OPENING_HOURS_ROWS = 4;
 /**
  * Wariant logo na pasie nagłówka PDF.
  *
- * `auto` liczy kontrast z koloru nagłówka; `light` i `dark` to decyzja
- * użytkownika, która tę regułę wyłącza. Nazwy opisują SAM PLIK, nie tło:
- * `light` to jasny znak (na ciemny pas), `dark` — ciemny (na jasny pas).
+ * Nazwy opisują SAM PLIK, nie tło: `light` to jasny znak (na ciemny pas),
+ * `dark` — ciemny (na jasny pas).
+ *
+ * Do sierpnia 2026 istniała trzecia wartość, `auto`, licząca kontrast z koloru
+ * nagłówka. Została usunięta: reguła nie zna znaków z własnym tłem ani plików
+ * wielokolorowych, więc wybierała źle dokładnie tam, gdzie wybór ma znaczenie,
+ * a użytkownik nie miał jak przewidzieć wyniku przed wygenerowaniem PDF-u.
+ * Zgodność ze starymi wierszami zapewnia `resolveHeaderLogo`.
  */
-export const HeaderLogoSchema = z.enum(['auto', 'light', 'dark']);
+export const HeaderLogoSchema = z.enum(['light', 'dark']);
 export type HeaderLogoChoice = z.infer<typeof HeaderLogoSchema>;
+
+/**
+ * Zapisana wartość `header_logo` → wariant, który naprawdę trafi na nagłówek.
+ *
+ * Istnieje wyłącznie dla wierszy sprzed migracji `0039`, w których stoi jeszcze
+ * `auto`. Odtwarzamy dla nich **dokładnie** dawną regułę kontrastu, żeby
+ * dokument wygenerowany po aktualizacji wyglądał tak jak ten sprzed niej —
+ * zmiana ustawień nie ma prawa po cichu podmienić znaku w ofercie, która już
+ * poszła do inwestora.
+ */
+export function resolveHeaderLogo(stored: unknown, accentColor: string): HeaderLogoChoice {
+  const parsed = HeaderLogoSchema.safeParse(stored);
+  if (parsed.success) return parsed.data;
+  return isLightBackground(accentColor) ? 'dark' : 'light';
+}
 
 export const BrandKitSchema = z.object({
   companyName: z.string().default(''),
@@ -58,14 +79,14 @@ export const BrandKitSchema = z.object({
   logoDarkPath: z.string().nullable().default(null),
   logoLightPath: z.string().nullable().default(null),
   /**
-   * Który wariant logo kłaść na pasie nagłówka PDF (poprawka 3, 2026-08-27).
+   * Który wariant logo kłaść na pasie nagłówka PDF (poprawka 3, 2026-08-27;
+   * dobór automatyczny wycofany 2026-08-28).
    *
-   * `auto` = dotychczasowa reguła kontrastu: jasny nagłówek bierze ciemne logo,
-   * ciemny — jasne. Zostaje domyślną, bo w większości przypadków jest po prostu
-   * poprawna. Wartości `light` / `dark` są dla znaków, które mają własne tło
-   * albo istnieją w jednej wersji i mają wyglądać zawsze tak samo.
+   * Wybór należy do użytkownika — program go nie zgaduje. Domyślnie `dark`,
+   * bo pas nagłówka startuje w jasnym beżu marki i to na nim znak ma być
+   * widoczny w świeżo założonym workspace.
    */
-  headerLogo: HeaderLogoSchema.default('auto'),
+  headerLogo: HeaderLogoSchema.default('dark'),
   // Parytet z `0024_brand_defaults_toolier.sql`. Dotyczy TYLKO nowych
   // workspace'ów — istniejące mają własne wartości w wierszu i nic ich
   // nie nadpisuje (08-REDESIGN D-4: kolor oferty jest własnością klienta).

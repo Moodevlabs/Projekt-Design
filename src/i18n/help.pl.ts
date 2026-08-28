@@ -222,7 +222,7 @@ export const helpPl = {
             'Kalendarz gromadzi cztery rodzaje terminów: rozpoczęcie projektu, wizję lokalną, upływ ważności oferty oraz termin wynikający z harmonogramu wyceny. Piąty rodzaj wpisu — notatka dzienna — powstaje bezpośrednio w kalendarzu.',
             'Kratka dnia niesie po jednym oznaczeniu na rodzaj zdarzenia, a nie na pojedynczy wpis. Trzy terminy tego samego rodzaju nie niosą większej informacji niż jeden, a zajmują trzykrotnie więcej miejsca w siatce.',
             'Wybór dnia otwiera jego szczegóły w panelu pod kalendarzem, z pełną treścią wpisów i odnośnikami do właściwych ekranów. Panel nie zasłania siatki, dzięki czemu kolejne dni można przeglądać bez zamykania okna.',
-            'Notatka dzienna przyjmuje treść oraz opcjonalną godzinę. Wpisy można oznaczać jako wykonane oraz usuwać.',
+            'Notatka dzienna przyjmuje treść oraz opcjonalną godzinę. Wpisy można edytować, oznaczać jako wykonane oraz usuwać.',
             'Termin z harmonogramu prezentowany jest w wariancie najpóźniejszym, czyli uwzględniającym pełny czas po stronie inwestora. Jest to data, której pracownia dotrzymuje wobec inwestora.',
           ],
         },
@@ -479,7 +479,7 @@ export const helpPl = {
         },
         {
           kind: 'p',
-          text: 'BRANDING (Ustawienia → Branding) obejmuje trzy elementy: znak graficzny, kolorystykę i krój pisma. Znak wgrywa się w dwóch wersjach — ciemnej (przeznaczonej na jasny nagłówek) i jasnej (na ciemny). O wariancie umieszczanym na pasie decyduje ustawienie „Logo na nagłówku”: opcja „Dobór automatyczny” uwzględnia kolor marki, natomiast wymuszenie wariantu jasnego lub ciemnego wyłącza tę regułę, co bywa potrzebne przy znakach z własnym białym tłem.',
+          text: 'BRANDING (Ustawienia → Branding) obejmuje trzy elementy: znak graficzny, kolorystykę i krój pisma. Znak wgrywa się w dwóch wersjach — ciemnej (przeznaczonej na jasny nagłówek) i jasnej (na ciemny). Który z nich trafi na pas nagłówka, wskazuje ustawienie „Znak na nagłówku dokumentu”. Wyboru dokonuje użytkownik: program nie wylicza go z koloru marki, ponieważ przy znakach z własnym tłem lub wielobarwnych taka reguła prowadziła do błędnych rozstrzygnięć. Rezultat prezentowany jest w podglądzie w dolnej części strony.',
         },
         {
           kind: 'list',
