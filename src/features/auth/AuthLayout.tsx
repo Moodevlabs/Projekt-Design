@@ -53,16 +53,11 @@ export function AuthLayout({
       />
 
       {/*
-        Matowe szkło na całym zdjęciu — jedna warstwa, równa na całej
-        powierzchni (2026-08-27). Wartości w `.auth-backdrop`, obok szkła
-        karty, żeby obie warstwy trzymały te same liczby.
-
-        Zastąpiło gradient o zmiennym kryciu i poświaty pod napisami. Rozmycie
-        robi tu robotę, której samo krycie zrobić nie umiało: zdjęcie ma ciemny
-        kasetonowy sufit tuż obok jasnych paneli świetlnych i to ten skok
-        jasności zjadał logotyp.
+        Zdjęcie BEZ warstwy efektów (T-105, decyzja właściciela 2026-08-28).
+        Do tej daty leżało tu matowe szkło (`.auth-backdrop`) na całym tle;
+        zdjęte razem z jego regułami w `globals.css`. Karta formularza zostaje
+        szklana — to jej własne tło, nie efekt na zdjęciu.
       */}
-      <div aria-hidden className="auth-backdrop pointer-events-none absolute inset-0 -z-10" />
 
       {/*
         Pełny lockup — jedyne miejsce, gdzie stoi w całości (08-REDESIGN D-2).
@@ -81,9 +76,14 @@ export function AuthLayout({
         Sterujemy SZEROKOŚCIĄ, nie wysokością: `w-full` pozwala logotypowi
         zwęzić się w wąskim oknie, zamiast wystawać poza ekran.
       */}
+      {/*
+        Logotyp biały (T-105) — wprost na fotografii. Lekki cień pod krzywymi
+        to jedyne ustępstwo: bez niego biały napis ginie na jasnych panelach
+        świetlnych, które zdjęcie ma tuż obok ciemnego sufitu.
+      */}
       <LogoLockup
         title={`${pl.app.name} — ${pl.app.tagline}`}
-        className="text-brown relative mb-10 w-full max-w-[460px]"
+        className="relative mb-10 w-full max-w-[460px] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.45)]"
       />
 
       <div className="relative w-full max-w-[380px]">
@@ -94,12 +94,15 @@ export function AuthLayout({
         </div>
 
         {/*
-          Stopka leży na szkle, nie na karcie — dlatego `--ink`, a nie
-          `--ink-soft` jak w reszcie aplikacji. Poświata pod literami zdjęta
-          razem z tą pod logotypem: rozmyte tło nie ma już ostrej faktury,
-          od której trzeba było odklejać napis.
+          Stopka leży wprost na zdjęciu — biała, jak logotyp (T-105), z tym
+          samym cieniem. Linki w środku ustawiają własny kolor w stronach
+          auth (`text-white`), bo `Link` nie dziedziczy klasy rodzica.
         */}
-        {footer ? <div className="text-ink relative mt-5 text-center text-sm">{footer}</div> : null}
+        {footer ? (
+          <div className="relative mt-5 text-center text-sm text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.45)]">
+            {footer}
+          </div>
+        ) : null}
       </div>
     </div>
   );

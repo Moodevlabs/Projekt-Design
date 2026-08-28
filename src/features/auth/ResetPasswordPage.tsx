@@ -51,7 +51,7 @@ export function ResetPasswordPage() {
       title={pl.auth.resetPassword}
       description={sent ? undefined : 'Wyślemy link do ustawienia nowego hasła.'}
       footer={
-        <Link to={routes.login} className="text-ink font-medium underline underline-offset-4">
+        <Link to={routes.login} className="font-medium text-white underline underline-offset-4">
           {pl.auth.login}
         </Link>
       }

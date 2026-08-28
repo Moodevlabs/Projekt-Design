@@ -1967,6 +1967,14 @@ Z wyrazami szacunku`,
       'Przykładowa wycena wygenerowana na podstawie bieżących ustawień, w tym niezapisanych. Dokument powstaje na tym komputerze i otwiera się w systemowej przeglądarce PDF. Dane mają charakter poglądowy.',
     previewRendering: 'Generowanie podglądu…',
     previewOpen: 'Otwórz podgląd oferty (PDF)',
+    /**
+     * Drugi przycisk (T-104): zapis do wskazanego pliku. Na macOS otwieranie
+     * z katalogu podręcznego bywa zawodne — plik na dysku otwiera się zawsze.
+     */
+    previewSave: 'Zapisz podgląd (PDF)',
+    previewSaved: 'Zapisano podgląd oferty',
+    previewSaveHint:
+      'Jeśli podgląd nie otwiera się automatycznie (np. na macOS), zapisz go jako plik PDF i otwórz z dysku.',
   },
   /** Teksty widoczne wyłącznie w wygenerowanych dokumentach. */
   pdf: {

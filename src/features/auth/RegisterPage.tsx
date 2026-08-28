@@ -65,7 +65,7 @@ export function RegisterPage() {
         title="Sprawdź skrzynkę"
         description="Wysłaliśmy link potwierdzający. Kliknij go, żeby dokończyć rejestrację."
         footer={
-          <Link to={routes.login} className="text-ink font-medium underline underline-offset-4">
+          <Link to={routes.login} className="font-medium text-white underline underline-offset-4">
             {pl.auth.login}
           </Link>
         }
@@ -84,7 +84,7 @@ export function RegisterPage() {
       footer={
         <>
           {pl.auth.hasAccount}{' '}
-          <Link to={routes.login} className="text-ink font-medium underline underline-offset-4">
+          <Link to={routes.login} className="font-medium text-white underline underline-offset-4">
             {pl.auth.login}
           </Link>
         </>

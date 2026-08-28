@@ -47,7 +47,10 @@ export function LoginPage() {
       footer={
         <>
           {pl.auth.noAccount}{' '}
-          <Link to={routes.register} className="text-ink font-medium underline underline-offset-4">
+          <Link
+            to={routes.register}
+            className="font-medium text-white underline underline-offset-4"
+          >
             {pl.auth.register}
           </Link>
         </>

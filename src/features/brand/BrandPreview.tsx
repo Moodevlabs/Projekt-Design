@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FileText, Loader2 } from 'lucide-react';
+import { Download, FileText, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -7,6 +7,7 @@ import { useBrandPreview } from './useBrandPreview';
 import { fetchLogoAsDataUrl } from '@/pdf/logo';
 import { headerLogoVariant } from '@/pdf/theme';
 import { openBytes, runningInTauri } from '@/lib/tauri';
+import { deliverPdf } from '@/pdf/export';
 import type { BrandKit } from '@/domain/brand/schema';
 import { createLogger } from '@/lib/logger';
 import { pl } from '@/i18n/pl';
@@ -25,6 +26,13 @@ const log = createLogger('brand.preview');
  *
  * Renderujemy szkic, a nie zapisany brand kit: podgląd jest coś wart tylko
  * w trakcie dobierania kolorów, a więc zanim cokolwiek trafi do bazy.
+ *
+ * **Drugi przycisk — „Zapisz podgląd" (T-104, poprawka z 2026-08-28).**
+ * Na macOS otwieranie pliku z katalogu podręcznego (`openBytes`) po raz
+ * kolejny nie zadziałało u właściciela — bez błędu, bez okna. Zapis przez
+ * systemowy dialog idzie tą samą drogą co eksport prawdziwej oferty
+ * (`deliverPdf` → `save_file`), która na macOS działa. Nie zgadujemy
+ * przyczyny w WKWebView; dajemy drogę, która nie zależy od niej.
  */
 export function BrandPreview({ draft }: { draft: BrandKit | null }) {
   const logoDataUrl = usePreviewLogo(draft);
@@ -53,6 +61,27 @@ export function BrandPreview({ draft }: { draft: BrandKit | null }) {
     }
   };
 
+  const save = async () => {
+    setOpening(true);
+    try {
+      const bytes = await generate();
+      if (!bytes) return;
+      await deliverPdf({
+        bytes,
+        fileName: 'podglad-oferty.pdf',
+        docType: 'quote',
+        savedToast: pl.brand.previewSaved,
+        // Podglad to nie dokument klienta — do archiwum nie idzie.
+        archive: null,
+      });
+    } catch (reason) {
+      log.error('Zapis podgladu nieudany', reason);
+      toast.error(reason instanceof Error ? reason.message : pl.files.openFailed);
+    } finally {
+      setOpening(false);
+    }
+  };
+
   const busy = rendering || opening;
 
   return (
@@ -66,14 +95,31 @@ export function BrandPreview({ draft }: { draft: BrandKit | null }) {
         </Alert>
       ) : null}
 
-      <Button type="button" variant="outline" disabled={busy || !draft} onClick={() => void open()}>
-        {busy ? (
-          <Loader2 className="size-4 animate-spin" aria-hidden />
-        ) : (
-          <FileText className="size-4" aria-hidden />
-        )}
-        {busy ? pl.brand.previewRendering : pl.brand.previewOpen}
-      </Button>
+      <div className="flex flex-wrap items-center gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          disabled={busy || !draft}
+          onClick={() => void open()}
+        >
+          {busy ? (
+            <Loader2 className="size-4 animate-spin" aria-hidden />
+          ) : (
+            <FileText className="size-4" aria-hidden />
+          )}
+          {busy ? pl.brand.previewRendering : pl.brand.previewOpen}
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          disabled={busy || !draft}
+          onClick={() => void save()}
+        >
+          <Download className="size-4" aria-hidden />
+          {pl.brand.previewSave}
+        </Button>
+      </div>
+      <p className="text-ink-soft max-w-prose text-xs">{pl.brand.previewSaveHint}</p>
     </section>
   );
 }

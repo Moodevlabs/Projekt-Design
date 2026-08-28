@@ -126,10 +126,8 @@
   /* Nazwa `--elevation-*`, a nie `--shadow-*`: blok `@theme inline` niżej
      wystawia je Tailwindowi jako `--shadow-card`/`--shadow-sheet`, a token
      odwołujący się do samego siebie byłby cyklem. */
-  --elevation-card:
-    0 1px 2px rgba(51, 37, 30, 0.05), 0 8px 24px -12px rgba(51, 37, 30, 0.12);
-  --elevation-sheet:
-    0 1px 3px rgba(51, 37, 30, 0.06), 0 24px 48px -20px rgba(51, 37, 30, 0.2);
+  --elevation-card: 0 1px 2px rgba(51, 37, 30, 0.05), 0 8px 24px -12px rgba(51, 37, 30, 0.12);
+  --elevation-sheet: 0 1px 3px rgba(51, 37, 30, 0.06), 0 24px 48px -20px rgba(51, 37, 30, 0.2);
 
   /* Blok aktywnej pozycji leży na BRĄZOWEJ szynie, więc jest beżowy. */
   --nav-pill: var(--rail-pill);
@@ -426,18 +424,9 @@
   }
 
   /*
-   * Matowe szkło na CAŁYM zdjęciu w tle (2026-08-27).
-   *
-   * Te same wartości rozmycia co karta, tylko rzadsze wypełnienie: karta ma
-   * zasłaniać, tło ma prześwitywać. Rozmycie uśrednia jasność lokalnie, więc
-   * zdjęcie przestaje mieć miejsca wyraźnie ciemniejsze od reszty — i logotyp
-   * leżący bezpośrednio na nim nie potrzebuje własnej poświaty ani obwódki.
+   * Matowe szkło na całym zdjęciu (`.auth-backdrop`, 2026-08-27) ZDJĘTE
+   * w T-105: właściciel chce fotografię bez efektów. Zostaje tylko szkło karty.
    */
-  .auth-backdrop {
-    background: rgba(247, 244, 240, 0.42);
-    backdrop-filter: blur(24px) saturate(130%);
-    -webkit-backdrop-filter: blur(24px) saturate(130%);
-  }
 
   /*
    * Bez `backdrop-filter` (starsze WebView2) szkło zamienia się w mleczną
@@ -447,15 +436,6 @@
   @supports not (backdrop-filter: blur(1px)) {
     .auth-glass {
       background: rgba(255, 255, 255, 0.96);
-    }
-
-    /*
-     * Tło bez rozmycia zostaje ostre, więc samo krycie musi wyrównać jasność
-     * za logotypem — stąd skok z 0,42 na 0,66. Zdjęcie dalej widać, tylko
-     * słabiej: to jest ścieżka awaryjna, nie wygląd docelowy.
-     */
-    .auth-backdrop {
-      background: rgba(247, 244, 240, 0.66);
     }
   }
 }
@@ -597,7 +577,6 @@
     transform 320ms var(--ease-liquid);
 }
 
-
 /*
  * Przeciąganie w edytorze. Nie ma plakietki pod kursorem — podglądem jest sam
  * przenoszony wiersz, a informację „trzymam" niesie KURSOR. Musi obowiązywać
@@ -611,12 +590,18 @@
  * Po przecinku zostaje systemowy zapas na wypadek, gdyby obrazek nie wczytał się.
  */
 .cursor-grip {
-  cursor: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><g fill='%2316181C' stroke='%23ffffff' stroke-width='1.7' paint-order='stroke'><rect x='6.0' y='11.4' width='12.4' height='9.4' rx='4.2'/><rect x='6.4' y='3.6' width='2.7' height='9.4' rx='1.35'/><rect x='9.5' y='3.6' width='2.7' height='9.4' rx='1.35'/><rect x='12.6' y='3.6' width='2.7' height='9.4' rx='1.35'/><rect x='15.7' y='3.6' width='2.7' height='9.4' rx='1.35'/><rect x='3.2' y='12.2' width='2.7' height='6.2' rx='1.35' transform='rotate(-28 4.55 15.3)'/></g></svg>") 12 12, grab;
+  cursor:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><g fill='%2316181C' stroke='%23ffffff' stroke-width='1.7' paint-order='stroke'><rect x='6.0' y='11.4' width='12.4' height='9.4' rx='4.2'/><rect x='6.4' y='3.6' width='2.7' height='9.4' rx='1.35'/><rect x='9.5' y='3.6' width='2.7' height='9.4' rx='1.35'/><rect x='12.6' y='3.6' width='2.7' height='9.4' rx='1.35'/><rect x='15.7' y='3.6' width='2.7' height='9.4' rx='1.35'/><rect x='3.2' y='12.2' width='2.7' height='6.2' rx='1.35' transform='rotate(-28 4.55 15.3)'/></g></svg>")
+      12 12,
+    grab;
 }
 
 body.is-dragging,
 body.is-dragging * {
-  cursor: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><g fill='%2316181C' stroke='%23ffffff' stroke-width='1.7' paint-order='stroke'><rect x='6.0' y='11.4' width='12.4' height='9.4' rx='4.2'/><rect x='6.4' y='7.0' width='2.7' height='6.2' rx='1.35'/><rect x='9.5' y='7.0' width='2.7' height='6.2' rx='1.35'/><rect x='12.6' y='7.0' width='2.7' height='6.2' rx='1.35'/><rect x='15.7' y='7.0' width='2.7' height='6.2' rx='1.35'/><rect x='3.2' y='12.2' width='2.7' height='6.2' rx='1.35' transform='rotate(-28 4.55 15.3)'/></g></svg>") 12 12, grabbing !important;
+  cursor:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><g fill='%2316181C' stroke='%23ffffff' stroke-width='1.7' paint-order='stroke'><rect x='6.0' y='11.4' width='12.4' height='9.4' rx='4.2'/><rect x='6.4' y='7.0' width='2.7' height='6.2' rx='1.35'/><rect x='9.5' y='7.0' width='2.7' height='6.2' rx='1.35'/><rect x='12.6' y='7.0' width='2.7' height='6.2' rx='1.35'/><rect x='15.7' y='7.0' width='2.7' height='6.2' rx='1.35'/><rect x='3.2' y='12.2' width='2.7' height='6.2' rx='1.35' transform='rotate(-28 4.55 15.3)'/></g></svg>")
+      12 12,
+    grabbing !important;
 }
 
 /* Zaznaczanie tekstu w trakcie przeciągania tylko przeszkadza. */
