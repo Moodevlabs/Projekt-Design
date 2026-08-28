@@ -3,6 +3,62 @@
 Format wg [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/).
 Wersje zgodne z [SemVer](https://semver.org/lang/pl/).
 
+## [1.1.6] – 2026-08-28
+
+### Zmienione
+
+**Strona klienta przeniesiona na własną subdomenę.** Oferty i briefy stoją od
+tego wydania pod `klient.toolier.pl`, a adres główny `toolier.pl` zostaje
+zwolniony pod stronę produktu. Rozdzielenie jest celowe i nie jest kosmetyką:
+strona klienta wysyła nagłówki `noindex, nofollow`, `X-Frame-Options: DENY`
+i `Referrer-Policy: no-referrer` dla **całej** domeny, bez wyjątków. Gdyby
+dzieliła adres ze stroną produktu, te reguły trzeba by zawęzić do wybranych
+ścieżek, czyli otworzyć drogę do przypadkowego zaindeksowania cudzej oferty.
+Osobny adres oznacza też, że publikacja strony produktu nie ma jak ruszyć
+strony, na której inwestor akceptuje ofertę.
+
+Adres pochodzi ze zmiennej `VITE_SHARE_BASE_URL` i jest **wkompilowywany
+w aplikację** przy budowaniu wydania — linki utworzone w starszych wersjach
+wskazują na poprzedni adres i pozostają ważne tak długo, jak długo prowadzi
+z niego przekierowanie.
+
+**Podgląd oferty w ustawieniach brandingu zamiast osadzonego — otwierany
+przyciskiem.** Dokument był dotąd odświeżany po każdej zmianie i wyświetlany
+wewnątrz strony: najpierw ramką PDF, potem stronami rysowanymi na kanwie.
+Na macOS żadne z tych rozwiązań nie pokazywało dokumentu i — co gorsza — nie
+zgłaszało błędu, więc zostawało białe pole bez wskazówki, co poszło nie tak.
+Zamiast trzeciego podejścia do osadzania aplikacja generuje teraz prawdziwy
+plik na tym komputerze i otwiera go w systemowej przeglądarce PDF, która na
+pewno umie go wyświetlić, powiększyć i wydrukować próbnie. Przy okazji zniknęło
+przerysowywanie dokumentu przy każdym naciśnięciu klawisza w polu koloru.
+
+**Pas z logo pracowni na stronie oferty i briefu.** Dokument PDF otwiera pas
+wypełniony kolorem marki ze znakiem po lewej stronie; strona przekazywana
+inwestorowi pokazywała dotąd nagi obrazek na tle strony, czyli to samo pismo
+w dwóch różnych papeteriach. Teraz obie strony zaczynają się tym samym pasem.
+Wariant znaku pochodzi z ustawienia „Znak na nagłówku dokumentu", a gdy
+wskazanego wariantu nie wgrano, stosowany jest ten drugi — pracownia mająca
+jeden plik zobaczy go zamiast samej nazwy firmy. Migracja `0041`.
+
+**Podpis w stopce prowadzi na stronę produktu.** Słowo „Toolier" w stopce
+oferty i briefu jest odnośnikiem do `toolier.pl`, otwieranym w nowej karcie,
+żeby nie zabierać inwestorowi formularza w połowie wypełniania.
+
+**Opisy w ustawieniach brandingu zgodne ze stanem faktycznym.** Usunięto
+zdanie o automatycznym doborze koloru oraz wzmianki o podglądzie odświeżanym
+na żywo. Opis znaku na nagłówku mówi też wprost, że wybór dotyczy nie tylko
+dokumentu PDF, ale i strony przekazywanej inwestorowi.
+
+### Naprawione
+
+**Wydanie ze złym adresem strony klienta nie zbuduje się.** Brak albo literówka
+w `VITE_SHARE_BASE_URL` nie objawiały się niczym widocznym: aplikacja
+budowała się poprawnie, a dopiero przy wysyłce oferty pokazywała projektantowi
+sam token zamiast adresu. Ponieważ wartość wchodzi do paczki na stałe, naprawa
+oznaczała nowe wydanie. Build produkcyjny sprawdza teraz tę zmienną, zanim
+cokolwiek skompiluje, i przerywa się z komunikatem mówiącym, co poprawić —
+tak samo jak przy niezgodności numeru wersji z tagiem.
+
 ## [1.1.5] – 2026-08-28
 
 ### Naprawione

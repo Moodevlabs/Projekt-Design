@@ -11,6 +11,8 @@ import {
 import { fetchSharedBrief, isConfigured, signedLogoUrl, submitSharedBrief } from './api';
 import { BRIEF_REJECTION_TEXT } from './messages';
 import { BriefForm } from './components/BriefForm';
+import { ToolierLink } from './components/ToolierLink';
+import { BrandHeader } from './components/BrandHeader';
 
 type Screen =
   | { kind: 'loading' }
@@ -119,13 +121,7 @@ export function BriefApp({ token }: { token: string }) {
       }}
     >
       <main className="mx-auto w-full max-w-2xl">
-        <header className="mb-6 flex items-center justify-between gap-4">
-          {logo ? (
-            <img src={logo} alt={brand.companyName} className="max-h-12 w-auto" />
-          ) : (
-            <span className="font-display text-lg tracking-tight">{brand.companyName}</span>
-          )}
-        </header>
+        <BrandHeader companyName={brand.companyName} logoUrl={logo} />
 
         <article className="rounded-2xl bg-[var(--surface)] p-6 shadow-[0_1px_2px_rgba(51,37,30,0.06),0_8px_24px_-12px_rgba(51,37,30,0.18)] sm:p-10">
           <h1 className="font-display text-2xl tracking-tight sm:text-3xl">
@@ -166,7 +162,9 @@ export function BriefApp({ token }: { token: string }) {
         <footer className="text-ink-faint mt-6 space-y-1 text-center text-xs">
           {brand.address ? <p>{brand.address}</p> : null}
           {brand.footerText ? <p>{brand.footerText}</p> : null}
-          <p className="pt-2">Brief przygotowany w Toolier</p>
+          <p className="pt-2">
+            Brief przygotowany w <ToolierLink />
+          </p>
         </footer>
       </main>
     </div>

@@ -1763,7 +1763,7 @@ Z wyrazami szacunku`,
      */
     accentColor: 'Kolor marki',
     accentColorHint:
-      'Kolor pasa w górnej części każdej strony PDF, na którym umieszczane są logo i numer oferty. W tym samym kolorze drukowane są tytuły sekcji oraz linia nad podpisem. Kolor tekstu na pasie dobierany jest automatycznie: jasny na ciemnym tle, ciemny na jasnym.',
+      'Kolor pasa w górnej części każdej strony PDF, na którym umieszczane są logo i numer oferty. W tym samym kolorze drukowane są tytuły sekcji oraz linia nad podpisem. Tym samym kolorem wypełniony jest pas nagłówka na stronie oferty i briefu przekazywanych inwestorowi.',
     bgColor: 'Tło podsumowania kosztów',
     bgColorHint:
       'Wypełnienie ramki podsumowania na końcu oferty, zawierającej kwotę netto, VAT i brutto. Kwoty drukowane są ciemnym kolorem, dlatego zalecany jest jasny odcień tła.',
@@ -1776,7 +1776,7 @@ Z wyrazami szacunku`,
     sectionIdentity: 'Firma',
     sectionLook: 'Wygląd PDF',
     sectionLookHint:
-      'Trzy elementy identyfikacji dokumentu: znak w nagłówku, kolorystyka i krój pisma. Wprowadzone zmiany widoczne są natychmiast w podglądzie w dolnej części strony.',
+      'Trzy elementy identyfikacji dokumentu: znak w nagłówku, kolorystyka i krój pisma. Efekt wprowadzonych zmian można sprawdzić przyciskiem podglądu w dolnej części strony — także przed zapisaniem.',
     sectionContact: 'Kontakt i stopka',
     sectionDefaults: 'Domyślne w wycenie',
 
@@ -1790,7 +1790,7 @@ Z wyrazami szacunku`,
     // Wybór wariantu na nagłówku (poprawka 3; dobór automatyczny wycofany).
     headerLogo: 'Znak na nagłówku dokumentu',
     headerLogoHint:
-      'Proszę wskazać wersję znaku umieszczaną na pasie nagłówka. Wybór zależy od koloru marki: na pasie ciemnym czytelny pozostaje znak jasny, na pasie jasnym — znak ciemny. Rezultat prezentowany jest w podglądzie w dolnej części strony.',
+      'Proszę wskazać wersję znaku umieszczaną na pasie nagłówka — w dokumencie PDF oraz na stronie oferty i briefu przekazywanych inwestorowi. Wybór zależy od koloru marki: na pasie ciemnym czytelny pozostaje znak jasny, na pasie jasnym — znak ciemny. Rezultat można sprawdzić przyciskiem podglądu w dolnej części strony.',
     headerLogoLight: 'Znak jasny',
     headerLogoDark: 'Znak ciemny',
     headerLogoResolved: (variant: 'light' | 'dark') =>
@@ -1840,10 +1840,9 @@ Z wyrazami szacunku`,
 
     previewTitle: 'Podgląd oferty',
     previewHint:
-      'Przykładowa wycena wygenerowana na podstawie bieżących ustawień, w tym niezapisanych. Dane mają charakter poglądowy.',
+      'Przykładowa wycena wygenerowana na podstawie bieżących ustawień, w tym niezapisanych. Dokument powstaje na tym komputerze i otwiera się w systemowej przeglądarce PDF. Dane mają charakter poglądowy.',
     previewRendering: 'Generowanie podglądu…',
-    previewOpen: 'Otwórz plik PDF',
-    previewPage: (number: number) => `Podgląd oferty — strona ${number}`,
+    previewOpen: 'Otwórz podgląd oferty (PDF)',
   },
   /** Teksty widoczne wyłącznie w wygenerowanych dokumentach. */
   pdf: {

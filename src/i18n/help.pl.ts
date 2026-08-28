@@ -479,14 +479,14 @@ export const helpPl = {
         },
         {
           kind: 'p',
-          text: 'BRANDING (Ustawienia → Branding) obejmuje trzy elementy: znak graficzny, kolorystykę i krój pisma. Znak wgrywa się w dwóch wersjach — ciemnej (przeznaczonej na jasny nagłówek) i jasnej (na ciemny). Który z nich trafi na pas nagłówka, wskazuje ustawienie „Znak na nagłówku dokumentu”. Wyboru dokonuje użytkownik: program nie wylicza go z koloru marki, ponieważ przy znakach z własnym tłem lub wielobarwnych taka reguła prowadziła do błędnych rozstrzygnięć. Rezultat prezentowany jest w podglądzie w dolnej części strony.',
+          text: 'BRANDING (Ustawienia → Branding) obejmuje trzy elementy: znak graficzny, kolorystykę i krój pisma. Znak wgrywa się w dwóch wersjach — ciemnej (przeznaczonej na jasny nagłówek) i jasnej (na ciemny). Który z nich trafi na pas nagłówka, wskazuje ustawienie „Znak na nagłówku dokumentu”. Wyboru dokonuje użytkownik: program nie wylicza go z koloru marki, ponieważ przy znakach z własnym tłem lub wielobarwnych taka reguła prowadziła do błędnych rozstrzygnięć. Rezultat można sprawdzić przyciskiem podglądu w dolnej części strony.',
         },
         {
           kind: 'list',
           items: [
-            '„Kolor marki” określa pas w górnej części każdej strony dokumentu PDF, na którym umieszczane są logo i numer oferty. W tym samym kolorze drukowane są tytuły sekcji oraz linia nad podpisem. Kolor tekstu na pasie dobierany jest automatycznie pod kątem kontrastu.',
+            '„Kolor marki” określa pas w górnej części każdej strony dokumentu PDF, na którym umieszczane są logo i numer oferty. W tym samym kolorze drukowane są tytuły sekcji oraz linia nad podpisem, a także pas nagłówka na stronie oferty i briefu przekazywanych inwestorowi.',
             '„Tło podsumowania kosztów” wypełnia ramkę z sumą na końcu oferty. Kwoty drukowane są ciemnym kolorem, dlatego zalecany jest jasny odcień tła.',
-            'Podgląd w dolnej części strony stanowi rzeczywisty dokument PDF wygenerowany na podstawie bieżących ustawień, w tym niezapisanych.',
+            'Przycisk podglądu w dolnej części strony generuje rzeczywisty dokument PDF na podstawie bieżących ustawień, w tym niezapisanych, i otwiera go w systemowej przeglądarce PDF. Dokument powstaje na komputerze użytkownika.',
           ],
         },
         {

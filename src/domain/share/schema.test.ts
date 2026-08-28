@@ -66,8 +66,9 @@ describe('expiryFromDays', () => {
 
 describe('buildShareUrl', () => {
   it('skleja adres bez podwójnego ukośnika', () => {
-    expect(buildShareUrl('https://app.toolier.pl/', 'tok')).toBe('https://app.toolier.pl/q/tok');
-    expect(buildShareUrl('https://app.toolier.pl', 'tok')).toBe('https://app.toolier.pl/q/tok');
+    const host = 'https://klient.toolier.pl';
+    expect(buildShareUrl(`${host}/`, 'tok')).toBe(`${host}/q/tok`);
+    expect(buildShareUrl(host, 'tok')).toBe(`${host}/q/tok`);
   });
 
   it('koduje token — base64url nie ma znaków spoza URL, ale nie zakładamy tego', () => {
