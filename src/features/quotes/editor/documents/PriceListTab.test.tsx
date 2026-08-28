@@ -9,6 +9,14 @@ const toastSuccess = vi.hoisted(() => vi.fn());
 const toastError = vi.hoisted(() => vi.fn());
 
 vi.mock('@/data/queries/useWorkspace', () => ({ useWorkspace, useWorkspaceId: () => 'ws-1' }));
+
+// Biblioteka dokumentow (T-103): panel „Dodaj z biblioteki" i zapis wiersza
+// pytaja o wpisy — test komponentu izoluje sie od TanStack Query.
+vi.mock('@/data/queries/useLibraryDocs', () => ({
+  useDocLibrary: () => ({ data: [], isLoading: false, isError: false }),
+  useDocLibraryEntries: () => ({ entries: [], data: [], isLoading: false, isError: false }),
+  useCreateDocLibraryEntry: () => ({ mutate: vi.fn(), isPending: false }),
+}));
 vi.mock('sonner', () => ({
   toast: { success: toastSuccess, error: toastError, info: vi.fn() },
 }));
@@ -311,7 +319,7 @@ describe('PriceListTab — edycja', () => {
     render(<PriceListTab editing />);
 
     const przed = cennik()?.items.length ?? 0;
-    await user.click(screen.getByText(pl.editor.addPriceListItem));
+    await user.click(screen.getByText(pl.editor.docLibrary.manual.price_list));
 
     expect(cennik()?.items).toHaveLength(przed + 1);
   });
@@ -321,7 +329,7 @@ describe('PriceListTab — edycja', () => {
     zaladuj();
     render(<PriceListTab editing />);
 
-    await user.click(screen.getByText(pl.editor.addPriceListItem));
+    await user.click(screen.getByText(pl.editor.docLibrary.manual.price_list));
     expect(() => JSON.stringify(cennik())).not.toThrow();
   });
 

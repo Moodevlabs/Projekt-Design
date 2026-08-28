@@ -1,10 +1,14 @@
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
 import { InlineText } from '../components/InlineText';
 import { InlineMoney } from '../components/InlineMoney';
 import { NumberField } from '../components/NumberField';
 import { AddLink } from '../components/AddLink';
+import { SaveToLibraryButton } from '../components/SaveToLibraryButton';
+import { Button } from '@/components/ui/button';
+import { DocLibraryPanel } from './DocLibraryPanel';
+import { useSaveDocToLibrary } from './useSaveDocToLibrary';
 import { AddToQuoteBridge } from './AddToQuoteBridge';
 import { useEditorStore } from '../editor.store';
 import { useWorkspace } from '@/data/queries/useWorkspace';
@@ -44,6 +48,8 @@ export function PriceListTab({
   const addItem = useEditorStore((state) => state.addPriceListItem);
   const removeItem = useEditorStore((state) => state.removePriceListItem);
 
+  const [libraryOpen, setLibraryOpen] = useState(false);
+  const saveToLibrary = useSaveDocToLibrary('price_list');
   const workspaceTemplate = useWorkspace().data?.settings.priceListTemplate ?? null;
   const template = startEmpty ? EMPTY_TEMPLATE : workspaceTemplate;
 
@@ -98,17 +104,32 @@ export function PriceListTab({
                   editing={editing}
                   onPatch={(patch) => updateItem(item.id, patch)}
                   onRemove={() => removeItem(item.id)}
+                  onSaveToLibrary={() => saveToLibrary(item)}
                 />
               ))}
             </ul>
           </section>
         ))}
 
+        {/* Dwa wejscia, jak w wycenie (T-71): biblioteka albo pusty wiersz. */}
         {editing ? (
-          <AddLink icon={Plus} onClick={() => addItem()} className="mt-4 text-[13px]">
-            {pl.editor.addPriceListItem}
-          </AddLink>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <Button type="button" size="sm" variant="outline" onClick={() => setLibraryOpen(true)}>
+              <Plus className="size-3.5" aria-hidden />
+              {pl.editor.docLibrary.open}
+            </Button>
+            <AddLink icon={Plus} onClick={() => addItem()} className="text-[13px]">
+              {pl.editor.docLibrary.manual.price_list}
+            </AddLink>
+          </div>
         ) : null}
+
+        <DocLibraryPanel
+          kind="price_list"
+          open={libraryOpen}
+          onOpenChange={setLibraryOpen}
+          onInsert={(payload) => addItem(payload)}
+        />
 
         {editing || doc.footnote ? (
           <div className="mt-8 border-t border-[var(--doc-hair)] pt-3">
@@ -135,11 +156,13 @@ function PriceListRow({
   editing,
   onPatch,
   onRemove,
+  onSaveToLibrary,
 }: {
   item: PriceListItem;
   editing: boolean;
   onPatch: (patch: Partial<PriceListItem>) => void;
   onRemove: () => void;
+  onSaveToLibrary: () => void;
 }) {
   const label = item.name || pl.editor.newPriceListItemName;
 
@@ -203,6 +226,15 @@ function PriceListRow({
             </label>
           ) : null}
         </div>
+
+        {editing ? (
+          <SaveToLibraryButton
+            label={pl.editor.docLibrary.saveRow(label)}
+            savedLabel={pl.editor.docLibrary.savedRow(label)}
+            disabled={item.name.trim().length === 0}
+            onSave={onSaveToLibrary}
+          />
+        ) : null}
 
         {editing ? (
           <button

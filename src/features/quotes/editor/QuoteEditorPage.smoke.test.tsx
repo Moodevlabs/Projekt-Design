@@ -58,6 +58,14 @@ vi.mock('@/data/queries/useLibraryCategories', () => ({
   useLibraryCategoryList: () => ({ data: [] }),
 }));
 
+// Biblioteka dokumentow (T-103): panel „Dodaj z biblioteki" i zapis wiersza
+// pytaja o wpisy — test komponentu izoluje sie od TanStack Query.
+vi.mock('@/data/queries/useLibraryDocs', () => ({
+  useDocLibrary: () => ({ data: [], isLoading: false, isError: false }),
+  useDocLibraryEntries: () => ({ entries: [], data: [], isLoading: false, isError: false }),
+  useCreateDocLibraryEntry: () => ({ mutate: vi.fn(), isPending: false }),
+}));
+
 vi.mock('@/data/queries/useRoomTypes', () => ({
   useRoomTypes: () => ({ data: [] }),
 }));

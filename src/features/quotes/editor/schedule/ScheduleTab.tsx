@@ -1,9 +1,12 @@
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Plus } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
 import { StageRow } from './StageRow';
 import { ScheduleResultCard } from './ScheduleResultCard';
 import { AddLink } from '../components/AddLink';
+import { Button } from '@/components/ui/button';
+import { DocLibraryPanel } from '../documents/DocLibraryPanel';
+import { useSaveDocToLibrary } from '../documents/useSaveDocToLibrary';
 import { NumberField } from '../components/NumberField';
 import { useEditorStore } from '../editor.store';
 import { useStageAutoSync } from './useStageAutoSync';
@@ -57,6 +60,8 @@ export function ScheduleTab({
   // Podpowiedz dziala tylko wtedy, gdy jest co zmieniac.
   useStageAutoSync(editing && schedule !== null);
 
+  const [libraryOpen, setLibraryOpen] = useState(false);
+  const saveToLibrary = useSaveDocToLibrary('schedule');
   const roomTypes = useRoomTypes();
   const workspaceTemplate = useWorkspace().data?.settings.scheduleTemplate ?? null;
   const template = startEmpty ? EMPTY_TEMPLATE : workspaceTemplate;
@@ -163,15 +168,30 @@ export function ScheduleTab({
               onRemove={() => removeStage(stage.id)}
               onRemoveExtra={removeExtra}
               onExtraDays={updateExtraDays}
+              onSaveToLibrary={stage.kind === 'extras' ? undefined : () => saveToLibrary(stage)}
             />
           ))}
         </ul>
 
+        {/* Dwa wejscia, jak w wycenie (T-71): biblioteka albo pusty wiersz. */}
         {editing ? (
-          <AddLink icon={Plus} onClick={() => addStage()} className="mt-3 text-[13px]">
-            {pl.editor.addStage}
-          </AddLink>
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <Button type="button" size="sm" variant="outline" onClick={() => setLibraryOpen(true)}>
+              <Plus className="size-3.5" aria-hidden />
+              {pl.editor.docLibrary.open}
+            </Button>
+            <AddLink icon={Plus} onClick={() => addStage()} className="text-[13px]">
+              {pl.editor.docLibrary.manual.schedule}
+            </AddLink>
+          </div>
         ) : null}
+
+        <DocLibraryPanel
+          kind="schedule"
+          open={libraryOpen}
+          onOpenChange={setLibraryOpen}
+          onInsert={(payload) => addStage(payload)}
+        />
 
         {/*
           Legenda ARCH./INW. stoi POD listą, a nie tylko w karcie wyniku:

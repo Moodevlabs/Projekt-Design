@@ -1,9 +1,13 @@
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Check, Plus, Trash2, X } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
 import { InlineText } from '../components/InlineText';
 import { NumberField } from '../components/NumberField';
 import { AddLink } from '../components/AddLink';
+import { SaveToLibraryButton } from '../components/SaveToLibraryButton';
+import { Button } from '@/components/ui/button';
+import { DocLibraryPanel } from './DocLibraryPanel';
+import { useSaveDocToLibrary } from './useSaveDocToLibrary';
 import { useEditorStore } from '../editor.store';
 import { useStageEntryAutoSync } from './useStageEntryAutoSync';
 import { useWorkspace } from '@/data/queries/useWorkspace';
@@ -41,6 +45,8 @@ export function StagesDocTab({
   const addEntry = useEditorStore((state) => state.addStageEntry);
   const removeEntry = useEditorStore((state) => state.removeStageEntry);
 
+  const [libraryOpen, setLibraryOpen] = useState(false);
+  const saveToLibrary = useSaveDocToLibrary('stages');
   const workspaceTemplate = useWorkspace().data?.settings.stagesTemplate ?? null;
   const template = startEmpty ? EMPTY_TEMPLATE : workspaceTemplate;
 
@@ -103,17 +109,32 @@ export function StagesDocTab({
                   editing={editing}
                   onPatch={(patch) => updateEntry(entry.id, patch)}
                   onRemove={() => removeEntry(entry.id)}
+                  onSaveToLibrary={() => saveToLibrary(entry)}
                 />
               ))}
             </ul>
           </section>
         ))}
 
+        {/* Dwa wejscia, jak w wycenie (T-71): biblioteka albo pusty wiersz. */}
         {editing ? (
-          <AddLink icon={Plus} onClick={() => addEntry()} className="mt-4 text-[13px]">
-            {pl.editor.addStageEntry}
-          </AddLink>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <Button type="button" size="sm" variant="outline" onClick={() => setLibraryOpen(true)}>
+              <Plus className="size-3.5" aria-hidden />
+              {pl.editor.docLibrary.open}
+            </Button>
+            <AddLink icon={Plus} onClick={() => addEntry()} className="text-[13px]">
+              {pl.editor.docLibrary.manual.stages}
+            </AddLink>
+          </div>
         ) : null}
+
+        <DocLibraryPanel
+          kind="stages"
+          open={libraryOpen}
+          onOpenChange={setLibraryOpen}
+          onInsert={(payload) => addEntry(payload)}
+        />
 
         {editing || doc.footnote ? (
           <div className="mt-8 border-t border-[var(--doc-hair)] pt-3">
@@ -140,11 +161,13 @@ function StageEntryRow({
   editing,
   onPatch,
   onRemove,
+  onSaveToLibrary,
 }: {
   entry: StageEntry;
   editing: boolean;
   onPatch: (patch: Partial<StageEntry>) => void;
   onRemove: () => void;
+  onSaveToLibrary: () => void;
 }) {
   const label = entry.name || pl.editor.newStageEntryName;
 
@@ -198,6 +221,15 @@ function StageEntryRow({
           />
         ) : null}
       </div>
+
+      {editing ? (
+        <SaveToLibraryButton
+          label={pl.editor.docLibrary.saveRow(label)}
+          savedLabel={pl.editor.docLibrary.savedRow(label)}
+          disabled={entry.name.trim().length === 0}
+          onSave={onSaveToLibrary}
+        />
+      ) : null}
 
       {editing ? (
         <button

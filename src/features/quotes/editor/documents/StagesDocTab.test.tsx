@@ -8,6 +8,14 @@ const useWorkspace = vi.hoisted(() => vi.fn());
 const toastSuccess = vi.hoisted(() => vi.fn());
 
 vi.mock('@/data/queries/useWorkspace', () => ({ useWorkspace, useWorkspaceId: () => 'ws-1' }));
+
+// Biblioteka dokumentow (T-103): panel „Dodaj z biblioteki" i zapis wiersza
+// pytaja o wpisy — test komponentu izoluje sie od TanStack Query.
+vi.mock('@/data/queries/useLibraryDocs', () => ({
+  useDocLibrary: () => ({ data: [], isLoading: false, isError: false }),
+  useDocLibraryEntries: () => ({ entries: [], data: [], isLoading: false, isError: false }),
+  useCreateDocLibraryEntry: () => ({ mutate: vi.fn(), isPending: false }),
+}));
 vi.mock('sonner', () => ({
   toast: { success: toastSuccess, error: vi.fn(), info: vi.fn() },
 }));
@@ -180,7 +188,7 @@ describe('StagesDocTab — edycja', () => {
     render(<StagesDocTab editing />);
 
     const przed = dokument()?.entries.length ?? 0;
-    await user.click(screen.getByText(pl.editor.addStageEntry));
+    await user.click(screen.getByText(pl.editor.docLibrary.manual.stages));
 
     expect(dokument()?.entries).toHaveLength(przed + 1);
   });
@@ -192,7 +200,7 @@ describe('StagesDocTab — edycja', () => {
     zaladuj();
     render(<StagesDocTab editing />);
 
-    await user.click(screen.getByText(pl.editor.addStageEntry));
+    await user.click(screen.getByText(pl.editor.docLibrary.manual.stages));
     expect(() => JSON.stringify(dokument())).not.toThrow();
   });
 

@@ -3,6 +3,7 @@ import { ChevronDown, Trash2 } from 'lucide-react';
 import { InlineText } from '../components/InlineText';
 import { NumberField } from '../components/NumberField';
 import { StageExtrasList } from './StageExtrasList';
+import { SaveToLibraryButton } from '../components/SaveToLibraryButton';
 import type { RoomType } from '@/data/repos/room-types.repo';
 import type { ScheduleStage, StageOwner } from '@/domain/schedule';
 import { pl } from '@/i18n/pl';
@@ -23,6 +24,7 @@ export function StageRow({
   editing,
   onPatch,
   onRemove,
+  onSaveToLibrary,
   onRemoveExtra,
   onExtraDays,
 }: {
@@ -33,6 +35,8 @@ export function StageRow({
   editing: boolean;
   onPatch: (patch: Partial<ScheduleStage>) => void;
   onRemove: () => void;
+  /** Zapis etapu jako wzorca do biblioteki (T-103). Brak = etap zbiorczy. */
+  onSaveToLibrary?: () => void;
   /** Tylko dla etapu `extras` (T-64) — usuwanie i edycja pojedynczej usługi. */
   onRemoveExtra?: (extraId: string) => void;
   onExtraDays?: (extraId: string, days: number) => void;
@@ -85,6 +89,15 @@ export function StageRow({
         <span className="tabular text-ink-soft w-14 shrink-0 text-right text-xs">
           {pl.editor.stageDays(days)}
         </span>
+
+        {editing && onSaveToLibrary ? (
+          <SaveToLibraryButton
+            label={pl.editor.docLibrary.saveRow(label)}
+            savedLabel={pl.editor.docLibrary.savedRow(label)}
+            disabled={stage.name.trim().length === 0}
+            onSave={onSaveToLibrary}
+          />
+        ) : null}
 
         {editing ? (
           <button
