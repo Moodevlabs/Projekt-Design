@@ -64,14 +64,14 @@ describe('Sidebar — kropka polaczenia (poprawka 4)', () => {
 
 describe('Sidebar — aktywna pozycja', () => {
   it('ustawia znacznik na wysokości aktywnej pozycji', () => {
-    renderAt('/wyceny');
+    renderAt('/dokumenty');
     const marker = screen.getByTestId('nav-active-marker');
-    const expected = NAV_ITEMS.findIndex((item) => item.to === '/wyceny');
+    const expected = NAV_ITEMS.findIndex((item) => item.to === '/dokumenty');
     expect(marker).toHaveAttribute('data-index', String(expected));
   });
 
   it('oznacza aktywny link atrybutem aria-current', () => {
-    renderAt('/wyceny');
+    renderAt('/dokumenty');
     // Regresja: `TooltipTrigger asChild` scala className jako string, więc
     // funkcyjny className NavLinka wyciekłby do DOM zamiast klas.
     const active = screen.getByRole('link', { name: pl.nav.quotes });
@@ -80,13 +80,13 @@ describe('Sidebar — aktywna pozycja', () => {
   });
 
   it('nie zaznacza pulpitu, gdy jesteśmy na podstronie', () => {
-    renderAt('/wyceny');
+    renderAt('/dokumenty');
     expect(screen.getByRole('link', { name: pl.nav.dashboard })).not.toHaveAttribute(
       'aria-current',
     );
   });
 
-  it('zaznacza wyceny także na widoku edytora', () => {
+  it('zaznacza dokumenty także na widoku edytora (adres `/wyceny/:id` zostal po T-100)', () => {
     renderAt('/wyceny/abc');
     expect(screen.getByRole('link', { name: pl.nav.quotes })).toHaveAttribute(
       'aria-current',

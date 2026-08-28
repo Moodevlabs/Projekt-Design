@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -75,10 +75,13 @@ function SidebarLink({
   const Icon = item.icon;
   const label = item.disabled ? `${item.label} (${pl.common.soon})` : item.label;
 
+  // `Link`, nie `NavLink`: o aktywnosci decyduje `activeNavIndex` (razem
+  // z aliasami — edytor dokumentu siedzi pod `/wyceny/:id`, a pozycja pod
+  // `/dokumenty`), a `NavLink` zdejmowalby `aria-current`, gdy sam nie
+  // dopasuje sciezki.
   const link = (
-    <NavLink
+    <Link
       to={item.to}
-      end={item.end}
       aria-label={label}
       aria-current={active ? 'page' : undefined}
       aria-disabled={item.disabled}
@@ -114,7 +117,7 @@ function SidebarLink({
           {item.label}
         </span>
       ) : null}
-    </NavLink>
+    </Link>
   );
 
   // Podpowiedź ma sens tylko wtedy, gdy etykiety nie widać.

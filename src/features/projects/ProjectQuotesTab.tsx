@@ -1,6 +1,6 @@
-import { FileText, Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { FileText } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { NewDocumentMenu } from '@/features/quotes/list/NewDocumentMenu';
 import { EmptyState } from '@/components/shared';
 import { CopyRoomsDialog } from './CopyRoomsDialog';
 import { QuotesByLineage } from '@/features/quotes/list/QuotesByLineage';
@@ -11,7 +11,7 @@ import type { Project } from '@/domain/project/schema';
 import { pl } from '@/i18n/pl';
 
 /**
- * Wyceny jednej teczki.
+ * Dokumenty jednej teczki (od T-100 wszystkie rodzaje, z kolumna „Rodzaj").
  *
  * Filtruje baza (`project_id`), a tabela jest ta sama co w rejestrze — dwa
  * wyglądy tej samej listy znaczyłyby dwa miejsca do poprawiania.
@@ -26,10 +26,10 @@ export function ProjectQuotesTab({ project, client }: { project: Project; client
   const rows = quotes.data ?? [];
 
   const addButton = (
-    <Button disabled={!nowa.ready || nowa.working} onClick={() => void nowa.newQuote()}>
-      <Plus className="size-4" aria-hidden />
-      {pl.projects.newQuote}
-    </Button>
+    <NewDocumentMenu
+      disabled={!nowa.ready || nowa.working}
+      onSelect={(kind) => void nowa.newQuote(kind)}
+    />
   );
 
   if (quotes.isError) {
@@ -61,7 +61,7 @@ export function ProjectQuotesTab({ project, client }: { project: Project; client
       ) : (
         <>
           <div className="flex justify-end">{addButton}</div>
-          <QuotesByLineage rows={rows} loading={quotes.isLoading} />
+          <QuotesByLineage rows={rows} loading={quotes.isLoading} showKind />
         </>
       )}
 

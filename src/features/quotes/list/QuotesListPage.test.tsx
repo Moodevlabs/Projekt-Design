@@ -178,7 +178,7 @@ describe('QuotesListPage', () => {
     const { rerender } = renderPage();
 
     // Bez filtrow: zachecamy do stworzenia pierwszej wyceny.
-    expect(screen.getByText(pl.quotes.emptyTitle)).toBeInTheDocument();
+    expect(screen.getByText(pl.quotes.emptyKindTitle.offer)).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: pl.status.accepted }));
     rerender(

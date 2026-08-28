@@ -16,7 +16,15 @@ import { pl } from '@/i18n/pl';
  * dodatkowego elementu: rozwijanie czegoś, co nie ma zawartości, byłoby
  * kontrolką bez treści.
  */
-export function QuotesByLineage({ rows, loading }: { rows: QuoteSummary[]; loading: boolean }) {
+export function QuotesByLineage({
+  rows,
+  loading,
+  showKind = false,
+}: {
+  rows: QuoteSummary[];
+  loading: boolean;
+  showKind?: boolean;
+}) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   const groups = groupByLineage(rows);
@@ -30,7 +38,7 @@ export function QuotesByLineage({ rows, loading }: { rows: QuoteSummary[]; loadi
   };
 
   if (loading || groups.length === 0) {
-    return <QuotesTable rows={rows} loading={loading} />;
+    return <QuotesTable rows={rows} loading={loading} showKind={showKind} />;
   }
 
   return (
@@ -44,6 +52,7 @@ export function QuotesByLineage({ rows, loading }: { rows: QuoteSummary[]; loadi
             <QuotesTable
               rows={open ? [group.latest, ...group.older] : [group.latest]}
               loading={false}
+              showKind={showKind}
             />
 
             {hasOlder ? (

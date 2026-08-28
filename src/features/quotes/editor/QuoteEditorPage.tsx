@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 import { AlertTriangle, Plus } from 'lucide-react';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -29,6 +29,7 @@ import { OverwriteTemplateDialog, SaveAsTemplateDialog } from './components/Temp
 import { useCreateQuote, useCreateQuoteVersion, useQuote } from '@/data/queries/useQuotes';
 import { useWorkspace } from '@/data/queries/useWorkspace';
 import { canCreateVersion, quoteBodyFromSettings, versionLabel } from '@/domain/quote';
+import { defaultTitleForKind, documentKindFromLegacy } from '@/domain/documents';
 import { ConfirmDialog, EmptyState } from '@/components/shared';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -69,9 +70,15 @@ export function QuoteEditorPage() {
   return id ? <ExistingQuoteEditor quoteId={id} /> : <NewQuoteRedirect />;
 }
 
-/** `/wyceny/nowa` zakłada pustą wycenę i od razu przechodzi na jej adres. */
+/**
+ * `/wyceny/nowa` zakłada pusty dokument i od razu przechodzi na jego adres.
+ * `?rodzaj=schedule|stages|price_list` (T-100) zakłada dokument innego
+ * rodzaju niż wycena; brak parametru = wycena, jak zawsze.
+ */
 function NewQuoteRedirect() {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const docKind = documentKindFromLegacy(params.get('rodzaj') ?? 'offer');
   const create = useCreateQuote();
   const workspace = useWorkspace();
   const settings = workspace.data?.settings;
@@ -100,14 +107,17 @@ function NewQuoteRedirect() {
      * dochodzi do skutku niezależnie od tego, ile razy React nas przemontuje.
      */
     void create
-      .mutateAsync({ body: quoteBodyFromSettings(settings) })
+      .mutateAsync({
+        body: quoteBodyFromSettings(settings, { title: defaultTitleForKind(docKind) }),
+        docKind,
+      })
       .then((quote) => navigate(routes.quote(quote.id), { replace: true }))
       .catch((reason: unknown) => {
         // Bez własnego stanu błąd zginąłby razem z porzuconym obserwatorem
         // i użytkownik zostałby na szkielecie bez wyjaśnienia.
         setError(reason instanceof Error ? reason.message : pl.quotes.loadError);
       });
-  }, [create, navigate, settings]);
+  }, [create, navigate, settings, docKind]);
 
   if (error) {
     return (

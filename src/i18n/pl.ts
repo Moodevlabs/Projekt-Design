@@ -21,7 +21,7 @@ export const pl = {
     trash: 'Kosz',
     dashboard: 'Pulpit',
     calendar: 'Kalendarz',
-    quotes: 'Wyceny',
+    quotes: 'Dokumenty',
     clients: 'Klienci',
     library: 'Biblioteka',
     templates: 'Szablony',
@@ -63,8 +63,40 @@ export const pl = {
     archived: 'Archiwalna',
   },
   quotes: {
-    title: 'Wyceny',
+    title: 'Dokumenty',
     new: 'Nowa wycena',
+    /** Zakladki rejestru „Dokumenty" (T-100) — jedna na rodzaj dokumentu. */
+    kindTabs: {
+      offer: 'Wyceny',
+      schedule: 'Terminy',
+      stages: 'Etapy współpracy',
+      price_list: 'Cenniki dodatkowe',
+    },
+    kindTabsLabel: 'Rodzaj dokumentu',
+    newOfKind: {
+      offer: 'Nowa wycena',
+      schedule: 'Nowy termin',
+      stages: 'Nowe etapy współpracy',
+      price_list: 'Nowy cennik dodatkowy',
+    },
+    newDocument: 'Nowy dokument',
+    kindColumn: 'Rodzaj',
+    emptyKindTitle: {
+      offer: 'Nie utworzono jeszcze żadnej wyceny',
+      schedule: 'Nie utworzono jeszcze żadnego terminu',
+      stages: 'Nie utworzono jeszcze etapów współpracy',
+      price_list: 'Nie utworzono jeszcze cennika dodatkowego',
+    },
+    emptyKindDescription: {
+      offer:
+        'Przygotuj pierwszą ofertę z pozycjami do wyboru TAK/NIE i przekaż ją inwestorowi w formie dokumentu PDF.',
+      schedule:
+        'Policz szacowany termin z etapów i pomieszczeń — dokument PDF pokaże inwestorowi optymalne i najpóźniejsze zakończenie.',
+      stages:
+        'Opisz inwestorowi, co wchodzi w zakres współpracy, a co nie — zanim sam się tego domyśli.',
+      price_list:
+        'Zbierz usługi dodatkowe z widełkami cen i terminami — cennik jest ofertą na rozmowę.',
+    },
     newDialogHint: 'Wskaż klienta i projekt — dane inwestora zostaną uzupełnione automatycznie.',
     // Start z szablonu przy zakładaniu wyceny (T-70).
     startFrom: 'Zacznij od',
@@ -362,11 +394,11 @@ export const pl = {
     notFoundDescription: 'Rekord został usunięty lub podany adres jest nieprawidłowy.',
     backToList: 'Wszyscy klienci',
 
-    tabQuotes: 'Wyceny',
+    tabQuotes: 'Dokumenty',
     tabNotes: 'Notatki',
-    quotesEmptyTitle: 'Brak wycen dla tego klienta',
+    quotesEmptyTitle: 'Brak dokumentów dla tego klienta',
     quotesEmptyDescription:
-      'Utwórz pierwszą wycenę — dane inwestora zostaną uzupełnione automatycznie.',
+      'Utwórz pierwszą wycenę, termin, etapy współpracy albo cennik — dane inwestora zostaną uzupełnione automatycznie.',
     notesEmpty: 'Brak notatek.',
     notesSaved: 'Zapisano notatkę',
 
@@ -452,11 +484,11 @@ export const pl = {
     notFoundDescription: 'Rekord został usunięty lub podany adres jest nieprawidłowy.',
     loadError: 'Nie udało się wczytać projektów.',
 
-    tabQuotes: 'Wyceny',
+    tabQuotes: 'Dokumenty',
     tabNotes: 'Notatki',
-    quotesEmptyTitle: 'Brak wycen w tym projekcie',
+    quotesEmptyTitle: 'Brak dokumentów w tym projekcie',
     quotesEmptyDescription:
-      'Utwórz pierwszą wycenę — dane inwestora zostaną uzupełnione automatycznie.',
+      'Utwórz pierwszą wycenę, termin, etapy współpracy albo cennik — dane inwestora zostaną uzupełnione automatycznie.',
 
     // Przenoszenie wyceny między teczkami.
     moveTitle: 'Przenieś do projektu',
@@ -572,8 +604,12 @@ export const pl = {
     usageTrashLink: 'Otwórz kosz',
   },
   documents: {
-    tab: 'Dokumenty',
-    title: 'Dokumenty',
+    /**
+     * Archiwum wyeksportowanych PDF-ow. Od T-100 „Dokumentacja", bo
+     * „Dokumenty" to rejestr wycen, terminow, etapow i cennikow.
+     */
+    tab: 'Dokumentacja',
+    title: 'Dokumentacja',
     emptyTitle: 'Brak dokumentów',
     emptyDescription:
       'Dokumenty PDF wyeksportowane z wycen zapisywane są tutaj automatycznie — w wersji przekazanej inwestorowi.',
@@ -1163,7 +1199,7 @@ Z wyrazami szacunku`,
     corruptedTitle: 'Wycena uszkodzona',
     corruptedDescription:
       'Odczytanie treści wyceny nie powiodło się. Dane pozostają bezpieczne, lecz edytor nie jest w stanie ich otworzyć — prosimy o kontakt z pomocą techniczną.',
-    backToList: 'Wyceny',
+    backToList: 'Dokumenty',
     itemsCount: (count: number) => `${count} poz.`,
   },
   /*

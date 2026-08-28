@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { Navigate, createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { RootLayout } from '@/app/RootLayout';
 import { AppShell } from '@/app/layouts/AppShell';
 import { NotFoundPage } from '@/app/NotFoundPage';
@@ -51,7 +51,13 @@ const routeTree = [
                 element: <CalendarPage />,
                 handle: { title: pl.calendar.title },
               },
-              { path: 'wyceny', element: <QuotesListPage />, handle: { title: pl.quotes.title } },
+              {
+                path: 'dokumenty',
+                element: <QuotesListPage />,
+                handle: { title: pl.quotes.title },
+              },
+              // Stary adres rejestru sprzed T-100 — zapisane linki maja dalej dzialac.
+              { path: 'wyceny', element: <Navigate to={routes.quotes} replace /> },
               {
                 path: 'wyceny/nowa',
                 element: <QuoteEditorPage />,

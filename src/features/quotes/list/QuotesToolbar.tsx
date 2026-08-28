@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import type { QuoteSort } from '@/data/repos/quotes.repo';
-import { QuoteStatusSchema, type QuoteStatus } from '@/domain/quote';
+import { QuoteStatusSchema, type DocKind, type QuoteStatus } from '@/domain/quote';
 import { routes } from '@/app/routes';
 import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
@@ -37,6 +37,8 @@ function statusLabel(status: StatusFilter): string {
 }
 
 export interface QuotesToolbarProps {
+  /** Rodzaj dokumentu z aktywnej zakladki rejestru (T-100). */
+  kind: DocKind;
   status: StatusFilter;
   onStatusChange: (next: StatusFilter) => void;
   search: string;
@@ -54,6 +56,7 @@ export interface QuotesToolbarProps {
 }
 
 export function QuotesToolbar({
+  kind,
   status,
   onStatusChange,
   search,
@@ -161,9 +164,9 @@ export function QuotesToolbar({
         </DropdownMenu>
 
         <Button asChild>
-          <Link to={routes.quoteNew}>
+          <Link to={routes.documentNew(kind)}>
             <Plus className="size-4" aria-hidden />
-            {pl.quotes.new}
+            {pl.quotes.newOfKind[kind]}
           </Link>
         </Button>
       </div>

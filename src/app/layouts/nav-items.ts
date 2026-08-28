@@ -23,6 +23,8 @@ export interface NavItem {
   group: NavGroup;
   end?: boolean;
   disabled?: boolean;
+  /** Inne prefiksy sciezek, przy ktorych pozycja ma sie podswietlac (np. edytor dokumentu). */
+  aliases?: string[];
 }
 
 /** Wysokość wiersza i odstęp — „kulka" liczy z tego swoją pozycję. */
@@ -31,7 +33,7 @@ export const NAV_ROW_GAP = 6;
 export const NAV_ROW_STEP = NAV_ROW_HEIGHT + NAV_ROW_GAP;
 
 /*
- * Kolejnosc z 05-UI §2: **Pulpit · Klienci · Wyceny · Biblioteka · Szablony**,
+ * Kolejnosc z 05-UI §2: **Pulpit · Klienci · Dokumenty · Biblioteka · Szablony**,
  * a pod kreska **Pomoc · Ustawienia**. Klienci PRZED wycenami, bo od T-53 to
  * oni sa osia aplikacji — wycena zyje wewnatrz projektu klienta.
  *
@@ -59,7 +61,15 @@ export const NAV_ITEMS: NavItem[] = [
   // Kalendarz (T-98) stoi PO klientach i wycenach: to widok na terminy tego,
   // co już w aplikacji jest, a nie miejsce, w którym powstaje praca.
   { to: routes.calendar, label: pl.nav.calendar, icon: CalendarDays, group: 'main' },
-  { to: routes.quotes, label: pl.nav.quotes, icon: FileText, group: 'main' },
+  // „Dokumenty" (T-100): rejestr wycen, terminow, etapow i cennikow. Edytor
+  // zostal pod `/wyceny/:id`, wiec podswietlamy pozycje takze tam.
+  {
+    to: routes.quotes,
+    label: pl.nav.quotes,
+    icon: FileText,
+    group: 'main',
+    aliases: [routes.quotesLegacy],
+  },
   { to: routes.library, label: pl.nav.library, icon: Library, group: 'main' },
   { to: routes.templates, label: pl.nav.templates, icon: LayoutTemplate, group: 'main' },
   { to: routes.trash, label: pl.nav.trash, icon: Trash2, group: 'system' },
@@ -75,7 +85,8 @@ export function navItemsOf(group: NavGroup): NavItem[] {
 
 /** Indeks aktywnej pozycji (w całej liście) dla danej ścieżki; `-1`, gdy żadna nie pasuje. */
 export function activeNavIndex(pathname: string): number {
+  const matches = (prefix: string) => pathname === prefix || pathname.startsWith(`${prefix}/`);
   return NAV_ITEMS.findIndex((item) =>
-    item.end ? pathname === item.to : pathname === item.to || pathname.startsWith(`${item.to}/`),
+    item.end ? pathname === item.to : matches(item.to) || (item.aliases ?? []).some(matches),
   );
 }
