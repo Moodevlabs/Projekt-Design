@@ -4,8 +4,13 @@ import { useBrandKit } from '@/data/queries/useBrandKit';
 import { joinPath, openPath, runningInTauri, saveFile } from '@/lib/tauri';
 import { defaultBrandKit, type BrandKit } from '@/domain/brand/schema';
 import type { QuoteBody, Room } from '@/domain/quote';
-import type { ScheduleBody } from '@/domain/schedule';
-import type { PriceListDoc, StagesDoc } from '@/domain/documents';
+import { scheduleHasContent, type ScheduleBody } from '@/domain/schedule';
+import {
+  priceListHasContent,
+  stagesHasContent,
+  type PriceListDoc,
+  type StagesDoc,
+} from '@/domain/documents';
 import { createLogger } from '@/lib/logger';
 import { fetchLogoAsDataUrl } from './logo';
 import { renderQuotePdf } from './render';
@@ -70,9 +75,10 @@ export function usePackageExport() {
       const plan = packagePlan(
         selected,
         {
-          hasSchedule: source.schedule !== null,
-          hasStages: source.stages !== null,
-          hasPriceList: source.priceList !== null,
+          // Po treści, nie po istnieniu (T-115) — jak w dialogu pakietu.
+          hasSchedule: scheduleHasContent(source.schedule),
+          hasStages: stagesHasContent(source.stages),
+          hasPriceList: priceListHasContent(source.priceList),
         },
         source.number,
         source.body.client.name,

@@ -4,6 +4,8 @@ import { useCreateTemplate, useOverwriteTemplate, useTemplates } from '@/data/qu
 import type { Template } from '@/data/repos/templates.repo';
 import { useEditorStore } from './editor.store';
 import { pl } from '@/i18n/pl';
+import { scheduleHasContent } from '@/domain/schedule';
+import { documentsHaveContent } from '@/domain/documents';
 
 /** Co wycena ma do zaoferowania szablonowi — steruje checkboxami w dialogu. */
 export interface TemplateAvailable {
@@ -66,10 +68,13 @@ export function useTemplateActions(): TemplateActions {
     const state = useEditorStore.getState();
     return {
       schedule:
-        selection.schedule && state.schedule
+        selection.schedule && scheduleHasContent(state.schedule) && state.schedule
           ? { ...structuredClone(state.schedule), startDate: null }
           : null,
-      documents: selection.documents && state.documents ? structuredClone(state.documents) : null,
+      documents:
+        selection.documents && documentsHaveContent(state.documents) && state.documents
+          ? structuredClone(state.documents)
+          : null,
     };
   };
 
@@ -115,8 +120,10 @@ export function useTemplateActions(): TemplateActions {
    * w której użytkownik doda pierwszy etap w zakładce „Termin" — bez czekania
    * na przypadkowe przerenderowanie strony.
    */
-  const hasSchedule = useEditorStore((state) => state.schedule !== null);
-  const hasDocuments = useEditorStore((state) => state.documents !== null);
+  // Po treści, nie po istnieniu (T-115): pusta powłoka zakładki nie jest
+  // pakietem i nie ma trafić do szablonu jako „termin" czy „etapy".
+  const hasSchedule = useEditorStore((state) => scheduleHasContent(state.schedule));
+  const hasDocuments = useEditorStore((state) => documentsHaveContent(state.documents));
   const available: TemplateAvailable = { schedule: hasSchedule, documents: hasDocuments };
 
   return {

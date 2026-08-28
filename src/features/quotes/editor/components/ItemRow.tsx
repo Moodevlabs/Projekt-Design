@@ -55,6 +55,29 @@ function pricingSummary(item: Item, rooms: Room[], currency: string): string | n
   return null;
 }
 
+/**
+ * Co pokazuje pole ceny w edycji: cenę jednostkową dla `flat`, BAZĘ reguły
+ * dla pozycji parametrycznej. `null` = wycena indywidualna w obu trybach.
+ */
+function priceFieldCents(item: Item): number | null {
+  if (item.unitPriceCents === null) return null;
+  return item.pricing.mode === 'flat' ? item.unitPriceCents : item.pricing.baseCents;
+}
+
+/**
+ * Łatka po wpisaniu kwoty w polu ceny. Dla reguły parametrycznej kwota idzie
+ * w `baseCents`, a `unitPriceCents` dostaje tę samą liczbę tylko po to, żeby
+ * pozycja przestała liczyć się jako „indywidualna" (`countIndividualItems`
+ * patrzy na `unitPriceCents`). Wyczyszczenie (`null`) zeruje bazę.
+ */
+function priceFieldPatch(item: Item, cents: number | null): Partial<Item> {
+  if (item.pricing.mode === 'flat') return { unitPriceCents: cents };
+  return {
+    unitPriceCents: cents,
+    pricing: { ...item.pricing, baseCents: cents ?? 0 },
+  };
+}
+
 /** Stała referencja: brak wariantów nie może przebijać `memo` na wierszach. */
 const EMPTY_VARIANTS: LibraryItem[] = [];
 
@@ -271,6 +294,33 @@ export const ItemRow = memo(function ItemRow({
               </span>
               <span className="amount">{formatMoney(valueCents, currency)}</span>
             </span>
+          ) : editing ? (
+            /*
+             * Cena jest edytowalna ZAWSZE w trybie edycji (T-115) — także gdy
+             * pozycja przyszła z biblioteki lub szablonu bez ceny („wycena
+             * indywidualna") i także dla pozycji parametrycznej.
+             *
+             * Do tej pory `null` pokazywał sam napis, a pozycja parametryczna
+             * samą kwotę wynikową. Człowiek, który wziął szablon startowy
+             * (wszystkie ceny puste, połowa pozycji „za pomieszczenie"), nie
+             * miał gdzie wpisać stawki — musiał iść do biblioteki, żeby
+             * wycenić JEDNĄ ofertę. Teraz: puste pole z podpowiedzią, wpisanie
+             * kwoty nadaje cenę, wyczyszczenie wraca do „ustalimy osobno".
+             *
+             * Dla reguły `per_room`/`per_frame` pole edytuje BAZĘ (część
+             * niezależną od pomieszczeń); składniki za pomieszczenia dochodzą
+             * z cennika i są opisane dopiskiem pod kwotą.
+             */
+            <InlineMoney
+              cents={priceFieldCents(item)}
+              currency={currency}
+              nullable
+              placeholder={pl.editor.individualPrice}
+              onCommit={(cents) => onPatch(item.id, priceFieldPatch(item, cents))}
+              onClear={() => onPatch(item.id, priceFieldPatch(item, null))}
+              ariaLabel={pl.editor.itemPriceLabel}
+              className="price-field inline-field amount w-[76px] text-[14.5px]"
+            />
           ) : item.unitPriceCents === null ? (
             /*
              * „Wycena indywidualna" (T-60) — pozycja jest w ofercie, ale ceny
@@ -280,18 +330,7 @@ export const ItemRow = memo(function ItemRow({
             <span className="text-[13px] text-[var(--doc-ink-soft)] italic">
               {pl.editor.individualPrice}
             </span>
-          ) : editing && parametric === null ? (
-            <InlineMoney
-              cents={item.unitPriceCents}
-              currency={currency}
-              onCommit={(unitPriceCents) => onPatch(item.id, { unitPriceCents })}
-              ariaLabel={pl.editor.itemPriceLabel}
-              className="price-field inline-field amount w-[76px] text-[14.5px]"
-            />
           ) : (
-            // Cena pozycji parametrycznej WYNIKA z reguły, więc nie ma tu czego
-            // edytować — pole do wpisania kwoty sugerowałoby, że da się ją
-            // nadpisać, a wpisana wartość nie miałaby żadnego wpływu na wynik.
             <span className="amount">{formatMoney(valueCents, currency)}</span>
           )}
         </div>

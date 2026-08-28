@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 import { useBrandKit } from '@/data/queries/useBrandKit';
 import { defaultBrandKit } from '@/domain/brand/schema';
-import type { PriceListDoc } from '@/domain/documents';
+import { priceListHasContent, type PriceListDoc } from '@/domain/documents';
 import { createLogger } from '@/lib/logger';
 import { fetchLogoAsDataUrl } from './logo';
 import { buildPdfTheme } from './theme';
@@ -31,7 +31,8 @@ export function useExportPriceListPdf() {
 
   const exportPriceList = useCallback(
     async ({ doc, number, issueDate, currency = 'PLN', archive, version }: ExportPriceListArgs) => {
-      if (!doc) {
+      if (!priceListHasContent(doc) || !doc) {
+        // Pusta powloka zakladki to nie cennik (T-115).
         toast.info(pl.pdf.priceListMissing);
         return;
       }

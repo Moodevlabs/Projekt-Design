@@ -6,7 +6,6 @@ import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { AddLink } from '../components/AddLink';
 import { useEditorStore } from '../editor.store';
-import { useWorkspace } from '@/data/queries/useWorkspace';
 import type { PriceListItem } from '@/domain/documents';
 import { convertUnits, newItem } from '@/domain/quote';
 import { pl } from '@/i18n/pl';
@@ -161,11 +160,17 @@ function useAddToQuote() {
  */
 function useAddToSchedule() {
   const addExtra = useEditorStore((state) => state.addScheduleExtra);
-  const template = useWorkspace().data?.settings.scheduleTemplate ?? null;
 
   return (item: PriceListItem, days: number) => {
     const name = item.name || pl.editor.newPriceListItemName;
-    addExtra({ name, days }, pl.editor.extrasStageName, template);
+    /*
+     * Bez `settings.scheduleTemplate` (T-115). To był ostatni czytelnik tego
+     * ustawienia: gdy zakładka „Termin" nie była jeszcze otwarta, most zakładał
+     * harmonogram z PEŁNYM szablonem studia i dopiero dopisywał usługę —
+     * użytkownik dostawał kilkanaście etapów, których nie dodawał. Teraz
+     * powstaje pusty termin z jednym etapem zbiorczym; reszta z biblioteki.
+     */
+    addExtra({ name, days }, pl.editor.extrasStageName);
     toast.success(pl.editor.priceListAddedToSchedule(name, days));
   };
 }

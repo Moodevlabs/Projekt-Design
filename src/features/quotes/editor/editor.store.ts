@@ -456,7 +456,14 @@ export const useEditorStore = create<EditorState>()(
         // Idempotentne: wejście na zakładkę „Termin" nie może skasować tego,
         // co ktoś już ustawił.
         if (state.schedule) return;
-        state.schedule = newScheduleBody({}, template ?? null);
+        /*
+         * Brak szablonu = PUSTY harmonogram (T-115), a nie wbudowany.
+         * `newScheduleBody({}, null)` wstawia 13 etapów z domeny — to jest
+         * właściwe dla biblioteki, nie dla dokumentu, który od T-111 ma
+         * startować pusty. Wywołanie bez argumentu dawało pełny szablon
+         * „znikąd" wszędzie tam, gdzie ktoś zapomniał `EMPTY_TEMPLATE`.
+         */
+        state.schedule = newScheduleBody({}, template ?? []);
         state.saveState = 'dirty';
       }),
 
@@ -493,7 +500,9 @@ export const useEditorStore = create<EditorState>()(
       set((state) => {
         // Bez harmonogramu nie ma gdzie dopisać dni — zakładamy go, zamiast po
         // cichu nic nie zrobić. Most i tak pyta o zgodę przełącznikiem.
-        if (!state.schedule) state.schedule = newScheduleBody({}, template ?? null);
+        // Pusty harmonogram + etap zbiorczy — NIE wbudowany szablon (T-115):
+        // „dodaj do terminu" z cennika nie ma prawa dosypać 13 etapów.
+        if (!state.schedule) state.schedule = newScheduleBody({}, template ?? []);
         state.schedule = withExtra(state.schedule, extra, stageName);
         state.saveState = 'dirty';
       }),
@@ -518,7 +527,8 @@ export const useEditorStore = create<EditorState>()(
         // skasować tego, co ktoś już opisał.
         if (state.documents?.stages) return;
         state.documents = {
-          stages: newStagesDoc({}, template ?? null),
+          // Brak szablonu = pusta lista (T-115), jak w `ensureSchedule`.
+          stages: newStagesDoc({}, template ?? []),
           priceList: state.documents?.priceList ?? null,
         };
         state.saveState = 'dirty';
@@ -561,7 +571,8 @@ export const useEditorStore = create<EditorState>()(
         if (state.documents?.priceList) return;
         state.documents = {
           stages: state.documents?.stages ?? null,
-          priceList: newPriceListDoc({}, template ?? null),
+          // Brak szablonu = pusta lista (T-115), jak w `ensureSchedule`.
+          priceList: newPriceListDoc({}, template ?? []),
         };
         state.saveState = 'dirty';
       }),

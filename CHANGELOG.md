@@ -21,6 +21,22 @@ i „Zapisz jako szablon” działają jak dotąd.
 
 ### Zmienione
 
+**Numer dokumentacji zaczyna się od „DOK/”** (domyślnie `DOK/RRRR/MM/0001`).
+Dotąd „WYC/” — nazwa jednej zakładki, nie całej teczki. Własny wzorzec
+z Ustawień zostaje; numery już nadane nie zmieniają się.
+
+**Cenę wpisuje się w wycenie — także przy pozycji z biblioteki lub szablonu.**
+Pozycja bez ceny („wycena indywidualna”) ma w edycji puste pole: wpisanie kwoty
+nadaje cenę, wyczyszczenie wraca do „ustalimy osobno”. Pozycja liczona za
+pomieszczenie ma pole bazy, a składniki za pomieszczenia dochodzą z cennika.
+Dotąd trzeba było iść do biblioteki, żeby wycenić jedną ofertę.
+
+**Pusta zakładka jest naprawdę pusta.** Podsumowanie wyceny podpisywało podział
+po sekcjach jako „etapy” — teraz „sekcje”. „Dodaj do terminu” z cennika zakładało
+harmonogram z pełnym szablonem studia — teraz sam etap zbiorczy. Zakładka, na
+którą tylko wejrzano, nie trafia do PDF, pakietu ani szablonu. Teksty Pomocy
+opisujące osobne dokumenty (WYC/TER/ETP/CEN) poprawione.
+
 **Rejestr Dokumentów bez list „miasto” i „klient”.** Zostają: statusy,
 wyszukiwarka (numer, tytuł, klient — i od teraz także miasto) oraz sortowanie.
 
