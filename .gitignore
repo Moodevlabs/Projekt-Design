@@ -43,8 +43,10 @@ supabase/.temp
 #    Trzymaj kopię (osobne prywatne repozytorium albo backup dysku).
 # ---------------------------------------------------------------------------
 
-# Dokumentacja projektowa: PRD, architektura, schemat bazy, plan zadań.
-/docs/
+# Dokumentacja projektowa (PRD, architektura, schemat bazy, plan zadań) — tylko w korzeniu.
+# Nazwa „dokumentacja”, a nie „docs”: katalogi kodu też bywają tak nazwane
+# (src/features/library/docs) i nie mogą wpadać pod ten wpis.
+/dokumentacja/
 
 # Materiały źródłowe od klienta: koncepcje, inspiracje, arkusz, prototyp.
 reference/
