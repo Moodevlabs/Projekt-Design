@@ -882,7 +882,10 @@ Z wyrazami szacunku`,
     // Zakladki edytora i harmonogram (F5.2).
     tabQuote: 'Wycena',
     tabSchedule: 'Termin',
-    tabDocuments: 'Dokumenty',
+    // Od T-101 etapy i cennik sa zakladkami pierwszego poziomu — „Dokumenty"
+    // znaczy teraz rejestr, wiec drugi poziom pod ta nazwa bylby mylacy.
+    tabStages: 'Etapy współpracy',
+    tabPriceList: 'Cennik dodatkowy',
 
     // Dokument „Etapy wspolpracy" (F6.1).
     stagesDocTitle: 'Etapy współpracy',

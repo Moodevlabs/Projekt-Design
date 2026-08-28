@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { Check, Plus, Trash2, X } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
 import { InlineText } from '../components/InlineText';
@@ -19,7 +19,20 @@ import { cn } from '@/lib/utils';
  * znikać: „nie robimy nadzoru" trzeba powiedzieć przed podpisaniem umowy,
  * a nie w połowie budowy.
  */
-export function StagesDocTab({ editing }: { editing: boolean }) {
+/** Stala referencja — patrz `ScheduleTab`. */
+const EMPTY_TEMPLATE: never[] = [];
+
+export function StagesDocTab({
+  editing,
+  startEmpty = false,
+  aside,
+}: {
+  editing: boolean;
+  /** Dokument standalone (T-101) startuje pusty i buduje sie z biblioteki. */
+  startEmpty?: boolean;
+  /** Prawa kolumna (klient, archiwum) — tylko dla dokumentu standalone. */
+  aside?: ReactNode;
+}) {
   const { doc } = useEditorStore(useShallow((state) => ({ doc: state.documents?.stages ?? null })));
 
   const ensureStagesDoc = useEditorStore((state) => state.ensureStagesDoc);
@@ -28,7 +41,8 @@ export function StagesDocTab({ editing }: { editing: boolean }) {
   const addEntry = useEditorStore((state) => state.addStageEntry);
   const removeEntry = useEditorStore((state) => state.removeStageEntry);
 
-  const template = useWorkspace().data?.settings.stagesTemplate ?? null;
+  const workspaceTemplate = useWorkspace().data?.settings.stagesTemplate ?? null;
+  const template = startEmpty ? EMPTY_TEMPLATE : workspaceTemplate;
 
   useStageEntryAutoSync(editing);
 
@@ -46,8 +60,13 @@ export function StagesDocTab({ editing }: { editing: boolean }) {
   const objete = doc.entries.filter((entry) => entry.included).length;
 
   return (
-    <div className="mx-auto w-full max-w-[900px] px-7 pt-6 pb-14">
-      <div className="quote-doc quote-sheet px-10 py-9">
+    <div
+      className={cn(
+        'mx-auto w-full px-7 pt-6 pb-14',
+        aside ? 'grid max-w-[1320px] items-start gap-7 lg:grid-cols-[1fr_336px]' : 'max-w-[900px]',
+      )}
+    >
+      <div className="quote-doc quote-sheet min-w-0 px-10 py-9">
         <h2 className="text-[22px] font-normal tracking-[-0.01em] uppercase">
           {pl.editor.stagesDocTitle}
         </h2>
@@ -110,6 +129,8 @@ export function StagesDocTab({ editing }: { editing: boolean }) {
           </div>
         ) : null}
       </div>
+
+      {aside ? <div className="flex flex-col gap-4 lg:sticky lg:top-6">{aside}</div> : null}
     </div>
   );
 }

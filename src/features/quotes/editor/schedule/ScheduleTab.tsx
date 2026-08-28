@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { Plus } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
 import { StageRow } from './StageRow';
@@ -14,6 +14,8 @@ import type { Room } from '@/domain/quote';
 import { pl } from '@/i18n/pl';
 
 const NO_ROOMS: Room[] = [];
+/** Stala referencja — `[]` w propsie odpalaloby `ensureSchedule` przy kazdym renderze. */
+const EMPTY_TEMPLATE: never[] = [];
 
 /**
  * Zakładka „Termin" (F5.2).
@@ -22,7 +24,21 @@ const NO_ROOMS: Room[] = [];
  * mieszka w tym samym dokumencie, a nie w osobnym bycie. Zmiana pomieszczeń
  * w zakładce „Wycena" natychmiast zmienia tutejszy wynik.
  */
-export function ScheduleTab({ editing }: { editing: boolean }) {
+export function ScheduleTab({
+  editing,
+  startEmpty = false,
+  aside,
+}: {
+  editing: boolean;
+  /**
+   * Dokument standalone „Termin" (T-101) startuje BEZ etapow i buduje sie
+   * z biblioteki — jak wycena. Wewnatrz wyceny zostaje pre-wypelnienie
+   * z szablonu workspace'u.
+   */
+  startEmpty?: boolean;
+  /** Karty pod wynikiem w prawej kolumnie (klient, pomieszczenia, archiwum). */
+  aside?: ReactNode;
+}) {
   const { schedule, rooms } = useEditorStore(
     useShallow((state) => ({
       schedule: state.schedule,
@@ -42,7 +58,8 @@ export function ScheduleTab({ editing }: { editing: boolean }) {
   useStageAutoSync(editing && schedule !== null);
 
   const roomTypes = useRoomTypes();
-  const template = useWorkspace().data?.settings.scheduleTemplate ?? null;
+  const workspaceTemplate = useWorkspace().data?.settings.scheduleTemplate ?? null;
+  const template = startEmpty ? EMPTY_TEMPLATE : workspaceTemplate;
 
   useEffect(() => {
     // Harmonogram zakładamy dopiero przy pierwszym wejściu na zakładkę —
@@ -174,8 +191,9 @@ export function ScheduleTab({ editing }: { editing: boolean }) {
         ) : null}
       </div>
 
-      <div className="lg:sticky lg:top-6">
+      <div className="flex flex-col gap-4 lg:sticky lg:top-6">
         <ScheduleResultCard result={result} />
+        {aside}
       </div>
     </div>
   );

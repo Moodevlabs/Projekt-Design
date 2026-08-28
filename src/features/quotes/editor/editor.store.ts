@@ -24,6 +24,7 @@ import {
   type QuoteStatus,
   type Room,
   type Section,
+  type DocKind,
 } from '@/domain/quote';
 import {
   newScheduleBody,
@@ -114,6 +115,12 @@ export interface EditorState {
   currency: string;
   number: string | null;
   status: QuoteStatus;
+  /**
+   * Rodzaj dokumentu (T-101). Decyduje, ktora powierzchnia jest „tym
+   * dokumentem": wycena ma cztery zakladki, pozostale rodzaje — jedna.
+   * Ustalany przy utworzeniu, store go tylko niesie.
+   */
+  docKind: DocKind;
   body: QuoteBody | null;
   /**
    * `updated_at` wiersza, na ktorym pracujemy. Autozapis wysyla go jako podstawe
@@ -318,6 +325,7 @@ const INITIAL = {
   currency: 'PLN',
   number: null,
   status: 'draft' as QuoteStatus,
+  docKind: 'offer' as DocKind,
   body: null,
   schedule: null as ScheduleBody | null,
   documents: null as QuoteDocuments | null,
@@ -397,6 +405,7 @@ export const useEditorStore = create<EditorState>()(
         state.currency = safeCurrency(quote.currency);
         state.number = quote.number;
         state.status = quote.status;
+        state.docKind = quote.docKind;
         state.body = quote.body;
         state.schedule = quote.schedule;
         state.documents = quote.documents;

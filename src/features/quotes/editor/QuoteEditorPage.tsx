@@ -16,7 +16,8 @@ import { SectionBlock } from './components/SectionBlock';
 import { TotalsCard } from './components/TotalsCard';
 import { RoomsPanel } from './components/RoomsPanel';
 import { ScheduleTab } from './schedule/ScheduleTab';
-import { DocumentsTab } from './documents/DocumentsTab';
+import { StagesDocTab } from './documents/StagesDocTab';
+import { PriceListTab } from './documents/PriceListTab';
 import { PricingBasisCard } from './components/PricingBasisCard';
 import { ClientCard } from './components/ClientCard';
 import { DocumentsCard } from './components/DocumentsCard';
@@ -29,7 +30,12 @@ import { OverwriteTemplateDialog, SaveAsTemplateDialog } from './components/Temp
 import { useCreateQuote, useCreateQuoteVersion, useQuote } from '@/data/queries/useQuotes';
 import { useWorkspace } from '@/data/queries/useWorkspace';
 import { canCreateVersion, quoteBodyFromSettings, versionLabel } from '@/domain/quote';
-import { defaultTitleForKind, documentKindFromLegacy } from '@/domain/documents';
+import {
+  defaultTitleForKind,
+  documentKindFromLegacy,
+  hasQuoteSurface,
+  usesRooms,
+} from '@/domain/documents';
 import { ConfirmDialog, EmptyState } from '@/components/shared';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -131,6 +137,24 @@ function NewQuoteRedirect() {
 
   return <EditorSkeleton />;
 }
+
+type EditorTabId = 'quote' | 'schedule' | 'stages' | 'priceList';
+
+/** Zakladki wyceny (T-101): cztery, plasko. Kolejnosc = kolejnosc pakietu. */
+const EDITOR_TABS: { id: EditorTabId; label: string }[] = [
+  { id: 'quote', label: pl.editor.tabQuote },
+  { id: 'schedule', label: pl.editor.tabSchedule },
+  { id: 'stages', label: pl.editor.tabStages },
+  { id: 'priceList', label: pl.editor.tabPriceList },
+];
+
+/** Jedyna powierzchnia dokumentu, ktory nie jest wycena. */
+const SURFACE_FOR_KIND: Record<'offer' | 'schedule' | 'stages' | 'price_list', EditorTabId> = {
+  offer: 'quote',
+  schedule: 'schedule',
+  stages: 'stages',
+  price_list: 'priceList',
+};
 
 /** Zakladka edytora — jeden dokument, rozne widoki na niego. */
 function EditorTab({
@@ -280,6 +304,7 @@ function EditorSurface({
     version,
     lineageId,
     currency,
+    docKind,
   } = useEditorStore(
     useShallow((state) => ({
       body: state.body,
@@ -292,8 +317,12 @@ function EditorSurface({
       version: state.version,
       lineageId: state.lineageId,
       currency: state.currency,
+      docKind: state.docKind,
     })),
   );
+  // Wycena ma cztery zakladki; termin, etapy i cennik sa JEDNA powierzchnia
+  // (T-101). Zakladki bez tresci bylyby obietnica, ktorej nie da sie kliknac.
+  const isOffer = hasQuoteSurface(docKind);
 
   // Akcje Zustanda sa stabilne, wiec zmemoizowane sekcje i wiersze nie
   // przerenderuja sie tylko dlatego, ze rodzic dostal nowy `body`.
@@ -350,7 +379,7 @@ function EditorSurface({
   const [packageOpen, setPackageOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
-  const [tab, setTab] = useState<'quote' | 'schedule' | 'documents'>('quote');
+  const [tab, setTab] = useState<EditorTabId>('quote');
   const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
   const [overwriteTemplateOpen, setOverwriteTemplateOpen] = useState(false);
 
@@ -423,10 +452,35 @@ function EditorSurface({
   const editing = mode === 'edit' && canWrite;
   const issueDate = body.issueDate ?? createdAt.slice(0, 10);
 
+  /*
+   * Prawa kolumna dokumentu standalone: to, co wycena ma obok arkusza,
+   * a co nie zalezy od pozycji — klient, archiwum, pomieszczenia (tylko
+   * termin, bo tylko on je liczy).
+   */
+  const standaloneAside = isOffer ? null : (
+    <>
+      {editing ? <ClientCard /> : null}
+      {editing ? <DocumentsCard /> : null}
+      {usesRooms(docKind) ? (
+        <RoomsPanel
+          rooms={body.rooms}
+          editing={editing}
+          onAdd={addRoom}
+          onPatch={updateRoom}
+          onRemove={removeRoom}
+        />
+      ) : null}
+    </>
+  );
+  const activeTab: EditorTabId = isOffer ? tab : SURFACE_FOR_KIND[docKind];
+
   return (
     <QuoteDndProvider enabled={editing}>
       <div className="flex h-full min-h-0 flex-col">
         <EditorTopbar
+          docKind={docKind}
+          title={body.title}
+          onTitleChange={(title) => patchHeader({ title })}
           number={number}
           status={status}
           mode={editing ? mode : 'preview'}
@@ -516,7 +570,7 @@ function EditorSurface({
           zamkniety modal wolalby trzy zapytania (linki, uwagi, akceptacja)
           przy kazdym wejsciu do edytora, a nikt na nie nie patrzy.
         */}
-        {quoteId && historyOpen && lineageId ? (
+        {quoteId && historyOpen && lineageId && isOffer ? (
           <VersionHistoryDialog
             lineageId={lineageId}
             currentId={quoteId}
@@ -526,7 +580,7 @@ function EditorSurface({
           />
         ) : null}
 
-        {quoteId && shareOpen ? (
+        {quoteId && shareOpen && isOffer ? (
           <ShareDialog quoteId={quoteId} quoteNumber={number} open onOpenChange={setShareOpen} />
         ) : null}
 
@@ -635,146 +689,155 @@ function EditorSurface({
           tylko to, co widac. Harmonogram jedzie z dokumentem w tym samym
           zapisie (patrz `useAutosave`).
         */}
-        <div className="border-hair flex items-center gap-1 border-b px-7">
-          <EditorTab
-            active={tab === 'quote'}
-            onSelect={() => setTab('quote')}
-            label={pl.editor.tabQuote}
-          />
-          <EditorTab
-            active={tab === 'schedule'}
-            onSelect={() => setTab('schedule')}
-            label={pl.editor.tabSchedule}
-          />
-          <EditorTab
-            active={tab === 'documents'}
-            onSelect={() => setTab('documents')}
-            label={pl.editor.tabDocuments}
-          />
-        </div>
+        {isOffer ? (
+          <div className="border-hair flex items-center gap-1 border-b px-7" role="tablist">
+            {EDITOR_TABS.map((entry) => (
+              <EditorTab
+                key={entry.id}
+                active={tab === entry.id}
+                onSelect={() => setTab(entry.id)}
+                label={entry.label}
+              />
+            ))}
+          </div>
+        ) : null}
 
         <div className="min-h-0 flex-1 overflow-y-auto">
-          {tab === 'schedule' ? <ScheduleTab editing={editing} /> : null}
-          {tab === 'documents' ? <DocumentsTab editing={editing} /> : null}
-          <div
-            className={cn(
-              'mx-auto grid w-full max-w-[1320px] items-start gap-7 px-7 pt-6 pb-14 lg:grid-cols-[1fr_336px]',
-              tab === 'quote' ? '' : 'hidden',
-            )}
-          >
-            <div className="quote-doc quote-sheet min-w-0 px-10 py-11" data-mode={mode}>
-              <QuoteHeader
-                body={body}
-                editing={editing}
-                createdAt={createdAt}
-                onPatch={patchHeader}
-                onPatchClient={patchClient}
-              />
+          {activeTab === 'schedule' ? (
+            <ScheduleTab editing={editing} startEmpty={!isOffer} aside={standaloneAside} />
+          ) : null}
+          {activeTab === 'stages' ? (
+            <StagesDocTab editing={editing} startEmpty={!isOffer} aside={standaloneAside} />
+          ) : null}
+          {activeTab === 'priceList' ? (
+            <PriceListTab editing={editing} startEmpty={!isOffer} aside={standaloneAside} />
+          ) : null}
+          {/*
+            Arkusz wyceny jest CHOWANY (nie odmontowywany) przy zmianie
+            zakladki — DnD i zmemoizowane wiersze maja przezyc przelaczenie.
+            Dla dokumentu bez powierzchni wyceny nie ma go wcale.
+          */}
+          {isOffer ? (
+            <div
+              className={cn(
+                'mx-auto grid w-full max-w-[1320px] items-start gap-7 px-7 pt-6 pb-14 lg:grid-cols-[1fr_336px]',
+                activeTab === 'quote' ? '' : 'hidden',
+              )}
+            >
+              <div className="quote-doc quote-sheet min-w-0 px-10 py-11" data-mode={mode}>
+                <QuoteHeader
+                  body={body}
+                  editing={editing}
+                  createdAt={createdAt}
+                  onPatch={patchHeader}
+                  onPatchClient={patchClient}
+                />
 
-              <div className="mt-10">
-                <SortableContext items={sectionIds} strategy={verticalListSortingStrategy}>
-                  {body.sections.map((section) => (
-                    <SectionBlock
-                      key={section.id}
-                      section={section}
-                      editing={editing}
-                      currency={currency}
-                      vatRate={body.vatRate}
-                      pricesInclude={body.pricesInclude}
-                      rooms={body.rooms}
-                      textInfo={textInfo}
-                      pricing={pricing}
-                      variants={variants}
-                      onVariantChange={setItemVariant}
-                      onRename={renameSection}
-                      onRemove={removeSection}
-                      onAddGroup={addGroup}
-                      onRenameGroup={renameGroup}
-                      onRemoveGroup={removeGroup}
-                      onToggleGroup={toggleGroup}
-                      onAddItem={addItemAction}
-                      onToggleItem={toggleItem}
-                      onPatchItem={updateItem}
-                      onRemoveItem={removeItem}
-                      onSaveItemToLibrary={library.saveItem}
-                      onSaveGroupToLibrary={library.saveGroup}
-                    />
-                  ))}
-                </SortableContext>
-
-                {editing ? (
-                  <AddLink icon={Plus} onClick={addSection} className="text-[13px]">
-                    {pl.editor.addSection}
-                  </AddLink>
-                ) : null}
-
-                {/* Rabaty na końcu dokumentu, jak w arkuszu — i jak w każdej
-                    ofercie, gdzie obniżki czyta się po cenach. */}
                 <div className="mt-10">
-                  <DiscountsSection
-                    body={body}
-                    currency={currency}
-                    editing={editing}
-                    onAdd={addDiscount}
-                    onToggle={toggleDiscount}
-                    onPatch={updateDiscount}
-                    onRemove={removeDiscount}
-                  />
+                  <SortableContext items={sectionIds} strategy={verticalListSortingStrategy}>
+                    {body.sections.map((section) => (
+                      <SectionBlock
+                        key={section.id}
+                        section={section}
+                        editing={editing}
+                        currency={currency}
+                        vatRate={body.vatRate}
+                        pricesInclude={body.pricesInclude}
+                        rooms={body.rooms}
+                        textInfo={textInfo}
+                        pricing={pricing}
+                        variants={variants}
+                        onVariantChange={setItemVariant}
+                        onRename={renameSection}
+                        onRemove={removeSection}
+                        onAddGroup={addGroup}
+                        onRenameGroup={renameGroup}
+                        onRemoveGroup={removeGroup}
+                        onToggleGroup={toggleGroup}
+                        onAddItem={addItemAction}
+                        onToggleItem={toggleItem}
+                        onPatchItem={updateItem}
+                        onRemoveItem={removeItem}
+                        onSaveItemToLibrary={library.saveItem}
+                        onSaveGroupToLibrary={library.saveGroup}
+                      />
+                    ))}
+                  </SortableContext>
+
+                  {editing ? (
+                    <AddLink icon={Plus} onClick={addSection} className="text-[13px]">
+                      {pl.editor.addSection}
+                    </AddLink>
+                  ) : null}
+
+                  {/* Rabaty na końcu dokumentu, jak w arkuszu — i jak w każdej
+                    ofercie, gdzie obniżki czyta się po cenach. */}
+                  <div className="mt-10">
+                    <DiscountsSection
+                      body={body}
+                      currency={currency}
+                      editing={editing}
+                      onAdd={addDiscount}
+                      onToggle={toggleDiscount}
+                      onPatch={updateDiscount}
+                      onRemove={removeDiscount}
+                    />
+                  </div>
                 </div>
+
+                {body.preparedBy || editing ? (
+                  <p className="mt-8 text-[12.5px] text-[var(--doc-ink-soft)] italic">
+                    {pl.editor.preparedBy}: {body.preparedBy}
+                  </p>
+                ) : null}
               </div>
 
-              {body.preparedBy || editing ? (
-                <p className="mt-8 text-[12.5px] text-[var(--doc-ink-soft)] italic">
-                  {pl.editor.preparedBy}: {body.preparedBy}
-                </p>
-              ) : null}
-            </div>
-
-            <div className="flex flex-col gap-4 lg:sticky lg:top-6">
-              {/* Nad podsumowaniem, bo to pomieszczenia decydują o kwotach
+              <div className="flex flex-col gap-4 lg:sticky lg:top-6">
+                {/* Nad podsumowaniem, bo to pomieszczenia decydują o kwotach
                   usług liczonych za pomieszczenie. */}
-              {/* Tylko w edycji — w podgladzie nie ma czego przelaczac, a stawka
+                {/* Tylko w edycji — w podgladzie nie ma czego przelaczac, a stawka
                   godzinowa to liczba wewnetrzna, nie tresc oferty. */}
-              {editing ? (
-                <PricingBasisCard
-                  body={body}
-                  onPatch={patchHeader}
-                  onBasisChange={basisChange.request}
-                />
-              ) : null}
+                {editing ? (
+                  <PricingBasisCard
+                    body={body}
+                    onPatch={patchHeader}
+                    onBasisChange={basisChange.request}
+                  />
+                ) : null}
 
-              {/* Karta klienta tylko w edycji: przypisanie do kartoteki jest
+                {/* Karta klienta tylko w edycji: przypisanie do kartoteki jest
                   informacja robocza, a nie trescia oferty. W podgladzie liczy
                   sie to, co w naglowku dokumentu. */}
-              {editing ? <ClientCard /> : null}
+                {editing ? <ClientCard /> : null}
 
-              {/* Archiwum dokumentow — skrot do tego, co juz poszlo do
+                {/* Archiwum dokumentow — skrot do tego, co juz poszlo do
                   inwestora. Sama karta chowa sie, gdy wycena nie ma klienta. */}
-              {/*
+                {/*
                 Co wrocilo od klienta — TU, a nie tylko w oknie „Udostepnij".
                 Do 2026-08-27 fakt akceptacji byl widoczny wylacznie po
                 otwarciu modala; kto nie wiedzial, ze tam jest, nie dowiadywal
                 sie o niej wcale. Karta milczy, dopoki nie ma czego pokazac.
               */}
-              {quoteId ? <QuoteFeedback quoteId={quoteId} sentAt={sentAt} /> : null}
+                {quoteId ? <QuoteFeedback quoteId={quoteId} sentAt={sentAt} /> : null}
 
-              {editing ? <DocumentsCard /> : null}
+                {editing ? <DocumentsCard /> : null}
 
-              <RoomsPanel
-                rooms={body.rooms}
-                editing={editing}
-                onAdd={addRoom}
-                onPatch={updateRoom}
-                onRemove={removeRoom}
-              />
-              <TotalsCard
-                body={body}
-                currency={currency}
-                issueDate={issueDate}
-                hourlyRateCents={workspaceRate}
-              />
+                <RoomsPanel
+                  rooms={body.rooms}
+                  editing={editing}
+                  onAdd={addRoom}
+                  onPatch={updateRoom}
+                  onRemove={removeRoom}
+                />
+                <TotalsCard
+                  body={body}
+                  currency={currency}
+                  issueDate={issueDate}
+                  hourlyRateCents={workspaceRate}
+                />
+              </div>
             </div>
-          </div>
+          ) : null}
         </div>
       </div>
     </QuoteDndProvider>
