@@ -91,13 +91,10 @@ otp_expiry = 3600
 enable_signup = false
 enable_confirmations = false
 
-# Google OAuth (T-05). Sekrety wylacznie z env — nigdy w repo.
-[auth.external.google]
-enabled = false
-client_id = "env(SUPABASE_AUTH_GOOGLE_CLIENT_ID)"
-secret = "env(SUPABASE_AUTH_GOOGLE_SECRET)"
-redirect_uri = ""
-skip_nonce_check = false
+# Logowanie zewnetrzne (Google) USUNIETE w T-119. Zostaje wylacznie e-mail
+# i haslo. Gdyby kiedys wrocilo, blok `[auth.external.*]` idzie tutaj — ale
+# razem z przyciskiem w UI i z wpisem w `capabilities/default.json`, bo bez
+# nich sama konfiguracja niczego nie wlacza.
 
 [edge_runtime]
 enabled = true

@@ -8,7 +8,7 @@ export type ToolierClient = SupabaseClient<Database>;
 /**
  * Jedyna instancja klienta. Komponenty jej nie widzą — chodzą przez `data/repos`.
  *
- * `detectSessionInUrl: false`, bo w aplikacji desktopowej powrót z OAuth idzie
+ * `detectSessionInUrl: false`, bo w aplikacji desktopowej powrót z maila idzie
  * deep linkiem (`toolier://auth/callback`), a nie przez adres w oknie.
  */
 let client: ToolierClient | null = null;

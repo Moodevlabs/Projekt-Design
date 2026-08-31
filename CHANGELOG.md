@@ -3,6 +3,22 @@
 Format wg [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/).
 Wersje zgodne z [SemVer](https://semver.org/lang/pl/).
 
+## [1.2.4] – 2026-08-31
+
+### Usunięte
+
+**Logowanie przez Google.** Zostaje jedna droga do konta: adres e-mail i hasło.
+W miejscu przycisku Google jest teraz przejście między ekranami — z logowania
+do zakładania konta i z powrotem. Zniknęły: przycisk wraz ze znakiem Google,
+obsługa logowania zewnętrznego, wpis w konfiguracji Supabase i zgoda na
+otwieranie `accounts.google.com` w uprawnieniach aplikacji.
+
+> Powroty z maili (potwierdzenie adresu, reset hasła) działają bez zmian —
+> korzystały z tego samego mechanizmu deep linków co logowanie Google, więc
+> został on zachowany pod własną nazwą. Kto ma dziś konto założone przez
+> Google, loguje się przez „Nie pamiętam hasła" i ustawia hasło do tego samego
+> adresu.
+
 ## [1.2.3] – 2026-08-31
 
 ### Dodane

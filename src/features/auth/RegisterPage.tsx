@@ -3,11 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AuthLayout } from './AuthLayout';
-import { GoogleButton } from './GoogleButton';
 import { RegisterFormSchema, type RegisterForm } from './schema';
 import { authErrorMessage } from './errors';
-import { AUTH_CALLBACK_URL } from './oauth';
+import { AUTH_CALLBACK_URL } from './callback';
 import { Button } from '@/components/ui/button';
+import { ExternalLink } from '@/components/shared';
 import { Input } from '@/components/ui/input';
 import {
   Form,
@@ -52,9 +52,10 @@ export function RegisterPage() {
          * potwierdzenie rejestracji kończyło się pustą stroną zamiast
          * otwarciem aplikacji, a objaw wyglądał jak zepsuty mail.
          *
-         * Ten sam deep link co przy logowaniu Google: `deep-links.ts` obsługuje
-         * `toolier://auth/callback` jednym torem — wymienia `code` na sesję,
-         * niezależnie od tego, czy przyszedł z OAuth, czy z potwierdzenia maila.
+         * `deep-links.ts` obsługuje `toolier://auth/callback` i `…/recovery`
+         * jednym torem (`completeAuthFromUrl`) — wymienia `code` na sesję
+         * niezależnie od tego, czy przyszedł z potwierdzenia adresu, czy
+         * z maila „reset hasła".
          *
          * ⚠️ Adres musi stać na liście **Redirect URLs** w panelu Supabase.
          * Adresu spoza listy Supabase nie odrzuca — po cichu zamienia go na
@@ -101,12 +102,18 @@ export function RegisterPage() {
       title={pl.auth.register}
       description="14 dni bez opłat, bez karty."
       footer={
-        <>
-          {pl.auth.hasAccount}{' '}
-          <Link to={routes.login} className="font-medium text-white underline underline-offset-4">
-            {pl.auth.login}
-          </Link>
-        </>
+        // „Posiadasz już konto?" przeniosło się do karty, przy przycisku
+        // przejścia (T-119). W stopce zostaje to, czego w karcie nie ma:
+        // strona produktu — tak samo jak na ekranie logowania.
+        <p className="text-white/80">
+          {pl.app.websiteHint}{' '}
+          <ExternalLink
+            href={pl.app.websiteUrl}
+            className="font-medium text-white underline underline-offset-4"
+          >
+            {pl.app.websiteLabel}
+          </ExternalLink>
+        </p>
       }
     >
       {!isConfigured ? (
@@ -193,13 +200,13 @@ export function RegisterPage() {
         </form>
       </Form>
 
-      <div className="my-5 flex items-center gap-3">
-        <span className="bg-hair h-px flex-1" />
-        <span className="text-ink-soft text-xs">lub</span>
-        <span className="bg-hair h-px flex-1" />
-      </div>
+      {/* Odpowiednik bloku z ekranu logowania (T-119) — w drugą stronę. */}
+      <div className="bg-hair my-5 h-px" />
 
-      <GoogleButton disabled={!isConfigured} />
+      <p className="text-ink-soft mb-3 text-center text-sm">{pl.auth.hasAccount}</p>
+      <Button asChild variant="outline" className="w-full">
+        <Link to={routes.login}>{pl.auth.login}</Link>
+      </Button>
     </AuthLayout>
   );
 }

@@ -7,12 +7,8 @@ const signUp = vi.hoisted(() => vi.fn());
 
 vi.mock('@/data/supabase', () => ({ getSupabase: () => ({ auth: { signUp } }) }));
 vi.mock('@/lib/env', () => ({ isConfigured: true, env: { appEnv: 'local' } }));
-// Przycisk Google otwiera przeglądarkę systemową — w teście rejestracji
-// interesuje nas wyłącznie formularz.
-vi.mock('./GoogleButton', () => ({ GoogleButton: () => null }));
-
 const { RegisterPage } = await import('./RegisterPage');
-const { AUTH_CALLBACK_URL } = await import('./oauth');
+const { AUTH_CALLBACK_URL } = await import('./callback');
 const { pl } = await import('@/i18n/pl');
 
 async function wypelnijIWyslij() {
@@ -53,9 +49,9 @@ describe('RegisterPage — adres powrotu z maila potwierdzającego (T-118)', () 
     });
   });
 
-  it('adres powrotu jest tym samym deep linkiem co przy logowaniu Google', () => {
-    // Jeden tor obsługi w `deep-links.ts` — rozjazd tych dwóch adresów
-    // znaczyłby, że potwierdzenie maila wraca tam, gdzie nikt nie słucha.
+  it('adres powrotu to deep link obsługiwany przez aplikację', () => {
+    // `deep-links.ts` nasłuchuje dokładnie na tym adresie. Rozjazd znaczyłby,
+    // że potwierdzenie maila wraca tam, gdzie nikt nie słucha.
     expect(AUTH_CALLBACK_URL).toBe('toolier://auth/callback');
   });
 

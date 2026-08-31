@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AuthLayout } from './AuthLayout';
-import { GoogleButton } from './GoogleButton';
 import { LoginFormSchema, type LoginForm } from './schema';
 import { Button } from '@/components/ui/button';
 import { ExternalLink } from '@/components/shared';
@@ -47,18 +46,12 @@ export function LoginPage() {
       title={pl.auth.login}
       footer={
         <>
-          <p>
-            {pl.auth.noAccount}{' '}
-            <Link
-              to={routes.register}
-              className="font-medium text-white underline underline-offset-4"
-            >
-              {pl.auth.register}
-            </Link>
-          </p>
+          {/* „Nie posiadasz konta?" stoi teraz w karcie, przy przycisku
+              (T-119) — powtórzone jeszcze w stopce znaczyłoby dwa wyjścia
+              do tego samego miejsca, oddalone o 2 cm. */}
           {/* Strona produktu (2026-08-28): jedyne miejsce w aplikacji, gdzie
               ktoś jeszcze niezalogowany może o niej doczytać. */}
-          <p className="mt-2 text-white/80">
+          <p className="text-white/80">
             {pl.app.websiteHint}{' '}
             <ExternalLink
               href={pl.app.websiteUrl}
@@ -133,13 +126,18 @@ export function LoginPage() {
         </form>
       </Form>
 
-      <div className="my-5 flex items-center gap-3">
-        <span className="bg-hair h-px flex-1" />
-        <span className="text-ink-soft text-xs">lub</span>
-        <span className="bg-hair h-px flex-1" />
-      </div>
+      {/*
+        Druga droga z tego ekranu (T-119, po usunięciu logowania Google).
+        Kreska oddziela ją od formularza, bo to nie jest wariant logowania,
+        tylko wyjście gdzie indziej — a przycisk `outline` mówi, że akcja
+        jest drugorzędna wobec „Zaloguj się" u góry.
+      */}
+      <div className="bg-hair my-5 h-px" />
 
-      <GoogleButton disabled={!isConfigured} />
+      <p className="text-ink-soft mb-3 text-center text-sm">{pl.auth.noAccount}</p>
+      <Button asChild variant="outline" className="w-full">
+        <Link to={routes.register}>{pl.auth.register}</Link>
+      </Button>
     </AuthLayout>
   );
 }

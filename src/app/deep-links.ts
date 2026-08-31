@@ -2,12 +2,12 @@
  * Rejestracja obsługi `toolier://…`. Wołane raz, przy starcie aplikacji.
  *
  * Ścieżki:
- *  - `toolier://auth/callback?code=…`   → wymiana kodu OAuth na sesję
+ *  - `toolier://auth/callback?code=…`   → powrót z maila „potwierdź adres"
  *  - `toolier://auth/recovery?code=…`   → powrót z maila „reset hasła"
  *  - `toolier://billing/success|cancel` → obsługa w T-15
  */
 import { onOpenUrl } from '@tauri-apps/plugin-deep-link';
-import { completeOAuthFromUrl } from '@/features/auth/oauth';
+import { completeAuthFromUrl } from '@/features/auth/callback';
 import { runningInTauri } from '@/lib/tauri';
 import { createLogger } from '@/lib/logger';
 
@@ -49,7 +49,7 @@ async function handleUrl(raw: string, handlers: DeepLinkHandlers): Promise<void>
   // Dla `toolier://auth/callback` host to „auth", a pathname „/callback".
   if (url.host === 'auth') {
     try {
-      const handled = await completeOAuthFromUrl(raw);
+      const handled = await completeAuthFromUrl(raw);
       if (!handled) {
         log.warn('Deep link auth bez kodu', url.pathname);
         return;
