@@ -3,7 +3,7 @@
 Format wg [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/).
 Wersje zgodne z [SemVer](https://semver.org/lang/pl/).
 
-## [1.3.0] – 2026-08-31
+## [1.2.3] – 2026-08-31
 
 ### Dodane
 
@@ -32,6 +32,23 @@ o otwarciu przychodzi raz — inwestor wraca do oferty wielokrotnie.
 > Wymaga konfiguracji po stronie wdrożenia (klucz Resend, zweryfikowana domena
 > nadawcy, zadanie cron opróżniające kolejkę) — opis w `dokumentacja/09-EMAIL.md`.
 > Bez niej zdarzenia poprawnie się kolejkują, ale wiadomości nie wychodzą.
+
+### Zmienione
+
+**Powiadomienia wyglądają jak korespondencja firmowa.** Logotyp Toolier
+w nagłówku, uwagi klienta w ramce w kolorze marki, stopka z odnośnikiem do
+toolier.pl i informacją, jak powiadomienia wyłączyć. Wiadomość ma też tekst
+podglądu — ten, który skrzynka pokazuje obok tematu. W komplecie szablony
+maili logowania (potwierdzenie rejestracji, zmiana adresu, reset hasła)
+w tym samym designie: `dokumentacja/szablony-email/`, wgrywane ręcznie
+w panelu Supabase.
+
+### Naprawione
+
+**Potwierdzenie rejestracji wraca do aplikacji.** Odnośnik z maila odsyłał pod
+adres domyślny projektu (`localhost:3000`) zamiast otworzyć Toolier — teraz
+rejestracja podaje ten sam deep link co logowanie przez Google. Warunek: adres
+`toolier://auth/callback` musi stać na liście Redirect URLs w panelu Supabase.
 
 ## [1.2.2] – 2026-08-28
 
