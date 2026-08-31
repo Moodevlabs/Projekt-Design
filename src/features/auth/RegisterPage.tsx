@@ -6,6 +6,7 @@ import { AuthLayout } from './AuthLayout';
 import { GoogleButton } from './GoogleButton';
 import { RegisterFormSchema, type RegisterForm } from './schema';
 import { authErrorMessage } from './errors';
+import { AUTH_CALLBACK_URL } from './oauth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -42,6 +43,24 @@ export function RegisterPage() {
       password: values.password,
       options: {
         data: { company: values.company, full_name: values.fullName },
+        /*
+         * Dokąd wróci człowiek po kliknięciu „Potwierdź adres e-mail" (T-118).
+         *
+         * Bez tego pola Supabase odsyła pod **Site URL** projektu — czyli pod
+         * ustawienie globalne, którego ten kod nie widzi i którego nikt nie
+         * pilnuje. Świeży projekt ma tam `http://localhost:3000`, więc
+         * potwierdzenie rejestracji kończyło się pustą stroną zamiast
+         * otwarciem aplikacji, a objaw wyglądał jak zepsuty mail.
+         *
+         * Ten sam deep link co przy logowaniu Google: `deep-links.ts` obsługuje
+         * `toolier://auth/callback` jednym torem — wymienia `code` na sesję,
+         * niezależnie od tego, czy przyszedł z OAuth, czy z potwierdzenia maila.
+         *
+         * ⚠️ Adres musi stać na liście **Redirect URLs** w panelu Supabase.
+         * Adresu spoza listy Supabase nie odrzuca — po cichu zamienia go na
+         * Site URL, więc błąd widać dopiero na końcu, u użytkownika.
+         */
+        emailRedirectTo: AUTH_CALLBACK_URL,
       },
     });
 
