@@ -5,6 +5,7 @@ import { PricesIncludeSchema, PricingBasisSchema } from '../quote/schema';
 import { ScheduleStageSchema } from '../schedule/schema';
 import { StageEntrySchema } from '../documents/schema';
 import { PriceListItemSchema } from '../documents/price-list';
+import { NotificationSettingsSchema } from '../notifications/schema';
 
 /**
  * Brand kit i ustawienia workspace — parytet z tabelą `brand_kits`
@@ -183,6 +184,15 @@ export const WorkspaceSettingsSchema = z.object({
    * przy każdej zmianie maszyny.
    */
   activitySeenAt: z.string().nullable().default(null),
+  /**
+   * Powiadomienia e-mail o ruchu klienta (T-116).
+   *
+   * Kształt jest wspólny z bazą: `notifications_enabled()` z migracji 0047
+   * czyta stąd `enabled` i klucz o nazwie rodzaju zdarzenia. Domyślne
+   * wartości nadaje zagnieżdżony schemat, więc konto sprzed T-116 dostaje
+   * komplet włączonych powiadomień bez migracji danych.
+   */
+  notifications: NotificationSettingsSchema.default({}),
 });
 export type WorkspaceSettings = z.infer<typeof WorkspaceSettingsSchema>;
 

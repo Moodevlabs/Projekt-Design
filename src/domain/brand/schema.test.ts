@@ -120,6 +120,18 @@ describe('WorkspaceSettingsSchema', () => {
       avatarPath: null,
       // Znacznik odhaczenia paska „Co nowego" — `null` = nic nie odhaczone.
       activitySeenAt: null,
+      // Powiadomienia e-mail (T-116). Domyslnie WLACZONE — konto sprzed
+      // T-116 nie ma w `settings` niczego, na czym oprzec zgode, a adresatem
+      // jest wlasna skrzynka wlasciciela. `email: null` = adres konta.
+      notifications: {
+        enabled: true,
+        viewed: true,
+        accepted: true,
+        rejected: true,
+        comment: true,
+        brief: true,
+        email: null,
+      },
     });
   });
 

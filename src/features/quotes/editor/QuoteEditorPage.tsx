@@ -21,6 +21,7 @@ import { PriceListTab } from './documents/PriceListTab';
 import { PricingBasisCard } from './components/PricingBasisCard';
 import { ClientCard } from './components/ClientCard';
 import { DocumentsCard } from './components/DocumentsCard';
+import { ClientLinksCard } from './components/ClientLinksCard';
 import { QuoteFeedback } from '@/features/share/QuoteFeedback';
 import { DiscountsSection } from './components/DiscountsSection';
 import { AddLink } from './components/AddLink';
@@ -886,6 +887,11 @@ function EditorSurface({
               {quoteId ? <QuoteFeedback quoteId={quoteId} sentAt={sentAt} /> : null}
 
               {editing && !templateMode ? <DocumentsCard /> : null}
+
+              {/* Odnośniki do materiałów u projektanta (T-116). W szablonie
+                  nie ma ich po co pokazywać — wizualizacje należą do
+                  konkretnej inwestycji, więc `fromTemplate` ich nie przenosi. */}
+              {editing && !templateMode ? <ClientLinksCard /> : null}
 
               <RoomsPanel
                 rooms={body.rooms}

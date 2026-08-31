@@ -12,6 +12,7 @@ const useRoomTypes = vi.hoisted(() => vi.fn());
 const createMutate = vi.hoisted(() => vi.fn());
 const updateRoomMutate = vi.hoisted(() => vi.fn());
 const canWrite = vi.hoisted(() => ({ value: true }));
+const testMutate = vi.hoisted(() => vi.fn());
 const toastError = vi.hoisted(() => vi.fn());
 
 vi.mock('@/data/queries/useWorkspace', () => ({
@@ -43,6 +44,17 @@ vi.mock('@/data/queries/useFiles', () => ({
   useRestoreFile: () => ({ mutate: vi.fn() }),
   useDeleteFilePermanently: () => ({ mutate: vi.fn(), mutateAsync: vi.fn() }),
   usePurgeExpiredTrash: () => ({ data: 0 }),
+}));
+
+// Powiadomienia e-mail (T-116). Sekcja wola funkcje brzegowa przez
+// `useMutation`, wiec bez tej atrapy strona wymagalaby QueryClientProvider —
+// a caly ten plik testuje ja bez niego, na zamockowanych hookach.
+vi.mock('@/data/queries/useNotifications', () => ({
+  useSendTestNotification: () => ({ mutate: testMutate, isPending: false }),
+}));
+
+vi.mock('@/features/auth/auth-context', () => ({
+  useAuth: () => ({ session: { user: { email: 'projektant@przyklad.pl' } } }),
 }));
 
 vi.mock('@/features/billing/useEntitlement', () => ({
@@ -172,6 +184,74 @@ describe('Typy pomieszczen (T-73)', () => {
     expect(
       screen.queryByPlaceholderText(pl.settings.roomTypeNamePlaceholder),
     ).not.toBeInTheDocument();
+  });
+});
+
+describe('Powiadomienia e-mail (T-116)', () => {
+  /** Wyłącznik główny zostawia listę rodzajów widoczną, ale nieczynną. */
+  it('wylacznik glowny blokuje przelaczniki rodzajow', async () => {
+    const user = userEvent.setup();
+    render(<SettingsAppPage />);
+
+    const akceptacja = screen.getByLabelText(pl.notifications.kinds.accepted.label);
+    expect(akceptacja).toBeEnabled();
+
+    await user.click(screen.getByLabelText(pl.notifications.enabled));
+
+    // Widoczne — żeby wiadomo było, czego dotyczy wyłącznik — ale nieczynne.
+    expect(screen.getByLabelText(pl.notifications.kinds.accepted.label)).toBeDisabled();
+  });
+
+  it('zapisuje przelaczniki razem z reszta ustawien workspace', async () => {
+    const user = userEvent.setup();
+    render(<SettingsAppPage />);
+
+    await user.click(screen.getByLabelText(pl.notifications.kinds.viewed.label));
+    await user.click(screen.getByRole('button', { name: pl.notifications.save }));
+
+    expect(updateMutate).toHaveBeenCalledTimes(1);
+    expect(updateMutate.mock.calls[0]?.[0]).toMatchObject({
+      // Reszta ustawień musi przejść nietknięta: sekcja zapisuje CAŁY wiersz
+      // `settings`, więc zgubienie ich znaczyłoby ciche skasowanie stawki VAT.
+      vatRate: 23,
+      numberPattern: DEFAULT_NUMBER_PATTERN,
+      notifications: { enabled: true, viewed: false, accepted: true },
+    });
+  });
+
+  /*
+   * Test wysyła prawdziwą wiadomość na ZAPISANY adres. Gdyby dało się go
+   * kliknąć przy niezapisanym szkicu, wiadomość poszłaby gdzie indziej niż
+   * pokazuje pole — czyli test potwierdzałby coś innego, niż człowiek sprawdza.
+   */
+  it('test jest nieczynny, dopoki sa niezapisane zmiany', async () => {
+    const user = userEvent.setup();
+    render(<SettingsAppPage />);
+
+    const test = screen.getByRole('button', { name: pl.notifications.test });
+    expect(test).toBeEnabled();
+
+    await user.click(screen.getByLabelText(pl.notifications.kinds.comment.label));
+    expect(screen.getByRole('button', { name: pl.notifications.test })).toBeDisabled();
+    expect(testMutate).not.toHaveBeenCalled();
+  });
+
+  it('wysyla wiadomosc testowa', async () => {
+    const user = userEvent.setup();
+    render(<SettingsAppPage />);
+
+    await user.click(screen.getByRole('button', { name: pl.notifications.test }));
+    expect(testMutate).toHaveBeenCalledTimes(1);
+  });
+
+  /** Puste pole = adres konta; podpowiadamy go zamiast zostawiać pustkę. */
+  it('puste pole adresu podpowiada adres konta', () => {
+    render(<SettingsAppPage />);
+
+    expect(screen.getByLabelText(pl.notifications.email)).toHaveAttribute(
+      'placeholder',
+      'projektant@przyklad.pl',
+    );
   });
 });
 

@@ -3,6 +3,36 @@
 Format wg [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/).
 Wersje zgodne z [SemVer](https://semver.org/lang/pl/).
 
+## [1.3.0] – 2026-08-31
+
+### Dodane
+
+**Odnośniki do materiałów w linku dla inwestora.** Do oferty dołącza się adresy
+tego, co leży poza Toolier: folderu z wizualizacjami na Dysku Google, spaceru 3D,
+moodboardu. Inwestor widzi je pod ofertą, w bloku „Materiały do obejrzenia” —
+razem z zakresem, na który się zgadza, a nie w osobnym mailu obok. Pliki zostają
+tam, gdzie leżą; do Toolier trafia sam adres, więc rendery nie zajmują miejsca
+w przestrzeni pracowni. Odnośniki dodaje się w karcie „Odnośniki dla klienta”
+w edytorze albo w oknie „Udostępnij” — obydwa miejsca prowadzą tę samą listę,
+więc drugi link do tej samej wyceny nie każe przepisywać adresów. Adres bez
+„https://” zostaje uzupełniony, a wpis niebędący adresem nie zapisze się wcale.
+Odnośniki należą do wyceny (wchodzą do jej wersji i do zapisu akceptacji), ale
+nie przenoszą się przez szablon do kolejnej inwestycji.
+
+**Powiadomienia e-mail o ruchu inwestora.** Toolier pisze do pracowni, gdy
+inwestor pierwszy raz otworzy link, zaakceptuje ofertę, odrzuci ją, zostawi
+uwagi albo odeśle brief. Treść uwagi przychodzi w całości — widać, czy odpisać
+dziś, czy w poniedziałek. Wiadomości idą wyłącznie do właściciela konta, na
+adres logowania albo inny wskazany w Ustawieniach → Aplikacja → Powiadomienia
+e-mail; inwestor nie dostaje z Toolier żadnej korespondencji, ofertę nadal
+wysyła projektant swoją pocztą. Każdy rodzaj zdarzenia da się wyłączyć osobno,
+a przycisk „Wyślij wiadomość testową” sprawdza całą drogę wysyłki. Powiadomienie
+o otwarciu przychodzi raz — inwestor wraca do oferty wielokrotnie.
+
+> Wymaga konfiguracji po stronie wdrożenia (klucz Resend, zweryfikowana domena
+> nadawcy, zadanie cron opróżniające kolejkę) — opis w `dokumentacja/09-EMAIL.md`.
+> Bez niej zdarzenia poprawnie się kolejkują, ale wiadomości nie wychodzą.
+
 ## [1.2.2] – 2026-08-28
 
 ### Zmienione

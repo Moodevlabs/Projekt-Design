@@ -5,3 +5,4 @@ export * from './quote';
 export * from './library/schema';
 export * from './brand/schema';
 export * from './share/schema';
+export * from './notifications/schema';

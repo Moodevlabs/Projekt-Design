@@ -35,6 +35,8 @@ export interface HelpSection {
     | 'calendar'
     | 'quote'
     | 'status'
+    // Powiadomienia e-mail o ruchu inwestora (T-116).
+    | 'notifications'
     | 'schedule'
     | 'documents'
     | 'pdf'
@@ -64,6 +66,7 @@ export const helpPl = {
     { label: 'Kalendarz terminów', target: 'calendar' },
     { label: 'Dobór usług do wyceny', target: 'quote' },
     { label: 'Link i decyzja inwestora', target: 'status' },
+    { label: 'Powiadomienia e-mail', target: 'notifications' },
     { label: 'Skróty klawiszowe', target: 'keys' },
   ],
   tipLabel: 'Wskazówka',
@@ -353,6 +356,68 @@ export const helpPl = {
           kind: 'warn',
           title: 'Odmowa zamyka postępowanie ofertowe',
           text: 'Po odrzuceniu tej samej wyceny nie można już zaakceptować — konieczne jest przygotowanie nowej wersji. Informacja ta prezentowana jest inwestorowi przed potwierdzeniem decyzji, wraz ze wskazaniem, że w przypadku oczekiwanych korekt właściwą ścieżką jest przekazanie uwag.',
+        },
+        {
+          kind: 'p',
+          text: 'ODNOŚNIKI DO MATERIAŁÓW (wizualizacje). Do linku dołącza się adresy materiałów przechowywanych poza aplikacją: folderu z wizualizacjami na Dysku Google, spaceru 3D, moodboardu, katalogu dostawcy. Inwestor otwiera je pod ofertą, w bloku „Materiały do obejrzenia”. Pliki pozostają tam, gdzie leżą — do Toolier trafia wyłącznie adres, więc kilkusetmegabajtowe rendery nie zajmują miejsca w przestrzeni pracowni.',
+        },
+        {
+          kind: 'steps',
+          items: [
+            'Odnośniki dodaje się w dwóch równorzędnych miejscach: w karcie „Odnośniki dla klienta” w prawej kolumnie edytora albo w oknie „Udostępnij”, nad listą linków. Obydwa miejsca obsługują tę samą listę — adres wpisany raz obowiązuje dla wszystkich linków wystawionych do tej wyceny.',
+            'Polecenie „Dodaj odnośnik” tworzy wiersz z trzema polami: nazwa widoczna dla inwestora („Wizualizacje — salon i kuchnia”), adres oraz nieobowiązkowy dopisek (przykładowo hasło do folderu).',
+            'Adres wystarczy wkleić; brakujący przedrostek „https://” zostaje uzupełniony po opuszczeniu pola. Wpis niebędący adresem strony jest sygnalizowany komunikatem i nie zostaje zapisany.',
+            'Polecenie „Sprawdź odnośnik” otwiera adres w przeglądarce systemowej. Zalecane przed przekazaniem linku: najczęstszą przyczyną nieotwierania materiałów są uprawnienia folderu w usłudze zewnętrznej, a nie sam adres.',
+            'Usunięcie odnośnika odbywa się ikoną kosza w wierszu. Zmiany zapisują się automatycznie, tak jak pozostała treść wyceny.',
+          ],
+        },
+        {
+          kind: 'warn',
+          title: 'Uprawnienia do folderu pozostają po stronie usługi zewnętrznej',
+          text: 'Toolier przekazuje adres, natomiast o tym, kto zobaczy materiały, decydują ustawienia udostępniania w Dysku Google, Dropboksie lub innym serwisie. Folder udostępniony wyłącznie właścicielowi konta pozostanie dla inwestora niedostępny mimo poprawnego odnośnika.',
+        },
+        {
+          kind: 'tip',
+          text: 'Odnośniki należą do konkretnej wyceny, nie do szablonu — szablon zapisany z wyceny zawierającej materiały nie przeniesie ich do kolejnej inwestycji. Zapisywane są natomiast w wersjach wyceny oraz w zapisie akceptacji, dzięki czemu po czasie wiadomo, jakie materiały towarzyszyły przyjętej ofercie.',
+        },
+      ],
+    },
+    {
+      id: 'notifications',
+      icon: 'notifications',
+      title: 'Powiadomienia e-mail',
+      lead: 'Aplikacja informuje pocztą elektroniczną o każdym ruchu inwestora pod przekazanym linkiem. Wiadomości przychodzą niezależnie od tego, czy Toolier pozostaje uruchomiony.',
+      blocks: [
+        {
+          kind: 'p',
+          text: 'Powiadomienia kierowane są WYŁĄCZNIE do pracowni — inwestor nie otrzymuje z Toolier żadnej korespondencji. Ofertę przekazuje się nadal własną pocztą (polecenie „Wyślij mailem” w oknie „Udostępnij” otwiera domyślny program pocztowy z gotową treścią), ponieważ wiadomość od znanego adresu ma nieporównanie większą skuteczność niż wiadomość z obcej domeny.',
+        },
+        {
+          kind: 'list',
+          items: [
+            'Otwarcie oferty — jednorazowo, przy pierwszym otwarciu linku. Kolejne wejścia nie generują wiadomości, ponieważ inwestor wraca do oferty wielokrotnie.',
+            'Akceptacja — wraz z podpisem inwestora oraz liczbą pozycji objętych przyjętym zakresem.',
+            'Odrzucenie — wraz z uzasadnieniem, o ile zostało podane.',
+            'Uwagi — treść uwagi przekazywana jest w całości, co pozwala ocenić pilność odpowiedzi bez uruchamiania aplikacji.',
+            'Odesłanie briefu — jednorazowo, przy pierwszym przesłaniu formularza. Brief uzupełniany jest nieraz partiami, stąd wiadomość wysyłana jest raz.',
+          ],
+        },
+        {
+          kind: 'steps',
+          items: [
+            'Ustawienia → Aplikacja → „Powiadomienia e-mail”. Wyłącznik główny obejmuje całość wysyłki; poniżej znajdują się przełączniki poszczególnych rodzajów zdarzeń.',
+            'Pole „Adres do powiadomień” pozostawione puste oznacza adres, na który następuje logowanie. Adres odmienny od loginu podaje się wtedy, gdy korespondencję pracowni obsługuje inna skrzynka.',
+            'Polecenie „Wyślij wiadomość testową” przekazuje jedną wiadomość na ustawiony adres. Zalecane po każdej zmianie adresu — sprawdza całą drogę wysyłki, łącznie z filtrem antyspamowym po stronie odbiorcy.',
+          ],
+        },
+        {
+          kind: 'warn',
+          title: 'Wiadomość testowa nie dotarła',
+          text: 'Należy sprawdzić kolejno: folder wiadomości niechcianych, poprawność adresu w ustawieniach oraz komunikat wyświetlony po naciśnięciu przycisku — treść błędu przekazywana jest wprost, bez zastępowania jej komunikatem ogólnym. Wysyłka wymaga konfiguracji usługi pocztowej po stronie wdrożenia (opis: dokumentacja techniczna, „Powiadomienia e-mail”).',
+        },
+        {
+          kind: 'tip',
+          text: 'Powiadomienia nie zastępują paska „Co nowego u klientów” na pulpicie ani osi „Stan procesu ofertowego” w wycenie — stanowią ich uzupełnienie na czas poza aplikacją. Zdarzenie odnotowywane jest w Toolier niezależnie od tego, czy wiadomość została wysłana.',
         },
       ],
     },

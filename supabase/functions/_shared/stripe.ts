@@ -72,19 +72,9 @@ export async function findPriceId(stripe: Stripe, plan: PlanKey): Promise<string
 }
 
 /** Nagłówki CORS — funkcje wołamy z aplikacji, więc preflight musi przejść. */
-export const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
-
-export function jsonResponse(body: unknown, status = 200): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-  });
-}
-
-export function errorResponse(message: string, status = 400): Response {
-  return jsonResponse({ error: message }, status);
-}
+/*
+ * Odpowiedzi HTTP przeniosły się do `_shared/http.ts` (T-116) — funkcja
+ * `notify` używa ich, nie mając nic wspólnego ze Stripe'em. Re-eksport
+ * zostaje, żeby trzy funkcje płatności nie musiały zmieniać importów.
+ */
+export { corsHeaders, errorResponse, jsonResponse } from './http.ts';

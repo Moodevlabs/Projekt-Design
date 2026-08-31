@@ -617,6 +617,79 @@ export const pl = {
     hint: 'Archiwum udostępnia zapisany plik — dokument nie jest generowany ponownie.',
   },
   /** Link dla klienta i akceptacja online (T-25/T-26). */
+  /** Powiadomienia e-mail o ruchu klienta (T-116). */
+  notifications: {
+    title: 'Powiadomienia e-mail',
+    intro:
+      'Toolier napisze do Ciebie, gdy klient ruszy Twój link — nie musisz trzymać aplikacji otwartej.',
+    enabled: 'Wysyłaj powiadomienia',
+    enabledHint: 'Wyłącznik główny. Po wyłączeniu nie wyjdzie żadna wiadomość, także testowa.',
+    kinds: {
+      viewed: {
+        label: 'Klient otworzył ofertę',
+        hint: 'Raz, przy pierwszym otwarciu linku. Kolejne wejścia nie generują wiadomości.',
+      },
+      accepted: {
+        label: 'Klient zaakceptował ofertę',
+        hint: 'Razem z podpisem i liczbą pozycji w przyjętym zakresie.',
+      },
+      rejected: {
+        label: 'Klient odrzucił ofertę',
+        hint: 'Z powodem, jeśli klient go podał.',
+      },
+      comment: {
+        label: 'Klient zostawił uwagi',
+        hint: 'Treść uwagi przychodzi w całości — nie trzeba otwierać aplikacji, żeby wiedzieć, o co chodzi.',
+      },
+      brief: {
+        label: 'Klient odesłał brief',
+        hint: 'Raz, przy pierwszym odesłaniu. Brief da się uzupełniać na raty.',
+      },
+    },
+    email: 'Adres do powiadomień',
+    emailPlaceholder: 'adres@pracownia.pl',
+    emailHint:
+      'Puste pole = adres, na który się logujesz. Wpisz inny, jeśli pocztę firmową czytasz gdzie indziej.',
+    emailInvalid: 'To nie wygląda na adres e-mail.',
+    /**
+     * Własna etykieta zapisu, nie wspólne „Zapisz".
+     *
+     * Karta „Aplikacja" ma teraz dwa formularze zapisywane osobno. Dwa
+     * przyciski o identycznym napisie na jednym ekranie znaczą, że nie widać,
+     * który zapisuje co — a czytnik ekranu odczytuje oba tak samo.
+     */
+    save: 'Zapisz powiadomienia',
+    test: 'Wyślij wiadomość testową',
+    testSending: 'Wysyłanie…',
+    testSent: (address: string) =>
+      address === '' ? 'Wiadomość testowa wysłana.' : `Wiadomość testowa wysłana na ${address}.`,
+    saveFirst: 'Najpierw zapisz zmiany — test użyje zapisanych ustawień.',
+  },
+
+  /**
+   * Odnośniki do materiałów u projektanta (T-116) — wizualizacje na Dysku,
+   * spacer 3D, moodboard. Teksty mówią „dla klienta", bo to jedyne, co
+   * odróżnia je od odnośników technicznych gdziekolwiek indziej w aplikacji.
+   */
+  quoteLinks: {
+    title: 'Odnośniki dla klienta',
+    hint: 'Np. folder z wizualizacjami na Dysku Google, spacer 3D, moodboard. Klient zobaczy je pod ofertą — nic nie wgrywamy do Toolier, przekazujemy sam adres.',
+    empty: 'Brak odnośników. Oferta pójdzie bez materiałów dodatkowych.',
+    add: 'Dodaj odnośnik',
+    remove: 'Usuń odnośnik',
+    labelLabel: 'Nazwa odnośnika',
+    labelPlaceholder: 'Wizualizacje — salon i kuchnia',
+    urlLabel: 'Adres odnośnika',
+    urlPlaceholder: 'drive.google.com/…',
+    noteLabel: 'Uwaga do odnośnika',
+    notePlaceholder: 'Dopisek dla klienta (nieobowiązkowy)',
+    invalidUrl: 'To nie wygląda na adres strony. Wklej pełny adres, np. https://drive.google.com/…',
+    test: 'Sprawdź odnośnik',
+    limitReached: 'Osiągnięto limit odnośników w jednej ofercie.',
+    /** Nagłówek bloku na stronie klienta — jego treść żyje w apps/share. */
+    clientHeading: 'Materiały do obejrzenia',
+  },
+
   share: {
     title: 'Udostępnij klientowi',
     action: 'Udostępnij',

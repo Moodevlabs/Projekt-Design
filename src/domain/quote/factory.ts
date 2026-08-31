@@ -1,7 +1,7 @@
 import { newId } from '../id';
 import { CURRENT_BODY_VERSION } from './migrate';
-import { DiscountSchema, RoomSchema } from './schema';
-import type { Discount, Group, Item, QuoteBody, Room, Section } from './schema';
+import { DiscountSchema, QuoteLinkSchema, RoomSchema } from './schema';
+import type { Discount, Group, Item, QuoteBody, QuoteLink, Room, Section } from './schema';
 
 /** Fabryki obiektów domenowych — każdy nowy element dostaje własne `id`. */
 
@@ -114,6 +114,27 @@ export function newDiscount(partial: Partial<Discount> = {}): Discount {
   return DiscountSchema.safeParse(kandydat).data ?? domyslne;
 }
 
+/**
+ * Nowy odnośnik dla klienta (T-116).
+ *
+ * Ta sama zasada co przy `newRoom`: czytamy WYMIENIONE pola, a wynik
+ * przepuszczamy przez schemat. Fabryka bywa podpięta wprost pod `onClick`,
+ * a rozsypany obiekt zdarzenia zabiłby zapis dokumentu.
+ */
+export function newQuoteLink(partial: Partial<QuoteLink> = {}): QuoteLink {
+  const domyslne: QuoteLink = { id: newId(), label: '', url: '', note: '' };
+
+  const kandydat: QuoteLink = {
+    ...domyslne,
+    ...(partial.id === undefined ? {} : { id: partial.id }),
+    ...(partial.label === undefined ? {} : { label: partial.label }),
+    ...(partial.url === undefined ? {} : { url: partial.url }),
+    ...(partial.note === undefined ? {} : { note: partial.note }),
+  };
+
+  return QuoteLinkSchema.safeParse(kandydat).data ?? domyslne;
+}
+
 /** Nowa sekcja wyceny. */
 export function newSection(partial: Partial<Section> = {}): Section {
   return {
@@ -147,6 +168,7 @@ export function newQuoteBody(partial: Partial<QuoteBody> = {}): QuoteBody {
     rooms: [],
     discounts: [],
     sections: [],
+    links: [],
     preparedBy: '',
     showDisabledItems: true,
     ...partial,
@@ -172,6 +194,11 @@ export function fromTemplate(body: QuoteBody): QuoteBody {
   return {
     ...duplicateQuoteBody(body),
     client: { name: '', phone: '', email: '', city: '' },
+    // Odnośniki do wizualizacji są własnością KONKRETNEJ inwestycji, nie
+    // szablonu (T-116). Przeniesione dalej pokazałyby nowemu inwestorowi
+    // folder z renderami cudzego mieszkania — dlatego szablon ich nie niesie,
+    // tak samo jak nie niesie danych klienta.
+    links: [],
   };
 }
 

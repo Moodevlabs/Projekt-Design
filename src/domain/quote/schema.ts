@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { CURRENT_BODY_VERSION, migrateBody } from './migrate';
+import { MAX_QUOTE_LINKS } from './links';
 
 /**
  * Model dokumentu wyceny (zod = jedno źródło typów i walidacji).
@@ -263,6 +264,30 @@ export type QuoteClient = z.infer<typeof QuoteClientSchema>;
 export const PricingBasisSchema = z.enum(['amount', 'time']);
 export type PricingBasis = z.infer<typeof PricingBasisSchema>;
 
+/**
+ * Odnośnik dla klienta dołączany do linku z ofertą (T-116).
+ *
+ * Typowo: folder z wizualizacjami na Dysku Google, spacer 3D, moodboard na
+ * Pintereście, katalog PDF u dostawcy. Materiały tego rodzaju bywają ciężkie
+ * (kilkaset MB renderów) i żyją tam, gdzie projektant już je trzyma —
+ * wciąganie ich do Storage Toolier byłoby przenoszeniem cudzej biblioteki,
+ * a nie ułatwieniem.
+ *
+ * ⚠️ **`url` NIE jest tu walidowany schematem.** Sprawdza go
+ * `normalizeLinkUrl` przy zapisie i `isSafeHttpUrl` przy renderowaniu.
+ * Odrzucenie całego dokumentu wyceny dlatego, że w jednym z odnośników jest
+ * literówka, kosztowałoby użytkownika ofertę — a nie o to chodzi.
+ */
+export const QuoteLinkSchema = z.object({
+  id: z.string(),
+  /** Nazwa widoczna dla klienta („Wizualizacje — salon"). Pusta = pokaż host. */
+  label: z.string().default(''),
+  url: z.string().default(''),
+  /** Jedno zdanie kontekstu, np. „hasło: 2026". Nieobowiązkowe. */
+  note: z.string().default(''),
+});
+export type QuoteLink = z.infer<typeof QuoteLinkSchema>;
+
 export const QuoteBodySchema = z.object({
   /**
    * Wersja kształtu dokumentu. Dokument z bazy przechodzi przez `migrateBody`,
@@ -310,6 +335,13 @@ export const QuoteBodySchema = z.object({
   /** Rabaty procentowe i warunkowe. Kwotowe z pozycji (`kind`) działają nadal. */
   discounts: z.array(DiscountSchema).default([]),
   sections: z.array(SectionSchema).default([]),
+  /**
+   * Odnośniki do materiałów u projektanta — pokazuje je strona klienta pod
+   * ofertą (T-116). Nowe pole z wartością domyślną, więc **`bodyVersion` nie
+   * idzie w górę**: dokument sprzed T-116 czyta się dalej, dostając pustą
+   * listę (ten sam wybór co przy `client.city` w T-49).
+   */
+  links: z.array(QuoteLinkSchema).max(MAX_QUOTE_LINKS).default([]),
   preparedBy: z.string().default(''),
   showDisabledItems: z.boolean().default(true),
 });

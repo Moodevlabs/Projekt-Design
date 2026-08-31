@@ -21,7 +21,9 @@
         { "url": "https://toolier.pl/*" },
         { "url": "https://*.toolier.pl/*" },
         { "url": "http://localhost:*/*" },
-        { "url": "mailto:*" }
+        { "url": "mailto:*" },
+        { "url": "https://*/*" },
+        { "url": "http://*/*" }
       ]
     },
     "deep-link:default",

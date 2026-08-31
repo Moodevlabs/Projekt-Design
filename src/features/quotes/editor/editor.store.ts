@@ -11,10 +11,13 @@ import {
   newSection,
   newRoom,
   newDiscount,
+  newQuoteLink,
+  MAX_QUOTE_LINKS,
   convertItemUnits,
   type Group,
   type Item,
   type QuoteBody,
+  type QuoteLink,
   type MoveGroupArgs,
   type MoveItemArgs,
   type MoveSectionArgs,
@@ -249,6 +252,11 @@ export interface EditorState {
   updateRoom: (roomId: string, patch: Partial<Room>) => void;
   /** Usuwa pomieszczenie i odpina od niego pozycje — patrz komentarz w implementacji. */
   removeRoom: (roomId: string) => void;
+
+  // --- odnośniki dla klienta (T-116): wizualizacje na Dysku, spacer 3D ---
+  addLink: (partial?: Partial<QuoteLink>) => void;
+  updateLink: (linkId: string, patch: Partial<QuoteLink>) => void;
+  removeLink: (linkId: string) => void;
 
   /*
    * `insertItemToRoomBlocks` („Do wszystkich pomieszczeń") USUNIĘTE 2026-08-27
@@ -784,6 +792,38 @@ export const useEditorStore = create<EditorState>()(
           }
         }
 
+        state.saveState = 'dirty';
+      }),
+
+    /*
+     * Odnośniki dla klienta (T-116).
+     *
+     * Adresu NIE normalizujemy tutaj: człowiek pisze go znak po znaku, więc
+     * poprawianie w trakcie („https://" doklejone po pierwszej literze)
+     * przestawiałoby kursor i walczyło z tym, co wpisuje. Normalizacja jest
+     * jeden krok dalej — w polu, przy `onBlur`.
+     */
+    addLink: (partial) =>
+      set((state) => {
+        if (!state.body) return;
+        if (state.body.links.length >= MAX_QUOTE_LINKS) return;
+        state.body.links.push(newQuoteLink(partial));
+        state.saveState = 'dirty';
+      }),
+
+    updateLink: (linkId, patch) =>
+      set((state) => {
+        if (!state.body) return;
+        const link = state.body.links.find((candidate) => candidate.id === linkId);
+        if (!link) return;
+        Object.assign(link, patch);
+        state.saveState = 'dirty';
+      }),
+
+    removeLink: (linkId) =>
+      set((state) => {
+        if (!state.body) return;
+        state.body.links = state.body.links.filter((link) => link.id !== linkId);
         state.saveState = 'dirty';
       }),
 

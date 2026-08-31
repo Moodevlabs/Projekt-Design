@@ -21,6 +21,7 @@ import { REJECTION_TEXT } from './messages';
 import { QuoteDocument } from './components/QuoteDocument';
 import { ScheduleBlock } from './components/ScheduleBlock';
 import { DocumentsBlock } from './components/DocumentsBlock';
+import { LinksBlock } from './components/LinksBlock';
 import { ToolierLink } from './components/ToolierLink';
 import { BrandHeader } from './components/BrandHeader';
 import { Summary } from './components/Summary';
@@ -287,6 +288,10 @@ export function App() {
           */}
           {schedule ? <ScheduleBlock schedule={schedule} rooms={body.rooms} /> : null}
           {documents ? <DocumentsBlock documents={documents} currency={quote.currency} /> : null}
+
+          {/* Wizualizacje i inne materiały u projektanta (T-116). Idą razem
+              z `body`, więc nie kosztują ani jednego zapytania więcej. */}
+          <LinksBlock links={body.links} />
 
           {closed ? null : (
             <DecisionPanel

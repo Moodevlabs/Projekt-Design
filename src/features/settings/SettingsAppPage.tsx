@@ -8,6 +8,7 @@ import { pl } from '@/i18n/pl';
 import { SampleLibrarySection } from './SampleLibrarySection';
 import { UpdateSection } from './UpdateSection';
 import { WorkspaceSettingsSection } from './WorkspaceSettingsSection';
+import { NotificationsSection } from './NotificationsSection';
 
 /**
  * Ustawienia → Aplikacja.
@@ -57,6 +58,9 @@ export function SettingsAppPage() {
       ) : null}
 
       <WorkspaceSettingsSection canWrite={canWrite} />
+      {/* Powiadomienia (T-116) zaraz pod ustawieniami wycen: jedno i drugie
+          dotyczy tego, co dzieje się z ofertą, a nie tego, jak wygląda. */}
+      <NotificationsSection canWrite={canWrite} />
       {/* Typy pomieszczen mieszkaja w Bibliotece → Pomieszczenia (T-73) —
           jedno miejsce do personalizacji, nie dwa. */}
       <SampleLibrarySection />

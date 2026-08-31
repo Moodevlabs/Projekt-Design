@@ -120,5 +120,14 @@ inspector_port = 8083
 # [functions.stripe-create-portal]
 # verify_jwt = true
 
+# Powiadomienia e-mail (T-116). `verify_jwt = false`, bo funkcje wola tez cron
+# — bez uzytkownika i bez tokenu. Autoryzacja jest w srodku i osobna dla kazdej
+# akcji: `drain` chce naglowka `x-notify-secret` albo klucza service_role,
+# `test` chce tokenu zalogowanego wlasciciela.
+#
+# Wdrozenie: supabase functions deploy notify --no-verify-jwt
+[functions.notify]
+verify_jwt = false
+
 [analytics]
 enabled = false

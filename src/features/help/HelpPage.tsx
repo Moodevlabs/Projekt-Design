@@ -14,6 +14,7 @@ import {
   LayoutDashboard,
   LayoutTemplate,
   Library,
+  MailCheck,
   Ruler,
   Settings,
   Upload,
@@ -40,6 +41,9 @@ const ICONS: Record<HelpSection['icon'], LucideIcon> = {
   calendar: CalendarDays,
   quote: FileText,
   status: History,
+  // Powiadomienia e-mail (T-116) — ta sama koperta co na przycisku „Wyślij
+  // mailem" w oknie „Udostępnij”.
+  notifications: MailCheck,
   schedule: Clock,
   documents: FolderOpen,
   pdf: Download,

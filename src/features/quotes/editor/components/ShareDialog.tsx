@@ -31,6 +31,8 @@ import { cn } from '@/lib/utils';
 
 import { QuoteFeedbackCard } from '@/features/share/QuoteFeedbackCard';
 
+import { ClientLinksEditor } from './ClientLinksEditor';
+
 interface Props {
   quoteId: string;
   quoteNumber: string | null;
@@ -82,6 +84,18 @@ export function ShareDialog({ quoteId, quoteNumber, open, onOpenChange }: Props)
           rzecz, którą czyta się w kontekście linku.
         */}
         <QuoteFeedbackCard comments={comments.data ?? []} quoteId={quoteId} />
+
+        {/*
+          Odnośniki do wizualizacji (T-116) — TU, bo tutaj człowiek myśli
+          „co jeszcze klient powinien zobaczyć". Edytują tę samą listę co
+          karta w prawej kolumnie edytora (`body.links`), więc kolejny link
+          do tej samej oferty nie każe przepisywać adresów od nowa.
+        */}
+        <section className="border-hair-strong rounded-[var(--radius-control)] border p-3">
+          <h3 className="text-ink text-sm font-semibold">{pl.quoteLinks.title}</h3>
+          <p className="text-ink-soft mt-0.5 mb-3 text-xs">{pl.quoteLinks.hint}</p>
+          <ClientLinksEditor />
+        </section>
 
         {/* Wybór ważności i przycisk w jednym rzędzie — to jedna czynność,
             a nie formularz do wypełniania. */}
