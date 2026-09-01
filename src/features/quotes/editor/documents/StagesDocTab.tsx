@@ -6,6 +6,7 @@ import { NumberField } from '../components/NumberField';
 import { AddLink } from '../components/AddLink';
 import { Button } from '@/components/ui/button';
 import { DocLibraryPanel } from './DocLibraryPanel';
+import { SaveDocSetButton } from './SaveDocSetButton';
 import { useEditorStore } from '../editor.store';
 import { useStageEntryAutoSync } from './useStageEntryAutoSync';
 import { groupStageEntries, type StageEntry } from '@/domain/documents';
@@ -111,6 +112,7 @@ export function StagesDocTab({ editing }: { editing: boolean }) {
             <AddLink icon={Plus} onClick={() => addEntry()} className="text-[13px]">
               {pl.editor.docLibrary.manual.stages}
             </AddLink>
+            <SaveDocSetButton kind="stages" entries={doc.entries} />
           </div>
         ) : null}
 

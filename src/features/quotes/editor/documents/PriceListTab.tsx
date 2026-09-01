@@ -7,6 +7,7 @@ import { NumberField } from '../components/NumberField';
 import { AddLink } from '../components/AddLink';
 import { Button } from '@/components/ui/button';
 import { DocLibraryPanel } from './DocLibraryPanel';
+import { SaveDocSetButton } from './SaveDocSetButton';
 import { AddToQuoteBridge } from './AddToQuoteBridge';
 import { useEditorStore } from '../editor.store';
 import { groupPriceListItems, type PriceListItem } from '@/domain/documents';
@@ -105,6 +106,7 @@ export function PriceListTab({ editing }: { editing: boolean }) {
             <AddLink icon={Plus} onClick={() => addItem()} className="text-[13px]">
               {pl.editor.docLibrary.manual.price_list}
             </AddLink>
+            <SaveDocSetButton kind="price_list" entries={doc.items} />
           </div>
         ) : null}
 

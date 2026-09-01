@@ -18,6 +18,19 @@ vi.mock('@/data/queries/useLibraryDocs', () => ({
   useDocLibraryEntries: () => ({ entries: [], data: [], isLoading: false, isError: false }),
   useCreateDocLibraryEntry: () => ({ mutate: vi.fn(), isPending: false }),
 }));
+
+/*
+ * Grupy i zestawy bibliotek dokumentow (T-121). Panel „Dodaj z biblioteki"
+ * pyta o nie razem z wpisami — test komponentu izoluje sie od TanStack Query.
+ */
+vi.mock('@/data/queries/useLibraryDocGroups', () => ({
+  useDocCategories: () => ({ data: [], isLoading: false, isError: false }),
+  useDocCategoryMap: () => new Map(),
+  useDocSets: () => ({ data: [], isLoading: false, isError: false }),
+  useSetDocEntryCategory: () => ({ mutate: vi.fn(), isPending: false }),
+  // „Zapisz jako zestaw" w pasku akcji dokumentu (T-122).
+  useCreateDocSet: () => ({ mutate: vi.fn(), isPending: false }),
+}));
 vi.mock('sonner', () => ({
   toast: { success: toastSuccess, error: toastError, info: vi.fn() },
 }));

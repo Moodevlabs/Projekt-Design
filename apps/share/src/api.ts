@@ -81,7 +81,14 @@ export async function rejectSharedQuote(
   const { data, error } = await client.rpc('reject_shared_quote', {
     p_token: token,
     p_signer_name: signerName,
-    p_reason: reason.trim() || null,
+    /*
+     * `undefined`, nie `null` — wyszło przy odświeżeniu `types.generated.ts`
+     * w T-121. W SQL argument ma `default null`, a generator mapuje taki
+     * argument na OPCJONALNY (`p_reason?: string`) i nie umie wyrazić
+     * „nullowalny". Pominięty klucz nie trafia do JSON-a, więc PostgREST
+     * bierze wartość domyślną funkcji — czyli dokładnie ten sam NULL.
+     */
+    p_reason: reason.trim() || undefined,
   });
   if (error) throw new Error(error.message);
   return ShareActionResultSchema.parse(data);

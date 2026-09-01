@@ -32,6 +32,7 @@ export function newGroup(partial: Partial<Group> = {}): Group {
     name: 'Nowa grupa',
     items: [],
     roomId: null,
+    categoryId: null,
     ...partial,
   };
 }

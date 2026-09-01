@@ -52,9 +52,11 @@ vi.mock('@/data/queries/useLibrary', () => ({
   useLibraryCategories: () => ({ data: [], isLoading: false }),
 }));
 
-// Panel „Dodaj usługi" (T-71) koloruje pigułki grup ze słownika.
+// Panel „Dodaj usługi" (T-71) koloruje pigułki grup ze słownika, a nagłówek
+// bloku grupy pokazuje znacznik pochodzenia z biblioteki (T-120).
 vi.mock('@/data/queries/useLibraryCategories', () => ({
   useLibraryCategoryList: () => ({ data: [] }),
+  useLibraryCategoryMap: () => new Map(),
 }));
 
 // Biblioteka dokumentow (T-103): panel „Dodaj z biblioteki" i zapis wiersza
@@ -63,6 +65,19 @@ vi.mock('@/data/queries/useLibraryDocs', () => ({
   useDocLibrary: () => ({ data: [], isLoading: false, isError: false }),
   useDocLibraryEntries: () => ({ entries: [], data: [], isLoading: false, isError: false }),
   useCreateDocLibraryEntry: () => ({ mutate: vi.fn(), isPending: false }),
+}));
+
+/*
+ * Grupy i zestawy bibliotek dokumentow (T-121). Panel „Dodaj z biblioteki"
+ * pyta o nie razem z wpisami — test komponentu izoluje sie od TanStack Query.
+ */
+vi.mock('@/data/queries/useLibraryDocGroups', () => ({
+  useDocCategories: () => ({ data: [], isLoading: false, isError: false }),
+  useDocCategoryMap: () => new Map(),
+  useDocSets: () => ({ data: [], isLoading: false, isError: false }),
+  useSetDocEntryCategory: () => ({ mutate: vi.fn(), isPending: false }),
+  // „Zapisz jako zestaw" w pasku akcji dokumentu (T-122).
+  useCreateDocSet: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
 vi.mock('@/data/queries/useRoomTypes', () => ({

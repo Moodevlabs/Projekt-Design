@@ -11,7 +11,8 @@ const { RegisterPage } = await import('./RegisterPage');
 const { AUTH_CALLBACK_URL } = await import('./callback');
 const { pl } = await import('@/i18n/pl');
 
-async function wypelnijIWyslij() {
+/** Wypełnia pola. `zgoda: false` zostawia checkbox pusty (T-124). */
+async function wypelnij({ zgoda = true }: { zgoda?: boolean } = {}) {
   const user = userEvent.setup();
   render(
     <MemoryRouter>
@@ -20,9 +21,15 @@ async function wypelnijIWyslij() {
   );
 
   await user.type(screen.getByLabelText(pl.auth.company), 'Pracownia Nova');
-  await user.type(screen.getByLabelText(pl.auth.fullName), 'Kamil Nowak');
+  await user.type(screen.getByLabelText(pl.auth.fullNameOptional), 'Kamil Nowak');
   await user.type(screen.getByLabelText(pl.auth.email), 'kamil@pracownia.pl');
   await user.type(screen.getByLabelText(pl.auth.password), 'tajnehaslo123');
+  if (zgoda) await user.click(screen.getByRole('checkbox'));
+  return user;
+}
+
+async function wypelnijIWyslij() {
+  const user = await wypelnij();
   await user.click(screen.getByRole('button', { name: pl.auth.register }));
 }
 
@@ -61,5 +68,79 @@ describe('RegisterPage — adres powrotu z maila potwierdzającego (T-118)', () 
     expect(signUp.mock.calls[0]?.[0]).toMatchObject({
       options: { data: { company: 'Pracownia Nova', full_name: 'Kamil Nowak' } },
     });
+  });
+});
+
+/**
+ * T-124: bez akceptacji regulaminu i polityki prywatności nie ma umowy.
+ *
+ * Zgoda musi być czynnością wyraźną (art. 4 pkt 11 RODO), więc checkbox
+ * startuje pusty i nie wolno go zaznaczać domyślnie — a próba rejestracji
+ * bez niego ma się zatrzymać z komunikatem, a nie przejść cicho dalej.
+ */
+describe('RegisterPage — akceptacja regulaminu (T-124)', () => {
+  it('checkbox startuje pusty', async () => {
+    await wypelnij({ zgoda: false });
+
+    expect(screen.getByRole('checkbox')).toHaveAttribute('aria-checked', 'false');
+  });
+
+  it('bez zaznaczenia rejestracja się nie odbywa i pokazuje powód', async () => {
+    const user = await wypelnij({ zgoda: false });
+    await user.click(screen.getByRole('button', { name: pl.auth.register }));
+
+    expect(signUp).not.toHaveBeenCalled();
+    expect(
+      await screen.findByText('Akceptacja regulaminu jest wymagana do założenia konta'),
+    ).toBeInTheDocument();
+  });
+
+  it('prowadzi do obu dokumentów pod publicznymi adresami', async () => {
+    await wypelnij({ zgoda: false });
+
+    expect(screen.getByRole('link', { name: pl.auth.termsTerms })).toHaveAttribute(
+      'href',
+      'https://toolier.pl/regulamin',
+    );
+    expect(screen.getByRole('link', { name: pl.auth.termsPrivacy })).toHaveAttribute(
+      'href',
+      'https://toolier.pl/polityka-prywatnosci',
+    );
+  });
+
+  it('po zaznaczeniu rejestracja przechodzi', async () => {
+    await wypelnijIWyslij();
+
+    expect(signUp).toHaveBeenCalledTimes(1);
+  });
+});
+
+/**
+ * Imię i nazwisko jest opcjonalne (2026-09-01). Pusty napis nie ma trafiać do
+ * profilu jako `''` — to co innego niż „nie podano".
+ */
+describe('RegisterPage — imię i nazwisko jest opcjonalne', () => {
+  it('rejestracja przechodzi bez podania nazwiska', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <RegisterPage />
+      </MemoryRouter>,
+    );
+
+    await user.type(screen.getByLabelText(pl.auth.company), 'Pracownia Nova');
+    await user.type(screen.getByLabelText(pl.auth.email), 'kamil@pracownia.pl');
+    await user.type(screen.getByLabelText(pl.auth.password), 'tajnehaslo123');
+    await user.click(screen.getByRole('checkbox'));
+    await user.click(screen.getByRole('button', { name: pl.auth.register }));
+
+    expect(signUp).toHaveBeenCalledTimes(1);
+
+    // Klucz ma WYPAŚĆ z metadanych — w profilu ma powstać NULL, nie pusty
+    // napis. Jawne typowanie, bo `mock.calls` jest nietypowane, a asercja na
+    // `any` niczego by nie pilnowała.
+    const [args] = signUp.mock.calls[0] as [{ options: { data: Record<string, unknown> } }];
+    expect(args.options.data).not.toHaveProperty('full_name');
+    expect(args.options.data).toMatchObject({ company: 'Pracownia Nova' });
   });
 });

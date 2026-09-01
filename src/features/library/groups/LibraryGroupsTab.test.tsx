@@ -208,7 +208,10 @@ describe('LibraryGroupsTab — zawartosc zestawu', () => {
     await user.click(
       screen.getByRole('button', { name: pl.library.groupAddItemFor('Kuchnia pod klucz') }),
     );
-    await user.click(await screen.findByText('Blat kamienny'));
+    // Panel z prawej (T-123): dodaje jawny przycisk w wierszu.
+    await user.click(
+      await screen.findByRole('button', { name: pl.library.groupPickerAddLabel('Blat kamienny') }),
+    );
 
     const items = savedItems();
     expect(items).toHaveLength(4);

@@ -135,6 +135,7 @@ describe('cena „indywidualna" w obliczeniach', () => {
               id: '22222222-2222-4222-8222-222222222222',
               name: 'Kuchnia',
               roomId: null,
+              categoryId: null,
               items: [newItem({ unitPriceCents: null })],
             },
           ],

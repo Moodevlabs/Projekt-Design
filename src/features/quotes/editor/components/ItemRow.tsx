@@ -21,6 +21,12 @@ import {
   type Room,
 } from '@/domain/quote';
 import { formatQty, unitLabel } from '@/domain/library/units';
+import {
+  COL_ACTIONS,
+  COL_PRICE,
+  COL_QTY,
+  ITEM_ROW_GAP,
+} from './item-columns';
 import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
 
@@ -151,7 +157,8 @@ export const ItemRow = memo(function ItemRow({
       ref={setNodeRef}
       style={{ transform: CSS.Translate.toString(transform), transition }}
       className={cn(
-        'flex items-center gap-[14px] border-b py-[13px]',
+        'flex items-center border-b py-[13px]',
+        ITEM_ROW_GAP,
         'border-[var(--doc-hair)]',
         // Bez plakietki pod kursorem to SAM WIERSZ jest podglądem przeciągania,
         // więc musi zostać w pełni czytelny — tylko unosi się nad resztą.
@@ -226,7 +233,7 @@ export const ItemRow = memo(function ItemRow({
             const next = Number.parseInt(event.target.value, 10);
             if (Number.isInteger(next) && next > 0) onPatch(item.id, { frames: next });
           }}
-          className="inline-field price-field amount w-14 px-1 py-[2px] text-right text-[14.5px]"
+          className={cn(COL_QTY, 'inline-field price-field amount px-1 py-[2px] text-right text-[14.5px]')}
         />
       ) : editing ? (
         <input
@@ -239,7 +246,7 @@ export const ItemRow = memo(function ItemRow({
             const next = Number.parseFloat(event.target.value);
             onPatch(item.id, { qty: Number.isFinite(next) && next > 0 ? next : 1 });
           }}
-          className="inline-field price-field amount w-14 px-1 py-[2px] text-right text-[14.5px]"
+          className={cn(COL_QTY, 'inline-field price-field amount px-1 py-[2px] text-right text-[14.5px]')}
         />
       ) : item.qty !== 1 || unitLabel(item.unit, item.unitLabel) ? (
         /*
@@ -252,7 +259,7 @@ export const ItemRow = memo(function ItemRow({
         </span>
       ) : null}
 
-      <div className="flex min-w-[86px] flex-col items-end">
+      <div className={cn(COL_PRICE, 'flex flex-col items-end')}>
         <div
           className={cn(
             'flex items-center justify-end gap-0.5 text-[14.5px]',
@@ -364,7 +371,8 @@ export const ItemRow = memo(function ItemRow({
           aria-label={`${pl.editor.removeItem}: ${item.name || pl.editor.newItemName}`}
           onClick={() => onRemove(item.id)}
           className={cn(
-            'flex size-[22px] shrink-0 items-center justify-center rounded-full text-base leading-none',
+            COL_ACTIONS,
+            'flex h-[22px] items-center justify-center rounded-full text-base leading-none',
             'text-[var(--doc-ink-soft)] transition-colors',
             'hover:bg-[var(--doc-danger-wash)] hover:text-[var(--doc-terracotta)]',
             'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',

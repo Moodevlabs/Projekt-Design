@@ -191,6 +191,21 @@ export const GroupSchema = z.object({
    * Nazwa takiej grupy pochodzi z `Room.label`, więc nie edytuje się jej tutaj.
    */
   roomId: z.string().uuid().nullable().default(null),
+  /**
+   * Grupa ze słownika biblioteki (`library_categories`), z której blok
+   * powstał — `null` dla grupy wpisanej ręcznie (T-120).
+   *
+   * Trzymamy sam identyfikator, a nie kolor i kod: to dane słownika, więc
+   * przepisane do dokumentu zestarzałyby się przy pierwszej zmianie palety.
+   * Nazwa jest kopiowana (`name`) świadomie — dokument ma zostać czytelny
+   * także po skasowaniu grupy z biblioteki.
+   *
+   * **`default(null)` zamiast kroku w `migrateBody`**: pole jest dodatkiem,
+   * a nie zmianą znaczenia istniejących danych, więc zod dopisze `null`
+   * staremu dokumentowi przy odczycie. Podnoszenie `CURRENT_BODY_VERSION`
+   * kazałoby starszej wersji aplikacji odrzucić dokument, który rozumie.
+   */
+  categoryId: z.string().uuid().nullable().default(null),
 });
 export type Group = z.infer<typeof GroupSchema>;
 

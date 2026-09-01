@@ -9,9 +9,14 @@ import { ItemToggle } from './ItemToggle';
 import { AddLink } from './AddLink';
 
 import { DragHandle } from './DragHandle';
+import { SaveGroupToSetButton } from './SaveGroupToSetButton';
 import { ItemsColumnsHeader } from './ItemsColumnsHeader';
 import { useStableIds } from '../dnd/useStableIds';
 import { useScopePanel } from '../scope/scope-panel.store';
+import { categoryLabel, type LibraryCategory } from '@/domain/library/schema';
+// Tokeny palety grup mieszkaja przy zakladce, ktora je wybiera — importujemy
+// stala, nie komponent, wiec nie ciagniemy tu kawalka biblioteki.
+import { categorySwatch } from '@/features/library/categories/swatches';
 import type { DocumentTextInfo, PricingContext } from '@/domain/quote';
 import type { VariantOptions } from '../useVariantOptions';
 import type { ItemVariant } from '../editor.store';
@@ -42,6 +47,14 @@ export interface GroupBlockProps {
   pricing: PricingContext;
   /** Warianty pozycji (F1.4) — przekazywane w dół bez zmian. */
   variants: VariantOptions;
+  /**
+   * Słownik grup bibliotecznych (T-120) — do rozwiązania `group.categoryId`.
+   *
+   * Opcjonalny i domyślnie pusty: znacznik pochodzenia jest dodatkiem do
+   * nagłówka, a nie warunkiem narysowania bloku. Blok wstawiony do testu albo
+   * do widoku, który słownika nie ciągnie, ma się narysować bez niego.
+   */
+  categories?: ReadonlyMap<string, LibraryCategory>;
   onVariantChange: (itemId: string, variant: ItemVariant) => void;
   onRename: (groupId: string, name: string) => void;
   onRemove: (groupId: string) => void;
@@ -63,6 +76,7 @@ export const GroupBlock = memo(function GroupBlock({
   textInfo,
   pricing,
   variants,
+  categories,
   onVariantChange,
   onRename,
   onRemove,
@@ -74,6 +88,10 @@ export const GroupBlock = memo(function GroupBlock({
 }: GroupBlockProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const openScope = useScopePanel((state) => state.openFor);
+  // Grupa ze słownika: znacznik pochodzenia widoczny TYLKO w trybie edycji.
+  // Dokument dla klienta (i PDF) zostaje bez zmian — decyzja właściciela
+  // przy T-120: kolor i kod grupy to narzędzie pracy, nie treść oferty.
+  const category = group.categoryId ? (categories?.get(group.categoryId) ?? null) : null;
   // `rooms` są konieczne: bez nich pozycja `per_room` policzyłaby samą bazę
   // i nagłówek pokazałby inną kwotę niż podsumowanie wyceny.
   const totals = calcGroupTotals(group, pricing, { vatRate, pricesInclude, rooms });
@@ -139,6 +157,21 @@ export const GroupBlock = memo(function GroupBlock({
           label={`${pl.editor.toggleGroup}: ${group.name}`}
         />
 
+        {editing && category ? (
+          <span
+            className="flex shrink-0 items-center gap-1 text-[11px] text-[var(--doc-ink-soft)]"
+            title={pl.editor.groupFromCategory(categoryLabel(category))}
+          >
+            <span
+              aria-hidden
+              className="border-hair size-2.5 shrink-0 rounded-full border"
+              style={{ backgroundColor: categorySwatch(category.color) }}
+            />
+            {category.code ? <span className="tabular">{category.code}</span> : null}
+            <span className="sr-only">{pl.editor.groupFromCategory(categoryLabel(category))}</span>
+          </span>
+        ) : null}
+
         {room ? (
           // Blok pomieszczenia bierze nazwe z panelu pomieszczen — edycja tutaj
           // rozjechalaby etykiete z tym, co liczy cennik.
@@ -170,6 +203,12 @@ export const GroupBlock = memo(function GroupBlock({
         <span className="amount text-[13px] text-[var(--doc-ink-soft)]">
           {formatMoney(totals.netCents, currency)}
         </span>
+
+        {/* Zapis do biblioteki stoi PRZED koszem: obie akcje dotyczą całej
+            grupy, a kolejność „zachowaj, potem usuń" jest mniej ryzykowna niż
+            odwrotna przy klikaniu na wyczucie. Bloku pomieszczenia nie
+            zapisujemy — jego nazwa i skład należą do konkretnej wyceny. */}
+        {editing && room === null ? <SaveGroupToSetButton group={group} /> : null}
 
         {editing ? (
           <button

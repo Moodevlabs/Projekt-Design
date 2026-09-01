@@ -27,10 +27,12 @@ import { DiscountsSection } from './components/DiscountsSection';
 import { AddLink } from './components/AddLink';
 import { LibrarySheet } from './components/LibrarySheet';
 import { ScopePanel } from './scope/ScopePanel';
+import { GroupFromLibraryDialog } from './scope/GroupFromLibraryDialog';
 import { OverwriteTemplateDialog, SaveAsTemplateDialog } from './components/TemplateDialogs';
 import { useCreateQuote, useCreateQuoteVersion, useQuote } from '@/data/queries/useQuotes';
 import { useTemplate } from '@/data/queries/useTemplates';
 import { useWorkspace } from '@/data/queries/useWorkspace';
+import { useLibraryCategoryMap } from '@/data/queries/useLibraryCategories';
 import { canCreateVersion, quoteBodyFromSettings, versionLabel } from '@/domain/quote';
 import { ConfirmDialog, EmptyState } from '@/components/shared';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -416,6 +418,13 @@ function EditorSurface({
   const removeItem = useEditorStore((state) => state.removeItem);
   const insertItems = useEditorStore((state) => state.insertItems);
   const insertGroup = useEditorStore((state) => state.insertGroup);
+  /*
+   * Słownik grup bibliotecznych — do znacznika pochodzenia na nagłówku bloku
+   * (T-120). Pobierany RAZ tutaj, nie w każdym `GroupBlock`: bloki są
+   * zmemoizowane, a hook w każdym z nich kazałby im subskrybować cache
+   * i przerysowywać się przy każdej zmianie w bibliotece.
+   */
+  const categoryById = useLibraryCategoryMap();
   const addRoom = useEditorStore((state) => state.addRoom);
   const updateRoom = useEditorStore((state) => state.updateRoom);
   const removeRoom = useEditorStore((state) => state.removeRoom);
@@ -707,6 +716,10 @@ function EditorSurface({
           onInsertGroup={insertGroup}
         />
 
+        {/* „Dodaj grupę → z biblioteki" (T-120) — też jeden na wycenę,
+            sekcja docelowa zapamiętana w store'u pickera. */}
+        <GroupFromLibraryDialog pricing={pricing} onInsertGroup={insertGroup} />
+
         <ExportPackageDialog
           open={packageOpen}
           onOpenChange={setPackageOpen}
@@ -814,6 +827,7 @@ function EditorSurface({
                       textInfo={textInfo}
                       pricing={pricing}
                       variants={variants}
+                      categories={categoryById}
                       onVariantChange={setItemVariant}
                       onRename={renameSection}
                       onRemove={removeSection}

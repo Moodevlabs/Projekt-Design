@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   createLibraryCategory,
@@ -8,6 +9,7 @@ import {
   type CategoryPatch,
   type CreateCategoryInput,
 } from '@/data/repos/library-categories.repo';
+import type { LibraryCategory } from '@/domain/library/schema';
 import { queryKeys } from '@/data/query-keys';
 import { requireWorkspaceId, useWorkspaceId } from './useWorkspace';
 
@@ -26,6 +28,21 @@ export function useLibraryCategoryList() {
     queryFn: () => listLibraryCategoryRows(requireWorkspaceId(workspaceId)),
     enabled: Boolean(workspaceId),
   });
+}
+
+/**
+ * Słownik grup po `id` — do rozwiązywania `Group.categoryId` w edytorze (T-120).
+ *
+ * Mapa, nie `find()` w komponencie: bloki grup są zmemoizowane, a szukanie
+ * po tablicy w każdym z nich zamieniałoby jedną zmianę nazwy w przebieg po
+ * wszystkich grupach razy wszystkie kategorie. Referencja jest stabilna,
+ * dopóki nie zmienią się dane.
+ */
+export function useLibraryCategoryMap(): ReadonlyMap<string, LibraryCategory> {
+  const list = useLibraryCategoryList();
+  const rows = list.data;
+
+  return useMemo(() => new Map((rows ?? []).map((row) => [row.id, row])), [rows]);
 }
 
 function useInvalidateCategories() {
