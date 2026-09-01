@@ -6,67 +6,73 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ConfirmDialog, EmptyState } from '@/components/shared';
-import { CategoryColorPicker } from './CategoryColorPicker';
-import { CategoryItemsList } from './CategoryItemsList';
+import { CategoryColorPicker } from '@/features/library/categories/CategoryColorPicker';
+import { DocCategoryEntriesList } from './DocCategoryEntriesList';
 import {
-  useCreateLibraryCategory,
-  useDeleteLibraryCategory,
-  useLibraryCategoryList,
-  useReorderLibraryCategories,
-  useUpdateLibraryCategory,
-} from '@/data/queries/useLibraryCategories';
-import { useAllLibraryItems } from '@/data/queries/useLibrary';
-import type { LibraryItem } from '@/data/repos/library.repo';
-import type { LibraryCategory, LibraryColor } from '@/domain/library/schema';
+  useCreateDocCategory,
+  useDeleteDocCategory,
+  useDocCategories,
+  useReorderDocCategories,
+  useUpdateDocCategory,
+} from '@/data/queries/useLibraryDocGroups';
+import { useDocLibrary } from '@/data/queries/useLibraryDocs';
+import type { DocLibraryRow } from '@/data/repos/library-docs.repo';
+import type { DocLibraryKind } from '@/domain/library/doc-entries';
+import type { DocLibraryCategory } from '@/domain/library/doc-groups';
+import type { LibraryColor } from '@/domain/library/schema';
 import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
 
-/** Stała referencja — `?? []` w renderze tworzyłoby nową tablicę co przebieg. */
-const EMPTY: LibraryItem[] = [];
+/*
+ * Stała referencja — `?? []` w renderze tworzyłoby nową tablicę co przebieg.
+ * Typ `never[]`, a nie `DocLibraryRow<DocLibraryKind>[]`: pusta lista pasuje
+ * wtedy do `DocLibraryRow<K>[]` dla KAŻDEGO `K`, więc nie trzeba jej rzutować
+ * w miejscu użycia (unia rodzajów nie jest podtypem konkretnego rodzaju).
+ */
+const EMPTY: never[] = [];
 
 /**
- * Zakładka „Grupy" — słownik działów porządkujących usługi (B1, T-59).
+ * Podzakładka „Grupy" biblioteki dokumentu (T-121).
  *
- * Kolejność zmienia się strzałkami, nie przeciąganiem. `@dnd-kit` jest już
- * w projekcie (edytor wyceny), ale tam przeciąganie ma sens: układa się
- * dokument, który potem ktoś czyta. Tu chodzi o kilka wierszy słownika
- * ustawianych raz — dwa przyciski są dostępne z klawiatury i nie wymagają
- * ćwiczenia precyzji myszy.
+ * Bliźniak `LibraryCategoriesTab` z usług — i celowo bliźniak, nie wspólny
+ * komponent generyczny: tam wiersz niesie cenę i licznik usług, tu wpis
+ * i licznik wpisów, a scalenie obu kosztowałoby cztery parametry typu
+ * i jedną wspólną ścieżkę, którą trzeba by czytać dwa razy.
  *
- * Od T-120 wiersz się **rozwija**. Do tej pory licznik „12 usług" był samym
- * tekstem: grupa mówiła, ile ma usług, ale nie dawała ich zobaczyć ani dopiąć,
- * a przypisanie szło wyłącznie od drugiej strony (Pozycje → usługa → select).
- * Grupa wyglądała więc na etykietę, nie na pojemnik — i tak też działała.
+ * Wiersz od razu jest **rozwijalny** — nauka z T-120: grupa, która pokazuje
+ * tylko licznik, wygląda na etykietę i tak też działa.
  */
-export function LibraryCategoriesTab() {
-  const categories = useLibraryCategoryList();
-  const items = useAllLibraryItems();
-  const create = useCreateLibraryCategory();
-  const reorder = useReorderLibraryCategories();
+export function DocCategoriesPanel<K extends DocLibraryKind>({ kind }: { kind: K }) {
+  const categories = useDocCategories(kind);
+  const library = useDocLibrary(kind);
+  const create = useCreateDocCategory(kind);
+  const reorder = useReorderDocCategories(kind);
   const [newName, setNewName] = useState('');
 
-  const rows = categories.data ?? [];
+  // Obie listy przez `useMemo`: `?? []` w ciele komponentu daje NOWĄ tablicę
+  // przy każdym renderze, a obie są zależnościami niżej — bez tego mapy
+  // przeliczałyby się przy każdym naciśnięciu klawisza w polu „Nowa grupa".
+  const rows = useMemo(() => categories.data ?? EMPTY, [categories.data]);
+  const allEntries = useMemo(() => library.data ?? EMPTY, [library.data]);
 
-  const allItems = useMemo(() => items.data ?? [], [items.data]);
-
-  /**
-   * Usługi grupy — z listy, którą i tak mamy w cache. Grupujemy raz, zamiast
-   * filtrować w każdym wierszu: przy kilkuset usługach i kilkunastu grupach
-   * filtr na wiersz to iloczyn, a lista przerysowuje się przy każdej edycji
-   * nazwy w sąsiednim wierszu.
-   */
-  const itemsByCategory = useMemo(() => {
-    const map = new Map<string, LibraryItem[]>();
-    for (const item of allItems) {
-      if (item.categoryId === null) continue;
-      const list = map.get(item.categoryId) ?? [];
-      list.push(item);
-      map.set(item.categoryId, list);
+  /** Wpisy pogrupowane RAZ — filtr w każdym wierszu byłby iloczynem list. */
+  const byCategory = useMemo(() => {
+    const map = new Map<string, DocLibraryRow<K>[]>();
+    for (const row of allEntries) {
+      if (row.categoryId === null) continue;
+      const list = map.get(row.categoryId) ?? [];
+      list.push(row);
+      map.set(row.categoryId, list);
     }
     return map;
-  }, [allItems]);
+  }, [allEntries]);
 
-  const withoutGroup = allItems.filter((item) => item.categoryId === null).length;
+  const categoryNames = useMemo(
+    () => new Map(rows.map((row) => [row.id, row.name])),
+    [rows],
+  );
+
+  const withoutGroup = allEntries.filter((row) => row.categoryId === null).length;
 
   const move = (index: number, delta: number) => {
     const next = [...rows];
@@ -74,7 +80,6 @@ export function LibraryCategoriesTab() {
     const moved = next[index];
     const swapped = next[target];
     if (!moved || !swapped) return;
-
     next[index] = swapped;
     next[target] = moved;
     reorder.mutate(next.map((row) => row.id));
@@ -83,13 +88,12 @@ export function LibraryCategoriesTab() {
   const add = () => {
     const name = newName.trim();
     if (!name) return;
-
     create.mutate(
       { name, sortOrder: rows.length },
       {
         onSuccess: () => {
           setNewName('');
-          toast.success(pl.library.categoryAdded);
+          toast.success(pl.library.docs.groups.added);
         },
         onError: (error) => toast.error(error.message),
       },
@@ -100,7 +104,7 @@ export function LibraryCategoriesTab() {
     return (
       <Alert variant="destructive">
         <AlertDescription>
-          {pl.library.loadError}{' '}
+          {pl.library.docs.loadError}{' '}
           <button
             type="button"
             onClick={() => void categories.refetch()}
@@ -118,17 +122,17 @@ export function LibraryCategoriesTab() {
       <div className="card-surface space-y-3 p-5">
         <div className="flex flex-wrap items-end gap-2">
           <div className="min-w-56 flex-1 space-y-1">
-            <label htmlFor="new-category" className="text-ink text-sm font-medium">
-              {pl.library.categoryNew}
+            <label htmlFor={`new-doc-group-${kind}`} className="text-ink text-sm font-medium">
+              {pl.library.docs.groups.newLabel}
             </label>
             <Input
-              id="new-category"
+              id={`new-doc-group-${kind}`}
               value={newName}
               onChange={(event) => setNewName(event.target.value)}
               onKeyDown={(event) => {
                 if (event.key === 'Enter') add();
               }}
-              placeholder={pl.library.categoryNamePlaceholder}
+              placeholder={pl.library.docs.groups.namePlaceholder}
             />
           </div>
           <Button onClick={add} disabled={!newName.trim() || create.isPending}>
@@ -136,7 +140,7 @@ export function LibraryCategoriesTab() {
             {pl.common.add}
           </Button>
         </div>
-        <p className="text-ink-soft text-xs">{pl.library.categoryHint}</p>
+        <p className="text-ink-soft text-xs">{pl.library.docs.groups.hint}</p>
       </div>
 
       {categories.isLoading ? (
@@ -147,17 +151,19 @@ export function LibraryCategoriesTab() {
       ) : rows.length === 0 ? (
         <EmptyState
           icon={FolderTree}
-          title={pl.library.categoriesEmptyTitle}
-          description={pl.library.categoriesEmptyDescription}
+          title={pl.library.docs.groups.emptyTitle}
+          description={pl.library.docs.groups.emptyDescription}
         />
       ) : (
         <ul className="space-y-2">
           {rows.map((category, index) => (
-            <CategoryRow
+            <DocCategoryRow
               key={category.id}
+              kind={kind}
               category={category}
-              items={itemsByCategory.get(category.id) ?? EMPTY}
-              all={allItems}
+              entries={byCategory.get(category.id) ?? EMPTY}
+              all={allEntries}
+              categoryNames={categoryNames}
               canMoveUp={index > 0}
               canMoveDown={index < rows.length - 1}
               onMoveUp={() => move(index, -1)}
@@ -167,44 +173,45 @@ export function LibraryCategoriesTab() {
         </ul>
       )}
 
-      {/* „Bez grupy" nie jest wierszem słownika — to stan, w którym lądują
-          usługi po usunięciu grupy. Pokazujemy licznik, żeby nie znikły
-          z pola widzenia. */}
       {withoutGroup > 0 ? (
-        <p className="text-ink-soft text-sm">{pl.library.withoutCategoryCount(withoutGroup)}</p>
+        <p className="text-ink-soft text-sm">
+          {pl.library.docs.groups.withoutGroup(withoutGroup)}
+        </p>
       ) : null}
     </div>
   );
 }
 
-function CategoryRow({
+function DocCategoryRow<K extends DocLibraryKind>({
+  kind,
   category,
-  items,
+  entries,
   all,
+  categoryNames,
   canMoveUp,
   canMoveDown,
   onMoveUp,
   onMoveDown,
 }: {
-  category: LibraryCategory;
-  /** Usługi tej grupy. */
-  items: LibraryItem[];
-  /** Cała biblioteka — picker dopina także usługi z innych grup. */
-  all: LibraryItem[];
+  kind: K;
+  category: DocLibraryCategory;
+  entries: DocLibraryRow<K>[];
+  all: DocLibraryRow<K>[];
+  categoryNames: ReadonlyMap<string, string>;
   canMoveUp: boolean;
   canMoveDown: boolean;
   onMoveUp: () => void;
   onMoveDown: () => void;
 }) {
-  const update = useUpdateLibraryCategory();
-  const remove = useDeleteLibraryCategory();
+  const update = useUpdateDocCategory(kind);
+  const remove = useDeleteDocCategory(kind);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(category.name);
   const [code, setCode] = useState(category.code);
 
-  const itemCount = items.length;
-  const listId = `library-category-items-${category.id}`;
+  const count = entries.length;
+  const listId = `doc-category-entries-${category.id}`;
 
   const commit = (patch: { name?: string; code?: string; color?: LibraryColor | null }) => {
     update.mutate({ id: category.id, patch }, { onError: (error) => toast.error(error.message) });
@@ -240,7 +247,7 @@ function CategoryRow({
           value={code}
           onChange={(event) => setCode(event.target.value)}
           onBlur={() => code !== category.code && commit({ code })}
-          aria-label={pl.library.categoryCode}
+          aria-label={pl.library.docs.groups.code}
           placeholder="01"
           className="w-16 text-center"
         />
@@ -249,28 +256,25 @@ function CategoryRow({
           value={name}
           onChange={(event) => setName(event.target.value)}
           onBlur={() => name.trim() && name !== category.name && commit({ name })}
-          aria-label={pl.library.categoryName}
+          aria-label={pl.library.docs.groups.name}
           className="min-w-40 flex-1"
         />
 
         <CategoryColorPicker value={category.color} onChange={(color) => commit({ color })} />
 
-        {/* Licznik JEST przyciskiem rozwijającym (T-120). Osobna strzałka obok
-            samego tekstu dawałaby dwa cele o tym samym znaczeniu, a liczba
-            usług to dokładnie ta informacja, po której klika się „pokaż je". */}
         <button
           type="button"
           aria-expanded={open}
           aria-controls={listId}
           aria-label={
             open
-              ? pl.library.categoryHideItems(category.name)
-              : pl.library.categoryShowItems(category.name)
+              ? pl.library.docs.groups.hideEntries(category.name)
+              : pl.library.docs.groups.showEntries(category.name)
           }
           onClick={() => setOpen((previous) => !previous)}
           className="text-ink-soft hover:text-ink focus-visible:ring-ring flex w-28 items-center justify-end gap-1 rounded-[var(--radius-control)] text-sm tabular-nums focus-visible:ring-2 focus-visible:outline-none"
         >
-          {pl.library.itemCount(itemCount)}
+          {pl.library.docs.groups.entryCount(count)}
           <ChevronDown
             className={cn('size-4 shrink-0 transition-transform', open && 'rotate-180')}
             aria-hidden
@@ -290,30 +294,32 @@ function CategoryRow({
 
       {open ? (
         <div id={listId}>
-          <CategoryItemsList
+          <DocCategoryEntriesList
+            kind={kind}
             categoryId={category.id}
             categoryName={category.name}
-            items={items}
+            entries={entries}
             all={all}
+            categoryNames={categoryNames}
           />
         </div>
       ) : null}
 
-      {/* Dialog mówi wprost, że usługi ZOSTAJĄ — inaczej człowiek z 20
-          usługami w grupie nie odważy się jej ruszyć (koncepcja §5 reguła 6). */}
+      {/* Dialog mówi wprost, że wpisy ZOSTAJĄ — inaczej nikt z pełną grupą
+          nie odważy się jej ruszyć (ta sama zasada co przy grupach usług). */}
       <ConfirmDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
-        title={pl.library.categoryDeleteTitle}
-        description={pl.library.categoryDeleteDescription(itemCount)}
+        title={pl.library.docs.groups.deleteTitle}
+        description={pl.library.docs.groups.deleteDescription(count)}
         confirmLabel={pl.common.delete}
         destructive
-        onConfirm={() => {
+        onConfirm={() =>
           remove.mutate(category.id, {
-            onSuccess: () => toast.success(pl.library.categoryDeleted),
+            onSuccess: () => toast.success(pl.library.docs.groups.deleted),
             onError: (error) => toast.error(error.message),
-          });
-        }}
+          })
+        }
       />
     </li>
   );

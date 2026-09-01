@@ -23,7 +23,7 @@ type LibraryGroupCardProps = {
 };
 
 /**
- * Karta grupy bibliotecznej: nazwa (edycja w miejscu), liczba pozycji, suma
+ * Karta zestawu bibliotecznego: nazwa (edycja w miejscu), liczba pozycji, suma
  * netto i rozwijany podgląd zawartości.
  *
  * Suma liczy się w domenie (`calcGroupTotals`), a nie w komponencie — snapshoty
@@ -55,8 +55,10 @@ export function LibraryGroupCard({
           name: group.name,
           items: group.items.map(librarySnapshotToQuoteItem),
           // Zestaw biblioteczny nie należy do żadnego pomieszczenia — to szablon,
-          // a pomieszczenia są własnością konkretnej wyceny.
+          // a pomieszczenia są własnością konkretnej wyceny. Nie należy też do
+          // grupy słownika: zestaw i grupa to dwa różne byty (T-59).
           roomId: null,
+          categoryId: null,
         },
         // Biblioteka jest KWOTOWA. Wpis biblioteczny niesie wlasny `pricingBasis`
         // (patrz `library_items.pricing_basis`), ale karta zestawu pokazuje sume

@@ -1,14 +1,7 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Plus } from 'lucide-react';
-import {
-  Command,
-  CommandEmpty,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
+import { LibraryPickerSheet } from '@/features/library/components/LibraryPickerSheet';
 import { useLibraryItems } from '@/data/queries/useLibrary';
 import { libraryItemToSnapshot, type LibraryItemSnapshot } from '@/domain/library/schema';
 import { formatMoney } from '@/domain/money';
@@ -24,56 +17,57 @@ type GroupItemPickerProps = {
  * „Dodaj pozycję" na karcie zestawu. Wybiera z biblioteki pozycji i wkłada do
  * zestawu **snapshot**, nie klucz obcy — zestaw ma zostać taki, jaki był
  * w chwili złożenia, nawet gdy pozycja źródłowa później zdrożeje.
+ *
+ * Od T-123 otwiera wspólny `LibraryPickerSheet` zamiast popovera na 280 px.
+ * Powód jest prosty: składanie zestawu to dobieranie KILKU pozycji, a wąskie
+ * okienko zamykało się po każdej i kazało zaczynać od nowa.
  */
 export function GroupItemPicker({ groupName, onPick }: GroupItemPickerProps) {
   const [open, setOpen] = useState(false);
   const items = useLibraryItems();
-  const rows = items.data ?? [];
+
+  const rows = useMemo(
+    () =>
+      (items.data ?? []).map((item) => ({
+        id: item.id,
+        title: item.name,
+        subtitle: item.description || undefined,
+        meta:
+          item.unitPriceCents === null
+            ? pl.editor.individualPrice
+            : formatMoney(item.unitPriceCents),
+      })),
+    [items.data],
+  );
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          aria-label={pl.library.groupAddItemFor(groupName)}
-          className="self-start"
-        >
-          <Plus className="size-4" aria-hidden />
-          {pl.library.groupAddItem}
-        </Button>
-      </PopoverTrigger>
+    <>
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        aria-label={pl.library.groupAddItemFor(groupName)}
+        className="self-start"
+        onClick={() => setOpen(true)}
+      >
+        <Plus className="size-4" aria-hidden />
+        {pl.library.groupAddItem}
+      </Button>
 
-      <PopoverContent align="start" className="w-[280px] p-0">
-        <Command>
-          <CommandInput placeholder={pl.library.groupPickerSearch} />
-          <CommandList className="max-h-[240px]">
-            <CommandEmpty>
-              {rows.length === 0 ? pl.library.groupPickerNoItems : pl.library.groupPickerEmpty}
-            </CommandEmpty>
-
-            {rows.map((item) => (
-              <CommandItem
-                key={item.id}
-                value={`${item.name} ${item.description} ${item.categoryName}`}
-                onSelect={() => {
-                  onPick(libraryItemToSnapshot(item));
-                  setOpen(false);
-                }}
-                className="flex items-center gap-3"
-              >
-                <span className="min-w-0 flex-1 truncate">{item.name}</span>
-                <span className="tabular text-ink-soft shrink-0 text-xs">
-                  {item.unitPriceCents === null
-                    ? pl.editor.individualPrice
-                    : formatMoney(item.unitPriceCents)}
-                </span>
-              </CommandItem>
-            ))}
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+      <LibraryPickerSheet
+        open={open}
+        onOpenChange={setOpen}
+        title={pl.library.groupAddItemFor(groupName)}
+        description={pl.library.groupPickerHint}
+        rows={rows}
+        emptyLabel={pl.library.groupPickerNoItems}
+        noMatchLabel={pl.library.groupPickerEmpty}
+        addLabel={(name) => pl.library.groupPickerAddLabel(name)}
+        onAdd={(id) => {
+          const item = (items.data ?? []).find((candidate) => candidate.id === id);
+          if (item) onPick(libraryItemToSnapshot(item));
+        }}
+      />
+    </>
   );
 }

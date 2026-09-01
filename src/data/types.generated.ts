@@ -108,6 +108,44 @@ export type Database = {
           },
         ]
       }
+      brief_templates: {
+        Row: {
+          created_at: string
+          id: string
+          is_default: boolean
+          name: string
+          sections: Json
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          name?: string
+          sections?: Json
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          name?: string
+          sections?: Json
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brief_templates_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       calendar_notes: {
         Row: {
           at_time: string | null
@@ -154,6 +192,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "calendar_notes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients_overview"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "calendar_notes_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
@@ -161,45 +206,14 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "calendar_notes_workspace_id_fkey"
-            columns: ["workspace_id"]
+            foreignKeyName: "calendar_notes_project_id_fkey"
+            columns: ["project_id"]
             isOneToOne: false
-            referencedRelation: "workspaces"
+            referencedRelation: "projects_overview"
             referencedColumns: ["id"]
           },
-        ]
-      }
-      brief_templates: {
-        Row: {
-          created_at: string
-          id: string
-          is_default: boolean
-          name: string
-          sections: Json
-          updated_at: string
-          workspace_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          is_default?: boolean
-          name?: string
-          sections?: Json
-          updated_at?: string
-          workspace_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          is_default?: boolean
-          name?: string
-          sections?: Json
-          updated_at?: string
-          workspace_id?: string
-        }
-        Relationships: [
           {
-            foreignKeyName: "brief_templates_workspace_id_fkey"
+            foreignKeyName: "calendar_notes_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
@@ -268,6 +282,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "client_briefs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients_overview"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "client_briefs_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
@@ -275,64 +296,14 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "client_briefs_workspace_id_fkey"
-            columns: ["workspace_id"]
-            isOneToOne: false
-            referencedRelation: "workspaces"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      site_visits: {
-        Row: {
-          attendees: string
-          checks: Json
-          created_at: string
-          created_by: string | null
-          id: string
-          notes: string
-          project_id: string
-          rooms: Json
-          updated_at: string
-          visited_at: string
-          workspace_id: string
-        }
-        Insert: {
-          attendees?: string
-          checks?: Json
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          notes?: string
-          project_id: string
-          rooms?: Json
-          updated_at?: string
-          visited_at?: string
-          workspace_id: string
-        }
-        Update: {
-          attendees?: string
-          checks?: Json
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          notes?: string
-          project_id?: string
-          rooms?: Json
-          updated_at?: string
-          visited_at?: string
-          workspace_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "site_visits_project_id_fkey"
+            foreignKeyName: "client_briefs_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
-            referencedRelation: "projects"
+            referencedRelation: "projects_overview"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "site_visits_workspace_id_fkey"
+            foreignKeyName: "client_briefs_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
@@ -494,6 +465,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "files_site_visit_id_fkey"
+            columns: ["site_visit_id"]
+            isOneToOne: false
+            referencedRelation: "site_visits"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "files_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
@@ -549,8 +527,59 @@ export type Database = {
           },
         ]
       }
+      library_doc_categories: {
+        Row: {
+          code: string | null
+          color: string | null
+          created_at: string
+          deleted_at: string | null
+          id: string
+          is_sample: boolean
+          kind: string
+          name: string
+          sort_order: number
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          code?: string | null
+          color?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          is_sample?: boolean
+          kind: string
+          name: string
+          sort_order?: number
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          code?: string | null
+          color?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          is_sample?: boolean
+          kind?: string
+          name?: string
+          sort_order?: number
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_doc_categories_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       library_doc_entries: {
         Row: {
+          category_id: string | null
           created_at: string
           deleted_at: string | null
           id: string
@@ -563,6 +592,7 @@ export type Database = {
           workspace_id: string
         }
         Insert: {
+          category_id?: string | null
           created_at?: string
           deleted_at?: string | null
           id?: string
@@ -575,6 +605,7 @@ export type Database = {
           workspace_id: string
         }
         Update: {
+          category_id?: string | null
           created_at?: string
           deleted_at?: string | null
           id?: string
@@ -588,7 +619,61 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "library_doc_entries_category_fkey"
+            columns: ["category_id", "kind"]
+            isOneToOne: false
+            referencedRelation: "library_doc_categories"
+            referencedColumns: ["id", "kind"]
+          },
+          {
             foreignKeyName: "library_doc_entries_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      library_doc_sets: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          id: string
+          is_sample: boolean
+          items: Json
+          kind: string
+          name: string
+          sort_order: number
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          is_sample?: boolean
+          items?: Json
+          kind: string
+          name: string
+          sort_order?: number
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          is_sample?: boolean
+          items?: Json
+          kind?: string
+          name?: string
+          sort_order?: number
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_doc_sets_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
@@ -725,6 +810,86 @@ export type Database = {
           },
         ]
       }
+      notification_outbox: {
+        Row: {
+          attempts: number
+          brief_id: string | null
+          claimed_at: string | null
+          created_at: string
+          id: string
+          kind: string
+          last_error: string | null
+          payload: Json
+          quote_id: string | null
+          recipient: string
+          sent_at: string | null
+          share_id: string | null
+          status: string
+          workspace_id: string
+        }
+        Insert: {
+          attempts?: number
+          brief_id?: string | null
+          claimed_at?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          last_error?: string | null
+          payload?: Json
+          quote_id?: string | null
+          recipient: string
+          sent_at?: string | null
+          share_id?: string | null
+          status?: string
+          workspace_id: string
+        }
+        Update: {
+          attempts?: number
+          brief_id?: string | null
+          claimed_at?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          last_error?: string | null
+          payload?: Json
+          quote_id?: string | null
+          recipient?: string
+          sent_at?: string | null
+          share_id?: string | null
+          status?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_outbox_brief_id_fkey"
+            columns: ["brief_id"]
+            isOneToOne: false
+            referencedRelation: "client_briefs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_outbox_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_outbox_share_id_fkey"
+            columns: ["share_id"]
+            isOneToOne: false
+            referencedRelation: "quote_shares"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_outbox_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -843,8 +1008,8 @@ export type Database = {
           decision: string
           enabled_item_ids: string[]
           id: string
-          reason: string | null
           quote_id: string
+          reason: string | null
           share_id: string | null
           signer_ip: unknown
           signer_name: string | null
@@ -852,9 +1017,11 @@ export type Database = {
         Insert: {
           accepted_at?: string
           accepted_body: Json
+          decision?: string
           enabled_item_ids?: string[]
           id?: string
           quote_id: string
+          reason?: string | null
           share_id?: string | null
           signer_ip?: unknown
           signer_name?: string | null
@@ -865,8 +1032,8 @@ export type Database = {
           decision?: string
           enabled_item_ids?: string[]
           id?: string
-          reason?: string | null
           quote_id?: string
+          reason?: string | null
           share_id?: string | null
           signer_ip?: unknown
           signer_name?: string | null
@@ -1185,6 +1352,70 @@ export type Database = {
           },
         ]
       }
+      site_visits: {
+        Row: {
+          attendees: string
+          checks: Json
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string
+          project_id: string
+          rooms: Json
+          updated_at: string
+          visited_at: string
+          workspace_id: string
+        }
+        Insert: {
+          attendees?: string
+          checks?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string
+          project_id: string
+          rooms?: Json
+          updated_at?: string
+          visited_at?: string
+          workspace_id: string
+        }
+        Update: {
+          attendees?: string
+          checks?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string
+          project_id?: string
+          rooms?: Json
+          updated_at?: string
+          visited_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_visits_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_visits_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_visits_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stripe_events: {
         Row: {
           id: string
@@ -1406,21 +1637,56 @@ export type Database = {
         }
         Returns: Json
       }
+      brand_contrast_ratio: {
+        Args: { p_a: string; p_b: string }
+        Returns: number
+      }
+      brand_relative_luminance: { Args: { p_hex: string }; Returns: number }
+      brand_shared_logo_path: {
+        Args: { p_brand: Database["public"]["Tables"]["brand_kits"]["Row"] }
+        Returns: string
+      }
+      brand_srgb_channel: { Args: { p_value: number }; Returns: number }
+      brief_status: { Args: { p_token: string }; Returns: string }
+      claim_notifications: {
+        Args: { p_limit?: number }
+        Returns: {
+          attempts: number
+          brief_id: string | null
+          claimed_at: string | null
+          created_at: string
+          id: string
+          kind: string
+          last_error: string | null
+          payload: Json
+          quote_id: string | null
+          recipient: string
+          sent_at: string | null
+          share_id: string | null
+          status: string
+          workspace_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "notification_outbox"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       comment_shared_quote: {
         Args: { p_author_name: string; p_message: string; p_token: string }
         Returns: Json
       }
-      get_shared_brief: {
-        Args: { p_token: string }
-        Returns: Json
-      }
-      reject_shared_quote: {
-        Args: { p_reason?: string | null; p_signer_name: string; p_token: string }
-        Returns: Json
-      }
-      submit_shared_brief: {
-        Args: { p_answers: Json; p_token: string }
-        Returns: Json
+      enqueue_notification: {
+        Args: {
+          p_brief_id?: string
+          p_kind: string
+          p_payload?: Json
+          p_quote_id?: string
+          p_share_id?: string
+          p_workspace_id: string
+        }
+        Returns: undefined
       }
       files_bump_usage: {
         Args: { delta: number; ws: string }
@@ -1434,6 +1700,7 @@ export type Database = {
         }[]
       }
       files_trash_days: { Args: never; Returns: number }
+      get_shared_brief: { Args: { p_token: string }; Returns: Json }
       get_shared_quote: { Args: { p_token: string }; Returns: Json }
       is_member: { Args: { ws: string }; Returns: boolean }
       is_quote_member: { Args: { q: string }; Returns: boolean }
@@ -1446,9 +1713,46 @@ export type Database = {
           quotes_count: number
         }[]
       }
-      next_document_number: { Args: { ws: string; kind: string }; Returns: string }
+      mark_notification_failed: {
+        Args: { p_error: string; p_id: string }
+        Returns: undefined
+      }
+      mark_notification_sent: { Args: { p_id: string }; Returns: undefined }
+      next_document_number: {
+        Args: { kind: string; ws: string }
+        Returns: string
+      }
       next_quote_number: { Args: { ws: string }; Returns: string }
+      notification_recipient: {
+        Args: { p_workspace_id: string }
+        Returns: string
+      }
+      notifications_enabled: {
+        Args: { p_kind: string; p_workspace_id: string }
+        Returns: boolean
+      }
+      prune_notification_outbox: { Args: never; Returns: number }
       quote_can_write: { Args: { q: string }; Returns: boolean }
+      quote_template_sample_rows: {
+        Args: never
+        Returns: {
+          code: string
+          description: string
+          enabled: boolean
+          mode: string
+          name: string
+          ord: number
+          sec_ord: number
+          sec_title: string
+          tags: string[]
+          unit: string
+          unit_label: string
+        }[]
+      }
+      reject_shared_quote: {
+        Args: { p_reason?: string; p_signer_name: string; p_token: string }
+        Returns: Json
+      }
       request_ip: { Args: never; Returns: unknown }
       resolve_share: {
         Args: { p_token: string }
@@ -1470,7 +1774,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      seed_doc_library: { Args: { ws: string; kind: string; entries: Json }; Returns: number }
+      seed_doc_library: {
+        Args: { entries: Json; kind: string; ws: string }
+        Returns: number
+      }
       seed_library_sample: { Args: { ws: string }; Returns: undefined }
       seed_quote_templates: { Args: { ws: string }; Returns: undefined }
       seed_room_types: { Args: { ws: string }; Returns: undefined }
@@ -1478,6 +1785,10 @@ export type Database = {
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
       storage_workspace_id: { Args: { object_name: string }; Returns: string }
+      submit_shared_brief: {
+        Args: { p_answers: Json; p_token: string }
+        Returns: Json
+      }
       workspace_can_write: { Args: { ws: string }; Returns: boolean }
     }
     Enums: {

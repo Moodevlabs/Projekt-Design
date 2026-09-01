@@ -1,4 +1,5 @@
 import type { ComponentPropsWithRef } from 'react';
+import { COL_HANDLE } from './item-columns';
 import { cn } from '@/lib/utils';
 
 /**
@@ -19,7 +20,10 @@ export function DragHandle({
       type="button"
       aria-label={label}
       className={cn(
-        'cursor-grip flex w-[18px] shrink-0 items-center justify-center text-[var(--doc-ink-soft)]',
+        // Szerokosc z `item-columns.ts` — naglowek kolumn rezerwuje dokladnie
+        // tyle samo, wiec uchwyt nie moze jej ustalac po swojemu.
+        COL_HANDLE,
+        'cursor-grip flex items-center justify-center text-[var(--doc-ink-soft)]',
         'transition-colors hover:text-[var(--doc-ink)]',
         'focus-visible:ring-ring rounded-[3px] focus-visible:ring-2 focus-visible:outline-none',
         className,

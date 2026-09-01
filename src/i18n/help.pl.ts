@@ -278,7 +278,8 @@ export const helpPl = {
           items: [
             'Nagłówek obejmuje tytuł, podtytuł, datę, okres ważności, tekst wprowadzenia i opis projektu. Pola edytuje się bezpośrednio w dokumencie; w trybie edycji oznaczone są przerywaną ramką, w podglądzie pozostają niewidoczne.',
             'Sekcja odpowiada etapowi prac (przykładowo „Koncepcja”, „Projekt techniczny”). Grupa stanowi podzbiór sekcji, najczęściej pomieszczenie. Pozycja to pojedyncza usługa z ceną.',
-            'Opcja „Dodaj usługi” otwiera panel z tabelą biblioteki: usługa · grupa · sposób wyceny · stawka. Przycisk „Dodaj” umieszcza usługę w dokumencie, a panel pozostaje otwarty; miejsce docelowe („Dodaj do: sekcja › grupa”) wybiera się w górnej części panelu. Przycisk „Gotowe” zamyka panel. Jest to jedyna droga doboru usług z biblioteki.',
+            'Opcja „Dodaj usługi” otwiera panel z tabelą biblioteki: usługa · grupa · sposób wyceny · stawka. Przycisk „Dodaj” umieszcza usługę w dokumencie, a panel pozostaje otwarty; miejsce docelowe („Dodaj do: sekcja › grupa”) wybiera się w górnej części panelu. Przycisk „Gotowe” zamyka panel.',
+            'Polecenie „Dodaj grupę” na końcu sekcji otwiera menu z trzema drogami: „Pusta grupa” (dotychczasowe zachowanie), „Z biblioteki (grupa)” — wybiera się grupę ze słownika, a następnie zaznacza, które jej usługi wejdą do wyceny (domyślnie wszystkie) — oraz „Z biblioteki (zestaw)”, wstawiający zapisany komplet jednym kliknięciem. Grupa wstawiona ze słownika pamięta swoje pochodzenie: w trybie edycji jej nagłówek nosi kropkę koloru i kod grupy. Dokument dla inwestora i PDF pozostają bez zmian — to oznaczenie robocze.',
             'Opcja „Pozycja ręcznie” dodaje pusty wiersz przeznaczony na pozycje spoza biblioteki.',
             'Przełącznik TAK/NIE przy pozycji: pozycja wyłączona pozostaje w dokumencie jako opcja bez kwoty (o ile ustawienie to jest włączone), lecz nie wchodzi do sumy. Przełącznik przy grupie obejmuje wszystkie jej pozycje.',
             'Ilość i jednostka („× 80 m²”, „× 3 kadry”) pochodzą z biblioteki i podlegają edycji w wierszu. Ceny wprowadza się jak w arkuszu kalkulacyjnym: „1 200”, „1200,50”.',
@@ -301,7 +302,7 @@ export const helpPl = {
             'Rabaty umieszczane są na końcu dokumentu: kwotowe albo procentowe, obejmujące całą wycenę, sekcję lub wybrane pozycje, z opcjonalnym warunkiem wyboru wszystkich pozycji z zakresu oraz zaokrągleniem.',
             'Sposób naliczania (karta w górnej części prawej kolumny): kwotowo albo godzinowo. W trybie godzinowym w wierszu wprowadza się minuty, a kwota wynika ze stawki przypisanej do wyceny. Przełączenie trybu wymaga decyzji o przeliczeniu wartości.',
             'Warianty: usługa posiadająca warianty w bibliotece (przykładowo „Wizualizacja” / „Panorama 360”) prezentuje w wierszu listę rozwijaną zamiast samej nazwy.',
-            'Ikona zakładki przy wierszu zapisuje pozycję w bibliotece, a przy grupie — cały zestaw.',
+            'Ikona zakładki przy nagłówku grupy zapisuje ją w bibliotece jako zestaw, razem z ilościami. Bloki pomieszczeń jej nie mają — ich nazwa i skład należą do konkretnej oferty, nie do wzorca. Polecenie „Zapisz wszystko do biblioteki” z menu „⋯” działa inaczej: dopisuje do biblioteki pojedyncze USŁUGI z całej wyceny, nie zestaw.',
             'Kolejność zmienia się przeciągnięciem za uchwyt (pozycje, grupy, sekcje), również pomiędzy sekcjami.',
           ],
         },
@@ -459,7 +460,8 @@ export const helpPl = {
         {
           kind: 'list',
           items: [
-            'Zakładki Termin, Etapy i Cennik startują puste — treść dodaje się poleceniem „Dodaj z biblioteki” (panel z wyszukiwarką i „Dodaj wszystkie”) albo ręcznie. Pusta zakładka nie trafia do PDF, na stronę dla inwestora ani do podsumowania: dokument pokazuje wyłącznie to, co zostało w nim wpisane.',
+            'Zakładki Termin, Etapy i Cennik startują puste — treść dodaje się poleceniem „Dodaj z biblioteki” albo ręcznie. Panel biblioteki ma dwie półki: „Pozycje” (z wyszukiwarką, filtrem grup nad listą i przyciskiem „Dodaj wszystkie”) oraz „Zestawy”, gdzie jedno kliknięcie wnosi cały zapisany komplet. Pusta zakładka nie trafia do PDF, na stronę dla inwestora ani do podsumowania: dokument pokazuje wyłącznie to, co zostało w nim wpisane.',
+            'Rozpisany dokument można odłożyć do biblioteki: przycisk „Zapisz jako zestaw” pod listą zapisuje jego pozycje jako komplet pod wskazaną nazwą. Zestaw jest kopią — późniejsze zmiany w dokumencie go nie ruszą. W terminie etap zbiorczy „Usługi dodatkowe” nie wchodzi do zestawu, ponieważ jego skład wynika z cennika tej konkretnej wyceny.',
             'Etapy współpracy: biblioteka podpowiada 19 etapów w 5 częściach, a dokument zawiera tylko te, które zostały do niego dodane. Wskazuje się etapy objęte zakresem; etapy pozostające poza zakresem zachowywane są w dokumencie z odpowiednim oznaczeniem, aby zakres wyłączony z oferty był dla inwestora jednoznaczny. Domyślny okres ważności wynosi 14 dni i podlega zmianie.',
             'Cennik usług dodatkowych obejmuje nazwę, opis, cenę podaną jako przedział („300–1200 zł”) lub kwotę, jednostkę (zł/h, szt., ryczałt), termin realizacji oraz liczbę dni doliczanych do harmonogramu. Dokument nie zawiera sumy — suma widełek nie niosłaby informacji.',
             'Polecenie „Dodaj do wyceny” przy pozycji cennika udostępnia dwa zakresy zmiany: koszt (pozycja z dolną granicą przedziału trafia do ostatniej sekcji) oraz termin (dni doliczane są do harmonogramu).',
@@ -489,7 +491,7 @@ export const helpPl = {
       id: 'library',
       icon: 'library',
       title: 'Biblioteka',
-      lead: 'Cennik pracowni. Zakładki: Usługi · Grupy · Zestawy · Pomieszczenia · Stawki · Termin · Etapy współpracy · Cennik dodatkowy. Ustawienia wprowadzone w tym miejscu obowiązują w nowych dokumentach.',
+      lead: 'Cennik pracowni. Zakładki: Usługi · Grupy · Zestawy · Pomieszczenia · Stawki · Termin · Etapy współpracy · Cennik dodatkowy. Każda z trzech ostatnich ma własne podzakładki Pozycje · Grupy · Zestawy — te same pojęcia co przy usługach. Ustawienia wprowadzone w tym miejscu obowiązują w nowych dokumentach.',
       blocks: [
         {
           kind: 'p',
@@ -502,12 +504,18 @@ export const helpPl = {
             'Sposób „Według pomieszczenia” obejmuje stawkę bazową powiększoną o stawkę przypisaną do typu pomieszczenia (krok 5: tabela pomieszczenie × stawka netto) oraz zakres: wszystkie pomieszczenia, wyłącznie część wizualna albo wyłącznie techniczna. Sposób „Za kadr” uwzględnia liczbę kadrów wprowadzoną w wycenie.',
             'Cena „od” prezentowana jest na listach oraz w panelu „Dodaj usługi” i nie wpływa na obliczenia. Przy braku wartości wprowadzonej ręcznie lista prezentuje najniższą stawkę wynikającą z reguły.',
             'Usługa nieaktywna nie jest dostępna w edytorze, lecz pozostaje w wycenach, które już ją zawierają.',
-            'Grupy opisują: kod („01”), nazwa, kolor z palety oraz kolejność ustalana przeciągnięciem. Kolejność grup odpowiada kolejności w panelu „Dodaj usługi”. Usunięcie grupy przenosi przypisane do niej usługi do kategorii „Bez grupy”.',
-            'Zestawy stanowią komplet pozycji wstawiany do wyceny jako grupa (przykładowo „Kuchnia — pakiet”). Tworzone są w zakładce Zestawy albo poleceniem „Zapisz wszystko do biblioteki” z menu edytora.',
+            'Grupa porządkuje bibliotekę: kod („01”), nazwa, kolor z palety oraz kolejność ustalana strzałkami w wierszu. Kolejność grup odpowiada kolejności w panelu „Dodaj usługi”. Licznik usług po prawej stronie wiersza jest przyciskiem — rozwija listę usług grupy, z możliwością dopięcia kolejnych („Dodaj usługę”) i odpięcia. Usługa należy do jednej grupy, więc dopięcie jej tutaj przenosi ją z poprzedniej; odpięcie nie usuwa usługi z biblioteki, lecz przenosi do kategorii „Bez grupy”. Usunięcie grupy również wyłącznie odpina usługi.',
+            'Zestaw to gotowy komplet pozycji wraz z ilościami, wstawiany do wyceny jako grupa (przykładowo „Kuchnia”: projekt koncepcyjny ×14 m², meble ×1, wizualizacje ×2). Ilości odróżniają zestaw od grupy — grupa ich nie przechowuje, a jedna usługa może należeć do wielu zestawów naraz. Najkrótsza droga do zestawu prowadzi z pracy już wykonanej: w edytorze wyceny ikona zakładki przy nagłówku grupy („Zapisz jako zestaw”) odkłada ją do biblioteki. Zestaw można też złożyć ręcznie w zakładce Zestawy.',
             'Pomieszczenia obejmują słownik typów (kuchnia, salon, łazienka i pozostałe), na podstawie którego cennik dobiera stawkę. Zmiana nazwy nie modyfikuje klucza technicznego, więc nie wpływa na ceny w zapisanych wycenach. Słownik edytuje się wyłącznie w tym miejscu.',
             'Stawki prezentują pełną macierz usługa × typ pomieszczenia na jednym ekranie, wraz z importem z pliku CSV.',
-            'Sekcje Termin, Etapy współpracy i Cennik dodatkowy to biblioteki pozostałych rodzajów dokumentu: przy pierwszym otwarciu wypełniają się wbudowanym szablonem (oznaczonym jako przykładowy), a wpisy edytuje się w miejscu (ikona ołówka) i porządkuje strzałkami. Wpis terminu przechowuje stronę (ARCH./INW.), dni bazowe, zakres pomieszczeń, stawkę domyślną oraz dni według typu pomieszczenia; wpis etapów — opis, nagłówek grupy i domyślne objęcie zakresem; wpis cennika — przedział cen, jednostkę, termin realizacji i dni doliczane do terminu. Z tych list korzysta panel „Dodaj z biblioteki”.',
+            'Sekcje Termin, Etapy współpracy i Cennik dodatkowy to biblioteki pozostałych rodzajów dokumentu, każda z podzakładkami Pozycje · Grupy · Zestawy. Podzakładka Pozycje przy pierwszym otwarciu wypełnia się wbudowanym szablonem (oznaczonym jako przykładowy); wpisy edytuje się w miejscu (ikona ołówka) i porządkuje strzałkami. Wpis terminu przechowuje stronę (ARCH./INW.), dni bazowe, zakres pomieszczeń, stawkę domyślną oraz dni według typu pomieszczenia; wpis etapów — opis, nagłówek grupy i domyślne objęcie zakresem; wpis cennika — przedział cen, jednostkę, termin realizacji i dni doliczane do terminu. Z tych list korzysta panel „Dodaj z biblioteki”.',
+            'Grupy i zestawy dokumentów działają tak samo jak przy usługach, osobno dla każdego rodzaju: grupa terminu nie miesza się z grupą cennika. Grupa porządkuje listę wpisów (wiersz rozwija się i przyjmuje wpisy), a zestaw przechowuje zapisany komplet — dla terminu jest to zwykle wybór typu „pełny proces” albo „sam nadzór”. Zestaw dokumentu powstaje najprościej z rozpisanego dokumentu: przycisk „Zapisz jako zestaw” w pasku pod listą.',
           ],
+        },
+        {
+          kind: 'tip',
+          title: 'Wybór z biblioteki wygląda wszędzie tak samo',
+          text: 'Dobieranie usług do wyceny, przypinanie ich do grupy i składanie zestawu otwierają ten sam panel z prawej strony ekranu: wyszukiwarka, lista z przyciskiem „Dodaj” przy każdym wierszu, licznik dodanych pozycji i przycisk „Gotowe”. Kliknięcie dodaje od razu, a panel pozostaje otwarty — dobiera się zwykle kilka pozycji, nie jedną.',
         },
         {
           kind: 'tip',
@@ -609,6 +617,11 @@ export const helpPl = {
             'Sesja przechowywana jest w systemowym magazynie kluczy. Wylogowanie dostępne jest w menu zdjęcia profilowego w dolnej części paska.',
           ],
         },
+        {
+          kind: 'tip',
+          title: 'Regulamin i polityka prywatności',
+          text: 'Oba dokumenty dostępne są pod adresami toolier.pl/regulamin oraz toolier.pl/polityka-prywatnosci i akceptuje się je jednorazowo przy zakładaniu konta — bez zaznaczenia zgody rejestracja nie dochodzi do skutku. Odnośniki w formularzu otwierają dokumenty w przeglądarce systemowej. Dane wprowadzane do Aplikacji (inwestorzy, dokumentacja) pozostają danymi pracowni: to pracownia jest ich administratorem, a Toolier przetwarza je wyłącznie na jej polecenie, na zasadach umowy powierzenia stanowiącej załącznik do regulaminu. O istotnych zmianach dokumentów informujemy z co najmniej 14-dniowym wyprzedzeniem.',
+        },
       ],
     },
     {
@@ -640,7 +653,12 @@ export const helpPl = {
             },
             {
               keys: 'Przeciągnięcie za uchwyt ⋮⋮',
-              action: 'Zmiana kolejności pozycji, grup i sekcji, także grup w bibliotece',
+              action: 'W edytorze: zmiana kolejności pozycji, grup i sekcji, także pomiędzy sekcjami',
+            },
+            {
+              keys: 'Strzałki ▲ ▼ w wierszu',
+              action:
+                'W bibliotece: kolejność grup, wpisów terminu, etapów i cennika (te listy ustawia się raz, więc mają przyciski dostępne z klawiatury zamiast przeciągania)',
             },
           ],
         },

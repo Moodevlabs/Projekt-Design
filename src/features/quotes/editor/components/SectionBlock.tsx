@@ -13,7 +13,15 @@ import { DragHandle } from './DragHandle';
 import { ItemsColumnsHeader } from './ItemsColumnsHeader';
 import { useStableIds } from '../dnd/useStableIds';
 import { useScopePanel } from '../scope/scope-panel.store';
+import { useGroupPicker } from '../scope/group-picker.store';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import type { DocumentTextInfo, PricingContext } from '@/domain/quote';
+import type { LibraryCategory } from '@/domain/library/schema';
 import type { VariantOptions } from '../useVariantOptions';
 import type { ItemVariant } from '../editor.store';
 import { ConfirmDialog } from '@/components/shared';
@@ -42,6 +50,8 @@ export interface SectionBlockProps {
   pricing: PricingContext;
   /** Warianty pozycji (F1.4) — przekazywane w dół bez zmian. */
   variants: VariantOptions;
+  /** Słownik grup bibliotecznych (T-120) — przekazywany blokom bez zmian. */
+  categories?: ReadonlyMap<string, LibraryCategory>;
   onVariantChange: (itemId: string, variant: ItemVariant) => void;
   onRename: (sectionId: string, title: string) => void;
   onRemove: (sectionId: string) => void;
@@ -68,6 +78,7 @@ export const SectionBlock = memo(function SectionBlock({
   textInfo,
   pricing,
   variants,
+  categories,
   onVariantChange,
   onRename,
   onRemove,
@@ -84,6 +95,7 @@ export const SectionBlock = memo(function SectionBlock({
   const [confirmOpen, setConfirmOpen] = useState(false);
   // Akcja ze store'u ma stałą referencję — nie przebija `memo` na bloku.
   const openScope = useScopePanel((state) => state.openFor);
+  const openGroupPicker = useGroupPicker((state) => state.openFor);
   const totals = calcSectionTotals(section, pricing, { vatRate, pricesInclude, rooms });
   const isEmpty = section.items.length === 0 && section.groups.length === 0;
 
@@ -248,6 +260,7 @@ export const SectionBlock = memo(function SectionBlock({
               textInfo={textInfo}
               pricing={pricing}
               variants={variants}
+              categories={categories}
               onVariantChange={onVariantChange}
               onRename={onRenameGroup}
               onRemove={onRemoveGroup}
@@ -263,7 +276,29 @@ export const SectionBlock = memo(function SectionBlock({
 
       {editing ? (
         <div className="mt-4">
-          <AddLink onClick={() => onAddGroup(section.id)}>{pl.editor.addGroup}</AddLink>
+          {/*
+            „Dodaj grupę" jest MENU, nie jednym gestem (T-120). Do tej pory
+            robiło zawsze pustą „Nową grupę", a grupa z biblioteki dawała się
+            wstawić wyłącznie przez „Dodaj usługi" → zakładka „Zestawy" — i to
+            tylko wtedy, gdy cel panelu był ustawiony na sekcję. Wejście do
+            biblioteki musi stać tam, gdzie człowiek szuka grupy.
+          */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <AddLink aria-haspopup="menu">{pl.editor.addGroup}</AddLink>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuItem onSelect={() => onAddGroup(section.id)}>
+                {pl.editor.addGroupEmpty}
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => openGroupPicker(section.id, 'categories')}>
+                {pl.editor.addGroupFromCategory}
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => openGroupPicker(section.id, 'sets')}>
+                {pl.editor.addGroupFromSet}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       ) : null}
 

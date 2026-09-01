@@ -50,6 +50,13 @@ export interface DocLibraryEntry<K extends DocLibraryKind = DocLibraryKind> {
   sortOrder: number;
   /** Wpis z wbudowanego szablonu; edycja zdejmuje flagę (jak w usługach, D4). */
   isSample: boolean;
+  /**
+   * Grupa ze słownika `library_doc_categories` (T-121). `null` = „Bez grupy".
+   *
+   * Baza pilnuje złożonym kluczem obcym `(category_id, kind)`, że grupa jest
+   * TEGO SAMEGO rodzaju co wpis — etap terminu nie wejdzie do grupy cennika.
+   */
+  categoryId: string | null;
 }
 
 const PAYLOAD_SCHEMAS = {

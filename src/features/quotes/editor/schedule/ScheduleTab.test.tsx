@@ -26,6 +26,23 @@ vi.mock('@/data/queries/useLibraryDocs', () => ({
   }),
   useCreateDocLibraryEntry: () => ({ mutate: vi.fn(), isPending: false }),
 }));
+
+/*
+ * Grupy i zestawy bibliotek dokumentow (T-121). Panel „Dodaj z biblioteki"
+ * pyta o nie razem z wpisami — test komponentu izoluje sie od TanStack Query.
+ */
+/** Zmienne mutacji zestawu — typowane, zeby asercja na `items` cos znaczyla. */
+const createDocSetMutate = vi.hoisted(() =>
+  vi.fn<(vars: { name: string; items: { name: string }[] }) => void>(),
+);
+vi.mock('@/data/queries/useLibraryDocGroups', () => ({
+  useDocCategories: () => ({ data: [], isLoading: false, isError: false }),
+  useDocCategoryMap: () => new Map(),
+  useDocSets: () => ({ data: [], isLoading: false, isError: false }),
+  useSetDocEntryCategory: () => ({ mutate: vi.fn(), isPending: false }),
+  // „Zapisz jako zestaw" w pasku akcji dokumentu (T-122).
+  useCreateDocSet: () => ({ mutate: createDocSetMutate, isPending: false }),
+}));
 vi.mock('sonner', () => ({
   toast: { success: toastSuccess, error: vi.fn(), info: vi.fn() },
 }));
@@ -337,5 +354,34 @@ describe('ScheduleTab — etapy z biblioteki i podpowiedzi (T-108)', () => {
     zaladuj([pokoj('Kuchnia')]);
     render(<ScheduleTab editing />);
     expect(screen.getByText(pl.editor.scheduleNoneEnabled)).toBeInTheDocument();
+  });
+});
+
+/**
+ * T-122: „Zapisz jako zestaw" bierze rozpisany termin i odkłada go do
+ * biblioteki. Etap zbiorczy „Usługi dodatkowe" (`kind: 'extras'`, T-64) jest
+ * z tego WYŁĄCZONY — jego skład liczy się z cennika tej konkretnej wyceny,
+ * więc jako wzorzec wróciłby pustą skorupą o mylącej nazwie.
+ */
+describe('ScheduleTab — „Zapisz jako zestaw" (T-122)', () => {
+  it('zapisuje etapy terminu, ale pomija etap zbiorczy', async () => {
+    const user = userEvent.setup();
+    zaladuj();
+    useEditorStore.getState().addStage({ name: 'Pomiar', enabled: true });
+    useEditorStore
+      .getState()
+      .addScheduleExtra({ name: 'Panorama 360', days: 3 }, pl.editor.extrasStageName);
+
+    render(<ScheduleTab editing />);
+
+    await user.click(screen.getByRole('button', { name: pl.editor.docLibrary.saveSet }));
+    await user.type(screen.getByLabelText(pl.library.docs.sets.nameLabel), 'Pełny proces');
+    await user.click(screen.getByRole('button', { name: pl.common.save }));
+
+    expect(createDocSetMutate).toHaveBeenCalledTimes(1);
+    const [vars] = createDocSetMutate.mock.calls[0]!;
+    const nazwy = vars.items.map((item) => item.name);
+    expect(nazwy).toContain('Pomiar');
+    expect(nazwy).not.toContain(pl.editor.extrasStageName);
   });
 });

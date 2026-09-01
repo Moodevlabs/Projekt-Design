@@ -51,6 +51,20 @@ export const queryKeys = {
       : kind
         ? (['library', 'docs', kind] as const)
         : (['library', 'docs'] as const),
+  /** Grupy bibliotek dokumentow (T-121) — osobno per rodzaj, jak `libraryDocs`. */
+  libraryDocCategories: (kind?: string, workspaceId?: string) =>
+    kind && workspaceId
+      ? (['library', 'doc-categories', kind, workspaceId] as const)
+      : kind
+        ? (['library', 'doc-categories', kind] as const)
+        : (['library', 'doc-categories'] as const),
+  /** Zestawy bibliotek dokumentow (T-121). */
+  libraryDocSets: (kind?: string, workspaceId?: string) =>
+    kind && workspaceId
+      ? (['library', 'doc-sets', kind, workspaceId] as const)
+      : kind
+        ? (['library', 'doc-sets', kind] as const)
+        : (['library', 'doc-sets'] as const),
   libraryGroups: (workspaceId?: string) =>
     workspaceId ? (['library', 'groups', workspaceId] as const) : (['library', 'groups'] as const),
   /** Linki klienta, uwagi i akceptacja — wszystko per wycena (T-25/T-26). */

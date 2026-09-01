@@ -6,6 +6,7 @@ import { ScheduleResultCard } from './ScheduleResultCard';
 import { AddLink } from '../components/AddLink';
 import { Button } from '@/components/ui/button';
 import { DocLibraryPanel } from '../documents/DocLibraryPanel';
+import { SaveDocSetButton } from '../documents/SaveDocSetButton';
 import { NumberField } from '../components/NumberField';
 import { useEditorStore } from '../editor.store';
 import { useStageAutoSync } from './useStageAutoSync';
@@ -169,6 +170,17 @@ export function ScheduleTab({ editing }: { editing: boolean }) {
             <AddLink icon={Plus} onClick={() => addStage()} className="text-[13px]">
               {pl.editor.docLibrary.manual.schedule}
             </AddLink>
+            {/*
+              Etap zbiorczy „Usługi dodatkowe" (`kind: 'extras'`, T-64) NIE
+              wchodzi do zestawu: jego skład liczy się z cennika tej wyceny,
+              więc zapisany jako wzorzec wróciłby jako pusty etap o mylącej
+              nazwie. Schemat payloadu i tak obciąłby `extras`, ale wtedy
+              zostałaby po nim pusta skorupa — lepiej go tu odsiać.
+            */}
+            <SaveDocSetButton
+              kind="schedule"
+              entries={schedule.stages.filter((stage) => stage.kind !== 'extras')}
+            />
           </div>
         ) : null}
 

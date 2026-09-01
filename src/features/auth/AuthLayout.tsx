@@ -86,8 +86,14 @@ export function AuthLayout({
         className="relative mb-10 w-full max-w-[460px] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.45)]"
       />
 
-      <div className="relative w-full max-w-[380px]">
-        <div className="auth-glass rounded-[var(--radius-card)] p-7">
+      {/*
+        440 px, nie 380 (2026-09-01, uwaga właściciela: karta wyglądała za
+        wąsko). Górna granica jest wyznaczona: logotyp ma `max-w-[460px]`
+        i ma ZOSTAĆ szerszy od karty — to on jest tu pierwszym planem,
+        a odwrócenie tej relacji zmieniłoby kompozycję ekranu.
+      */}
+      <div className="relative w-full max-w-[440px]">
+        <div className="auth-glass rounded-[var(--radius-card)] p-8">
           <h1 className="font-display text-ink text-[19px]">{title}</h1>
           {description ? <p className="text-ink-soft mt-1.5 text-sm">{description}</p> : null}
           <div className="mt-6">{children}</div>

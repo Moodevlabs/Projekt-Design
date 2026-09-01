@@ -801,6 +801,35 @@ Z wyrazami szacunku`,
     item: 'Pozycja',
     addSection: 'Dodaj sekcję',
     addGroup: 'Dodaj grupę',
+    /*
+     * Trzy drogi do grupy (T-120). Do tej pory „Dodaj grupę" robiło zawsze
+     * pustą „Nową grupę", a zestaw z biblioteki dawało się wstawić wyłącznie
+     * przez panel „Dodaj usługi" — i to tylko wtedy, gdy cel był ustawiony
+     * na sekcję. Wejście z biblioteki musi być tam, gdzie człowiek go szuka.
+     */
+    addGroupEmpty: 'Pusta grupa',
+    addGroupFromCategory: 'Z biblioteki (grupa)…',
+    addGroupFromSet: 'Z biblioteki (zestaw)…',
+    groupPickerTitle: 'Dodaj grupę z biblioteki',
+    groupPickerHint:
+      'Grupa wnosi usługi przypisane do niej w bibliotece, zestaw — zapisany komplet pozycji.',
+    groupPickerTabCategories: 'Grupy',
+    groupPickerTabSets: 'Zestawy',
+    groupPickerNoCategories:
+      'Biblioteka nie zawiera jeszcze grup. Grupy zakłada się w zakładce „Grupy”.',
+    groupPickerNoSets: 'Biblioteka nie zawiera jeszcze zestawów.',
+    groupPickerEmptyCategory: 'Do tej grupy nie przypisano jeszcze żadnej usługi.',
+    groupPickerBack: 'Wróć do listy',
+    groupPickerSelectAll: 'Zaznacz wszystkie',
+    groupPickerInsert: 'Wstaw grupę',
+    groupPickerPick: (name: string) => `Wybierz grupę: ${name}`,
+    groupPickerToggle: (name: string) => `Weź do wyceny: ${name}`,
+    groupPickerCount: (count: number) =>
+      count === 1 ? '1 usługa' : count >= 2 && count <= 4 ? `${count} usługi` : `${count} usług`,
+    groupInserted: (name: string) => `Dodano grupę „${name}”`,
+    groupInsertedEmpty: 'Grupa została dodana bez usług — żadnej nie dało się przenieść.',
+    /** Znacznik pochodzenia na nagłówku bloku — tylko w trybie edycji. */
+    groupFromCategory: (label: string) => `Grupa z biblioteki: ${label}`,
     addItem: 'Dodaj pozycję',
     fromLibrary: 'Z biblioteki',
     fromLibraryGroup: 'Grupa z biblioteki',
@@ -808,6 +837,9 @@ Z wyrazami szacunku`,
     saveAllToLibraryDone: (count: number) =>
       count === 1 ? 'Zapisano 1 pozycję w bibliotece' : `Zapisano ${count} pozycji w bibliotece`,
     saveAllToLibraryEmpty: 'Brak pozycji do zapisania — pozycje wymagają wcześniejszego nazwania.',
+    /** Akcja na grupie wyceny — podpieta dopiero w T-122. */
+    saveGroupToLibrary: (name: string) => `Zapisz jako zestaw w bibliotece: ${name}`,
+    saveGroupToLibraryShort: 'Zapisz jako zestaw',
     saveGroupToLibraryDone: (name: string) => `Zestaw „${name}” zapisano w bibliotece`,
     saveGroupToLibraryEmpty: 'Zestaw jest pusty — dodaj pozycje przed zapisaniem.',
     saveGroupToLibraryUnnamed:
@@ -957,6 +989,19 @@ Z wyrazami szacunku`,
       addedTotal: (n: number) => `Dodano ${n}`,
       empty: 'Brak wpisów. Uzupełnij tę sekcję w Bibliotece.',
       done: 'Gotowe',
+      /** Zapis obecnego dokumentu jako zestaw (T-122). */
+      saveSet: 'Zapisz jako zestaw',
+      saveSetTitle: 'Zapisz jako zestaw w bibliotece',
+      saveSetHint: (count: number) =>
+        count === 1
+          ? 'Do biblioteki trafi kopia 1 pozycji tego dokumentu. Późniejsze zmiany w dokumencie nie ruszą zestawu.'
+          : `Do biblioteki trafi kopia ${count} pozycji tego dokumentu. Późniejsze zmiany w dokumencie nie ruszą zestawu.`,
+      saveSetDone: (name: string) => `Zestaw „${name}” zapisano w bibliotece`,
+      saveSetPlaceholder: {
+        schedule: 'np. Pełny proces',
+        stages: 'np. Zakres podstawowy',
+        price_list: 'np. Dodatki wizualne',
+      },
       manual: {
         schedule: 'Etap ręcznie',
         stages: 'Etap ręcznie',
@@ -1682,7 +1727,44 @@ Z wyrazami szacunku`,
     moveUp: 'Przenieś wyżej',
     moveDown: 'Przenieś niżej',
 
+    /*
+     * Zawartość grupy (T-120). Grupa jest słownikiem, więc dodanie usługi to
+     * PRZENIESIENIE jej z poprzedniej grupy, a nie kopia — teksty muszą to
+     * mówić wprost, bo inaczej człowiek szuka potem zdublowanej pozycji.
+     */
+    categoryShowItems: (name: string) => `Pokaż usługi grupy: ${name}`,
+    categoryHideItems: (name: string) => `Ukryj usługi grupy: ${name}`,
+    categoryItemsEmpty: 'Grupa nie zawiera jeszcze usług.',
+    categoryAddItem: 'Dodaj usługę',
+    categoryAddItemFor: (name: string) => `Dodaj usługę do grupy: ${name}`,
+    categoryPickerSearch: 'Szukaj w bibliotece',
+    categoryPickerHint:
+      'Usługa należy do jednej grupy — dodanie jej tutaj przenosi ją z poprzedniej.',
+    categoryPickerAddLabel: (name: string) => `Przypisz do grupy: ${name}`,
+    categoryPickerEmpty: 'Brak dopasowań',
+    categoryPickerNoItems: 'Wszystkie usługi z biblioteki należą już do tej grupy.',
+    categoryPickerFrom: (name: string) => `obecnie: ${name}`,
+    categoryRemoveItem: (name: string) => `Odepnij od grupy: ${name}`,
+    categoryItemsHint:
+      'Usługa należy do jednej grupy — dodanie jej tutaj przenosi ją z poprzedniej. Odpięcie nie usuwa usługi z biblioteki.',
+    categoryItemAssigned: (item: string, group: string) => `„${item}” trafiła do grupy „${group}”`,
+    categoryItemUnassigned: (item: string) => `„${item}” bez grupy`,
+
     title: 'Biblioteka',
+
+    /*
+     * Wspolny picker biblioteki (T-123) — panel z prawej zamiast czterech
+     * roznych popoverow po 280-320 px. Teksty sa neutralne, bo ten sam panel
+     * sluzy do skladania zestawu i do przypinania wpisu do grupy.
+     */
+    picker: {
+      search: 'Szukaj w bibliotece',
+      count: (count: number) =>
+        count === 1 ? '1 pozycja' : count >= 2 && count <= 4 ? `${count} pozycje` : `${count} pozycji`,
+      addedTotal: (count: number) =>
+        count === 1 ? 'Dodano 1 pozycję' : `Dodano ${count} pozycji`,
+      done: 'Gotowe',
+    },
     sheetHint: 'Zmiany cen i nazw można od razu przenieść na otwartą wycenę.',
     items: 'Pozycje',
     /*
@@ -1714,6 +1796,88 @@ Z wyrazami szacunku`,
           'Usługi dodatkowe z widełkami cen i terminami. W dokumencie „Cennik dodatkowy” dodajesz je z tej listy.',
       },
       newLabel: 'Nowy wpis',
+
+      /*
+       * Podzakładki rodzaju (T-121). Ta sama trójka co przy usługach:
+       * pozycje leżą na liście, grupa je porządkuje, zestaw wstawia komplet.
+       */
+      subtabs: {
+        entries: 'Pozycje',
+        categories: 'Grupy',
+        sets: 'Zestawy',
+        label: 'Zawartość biblioteki',
+      },
+
+      // Grupy (słownik) — teksty jak przy grupach usług, bo to to samo pojęcie.
+      groups: {
+        newLabel: 'Nowa grupa',
+        namePlaceholder: 'np. Koncepcja',
+        name: 'Nazwa grupy',
+        code: 'Kod',
+        hint: 'Grupy porządkują wpisy w kolejności prac. Kod („01") jest opcjonalny.',
+        emptyTitle: 'Brak grup',
+        emptyDescription:
+          'Grupa odpowiada etapowi lub działowi: „Koncepcja", „Projekt", „Nadzór". Wpisy nieprzypisane do grupy pozostają w pełni funkcjonalne.',
+        added: 'Dodano grupę',
+        deleted: 'Usunięto grupę',
+        deleteTitle: 'Usunąć grupę?',
+        deleteDescription: (entries: number) =>
+          entries > 0
+            ? `Grupa zostanie usunięta z listy. ${entries === 1 ? 'Przypisany do niej wpis zostanie przeniesiony' : `Przypisane do niej wpisy (${entries}) zostaną przeniesione`} do kategorii „Bez grupy" — żadne dane nie zostaną skasowane.`
+            : 'Grupa zostanie usunięta z listy. Nie zawiera żadnych wpisów.',
+        entryCount: (count: number) =>
+          count === 1 ? '1 wpis' : count >= 2 && count <= 4 ? `${count} wpisy` : `${count} wpisów`,
+        showEntries: (name: string) => `Pokaż wpisy grupy: ${name}`,
+        hideEntries: (name: string) => `Ukryj wpisy grupy: ${name}`,
+        entriesEmpty: 'Grupa nie zawiera jeszcze wpisów.',
+        addEntry: 'Dodaj wpis',
+        addEntryFor: (name: string) => `Dodaj wpis do grupy: ${name}`,
+        removeEntry: (name: string) => `Odepnij od grupy: ${name}`,
+        pickerSearch: 'Szukaj w bibliotece',
+        pickerEmpty: 'Brak dopasowań',
+        pickerNoEntries: 'Wszystkie wpisy tego rodzaju należą już do tej grupy.',
+        pickerHint: 'Wpis należy do jednej grupy — dodanie go tutaj przenosi go z poprzedniej.',
+        pickerAddLabel: (name: string) => `Przypisz do grupy: ${name}`,
+        pickerFrom: (name: string) => `obecnie: ${name}`,
+        entriesHint:
+          'Wpis należy do jednej grupy — dodanie go tutaj przenosi go z poprzedniej. Odpięcie nie usuwa wpisu z biblioteki.',
+        assigned: (entry: string, group: string) => `„${entry}” trafił do grupy „${group}”`,
+        unassigned: (entry: string) => `„${entry}” bez grupy`,
+        withoutGroup: (count: number) => `Bez grupy: ${count}`,
+        badge: (name: string) => name,
+      },
+
+      // Zestawy (snapshot kompletu wpisów).
+      sets: {
+        add: 'Dodaj zestaw',
+        newName: 'Nowy zestaw',
+        nameLabel: 'Nazwa zestawu',
+        save: (name: string) => `Zapisz zestaw: ${name}`,
+        cancel: (name: string) => `Odrzuć zmiany w zestawie: ${name}`,
+        delete: (name: string) => `Usuń zestaw: ${name}`,
+        deleteTitle: 'Usunąć zestaw z biblioteki?',
+        deleteDescription: (name: string) =>
+          `Zestaw „${name}” zostanie usunięty z biblioteki. Dokumenty zbudowane na jego podstawie pozostają nienaruszone.`,
+        emptyTitle: 'Nie utworzono jeszcze żadnego zestawu',
+        emptyDescription:
+          'Zestaw stanowi gotowy komplet wpisów, który pozwala wprowadzić do dokumentu cały etap prac jednocześnie.',
+        itemsEmpty: 'Zestaw nie zawiera jeszcze wpisów.',
+        itemsCount: (count: number) =>
+          count === 1 ? '1 wpis' : count >= 2 && count <= 4 ? `${count} wpisy` : `${count} wpisów`,
+        showItems: (name: string) => `Pokaż wpisy zestawu: ${name}`,
+        hideItems: (name: string) => `Ukryj wpisy zestawu: ${name}`,
+        addItem: 'Dodaj wpis',
+        addItemFor: (name: string) => `Dodaj wpis do zestawu: ${name}`,
+        removeItem: (name: string) => `Usuń z zestawu: ${name}`,
+        pickerSearch: 'Szukaj w bibliotece',
+        pickerEmpty: 'Brak dopasowań',
+        pickerNoEntries: 'Wymagane jest wcześniejsze dodanie wpisów w zakładce „Pozycje”.',
+        pickerHint: 'Zestaw trzyma KOPIE wpisów z chwili dodania — późniejsza zmiana wpisu w bibliotece go nie ruszy.',
+        pickerAddLabel: (name: string) => `Dodaj do zestawu: ${name}`,
+        itemsHint:
+          'Zestaw trzyma KOPIE wpisów z chwili dodania — późniejsza zmiana wpisu w bibliotece go nie ruszy. Zmiany zawartości zapisywane są automatycznie.',
+        loadError: 'Nie udało się wczytać zestawów.',
+      },
       namePlaceholder: {
         schedule: 'np. Wizualizacje 3D',
         stages: 'np. Nadzór autorski',
@@ -1863,16 +2027,21 @@ Z wyrazami szacunku`,
     importCsvDone: (count: number) =>
       count === 1 ? 'Zapisano stawki 1 pozycji' : `Zapisano stawki ${count} pozycji`,
 
-    // Grupy.
-    addGroup: 'Dodaj grupę',
-    newGroupName: 'Nowa grupa',
-    groupNameLabel: 'Nazwa grupy',
-    saveGroup: (name: string) => `Zapisz grupę: ${name}`,
-    cancelGroup: (name: string) => `Odrzuć zmiany w grupie: ${name}`,
-    deleteGroup: (name: string) => `Usuń grupę: ${name}`,
-    deleteGroupTitle: 'Usunąć grupę z biblioteki?',
+    /*
+     * Zestawy (tabela `library_groups`, §9.3). Klucze zostają z `group`, bo
+     * tak nazywa się tabela; ETYKIETY mówią „zestaw" — T-120. Do T-119 mówiły
+     * „grupa", przez co jedyne miejsce w bibliotece, które umiało rozwijać
+     * i dodawać pozycje, nazywało się tak samo jak zakładka, która tego nie umie.
+     */
+    addGroup: 'Dodaj zestaw',
+    newGroupName: 'Nowy zestaw',
+    groupNameLabel: 'Nazwa zestawu',
+    saveGroup: (name: string) => `Zapisz zestaw: ${name}`,
+    cancelGroup: (name: string) => `Odrzuć zmiany w zestawie: ${name}`,
+    deleteGroup: (name: string) => `Usuń zestaw: ${name}`,
+    deleteGroupTitle: 'Usunąć zestaw z biblioteki?',
     deleteGroupDescription: (name: string) =>
-      `Grupa „${name}” zostanie usunięta z biblioteki. Wyceny zbudowane na jej podstawie pozostają nienaruszone.`,
+      `Zestaw „${name}” zostanie usunięty z biblioteki. Wyceny zbudowane na jego podstawie pozostają nienaruszone.`,
     groupTotal: 'Suma netto',
     groupItemsEmpty: 'Zestaw nie zawiera jeszcze pozycji.',
 
@@ -1880,13 +2049,15 @@ Z wyrazami szacunku`,
     groupAddItem: 'Dodaj pozycję',
     groupAddItemFor: (name: string) => `Dodaj pozycję do zestawu: ${name}`,
     groupPickerSearch: 'Szukaj w bibliotece',
+    groupPickerHint: 'Zestaw trzyma KOPIE pozycji z chwili dodania — późniejsza zmiana ceny w bibliotece go nie ruszy.',
+    groupPickerAddLabel: (name: string) => `Dodaj do zestawu: ${name}`,
     groupPickerEmpty: 'Brak dopasowań',
     groupPickerNoItems: 'Wymagane jest wcześniejsze dodanie pozycji w zakładce „Pozycje”.',
     groupRemoveItem: (name: string) => `Usuń z zestawu: ${name}`,
     groupItemQty: (name: string) => `Ilość: ${name}`,
     groupItemsHint: 'Zmiany zawartości zapisywane są automatycznie.',
-    showGroupItems: (name: string) => `Pokaż pozycje grupy: ${name}`,
-    hideGroupItems: (name: string) => `Ukryj pozycje grupy: ${name}`,
+    showGroupItems: (name: string) => `Pokaż pozycje zestawu: ${name}`,
+    hideGroupItems: (name: string) => `Ukryj pozycje zestawu: ${name}`,
     groupsEmptyTitle: 'Nie utworzono jeszcze żadnego zestawu',
     groupsEmptyDescription:
       'Zestaw stanowi gotowy komplet pozycji, który pozwala wprowadzić do wyceny cały etap prac jednocześnie.',
@@ -2386,6 +2557,26 @@ Z wyrazami szacunku`,
     readOnlyEditHint: 'Edycja wymaga aktywnego dostępu. Podgląd i eksport pozostają dostępne.',
   },
   auth: {
+    /** Pole opcjonalne od 2026-09-01 — etykieta musi to mówić przed kliknięciem. */
+    fullNameOptional: 'Imię i nazwisko (opcjonalnie)',
+    fullNameHint: 'Podpisuje dokumenty wysyłane inwestorom. Można uzupełnić później w ustawieniach.',
+
+    /*
+     * Zgoda przy rejestracji (T-124). Tekst rozbity na fragmenty, bo w środku
+     * stoją dwa odnośniki otwierane w systemowej przeglądarce — sklejanie go
+     * w jeden napis z HTML-em byłoby wstrzykiwaniem znaczników z pliku
+     * tłumaczeń.
+     */
+    termsLead: 'Akceptuję ',
+    termsTerms: 'regulamin',
+    termsMiddle: ' oraz ',
+    termsPrivacy: 'politykę prywatności',
+    termsTail: '.',
+    termsUrlTerms: 'https://toolier.pl/regulamin',
+    termsUrlPrivacy: 'https://toolier.pl/polityka-prywatnosci',
+    termsHint:
+      'Dokumenty otworzą się w przeglądarce. Zakładając konto, zawierasz umowę o świadczenie usługi drogą elektroniczną.',
+
     login: 'Zaloguj się',
     register: 'Załóż konto',
     resetPassword: 'Resetuj hasło',

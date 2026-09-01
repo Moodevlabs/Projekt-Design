@@ -9,6 +9,8 @@ import { docEntrySummary } from './doc-entry-summary';
 import { useDeleteDocLibraryEntry, useUpdateDocLibraryEntry } from '@/data/queries/useLibraryDocs';
 import type { DocLibraryRow } from '@/data/repos/library-docs.repo';
 import type { DocLibraryKind, DocLibraryPayloadByKind } from '@/domain/library/doc-entries';
+import { categorySwatch } from '@/features/library/categories/swatches';
+import type { LibraryColor } from '@/domain/library/schema';
 import { pl } from '@/i18n/pl';
 
 /**
@@ -21,6 +23,7 @@ import { pl } from '@/i18n/pl';
 export function DocEntryRow<K extends DocLibraryKind>({
   kind,
   row,
+  category,
   canMoveUp,
   canMoveDown,
   onMoveUp,
@@ -28,6 +31,12 @@ export function DocEntryRow<K extends DocLibraryKind>({
 }: {
   kind: K;
   row: DocLibraryRow<K>;
+  /**
+   * Grupa wpisu (T-121) — sama etykieta, nie cały obiekt: wiersz ma ją tylko
+   * pokazać. Przypisanie dzieje się w podzakładce „Grupy", tak jak przy
+   * usługach dzieje się w edytorze usługi.
+   */
+  category?: { name: string; color: LibraryColor | null } | null;
   canMoveUp: boolean;
   canMoveDown: boolean;
   onMoveUp: () => void;
@@ -82,6 +91,16 @@ export function DocEntryRow<K extends DocLibraryKind>({
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <span className="text-ink truncate text-sm font-medium">{label}</span>
+            {category ? (
+              <span className="text-ink-soft flex shrink-0 items-center gap-1 text-[11px]">
+                <span
+                  aria-hidden
+                  className="border-hair size-2 shrink-0 rounded-full border"
+                  style={{ backgroundColor: categorySwatch(category.color) }}
+                />
+                {category.name}
+              </span>
+            ) : null}
             {row.isSample ? <Badge variant="outline">{pl.library.docs.sampleBadge}</Badge> : null}
           </div>
           <p className="text-ink-soft truncate text-xs">

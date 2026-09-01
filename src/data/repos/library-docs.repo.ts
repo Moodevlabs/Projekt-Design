@@ -27,21 +27,25 @@ export interface DocLibraryRow<K extends DocLibraryKind = DocLibraryKind> {
   id: string;
   name: string;
   isSample: boolean;
+  /** Grupa wpisu (T-121) — na wierszu, bo uszkodzony `payload` też ma grupę. */
+  categoryId: string | null;
 }
 
 function mapRow<K extends DocLibraryKind>(kind: K, row: Row): DocLibraryRow<K> {
   const id = row.id as string;
   const name = (row.name as string) ?? '';
   const isSample = Boolean(row.is_sample);
+  const categoryId = (row.category_id as string | null) ?? null;
   const payload = parseDocLibraryPayload(kind, row.payload);
   if (!payload) {
     log.error('Uszkodzony wpis biblioteki dokumentow', { id, kind });
-    return { entry: null, id, name, isSample };
+    return { entry: null, id, name, isSample, categoryId };
   }
   return {
     id,
     name,
     isSample,
+    categoryId,
     entry: {
       id,
       workspaceId: row.workspace_id as string,
@@ -50,6 +54,7 @@ function mapRow<K extends DocLibraryKind>(kind: K, row: Row): DocLibraryRow<K> {
       payload: { ...payload, name: payload.name || name },
       sortOrder: Number(row.sort_order ?? 0),
       isSample,
+      categoryId,
     },
   };
 }

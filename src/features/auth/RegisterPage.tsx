@@ -7,6 +7,7 @@ import { RegisterFormSchema, type RegisterForm } from './schema';
 import { authErrorMessage } from './errors';
 import { AUTH_CALLBACK_URL } from './callback';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { ExternalLink } from '@/components/shared';
 import { Input } from '@/components/ui/input';
 import {
@@ -31,18 +32,35 @@ export function RegisterPage() {
 
   const form = useForm<RegisterForm>({
     resolver: zodResolver(RegisterFormSchema),
-    defaultValues: { company: '', fullName: '', email: '', password: '' },
+    /*
+     * `terms: false` — checkbox startuje PUSTY. Zgoda musi być czynnością
+     * wyraźną (art. 4 pkt 11 RODO), więc domyślne zaznaczenie nie byłoby
+     * zgodą, tylko jej pozorem. Schemat i tak odrzuci `false`.
+     */
+    defaultValues: { company: '', fullName: '', email: '', password: '', terms: false },
   });
 
   async function onSubmit(values: RegisterForm) {
     setFormError(null);
     // `company` i `full_name` czyta trigger handle_new_user() — z nich powstaje
     // workspace i profil. Nazwy kluczy muszą zgadzać się z migracją 0004.
+    //
+    // Puste imię i nazwisko (pole jest opcjonalne) NIE trafia do metadanych
+    // w ogóle — klucza po prostu nie ma. Wtedy
+    // `raw_user_meta_data->>'full_name'` daje w profilu NULL, czyli „nie
+    // podano"; pusty napis byłby czymś innym, deklaracją, że nazwisko brzmi
+    // „nic".
+    //
+    // Klucz opuszczamy jawnie, zamiast wpisywać `undefined` i liczyć na to, że
+    // zniknie przy serializacji do JSON-a. Zniknąłby — ale zachowanie zależałoby
+    // wtedy od tego, jak akurat serializuje biblioteka, a to nie jest coś,
+    // o czym chce się pamiętać przy następnej aktualizacji.
+    const fullName = values.fullName.trim();
     const { data, error } = await getSupabase().auth.signUp({
       email: values.email,
       password: values.password,
       options: {
-        data: { company: values.company, full_name: values.fullName },
+        data: { company: values.company, ...(fullName ? { full_name: fullName } : {}) },
         /*
          * Dokąd wróci człowiek po kliknięciu „Potwierdź adres e-mail" (T-118).
          *
@@ -100,7 +118,6 @@ export function RegisterPage() {
   return (
     <AuthLayout
       title={pl.auth.register}
-      description="14 dni bez opłat, bez karty."
       footer={
         // „Posiadasz już konto?" przeniosło się do karty, przy przycisku
         // przejścia (T-119). W stopce zostaje to, czego w karcie nie ma:
@@ -149,10 +166,11 @@ export function RegisterPage() {
             name="fullName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{pl.auth.fullName}</FormLabel>
+                <FormLabel>{pl.auth.fullNameOptional}</FormLabel>
                 <FormControl>
                   <Input autoComplete="name" {...field} />
                 </FormControl>
+                <FormDescription>{pl.auth.fullNameHint}</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -179,6 +197,46 @@ export function RegisterPage() {
                 <FormControl>
                   <Input type="password" autoComplete="new-password" {...field} />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="terms"
+            render={({ field }) => (
+              <FormItem className="border-hair rounded-[var(--radius-control)] border p-3">
+                <div className="flex items-start gap-3">
+                  <FormControl>
+                    <Checkbox
+                      id="terms"
+                      checked={field.value}
+                      onCheckedChange={(checked) => field.onChange(checked === true)}
+                      className="mt-0.5"
+                    />
+                  </FormControl>
+                  <div className="space-y-1">
+                    <label htmlFor="terms" className="text-ink cursor-pointer text-sm leading-snug">
+                      {pl.auth.termsLead}
+                      <ExternalLink
+                        href={pl.auth.termsUrlTerms}
+                        className="underline underline-offset-4"
+                      >
+                        {pl.auth.termsTerms}
+                      </ExternalLink>
+                      {pl.auth.termsMiddle}
+                      <ExternalLink
+                        href={pl.auth.termsUrlPrivacy}
+                        className="underline underline-offset-4"
+                      >
+                        {pl.auth.termsPrivacy}
+                      </ExternalLink>
+                      {pl.auth.termsTail}
+                    </label>
+                    <FormDescription>{pl.auth.termsHint}</FormDescription>
+                  </div>
+                </div>
                 <FormMessage />
               </FormItem>
             )}
