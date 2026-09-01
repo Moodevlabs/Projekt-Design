@@ -171,6 +171,34 @@ delete from public.library_categories
    );
 
 -- -----------------------------------------------------------------------------
+-- 3a. Grupy biblioteczne (słownik, T-59).
+--
+-- Blok stoi PRZED pozycjami, bo od T-69 pozycja wskazuje grupę kluczem obcym
+-- `category_id` i nie ma już kolumny tekstowej, po której dałoby się ją
+-- dopiąć później. Do 2026-09-01 ten blok leżał w sekcji 9, a pozycje
+-- wstawiały nazwę grupy do kolumny `category` — po migracji `0029`, która tę
+-- kolumnę usunęła, cały `supabase db reset` przewracał się na seedzie
+-- komunikatem „column category of relation library_items does not exist".
+--
+-- Migracja `0019` przepisuje tekstową kolumnę na wiersze słownika, ale przy
+-- `db reset` chodzi PRZED seedem, czyli na pustej bibliotece. Demo musi więc
+-- założyć słownik samo.
+--
+-- Kolejność jak w procesie projektowym, nie alfabetyczna: najpierw projekt,
+-- potem nadzór, na końcu dodatki.
+-- -----------------------------------------------------------------------------
+insert into public.library_categories (id, workspace_id, name, code, sort_order)
+select v.id, w.id, v.name, v.code, v.ord
+  from public.workspaces w
+ cross join (values
+   ('1c000000-0000-4000-8000-000000000001'::uuid, 'Projekt', '01', 0),
+   ('1c000000-0000-4000-8000-000000000002'::uuid, 'Nadzór',  '02', 1),
+   ('1c000000-0000-4000-8000-000000000003'::uuid, 'Dodatki', '03', 2)
+ ) as v(id, name, code, ord)
+ where w.owner_id = '11111111-1111-4111-8111-111111111111'
+on conflict (id) do nothing;
+
+-- -----------------------------------------------------------------------------
 -- 4. Biblioteka — 15 pozycji w 3 kategoriach (Projekt / Nadzór / Dodatki)
 --    Ceny w groszach: 9000 = 90,00 zł.
 --
@@ -180,9 +208,15 @@ delete from public.library_categories
 --    świeże konto od razu widzi, że opisy potrafią nadążać za zakresem —
 --    inaczej nikt by tej funkcji nie odkrył.
 -- -----------------------------------------------------------------------------
+--
+-- Nazwa grupy zostaje w liście wartości, bo obok każdej usługi czyta się ją
+-- lepiej niż UUID — ale trafia do bazy jako `category_id`, rozwiązany złączeniem
+-- ze słownikiem założonym w sekcji 3a. Złączenie jest WEWNĘTRZNE celowo:
+-- literówka w nazwie grupy ma po cichu wyrzucić pozycję z seeda, zamiast
+-- wstawić ją bez grupy i kazać się zastanawiać, czemu lista jest krótsza.
 insert into public.library_items
-  (id, workspace_id, category, kind, name, description, unit_price_cents, sort_order)
-select v.id, w.id, v.category, v.kind, v.name, v.description, v.price, v.ord
+  (id, workspace_id, category_id, kind, name, description, unit_price_cents, sort_order)
+select v.id, w.id, c.id, v.kind, v.name, v.description, v.price, v.ord
   from public.workspaces w
  cross join (values
    -- Projekt (rozliczane za m² powierzchni lub za sztukę)
@@ -234,6 +268,9 @@ select v.id, w.id, v.category, v.kind, v.name, v.description, v.price, v.ord
     'Rabat za polecenie',
     'Rabat dla klientów z polecenia. Wartość dodatnia, kalkulacja odejmuje.', 100000, 50)
  ) as v(id, category, kind, name, description, price, ord)
+  join public.library_categories c
+    on c.workspace_id = w.id
+   and c.name = v.category
  where w.owner_id = '11111111-1111-4111-8111-111111111111'
 on conflict (id) do nothing;
 
@@ -550,30 +587,9 @@ update public.quotes
  where id = '1d000000-0000-4000-8000-000000000002';
 
 -- -----------------------------------------------------------------------------
--- 9. Grupy biblioteczne jako słownik (T-59).
+-- 9. Grupy biblioteczne jako słownik (T-59) — PRZENIESIONE do sekcji 3a.
 --
--- Migracja `0019` przepisuje tekstową kolumnę `category` na wiersze
--- `library_categories`, ale przy `db reset` chodzi PRZED seedem — czyli na
--- pustej bibliotece. Demo musi więc założyć słownik samo, inaczej świeży
--- stack pokazywałby usługi bez grup.
---
--- Kolejność jak w procesie projektowym, nie alfabetyczna: najpierw projekt,
--- potem nadzór, na końcu dodatki.
+-- Blok musi stać przed pozycjami, bo pozycja wskazuje grupę kluczem obcym.
+-- Dopinanie po fakcie działało tylko dopóki istniała kolumna tekstowa
+-- `library_items.category`, którą usunęła migracja `0029`.
 -- -----------------------------------------------------------------------------
-insert into public.library_categories (id, workspace_id, name, code, sort_order)
-select v.id, w.id, v.name, v.code, v.ord
-  from public.workspaces w
- cross join (values
-   ('1c000000-0000-4000-8000-000000000001'::uuid, 'Projekt', '01', 0),
-   ('1c000000-0000-4000-8000-000000000002'::uuid, 'Nadzór',  '02', 1),
-   ('1c000000-0000-4000-8000-000000000003'::uuid, 'Dodatki', '03', 2)
- ) as v(id, name, code, ord)
- where w.owner_id = '11111111-1111-4111-8111-111111111111'
-on conflict (id) do nothing;
-
-update public.library_items i
-   set category_id = c.id
-  from public.library_categories c
- where c.workspace_id = i.workspace_id
-   and c.name = i.category
-   and i.category_id is null;
