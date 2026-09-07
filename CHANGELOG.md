@@ -3,7 +3,7 @@
 Format wg [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/).
 Wersje zgodne z [SemVer](https://semver.org/lang/pl/).
 
-## [1.2.6] – 2026-09-07
+## [1.2.7] – 2026-09-07
 
 ### Naprawione
 
@@ -21,6 +21,8 @@ wyceny zostaje bez zmian.
 
 **Rachunek pod kwotą.** Klikalny rachunek „skąd ta kwota” w edytorze ma cienką
 linię zamiast podkreślenia kropkami.
+
+## [1.2.6] – 2026-09-07
 
 ### Zmienione
 
