@@ -20,6 +20,8 @@ export interface PdfRenderPayload {
   issueDate: string;
   currency: string;
   logoDataUrl: string | null;
+  /** Własna numeracja stron wyceny — `false` tylko w scalonym pakiecie. */
+  pageNumbers?: boolean;
 }
 
 /** Wiadomość od workera: gotowy plik albo powód, dla którego go nie ma. */

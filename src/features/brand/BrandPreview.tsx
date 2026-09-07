@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useBrandPreview } from './useBrandPreview';
+import { pickHeaderLogoPath } from '@/domain/brand/logo-pick';
 import { fetchLogoAsDataUrl } from '@/pdf/logo';
 import { headerLogoVariant } from '@/pdf/theme';
 import { openBytes, runningInTauri } from '@/lib/tauri';
@@ -134,11 +135,7 @@ export function BrandPreview({ draft }: { draft: BrandKit | null }) {
 function usePreviewLogo(draft: BrandKit | null): string | null {
   const [dataUrl, setDataUrl] = useState<string | null>(null);
 
-  const path = draft
-    ? headerLogoVariant(draft) === 'dark'
-      ? draft.logoDarkPath
-      : draft.logoLightPath
-    : null;
+  const path = draft ? pickHeaderLogoPath(draft, headerLogoVariant(draft)) : null;
 
   useEffect(() => {
     let aktualne = true;

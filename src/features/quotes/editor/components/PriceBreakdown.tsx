@@ -74,7 +74,7 @@ export function PriceBreakdown({
           <PopoverTrigger
             type="button"
             aria-label={`${pl.editor.priceBreakdownOpen}: ${item.name || pl.editor.newItemName}`}
-            className="focus-visible:ring-ring rounded-[var(--radius-control)] underline decoration-dotted underline-offset-2 hover:text-[var(--doc-ink)] focus-visible:ring-2 focus-visible:outline-none"
+            className="focus-visible:ring-ring rounded-[var(--radius-control)] underline decoration-solid decoration-[0.5px] underline-offset-[3px] hover:text-[var(--doc-ink)] focus-visible:ring-2 focus-visible:outline-none"
           >
             {line}
           </PopoverTrigger>
@@ -95,7 +95,7 @@ export function PriceBreakdown({
         <button
           type="button"
           onClick={() => onPatch(item.id, { roomId: blockRoomId ?? null })}
-          className="focus-visible:ring-ring rounded-[var(--radius-control)] text-[11px] whitespace-nowrap text-[var(--doc-terracotta)] underline decoration-dotted underline-offset-2 hover:text-[var(--doc-ink)] focus-visible:ring-2 focus-visible:outline-none"
+          className="focus-visible:ring-ring rounded-[var(--radius-control)] text-[11px] whitespace-nowrap text-[var(--doc-terracotta)] underline decoration-solid decoration-[0.5px] underline-offset-[3px] hover:text-[var(--doc-ink)] focus-visible:ring-2 focus-visible:outline-none"
           title={pl.editor.pricingPin(blockRoom?.label || pl.editor.newRoomName)}
         >
           {pl.editor.pricingUnpinned} ·{' '}

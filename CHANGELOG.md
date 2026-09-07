@@ -5,6 +5,23 @@ Wersje zgodne z [SemVer](https://semver.org/lang/pl/).
 
 ## [1.2.6] – 2026-09-07
 
+### Naprawione
+
+**Logo na dokumentach.** Logo wgrane jako SVG albo WebP nie trafiało do PDF-u:
+generator umie osadzić tylko PNG i JPEG i pomijał inne formaty bez żadnego
+komunikatu — w podglądzie brandingu i w każdym eksporcie. Teraz taki plik jest
+przed złożeniem dokumentu zamieniany na PNG. Dodatkowo, gdy wybrany wariant
+logo (ciemne / jasne) nie jest wgrany, na nagłówek idzie ten drugi zamiast
+pustego pasa.
+
+**Podwójna numeracja stron w pakiecie.** Scalony pakiet dokumentów numerował
+strony ciągle w prawym dolnym rogu, a wycena drukowała tam jeszcze własne
+„1 / N”. W pakiecie wycena nie ma już własnej numeracji; eksport pojedynczej
+wyceny zostaje bez zmian.
+
+**Rachunek pod kwotą.** Klikalny rachunek „skąd ta kwota” w edytorze ma cienką
+linię zamiast podkreślenia kropkami.
+
 ### Zmienione
 
 **Wycena według pomieszczeń liczy się z miejsca, w którym leży pozycja.** Usługa

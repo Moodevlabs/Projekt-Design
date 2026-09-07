@@ -4,6 +4,7 @@ import { useBrandKit } from '@/data/queries/useBrandKit';
 import { defaultBrandKit } from '@/domain/brand/schema';
 import type { QuoteBody } from '@/domain/quote';
 import { createLogger } from '@/lib/logger';
+import { pickHeaderLogoPath } from '@/domain/brand/logo-pick';
 import { fetchLogoAsDataUrl } from './logo';
 import { quoteFileName } from './file-name';
 import { deliverPdf, type ArchiveRequest } from './export';
@@ -73,7 +74,7 @@ export function useExportPdf() {
 
         // Logo idzie do PDF jako data URL: `@react-pdf` w webview nie pobierze
         // podpisanego URL-a sam, a i tak chcemy je mieć w pliku, nie linkiem.
-        const logoPath = theme.headerLogo === 'dark' ? kit.logoDarkPath : kit.logoLightPath;
+        const logoPath = pickHeaderLogoPath(kit, theme.headerLogo);
         const logoDataUrl = await fetchLogoAsDataUrl(logoPath);
 
         // Render idzie do Web Workera, a przy jego niepowodzeniu na glowny

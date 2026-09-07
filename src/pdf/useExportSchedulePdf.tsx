@@ -5,6 +5,7 @@ import { defaultBrandKit } from '@/domain/brand/schema';
 import { scheduleHasContent, type ScheduleBody } from '@/domain/schedule';
 import type { Room } from '@/domain/quote';
 import { createLogger } from '@/lib/logger';
+import { pickHeaderLogoPath } from '@/domain/brand/logo-pick';
 import { fetchLogoAsDataUrl } from './logo';
 import { buildPdfTheme } from './theme';
 import { isPdfFontRegistered, registerPdfFonts } from './fonts/register';
@@ -61,7 +62,7 @@ export function useExportSchedulePdf() {
         registerPdfFonts();
         const theme = buildPdfTheme(kit, isPdfFontRegistered(kit.fontFamily));
 
-        const logoPath = theme.headerLogo === 'dark' ? kit.logoDarkPath : kit.logoLightPath;
+        const logoPath = pickHeaderLogoPath(kit, theme.headerLogo);
         const logoDataUrl = await fetchLogoAsDataUrl(logoPath);
 
         const [{ pdf }, { SchedulePdfDocument }] = await Promise.all([

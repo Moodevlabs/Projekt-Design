@@ -12,6 +12,7 @@ import {
   type StagesDoc,
 } from '@/domain/documents';
 import { createLogger } from '@/lib/logger';
+import { pickHeaderLogoPath } from '@/domain/brand/logo-pick';
 import { fetchLogoAsDataUrl } from './logo';
 import { renderQuotePdf } from './render';
 import { buildPdfTheme, type PdfTheme } from './theme';
@@ -94,7 +95,7 @@ export function usePackageExport() {
         const kit = brandKit.data ?? defaultBrandKit();
         registerPdfFonts();
         const theme = buildPdfTheme(kit, isPdfFontRegistered(kit.fontFamily));
-        const logoPath = theme.headerLogo === 'dark' ? kit.logoDarkPath : kit.logoLightPath;
+        const logoPath = pickHeaderLogoPath(kit, theme.headerLogo);
         const logoDataUrl = await fetchLogoAsDataUrl(logoPath);
 
         const czesci = await Promise.all(
@@ -107,6 +108,9 @@ export function usePackageExport() {
               theme,
               brandKit: kit,
               logoDataUrl,
+              // W jednym pliku numeruje `mergePdfs` — własne „n / N" wyceny
+              // stałoby w tym samym rogu (podwójna numeracja, 2026-09-07).
+              quotePageNumbers: !single,
             }),
           })),
         );
@@ -161,6 +165,7 @@ interface RenderContext extends PackageSource {
   theme: PdfTheme;
   brandKit: BrandKit;
   logoDataUrl: string | null;
+  quotePageNumbers: boolean;
 }
 
 async function renderPart(kind: PackageDocKind, ctx: RenderContext): Promise<Uint8Array> {
@@ -176,6 +181,7 @@ async function renderPart(kind: PackageDocKind, ctx: RenderContext): Promise<Uin
     return renderQuotePdf({
       body: ctx.body,
       currency: ctx.currency,
+      pageNumbers: ctx.quotePageNumbers,
       ...wspolne,
     });
   }

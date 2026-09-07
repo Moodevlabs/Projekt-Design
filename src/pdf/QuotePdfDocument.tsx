@@ -40,6 +40,15 @@ export interface QuotePdfProps {
   currency: string;
   /** Data URL logo w wariancie wskazanym przez `theme.headerLogo`. */
   logoDataUrl?: string | null;
+  /**
+   * Czy stopka ma drukować własne „n / N".
+   *
+   * `false` w scalonym PAKIECIE: tam numery ciągłe dorysowuje `mergePdfs`
+   * w tym samym rogu, więc wycena z własną numeracją dawała dwa napisy
+   * jeden na drugim („1 / 3" i „1 / 12"). Samodzielny eksport zostaje
+   * przy własnej numeracji.
+   */
+  pageNumbers?: boolean;
 }
 
 const styles = StyleSheet.create({
@@ -113,6 +122,7 @@ export function QuotePdfDocument({
   issueDate,
   currency,
   logoDataUrl,
+  pageNumbers = true,
 }: QuotePdfProps) {
   const totals = calcQuoteTotals(body);
   const discounts = calcDiscounts(body, body.rooms);
@@ -338,10 +348,12 @@ export function QuotePdfDocument({
           <Text style={{ fontSize: theme.sizes.small, color: theme.inkSoft }}>
             {brandKit.footerText ?? brandKit.companyName}
           </Text>
-          <Text
-            style={{ fontSize: theme.sizes.small, color: theme.inkSoft }}
-            render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`}
-          />
+          {pageNumbers ? (
+            <Text
+              style={{ fontSize: theme.sizes.small, color: theme.inkSoft }}
+              render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`}
+            />
+          ) : null}
         </View>
       </Page>
     </Document>

@@ -27,7 +27,10 @@ async function renderPakiet(): Promise<Uint8Array[]> {
   // `renderToBuffer`, a nie `pdf().toBlob()` jak w hooku: w Node `Blob`
   // z `@react-pdf` nie ma `arrayBuffer()`. Renderowana jest ta sama tresc.
   return Promise.all([
-    renderToBuffer(<QuotePdfDocument body={body} currency="PLN" {...wspolne} />),
+    // Jak w pakiecie: wycena BEZ własnego „n / N" — numeruje `mergePdfs`.
+    renderToBuffer(
+      <QuotePdfDocument body={body} currency="PLN" pageNumbers={false} {...wspolne} />,
+    ),
     renderToBuffer(
       <SchedulePdfDocument
         schedule={newScheduleBody({ startDate: '2026-09-01' })}
@@ -64,6 +67,27 @@ describe('pakiet dokumentów (F6.3) — cztery dokumenty w jednym pliku', () => 
     expect(scalony.getPageCount()).toBe(stronOsobno.reduce((sum, count) => sum + count, 0));
     expect(etykiety).toHaveLength(scalony.getPageCount());
     expect(etykiety.at(-1)).toBe(`${scalony.getPageCount()} / ${scalony.getPageCount()}`);
+  }, 60_000);
+
+  it('wycena w pakiecie nie drukuje własnej numeracji — numeruje tylko scalanie', async () => {
+    /*
+     * Do 2026-09-07 wycena miała własne „1 / 3" w prawym dolnym rogu, a
+     * `mergePdfs` dorysowywało tam „1 / 12" — dwa napisy jeden na drugim.
+     * Sprawdzamy, że oba warianty się składają i mają tyle samo stron: to
+     * TEN SAM dokument, różni się tylko stopką.
+     */
+    const body = sampleQuoteBody();
+    const [zNumeracja, bez] = await Promise.all([
+      renderToBuffer(<QuotePdfDocument body={body} currency="PLN" {...wspolne} />),
+      renderToBuffer(
+        <QuotePdfDocument body={body} currency="PLN" pageNumbers={false} {...wspolne} />,
+      ),
+    ]);
+    const stronA = (await PDFDocument.load(new Uint8Array(zNumeracja))).getPageCount();
+    const stronB = (await PDFDocument.load(new Uint8Array(bez))).getPageCount();
+    expect(stronB).toBe(stronA);
+    // Bez numeracji plik jest krótszy o same napisy stopki — nie dłuższy.
+    expect(bez.byteLength).toBeLessThanOrEqual(zNumeracja.byteLength);
   }, 60_000);
 
   it('mieści się w rozsądnym czasie', async () => {

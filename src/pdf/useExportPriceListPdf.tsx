@@ -4,6 +4,7 @@ import { useBrandKit } from '@/data/queries/useBrandKit';
 import { defaultBrandKit } from '@/domain/brand/schema';
 import { priceListHasContent, type PriceListDoc } from '@/domain/documents';
 import { createLogger } from '@/lib/logger';
+import { pickHeaderLogoPath } from '@/domain/brand/logo-pick';
 import { fetchLogoAsDataUrl } from './logo';
 import { buildPdfTheme } from './theme';
 import { isPdfFontRegistered, registerPdfFonts } from './fonts/register';
@@ -43,7 +44,7 @@ export function useExportPriceListPdf() {
         registerPdfFonts();
         const theme = buildPdfTheme(kit, isPdfFontRegistered(kit.fontFamily));
 
-        const logoPath = theme.headerLogo === 'dark' ? kit.logoDarkPath : kit.logoLightPath;
+        const logoPath = pickHeaderLogoPath(kit, theme.headerLogo);
         const logoDataUrl = await fetchLogoAsDataUrl(logoPath);
 
         const [{ pdf }, { PriceListPdfDocument }] = await Promise.all([
