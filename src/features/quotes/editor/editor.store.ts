@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { safeCurrency } from '@/domain/money';
+import { newId } from '@/domain/id';
 import { immer } from 'zustand/middleware/immer';
 import { current } from 'immer';
 import {
@@ -244,6 +245,14 @@ export interface EditorState {
    * wywolanie nie dubluje blokow i nie brudzi dokumentu, gdy nie ma czego dodac.
    */
   addRoomBlocks: (sectionId: string) => void;
+  /**
+   * „Do wszystkich pomieszczeń" (T-129): wstawia KLON pozycji do bloku
+   * każdego pomieszczenia wyceny w sekcji, zakładając brakujące bloki.
+   * Każdy klon ma własne `id` i `roomId` swojego bloku, więc liczy się za
+   * swoje pomieszczenie (T-126). Rabaty tu nie trafiają — obsługuje je
+   * wołający, jak przy `insertItems`.
+   */
+  insertItemToRoomBlocks: (sectionId: string, item: Item) => void;
   renameGroup: (groupId: string, name: string) => void;
   removeGroup: (groupId: string) => void;
 
@@ -373,6 +382,27 @@ function findItem(body: QuoteBody, itemId: string): Item | undefined {
     if (item) return item;
   }
   return undefined;
+}
+
+/**
+ * Zakłada w sekcji blok (grupę) dla każdego pomieszczenia, którego jeszcze
+ * nie ma. Zwraca liczbę dodanych — powtórne wywołanie nic nie dubluje.
+ *
+ * Nazwa bloku bierze się z pomieszczenia przy renderowaniu, ale zapisujemy ją
+ * też tutaj — zestaw zapisany do biblioteki albo wycena otwarta po usunięciu
+ * pomieszczenia dalej mają czytelny nagłówek.
+ */
+function ensureRoomBlocks(section: Section, rooms: Room[]): number {
+  const juzSa = new Set(
+    section.groups.map((group) => group.roomId).filter((id): id is string => id !== null),
+  );
+  let dodane = 0;
+  for (const room of rooms) {
+    if (juzSa.has(room.id)) continue;
+    section.groups.push(newGroup({ name: room.label, roomId: room.id }));
+    dodane += 1;
+  }
+  return dodane;
 }
 
 function findSection(body: QuoteBody, sectionId: string): Section | undefined {
@@ -713,22 +743,22 @@ export const useEditorStore = create<EditorState>()(
         if (!state.body) return;
         const section = findSection(state.body, sectionId);
         if (!section) return;
+        if (ensureRoomBlocks(section, state.body.rooms) > 0) state.saveState = 'dirty';
+      }),
 
-        const juzSa = new Set(
-          section.groups.map((group) => group.roomId).filter((id): id is string => id !== null),
-        );
+    insertItemToRoomBlocks: (sectionId, item) =>
+      set((state) => {
+        if (!state.body) return;
+        const section = findSection(state.body, sectionId);
+        if (!section) return;
+        if (state.body.rooms.length === 0) return;
 
-        let dodane = 0;
-        for (const room of state.body.rooms) {
-          if (juzSa.has(room.id)) continue;
-          // Nazwa bloku bierze sie z pomieszczenia przy renderowaniu, ale
-          // zapisujemy ja tez tutaj — zestaw zapisany do biblioteki albo wycena
-          // otwarta po usunieciu pomieszczenia dalej maja czytelny naglowek.
-          section.groups.push(newGroup({ name: room.label, roomId: room.id }));
-          dodane += 1;
+        ensureRoomBlocks(section, state.body.rooms);
+        for (const group of section.groups) {
+          if (group.roomId === null) continue;
+          group.items.push({ ...item, id: newId(), roomId: group.roomId });
         }
-
-        if (dodane > 0) state.saveState = 'dirty';
+        state.saveState = 'dirty';
       }),
 
     addGroup: (sectionId) =>

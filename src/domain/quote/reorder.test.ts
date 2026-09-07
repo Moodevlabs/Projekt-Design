@@ -295,7 +295,12 @@ describe('moveItem — przypięcie do pomieszczenia (T-126)', () => {
     const s1 = newSection({ groups: [blok, zwykla] });
     const body = newQuoteBody({ sections: [s1] });
 
-    const luzem = moveItem(body, { itemId: i1.id, toSectionId: s1.id, toGroupId: null, toIndex: 0 });
+    const luzem = moveItem(body, {
+      itemId: i1.id,
+      toSectionId: s1.id,
+      toGroupId: null,
+      toIndex: 0,
+    });
     expect(luzem.sections[0]!.items[0]!.roomId).toBeNull();
 
     const doZwyklej = moveItem(body, {

@@ -29,6 +29,8 @@ export interface ScopePanelProps {
   pricing: PricingContext;
   onInsertItems: (sectionId: string, groupId: string | null, items: Item[]) => void;
   onInsertGroup: (sectionId: string, group: Group) => void;
+  /** Cel „wszystkie pomieszczenia" (T-129): klon do bloku każdego pomieszczenia. */
+  onInsertItemToRoomBlocks: (sectionId: string, item: Item) => void;
 }
 
 type Tab = 'items' | 'sets';
@@ -50,7 +52,12 @@ const NO_ITEMS: LibraryItem[] = [];
  * otwarty, ta sama usługa może wejść dwa razy (dwie wizualizacje to dwie
  * pozycje). Cel („Dodaj do”) da się zmienić bez zamykania.
  */
-export function ScopePanel({ pricing, onInsertItems, onInsertGroup }: ScopePanelProps) {
+export function ScopePanel({
+  pricing,
+  onInsertItems,
+  onInsertGroup,
+  onInsertItemToRoomBlocks,
+}: ScopePanelProps) {
   const open = useScopePanel((state) => state.open);
   const target = useScopePanel((state) => state.target);
   const close = useScopePanel((state) => state.close);
@@ -69,8 +76,8 @@ export function ScopePanel({ pricing, onInsertItems, onInsertGroup }: ScopePanel
   /** Ile razy dodano daną pozycję w tej sesji panelu. */
   const [added, setAdded] = useState<Record<string, number>>({});
 
-  // Zestaw to grupa — nie da się go wstawić DO grupy.
-  const setsAllowed = target?.groupId === null;
+  // Zestaw to grupa — nie da się go wstawić DO grupy ani do każdego pomieszczenia.
+  const setsAllowed = target?.groupId === null && !target.allRooms;
   const activeTab: Tab = setsAllowed ? tab : 'items';
 
   const colorById = useMemo(() => {
@@ -117,7 +124,8 @@ export function ScopePanel({ pricing, onInsertItems, onInsertGroup }: ScopePanel
     if (!source) return;
     const item = toQuoteItem(source);
     if (!item) return;
-    onInsertItems(target.sectionId, target.groupId, [item]);
+    if (target.allRooms) onInsertItemToRoomBlocks(target.sectionId, item);
+    else onInsertItems(target.sectionId, target.groupId, [item]);
     setAdded((current) => ({ ...current, [id]: (current[id] ?? 0) + 1 }));
   };
 

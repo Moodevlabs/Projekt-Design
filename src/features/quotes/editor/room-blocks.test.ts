@@ -87,4 +87,47 @@ describe('editor.store.addRoomBlocks', () => {
       expect(grupy()[1]!.items[0]!.roomId).toBe(salon.id);
     });
   });
+
+  describe('insertItemToRoomBlocks — „Do wszystkich pomieszczeń" (T-129)', () => {
+    const wizualizacja = () =>
+      newItem({
+        name: 'Wizualizacja',
+        pricing: {
+          mode: 'per_room',
+          baseCents: 10_000,
+          perRoomCents: {},
+          defaultPerRoomCents: 25_000,
+          roomScope: 'all',
+        },
+      });
+
+    it('zakłada brakujące bloki i wstawia klon z własnym id i roomId do każdego', () => {
+      useEditorStore.getState().insertItemToRoomBlocks(sekcja.id, wizualizacja());
+      const bloki = grupy();
+      expect(bloki.map((group) => group.roomId)).toEqual([kuchnia.id, salon.id]);
+      const ids = bloki.map((group) => group.items[0]!.id);
+      expect(new Set(ids).size).toBe(2);
+      expect(bloki.map((group) => group.items[0]!.roomId)).toEqual([kuchnia.id, salon.id]);
+      // 250 zł za kuchnię + 250 zł za salon, bez bazy i bez podwajania.
+      expect(calcQuoteTotals(useEditorStore.getState().body!).itemsCents).toBe(50_000);
+      expect(useEditorStore.getState().saveState).toBe('dirty');
+    });
+
+    it('istniejące bloki dostają pozycję bez dublowania bloków', () => {
+      useEditorStore.getState().addRoomBlocks(sekcja.id);
+      useEditorStore.getState().insertItemToRoomBlocks(sekcja.id, wizualizacja());
+      expect(grupy()).toHaveLength(2);
+      expect(grupy().every((group) => group.items.length === 1)).toBe(true);
+    });
+
+    it('bez pomieszczeń nic nie robi', () => {
+      useEditorStore.setState((state) => ({
+        body: { ...state.body!, rooms: [] },
+        saveState: 'saved',
+      }));
+      useEditorStore.getState().insertItemToRoomBlocks(sekcja.id, wizualizacja());
+      expect(grupy()).toHaveLength(0);
+      expect(useEditorStore.getState().saveState).toBe('saved');
+    });
+  });
 });

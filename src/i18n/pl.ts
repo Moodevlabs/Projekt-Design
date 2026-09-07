@@ -875,6 +875,9 @@ Z wyrazami szacunku`,
     scopeTarget: 'Dodaj do',
     scopeTargetLabel: (section: string, group: string | null) =>
       group ? `${section} › ${group}` : section,
+    /** Cel „wszystkie pomieszczenia" (T-129) — klon usługi do bloku każdego pomieszczenia. */
+    scopeTargetAllRooms: 'wszystkie pomieszczenia',
+    scopeOpenAllRooms: 'Do wszystkich pomieszczeń',
     scopeSearch: 'Szukaj usługi…',
     scopeCount: (count: number) => {
       if (count === 1) return '1 usługa';

@@ -417,6 +417,7 @@ function EditorSurface({
   const toggleItem = useEditorStore((state) => state.toggleItem);
   const removeItem = useEditorStore((state) => state.removeItem);
   const insertItems = useEditorStore((state) => state.insertItems);
+  const insertItemToRoomBlocks = useEditorStore((state) => state.insertItemToRoomBlocks);
   const insertGroup = useEditorStore((state) => state.insertGroup);
   /*
    * Słownik grup bibliotecznych — do znacznika pochodzenia na nagłówku bloku
@@ -488,6 +489,21 @@ function EditorSurface({
       }
     },
     [insertItems, addDiscount],
+  );
+
+  /**
+   * „Do wszystkich pomieszczeń" (T-129). Rabat nie ma pomieszczenia — idzie
+   * na listę rabatów RAZ, tak jak przy zwykłym wstawianiu.
+   */
+  const handleInsertToRoomBlocks = useCallback(
+    (sectionId: string, item: Item) => {
+      if (item.kind === 'discount') {
+        handleInsertItems(sectionId, null, [item]);
+        return;
+      }
+      insertItemToRoomBlocks(sectionId, item);
+    },
+    [insertItemToRoomBlocks, handleInsertItems],
   );
 
   /**
@@ -714,6 +730,7 @@ function EditorSurface({
           pricing={pricing}
           onInsertItems={handleInsertItems}
           onInsertGroup={insertGroup}
+          onInsertItemToRoomBlocks={handleInsertToRoomBlocks}
         />
 
         {/* „Dodaj grupę → z biblioteki" (T-120) — też jeden na wycenę,

@@ -99,7 +99,16 @@ export function libraryItemToQuoteItem(
     name: libraryItem.name,
     description: libraryItem.description,
     qty: 1,
-    unitPriceCents: libraryItem.unitPriceCents,
+    /*
+     * Pusta cena znaczy „wycena indywidualna" TYLKO przy regule `flat`
+     * (`pricingChoiceFor`). Wpis parametryczny z `null` to relikt seedów
+     * sprzed T-129 — od T-126 `null` wyłączałby go z sumy mimo stawek, więc
+     * normalizujemy do zera: liczy reguła.
+     */
+    unitPriceCents:
+      libraryItem.pricing.mode === 'flat'
+        ? libraryItem.unitPriceCents
+        : (libraryItem.unitPriceCents ?? 0),
     // Jednostka jest SNAPSHOTEM z biblioteki i kaskaduje jak nazwa i cena
     // (§5 reguła 3) — bez niej wiersz „80 × 12 zł" gubi „m²".
     unit: libraryItem.unit ?? 'lump',
