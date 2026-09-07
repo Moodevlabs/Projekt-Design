@@ -880,11 +880,12 @@ export const useEditorStore = create<EditorState>()(
         if (!state.body) return;
         const section = findSection(state.body, sectionId);
         if (!section) return;
-        const target = groupId
-          ? section.groups.find((group) => group.id === groupId)?.items
-          : section.items;
+        const group = groupId ? section.groups.find((candidate) => candidate.id === groupId) : null;
+        const target = groupId ? group?.items : section.items;
         if (!target) return;
-        target.push(newItem({ name: '' }));
+        // Pozycja liczy się z miejsca, w którym leży (T-126): w bloku
+        // pomieszczenia dostaje jego `roomId`.
+        target.push(newItem({ name: '', roomId: group?.roomId ?? null }));
         state.saveState = 'dirty';
       }),
 
@@ -966,12 +967,15 @@ export const useEditorStore = create<EditorState>()(
         const section = findSection(state.body, sectionId);
         if (!section) return;
 
-        const target = groupId
-          ? section.groups.find((group) => group.id === groupId)?.items
-          : section.items;
+        const group = groupId ? section.groups.find((candidate) => candidate.id === groupId) : null;
+        const target = groupId ? group?.items : section.items;
         if (!target) return;
 
-        target.push(...items);
+        // Pozycja liczy się z miejsca, w którym leży (T-126): wstawiona do
+        // bloku pomieszczenia liczy się ZA TO pomieszczenie, więc dostaje jego
+        // `roomId`. Poza blokiem `roomId` jest `null` — usługa globalna.
+        const roomId = group?.roomId ?? null;
+        target.push(...items.map((item) => ({ ...item, roomId })));
         state.saveState = 'dirty';
       }),
 

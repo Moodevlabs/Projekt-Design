@@ -41,6 +41,13 @@ export function moveItem(body: QuoteBody, args: MoveItemArgs): QuoteBody {
   if (targetList === null) return body;
 
   found.list.splice(found.index, 1);
+  // Pozycja liczy się z miejsca, w którym leży (T-126): przeniesiona do bloku
+  // pomieszczenia dostaje jego `roomId`, przeniesiona poza blok — `null`.
+  const targetGroup =
+    args.toGroupId === null
+      ? null
+      : (targetSection.groups.find((group) => group.id === args.toGroupId) ?? null);
+  found.item.roomId = targetGroup?.roomId ?? null;
   targetList.splice(clampIndex(args.toIndex, targetList.length), 0, found.item);
   return next;
 }

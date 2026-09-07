@@ -271,3 +271,39 @@ describe('nudgeSection', () => {
     expect(body).toEqual(snapshot);
   });
 });
+
+describe('moveItem — przypięcie do pomieszczenia (T-126)', () => {
+  const ROOM = '11111111-1111-4111-8111-111111111111';
+
+  it('przeniesiona do bloku pomieszczenia dostaje jego roomId', () => {
+    const i1 = newItem({ name: 'i1' });
+    const blok = newGroup({ name: 'Kuchnia', roomId: ROOM });
+    const s1 = newSection({ items: [i1], groups: [blok] });
+    const next = moveItem(newQuoteBody({ sections: [s1] }), {
+      itemId: i1.id,
+      toSectionId: s1.id,
+      toGroupId: blok.id,
+      toIndex: 0,
+    });
+    expect(next.sections[0]!.groups[0]!.items[0]!.roomId).toBe(ROOM);
+  });
+
+  it('przeniesiona poza blok traci roomId', () => {
+    const i1 = newItem({ name: 'i1', roomId: ROOM });
+    const blok = newGroup({ name: 'Kuchnia', roomId: ROOM, items: [i1] });
+    const zwykla = newGroup({ name: 'Dodatki' });
+    const s1 = newSection({ groups: [blok, zwykla] });
+    const body = newQuoteBody({ sections: [s1] });
+
+    const luzem = moveItem(body, { itemId: i1.id, toSectionId: s1.id, toGroupId: null, toIndex: 0 });
+    expect(luzem.sections[0]!.items[0]!.roomId).toBeNull();
+
+    const doZwyklej = moveItem(body, {
+      itemId: i1.id,
+      toSectionId: s1.id,
+      toGroupId: zwykla.id,
+      toIndex: 0,
+    });
+    expect(doZwyklej.sections[0]!.groups[1]!.items[0]!.roomId).toBeNull();
+  });
+});

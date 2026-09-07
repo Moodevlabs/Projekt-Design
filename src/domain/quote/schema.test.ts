@@ -27,6 +27,8 @@ describe('ItemSchema', () => {
       // Pozycja bez reguły cenowej liczy się jak przed cennikiem
       // parametrycznym — `qty × cena`.
       pricing: { mode: 'flat' },
+      // Nadpisanie ręczne (T-127) — domyślnie liczy reguła.
+      priceOverrideCents: null,
       roomId: null,
       // Etykiety (F2.3) są opcjonalne — pozycja bez nich to zwykła praca.
       tags: [],

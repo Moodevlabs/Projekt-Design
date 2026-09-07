@@ -109,6 +109,7 @@ export function libraryItemToQuoteItem(
     // Reguła jedzie z biblioteki — pozycja wstawiona do wyceny liczy się tak,
     // jak opisano ją raz w cenniku.
     pricing: libraryItem.pricing,
+    priceOverrideCents: null,
     roomId: null,
     tags: [],
     ...overrides,
@@ -130,6 +131,7 @@ export function librarySnapshotToQuoteItem(snapshot: LibraryItemSnapshot): Item 
     enabled: true,
     libraryItemId: snapshot.libraryItemId,
     pricing: { mode: 'flat' },
+    priceOverrideCents: null,
     roomId: null,
     // Snapshot zestawu nie niesie etykiet — sa cecha konkretnej wyceny
     // (F2.3), a nie opisu uslugi w bibliotece.

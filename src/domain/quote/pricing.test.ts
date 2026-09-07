@@ -173,6 +173,83 @@ describe('calcItemUnits — per_frame (parytet z K26)', () => {
   });
 });
 
+describe('calcItemUnits — per_room w bloku pomieszczenia (T-126, arkusz wiersze 22–92)', () => {
+  /** „Wizualizacja”: 350 zl za kuchnie, 250 zl za inne, baza 100 zl (ignorowana w bloku). */
+  const wizualizacja = (partial: Partial<Item> = {}): Item =>
+    newItem({
+      name: 'Wizualizacja',
+      pricing: {
+        mode: 'per_room',
+        baseCents: 10_000,
+        perRoomCents: { [KUCHNIA]: 35_000 },
+        defaultPerRoomCents: 25_000,
+        roomScope: 'visual',
+      },
+      ...partial,
+    });
+
+  it('pozycja przypieta do pomieszczenia liczy TYLKO to pomieszczenie, bez bazy', () => {
+    const rooms = siedemPomieszczen();
+    const kuchnia = rooms.find((room) => room.roomTypeId === KUCHNIA)!;
+    expect(calcItemUnits(wizualizacja({ roomId: kuchnia.id }), rooms)).toBe(35_000);
+    expect(calcItemUnits(wizualizacja({ roomId: rooms[0]!.id }), rooms)).toBe(25_000);
+  });
+
+  it('ilosc pomieszczenia mnozy stawke (sypialnia ×2)', () => {
+    const rooms = siedemPomieszczen();
+    const sypialnia = rooms.find((room) => room.label === 'Sypialnia')!;
+    sypialnia.qty = 2;
+    expect(calcItemUnits(wizualizacja({ roomId: sypialnia.id }), rooms)).toBe(50_000);
+  });
+
+  it('blok nie patrzy na zasieg reguly — „w kuchni” znaczy „za kuchnie”', () => {
+    const rooms = siedemPomieszczen();
+    const kuchnia = rooms.find((room) => room.roomTypeId === KUCHNIA)!;
+    kuchnia.includedInVisual = false;
+    expect(calcItemUnits(wizualizacja({ roomId: kuchnia.id }), rooms)).toBe(35_000);
+  });
+
+  it('ta sama usluga luzem jest globalna: baza + wszystkie pomieszczenia', () => {
+    // 100 + 350 (kuchnia) + 6 × 250 = 1 950 zl.
+    expect(calcItemUnits(wizualizacja(), siedemPomieszczen())).toBe(195_000);
+  });
+
+  it('martwe przypiecie (pomieszczenie usuniete) wraca do wariantu globalnego', () => {
+    expect(calcItemUnits(wizualizacja({ roomId: newId() }), siedemPomieszczen())).toBe(195_000);
+  });
+
+  it('qty pozycji mnozy wynik takze w bloku', () => {
+    const rooms = siedemPomieszczen();
+    expect(calcItemUnits(wizualizacja({ roomId: rooms[0]!.id, qty: 2 }), rooms)).toBe(50_000);
+  });
+});
+
+describe('calcItemUnits — cena null i nadpisanie (T-126/T-127)', () => {
+  const zeStawkami: Item['pricing'] = {
+    mode: 'per_room',
+    baseCents: 20_000,
+    perRoomCents: {},
+    defaultPerRoomCents: 1_500,
+    roomScope: 'all',
+  };
+
+  it('pozycja parametryczna z cena null jest indywidualna: NIE wchodzi do sumy', () => {
+    // Przed T-126 stawki liczyly sie mimo `null`, a wiersz mowil „wycena indywidualna”.
+    const item = newItem({ unitPriceCents: null, pricing: zeStawkami });
+    expect(calcItemUnits(item, siedemPomieszczen())).toBe(0);
+  });
+
+  it('nadpisanie reczne bije regule i jest WARTOSCIA pozycji (qty nie mnozy)', () => {
+    const item = newItem({ qty: 3, pricing: zeStawkami, priceOverrideCents: 123_400 });
+    expect(calcItemUnits(item, siedemPomieszczen())).toBe(123_400);
+  });
+
+  it('nadpisanie bije takze „wycene indywidualna”', () => {
+    const item = newItem({ unitPriceCents: null, priceOverrideCents: 5_000 });
+    expect(calcItemUnits(item)).toBe(5_000);
+  });
+});
+
 describe('calcQuoteTotals z pomieszczeniami', () => {
   it('sumuje pozycje parametryczne razem ze zwyklymi', () => {
     const rooms = siedemPomieszczen();

@@ -311,13 +311,45 @@ function perRoomPrice(
 }
 
 /**
+ * Pomieszczenie, do którego pozycja jest przypięta — albo `null`, gdy pozycja
+ * jest „globalna" (leży luzem / w zwykłej grupie) lub jej pomieszczenie
+ * zniknęło z wyceny.
+ */
+export function itemRoom(item: Item, rooms: Room[]): Room | null {
+  if (item.roomId === null) return null;
+  return rooms.find((candidate) => candidate.id === item.roomId) ?? null;
+}
+
+/**
  * Wartość pozycji w groszach, wg jej reguły cenowej.
  *
  * ```
- * flat:      qty × cena jednostkowa
- * per_room:  qty × (baza + Σ po pomieszczeniach w zasięgu: cena_pom × ilość_pom)
- * per_frame: qty × ilość_pom × (cena_pom + baza × kadry)
+ * (nadpisanie)         override                       — patrz `priceOverrideCents`
+ * (indywidualna)       0                              — `unitPriceCents === null`
+ * flat:                qty × cena jednostkowa
+ * per_room, globalna:  qty × (baza + Σ po pomieszczeniach w zasięgu: cena_pom × ilość_pom)
+ * per_room, w bloku:   qty × cena_pom × ilość_pom        (BEZ bazy — patrz niżej)
+ * per_frame:           qty × ilość_pom × (cena_pom + baza × kadry)
  * ```
+ *
+ * **Pozycja liczy się z miejsca, w którym leży** (T-126). Ta sama usługa
+ * „według pomieszczenia" wstawiona luzem jest usługą globalną (arkusz
+ * `OFERTA - DANE`: projekt budowlany = 200 + 15 × 7 pomieszczeń), a wstawiona
+ * do bloku pomieszczenia (`roomId`) liczy się **tylko za to pomieszczenie**
+ * (arkusz `OFERTA - DOKUMENT`, wiersze 22–92: blok „Kuchnia" ma własną
+ * wizualizację, oświetlenie, listę zakupową). Do T-126 kalkulacja znała tylko
+ * wariant globalny, więc „Rozpisz na pomieszczenia" liczyło w każdym bloku
+ * sumę wszystkich pomieszczeń — dokładnie ten błąd zgłosił właściciel.
+ *
+ * **W bloku nie ma bazy.** Wiersze per pomieszczenie w arkuszu jej nie mają;
+ * doliczanie bazy w każdym z siedmiu bloków dawałoby siedem baz, czego nikt
+ * nie odtworzy z dokumentu. Blok nie patrzy też na `roomScope` — skoro
+ * użytkownik wstawił usługę „w kuchni", to znaczy „za kuchnię".
+ *
+ * **`null` sprawdzamy PRZED regułą.** Wcześniej pozycja parametryczna z pustą
+ * ceną wchodziła do sumy (ze stawek), a wiersz, PDF i podsumowanie mówiły
+ * „wycena indywidualna". Teraz `null` znaczy to samo w każdym trybie: pozycja
+ * jest w ofercie, ale nie w sumie.
  *
  * `qty` pozycji mnoży wynik w każdym trybie — tak jak wszędzie indziej
  * w aplikacji. W arkuszu usługi parametryczne mają `qty = 1`, więc parytet
@@ -327,29 +359,12 @@ function perRoomPrice(
  * całkowita, więc zaokrąglanie składników gubiłoby grosze.
  */
 export function calcItemUnits(item: Item, rooms: Room[] = []): number {
-  const pricing = item.pricing;
-
-  if (pricing.mode === 'per_room') {
-    const perRoom = rooms
-      .filter((room) => roomInScope(room, pricing.roomScope))
-      .reduce(
-        (sum, room) =>
-          sum + perRoomPrice(room, pricing.perRoomCents, pricing.defaultPerRoomCents) * room.qty,
-        0,
-      );
-    return roundCents(item.qty * (pricing.baseCents + perRoom));
-  }
-
-  if (pricing.mode === 'per_frame') {
-    // Pozycja bez przypisanego pomieszczenia liczy się raz, po cenie domyślnej —
-    // inaczej wizualizacja „luzem” cicho wypadłaby z wyceny.
-    const room = rooms.find((candidate) => candidate.id === item.roomId) ?? null;
-    const roomCents = room
-      ? perRoomPrice(room, pricing.perRoomCents, pricing.defaultPerRoomCents)
-      : pricing.defaultPerRoomCents;
-    const frames = item.frames ?? 1;
-    return roundCents(item.qty * (room?.qty ?? 1) * (roomCents + pricing.baseCents * frames));
-  }
+  /*
+   * Nadpisanie ręczne (T-127) bije wszystko — także „indywidualną". To jest
+   * WARTOŚĆ pozycji, nie cena jednostkowa: kratka w edytorze pokazuje wynik
+   * i to w niej użytkownik wpisał kwotę, którą chce widzieć w ofercie.
+   */
+  if (item.priceOverrideCents !== null) return item.priceOverrideCents;
 
   /*
    * Cena `null` = „wycena indywidualna" (T-60): pozycja jest w ofercie, ale
@@ -358,6 +373,38 @@ export function calcItemUnits(item: Item, rooms: Room[] = []): number {
    * indywidualnie"), zamiast udawać, że kosztuje 0 zł.
    */
   if (item.unitPriceCents === null) return 0;
+
+  const pricing = item.pricing;
+
+  if (pricing.mode === 'per_room') {
+    const room = itemRoom(item, rooms);
+    if (room) {
+      const cents = perRoomPrice(room, pricing.perRoomCents, pricing.defaultPerRoomCents);
+      return roundCents(item.qty * cents * room.qty);
+    }
+
+    const perRoom = rooms
+      .filter((candidate) => roomInScope(candidate, pricing.roomScope))
+      .reduce(
+        (sum, candidate) =>
+          sum +
+          perRoomPrice(candidate, pricing.perRoomCents, pricing.defaultPerRoomCents) *
+            candidate.qty,
+        0,
+      );
+    return roundCents(item.qty * (pricing.baseCents + perRoom));
+  }
+
+  if (pricing.mode === 'per_frame') {
+    // Pozycja bez przypisanego pomieszczenia liczy się raz, po cenie domyślnej —
+    // inaczej wizualizacja „luzem” cicho wypadłaby z wyceny.
+    const room = itemRoom(item, rooms);
+    const roomCents = room
+      ? perRoomPrice(room, pricing.perRoomCents, pricing.defaultPerRoomCents)
+      : pricing.defaultPerRoomCents;
+    const frames = item.frames ?? 1;
+    return roundCents(item.qty * (room?.qty ?? 1) * (roomCents + pricing.baseCents * frames));
+  }
 
   // qty może być ułamkowe (np. 2,5 h) — zaokrąglamy dopiero wartość pozycji.
   return roundCents(item.qty * item.unitPriceCents);
