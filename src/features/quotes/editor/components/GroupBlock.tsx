@@ -246,6 +246,7 @@ export const GroupBlock = memo(function GroupBlock({
               onPatch={onPatchItem}
               onRemove={onRemoveItem}
               rooms={rooms}
+              blockRoomId={group.roomId}
               textInfo={textInfo}
               pricing={pricing}
               variants={variants}

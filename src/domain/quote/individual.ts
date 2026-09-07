@@ -18,8 +18,19 @@ function allItems(body: QuoteBody): Item[] {
   ]);
 }
 
+/**
+ * Czy pozycja jest „wyceniana indywidualnie" — jedno pytanie dla wiersza,
+ * PDF-u i podsumowania, żeby nie mówiły trzech różnych rzeczy.
+ *
+ * Nadpisanie ręczne (T-127) zdejmuje ten status: ktoś wpisał kwotę, więc
+ * pozycja MA cenę i wchodzi do sumy — `calcItemUnits` liczy ją tak samo.
+ */
+export function isIndividualItem(item: Item): boolean {
+  return item.unitPriceCents === null && item.priceOverrideCents === null;
+}
+
 export function countIndividualItems(body: QuoteBody): number {
   return allItems(body).filter(
-    (item) => item.enabled && item.kind === 'item' && item.unitPriceCents === null,
+    (item) => item.enabled && item.kind === 'item' && isIndividualItem(item),
   ).length;
 }

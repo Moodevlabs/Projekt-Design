@@ -1191,11 +1191,50 @@ Z wyrazami szacunku`,
     placeholdersTitle: 'Pola podstawiane przy podglądzie',
     itemVariantLabel: 'Wariant pozycji',
     itemVariantPlaceholder: 'Wybierz wariant',
-    /** Skąd wzięła się cena pozycji parametrycznej — np. „baza 200,00 zł + 7 pom.”. */
-    pricingFromRooms: (base: string, rooms: number) =>
-      rooms === 1 ? `baza ${base} + 1 pom.` : `baza ${base} + ${rooms} pom.`,
+    /*
+     * SKĄD TA KWOTA (T-128). Jednowierszowy rachunek pod kwotą pozycji
+     * parametrycznej — ma się dać sprawdzić w głowie. Pełne rozbicie jest
+     * w popoverze (`priceBreakdown*`).
+     */
+    /** Usługa globalna: „200,00 zł + 7 pom.” / bez bazy: „7 pom. × stawka”. */
+    pricingFromRooms: (base: string | null, rooms: number) => {
+      const pom = rooms === 1 ? '1 pom.' : `${rooms} pom.`;
+      return base === null ? `${pom} × stawka` : `${base} + ${pom}`;
+    },
+    /** Pozycja w bloku: „kuchnia: 350,00 zł” / „sypialnia ×2: 2 × 250,00 zł”. */
+    pricingFromRoom: (room: string, qty: number, rate: string) =>
+      qty === 1 ? `${room}: ${rate}` : `${room} ×${qty}: ${qty} × ${rate}`,
     pricingFromFrames: (frames: number) =>
       frames === 1 ? 'pomieszczenie + 1 kadr' : `pomieszczenie + ${frames} kadry/ów`,
+    pricingOverridden: 'ręcznie',
+    pricingRestore: 'Przywróć z cennika',
+    pricingNoRooms: 'brak pomieszczeń w wycenie',
+    pricingNoRates: 'brak stawek — uzupełnij w Bibliotece → Stawki',
+    /** Pozycja parametryczna w bloku pomieszczenia sprzed T-126 — nieprzypięta. */
+    pricingUnpinned: 'liczy wszystkie pomieszczenia',
+    pricingPin: (room: string) => `Przypnij do: ${room}`,
+    priceBreakdownOpen: 'Skąd ta kwota',
+    priceBreakdownTitle: 'Skąd ta kwota',
+    priceBreakdownBase: 'Baza',
+    priceBreakdownRoomsScope: {
+      all: 'Wszystkie pomieszczenia',
+      visual: 'Pomieszczenia w części wizualnej',
+      technical: 'Pomieszczenia w części technicznej',
+    } as const,
+    priceBreakdownRoom: 'Pomieszczenie',
+    priceBreakdownFrames: (frames: number, base: string) =>
+      frames === 1 ? `1 kadr × ${base}` : `${frames} kadry/ów × ${base}`,
+    priceBreakdownItemQty: (qty: number) => `× ilość ${qty}`,
+    priceBreakdownTotal: 'Razem',
+    priceBreakdownNoRooms:
+      'Wycena nie ma pomieszczeń — dodaj je w panelu „Pomieszczenia” po prawej.',
+    priceBreakdownRatesHint:
+      'Stawki za pomieszczenia ustawia się w Bibliotece, w zakładce „Stawki”. Zmiana stawki obowiązuje w nowych wycenach; otwartą aktualizuje panel biblioteki.',
+    priceBreakdownOverrideHint:
+      'Kwota wpisana ręcznie. Reguła i stawki zostały zachowane — „Przywróć z cennika” wraca do wyliczenia.',
+    priceBreakdownMakeIndividual: 'Wyceń indywidualnie',
+    priceBreakdownIndividualHint:
+      'Pozycja jest w ofercie, ale nie ma ceny i nie wchodzi do sumy. Wpisanie kwoty w polu ceny nadaje ją z powrotem.',
 
     // Rabaty jako osobna lista (T-36).
     discountsTitle: 'Rabaty',
@@ -1760,9 +1799,12 @@ Z wyrazami szacunku`,
     picker: {
       search: 'Szukaj w bibliotece',
       count: (count: number) =>
-        count === 1 ? '1 pozycja' : count >= 2 && count <= 4 ? `${count} pozycje` : `${count} pozycji`,
-      addedTotal: (count: number) =>
-        count === 1 ? 'Dodano 1 pozycję' : `Dodano ${count} pozycji`,
+        count === 1
+          ? '1 pozycja'
+          : count >= 2 && count <= 4
+            ? `${count} pozycje`
+            : `${count} pozycji`,
+      addedTotal: (count: number) => (count === 1 ? 'Dodano 1 pozycję' : `Dodano ${count} pozycji`),
       done: 'Gotowe',
     },
     sheetHint: 'Zmiany cen i nazw można od razu przenieść na otwartą wycenę.',
@@ -1872,7 +1914,8 @@ Z wyrazami szacunku`,
         pickerSearch: 'Szukaj w bibliotece',
         pickerEmpty: 'Brak dopasowań',
         pickerNoEntries: 'Wymagane jest wcześniejsze dodanie wpisów w zakładce „Pozycje”.',
-        pickerHint: 'Zestaw trzyma KOPIE wpisów z chwili dodania — późniejsza zmiana wpisu w bibliotece go nie ruszy.',
+        pickerHint:
+          'Zestaw trzyma KOPIE wpisów z chwili dodania — późniejsza zmiana wpisu w bibliotece go nie ruszy.',
         pickerAddLabel: (name: string) => `Dodaj do zestawu: ${name}`,
         itemsHint:
           'Zestaw trzyma KOPIE wpisów z chwili dodania — późniejsza zmiana wpisu w bibliotece go nie ruszy. Zmiany zawartości zapisywane są automatycznie.',
@@ -2049,7 +2092,8 @@ Z wyrazami szacunku`,
     groupAddItem: 'Dodaj pozycję',
     groupAddItemFor: (name: string) => `Dodaj pozycję do zestawu: ${name}`,
     groupPickerSearch: 'Szukaj w bibliotece',
-    groupPickerHint: 'Zestaw trzyma KOPIE pozycji z chwili dodania — późniejsza zmiana ceny w bibliotece go nie ruszy.',
+    groupPickerHint:
+      'Zestaw trzyma KOPIE pozycji z chwili dodania — późniejsza zmiana ceny w bibliotece go nie ruszy.',
     groupPickerAddLabel: (name: string) => `Dodaj do zestawu: ${name}`,
     groupPickerEmpty: 'Brak dopasowań',
     groupPickerNoItems: 'Wymagane jest wcześniejsze dodanie pozycji w zakładce „Pozycje”.',
@@ -2559,7 +2603,8 @@ Z wyrazami szacunku`,
   auth: {
     /** Pole opcjonalne od 2026-09-01 — etykieta musi to mówić przed kliknięciem. */
     fullNameOptional: 'Imię i nazwisko (opcjonalnie)',
-    fullNameHint: 'Podpisuje dokumenty wysyłane inwestorom. Można uzupełnić później w ustawieniach.',
+    fullNameHint:
+      'Podpisuje dokumenty wysyłane inwestorom. Można uzupełnić później w ustawieniach.',
 
     /*
      * Zgoda przy rejestracji (T-124). Tekst rozbity na fragmenty, bo w środku

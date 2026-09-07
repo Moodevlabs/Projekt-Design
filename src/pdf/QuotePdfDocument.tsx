@@ -2,6 +2,7 @@ import { Document, Image, Page, StyleSheet, Text, View } from '@react-pdf/render
 import {
   calcDiscounts,
   calcItemCents,
+  isIndividualItem,
   calcQuoteTotals,
   documentTextInfo,
   itemTextContext,
@@ -430,7 +431,7 @@ function ItemLine({
   // Wartość z domeny — patrz komentarz przy `QuotePdfDocument`.
   const valueCents = calcItemCents(item, rooms, pricing);
   const off = !item.enabled;
-  const individual = item.unitPriceCents === null;
+  const individual = isIndividualItem(item);
 
   return (
     <View

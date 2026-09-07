@@ -234,13 +234,12 @@ describe('ItemRow — pozycja liczona za pomieszczenie', () => {
       </Dnd>,
     );
 
-    expect(screen.getByText(/baza .* \+ 3 pom\./)).toBeInTheDocument();
+    expect(screen.getByText(/200,00.*\+ 3 pom\./)).toBeInTheDocument();
   });
 
-  it('w trybie edycji pole ceny edytuje BAZE reguly (T-115)', async () => {
-    // Dotad pole nie istnialo („cena wynika z reguly"). Szablon startowy sklada
-    // sie w polowie z pozycji za pomieszczenie bez cen — bez tego pola nie
-    // daloby sie wycenic oferty bez wycieczki do biblioteki.
+  it('w trybie edycji kratka pokazuje WYNIK, a wpis jest nadpisaniem recznym (T-127)', async () => {
+    // Do T-127 kratka pokazywala BAZE (200 zl), a wyliczonej kwoty nie bylo
+    // w edycji wcale — nie dalo sie zrozumiec, skad suma sekcji.
     const user = userEvent.setup();
     const onPatch = vi.fn();
     render(
@@ -259,18 +258,108 @@ describe('ItemRow — pozycja liczona za pomieszczenie', () => {
     );
 
     const pole = screen.getByLabelText(pl.editor.itemPriceLabel);
-    expect(pole).toHaveValue('200,00\u00a0zł');
+    expect(pole).toHaveValue('245,00 zł');
     await user.clear(pole);
     await user.type(pole, '500');
     await user.tab();
 
-    expect(onPatch).toHaveBeenCalledWith(
-      parametryczna.id,
-      expect.objectContaining({
-        unitPriceCents: 50_000,
-        pricing: expect.objectContaining({ mode: 'per_room', baseCents: 50_000 }),
-      }),
+    expect(onPatch).toHaveBeenCalledWith(parametryczna.id, {
+      priceOverrideCents: 50_000,
+      unitPriceCents: 0,
+    });
+    // Reguly NIE ruszamy — „przywroc z cennika" ma do czego wrocic.
+    expect(onPatch.mock.calls[0]![1]).not.toHaveProperty('pricing');
+  });
+
+  it('nadpisana pozycja mowi „recznie", a wyczyszczenie kratki zdejmuje nadpisanie', async () => {
+    const user = userEvent.setup();
+    const onPatch = vi.fn();
+    const nadpisana = { ...parametryczna, priceOverrideCents: 99_900 };
+    render(
+      <Dnd ids={[nadpisana.id]}>
+        <ItemRow
+          item={nadpisana}
+          editing
+          currency="PLN"
+          rooms={rooms}
+          onToggle={vi.fn()}
+          onPatch={onPatch}
+          onRemove={vi.fn()}
+          {...BEZ_WARIANTOW}
+        />
+      </Dnd>,
     );
+
+    expect(screen.getByLabelText(pl.editor.itemPriceLabel)).toHaveValue('999,00 zł');
+    expect(screen.getByText(pl.editor.pricingOverridden)).toBeInTheDocument();
+
+    await user.clear(screen.getByLabelText(pl.editor.itemPriceLabel));
+    await user.tab();
+    expect(onPatch).toHaveBeenCalledWith(nadpisana.id, { priceOverrideCents: null });
+  });
+
+  it('parametryczna bez ceny jest „indywidualna" — pole puste, a nie liczone ze stawek', () => {
+    render(
+      <Dnd ids={[parametryczna.id]}>
+        <ItemRow
+          item={{ ...parametryczna, unitPriceCents: null }}
+          editing
+          currency="PLN"
+          rooms={rooms}
+          onToggle={vi.fn()}
+          onPatch={vi.fn()}
+          onRemove={vi.fn()}
+          {...BEZ_WARIANTOW}
+        />
+      </Dnd>,
+    );
+    expect(screen.getByLabelText(pl.editor.itemPriceLabel)).toHaveValue('');
+    expect(screen.queryByText(/pom\./)).not.toBeInTheDocument();
+  });
+
+  it('w bloku pomieszczenia pisze „kuchnia ×2: 2 × stawka" i liczy tylko to pomieszczenie', () => {
+    const kuchnia = rooms[0]!;
+    render(
+      <Dnd ids={[parametryczna.id]}>
+        <ItemRow
+          item={{ ...parametryczna, roomId: kuchnia.id }}
+          editing={false}
+          currency="PLN"
+          rooms={rooms}
+          blockRoomId={kuchnia.id}
+          onToggle={vi.fn()}
+          onPatch={vi.fn()}
+          onRemove={vi.fn()}
+          {...BEZ_WARIANTOW}
+        />
+      </Dnd>,
+    );
+    // 2 × 15 zl, BEZ bazy 200 zl.
+    expect(screen.getByText(/30,00/)).toBeInTheDocument();
+    expect(screen.getByText(/Kuchnia ×2: 2 × 15,00/)).toBeInTheDocument();
+  });
+
+  it('nieprzypieta pozycja w bloku (sprzed T-126) jest oznaczona i da sie przypiac', async () => {
+    const user = userEvent.setup();
+    const onPatch = vi.fn();
+    const kuchnia = rooms[0]!;
+    render(
+      <Dnd ids={[parametryczna.id]}>
+        <ItemRow
+          item={parametryczna}
+          editing
+          currency="PLN"
+          rooms={rooms}
+          blockRoomId={kuchnia.id}
+          onToggle={vi.fn()}
+          onPatch={onPatch}
+          onRemove={vi.fn()}
+          {...BEZ_WARIANTOW}
+        />
+      </Dnd>,
+    );
+    await user.click(screen.getByRole('button', { name: new RegExp(pl.editor.pricingUnpinned) }));
+    expect(onPatch).toHaveBeenCalledWith(parametryczna.id, { roomId: kuchnia.id });
   });
 
   it('pozycja bez ceny ma w edycji PUSTE pole z podpowiedzia, a wpisanie nadaje cene', async () => {
