@@ -99,7 +99,16 @@ export function libraryItemToQuoteItem(
     name: libraryItem.name,
     description: libraryItem.description,
     qty: 1,
-    unitPriceCents: libraryItem.unitPriceCents,
+    /*
+     * Pusta cena znaczy „wycena indywidualna" TYLKO przy regule `flat`
+     * (`pricingChoiceFor`). Wpis parametryczny z `null` to relikt seedów
+     * sprzed T-129 — od T-126 `null` wyłączałby go z sumy mimo stawek, więc
+     * normalizujemy do zera: liczy reguła.
+     */
+    unitPriceCents:
+      libraryItem.pricing.mode === 'flat'
+        ? libraryItem.unitPriceCents
+        : (libraryItem.unitPriceCents ?? 0),
     // Jednostka jest SNAPSHOTEM z biblioteki i kaskaduje jak nazwa i cena
     // (§5 reguła 3) — bez niej wiersz „80 × 12 zł" gubi „m²".
     unit: libraryItem.unit ?? 'lump',
@@ -109,6 +118,7 @@ export function libraryItemToQuoteItem(
     // Reguła jedzie z biblioteki — pozycja wstawiona do wyceny liczy się tak,
     // jak opisano ją raz w cenniku.
     pricing: libraryItem.pricing,
+    priceOverrideCents: null,
     roomId: null,
     tags: [],
     ...overrides,
@@ -130,6 +140,7 @@ export function librarySnapshotToQuoteItem(snapshot: LibraryItemSnapshot): Item 
     enabled: true,
     libraryItemId: snapshot.libraryItemId,
     pricing: { mode: 'flat' },
+    priceOverrideCents: null,
     roomId: null,
     // Snapshot zestawu nie niesie etykiet — sa cecha konkretnej wyceny
     // (F2.3), a nie opisu uslugi w bibliotece.

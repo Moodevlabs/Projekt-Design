@@ -3,6 +3,50 @@
 Format wg [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/).
 Wersje zgodne z [SemVer](https://semver.org/lang/pl/).
 
+## [Nieopublikowane]
+
+### Zmienione
+
+**Wycena według pomieszczeń liczy się z miejsca, w którym leży pozycja.** Usługa
+„według pomieszczenia” dodana do bloku pomieszczenia (po „Rozpisz na
+pomieszczenia”) liczy się wyłącznie za to pomieszczenie: stawka jego typu razy
+ilość, bez stawki bazowej. Dotąd każdy blok sumował wszystkie pomieszczenia
+wyceny, więc rozpisanie usługi na siedem bloków dawało siedem pełnych sum.
+Pozycja poza blokiem liczy jak dotąd: baza plus stawki wszystkich pomieszczeń
+w zakresie usługi.
+
+**Pole ceny pokazuje wyliczoną kwotę, a wpis ją nadpisuje.** Przy usłudze
+liczonej według pomieszczeń pole ceny pokazuje wynik, ten sam, który wchodzi do
+sumy. Wpisanie innej kwoty to nadpisanie ręczne: pozycja dostaje dopisek
+„ręcznie”, a reguła i stawki zostają — „Przywróć z cennika” wraca do
+wyliczenia, także po zmianie pomieszczeń. Do tej pory pole edytowało stawkę
+bazową, a wyliczonej kwoty w edycji nie było wcale.
+
+**„Skąd ta kwota”.** Pod kwotą stoi rachunek: „kuchnia ×2: 2 × 350,00 zł”,
+„200,00 zł + 7 pom.”, „brak pomieszczeń w wycenie” albo „brak stawek —
+uzupełnij w Bibliotece → Stawki”. Kliknięcie otwiera rozbicie po
+pomieszczeniach i akcje „Przywróć z cennika” / „Wyceń indywidualnie”.
+
+**Pusta cena znaczy „wycena indywidualna” w każdym trybie.** Pozycja bez ceny
+nie wchodzi do sumy — także gdy ma stawki za pomieszczenia. Wcześniej taka
+pozycja liczyła się ze stawek, a wiersz i PDF mówiły „indywidualna”.
+
+### Dodane
+
+**„Do wszystkich pomieszczeń”.** W panelu „Dodaj usługi” cel „Sekcja › wszystkie
+pomieszczenia” i link w bloku pomieszczenia wstawiają tę samą usługę do bloku
+każdego pomieszczenia naraz, zakładając brakujące bloki.
+
+**Oznaczenie pozycji sprzed zmiany.** Pozycja w bloku pomieszczenia z wycen
+zapisanych wcześniej liczy nadal wszystkie pomieszczenia — kwoty wysłanych
+ofert się nie zmieniają. W edytorze ma dopisek „liczy wszystkie pomieszczenia”
+i akcję „Przypnij do: …”, która przełącza ją na nowe liczenie.
+
+> Migracja `0049`: biblioteka przykładowa i szablony startowe dostają przy
+> usługach parametrycznych cenę 0 zamiast pustej (pusta cena = „indywidualnie”
+> tylko dla ceny stałej); istniejące wpisy biblioteki i szablony poprawione,
+> wyceny nietknięte.
+
 ## [1.2.4] – 2026-08-31
 
 ### Usunięte

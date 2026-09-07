@@ -161,7 +161,29 @@ export const ItemSchema = z.object({
   libraryItemId: z.string().uuid().nullable().default(null),
   /** Reguła wyceny. Brak = `flat`, czyli zachowanie sprzed cennika parametrycznego. */
   pricing: PricingRuleSchema.default({ mode: 'flat' }),
-  /** Pozycja przypięta do konkretnego pomieszczenia (bloki per-room, tryb `per_frame`). */
+  /**
+   * Nadpisanie ręczne WARTOŚCI pozycji (T-127) — w jednostkach dokumentu
+   * (grosze albo minuty). `null` = liczy reguła.
+   *
+   * Reguła i stawki zostają nietknięte: użytkownik, który wpisał kwotę
+   * w kratkę, może ją cofnąć („przywróć z cennika") i wrócić do wyliczenia,
+   * także po zmianie pomieszczeń. Zamiana pozycji na `flat` przy wpisie
+   * odcinałaby tę drogę na stałe.
+   *
+   * `default(null)` zamiast kroku migracji — precedens `Group.categoryId`:
+   * pole jest dodatkiem, więc zod dopisze `null` staremu dokumentowi.
+   */
+  priceOverrideCents: z.number().int().nullable().default(null),
+  /**
+   * Pozycja przypięta do konkretnego pomieszczenia.
+   *
+   * Od T-126 to **miejsce, w którym pozycja leży**: wstawienie do bloku
+   * pomieszczenia i przeniesienie między blokami ustawiają je, przeniesienie
+   * poza blok zeruje. Pozycja `per_room` z `roomId` liczy się tylko za to
+   * pomieszczenie (patrz `calcItemUnits`). Wyceny sprzed T-126 mają w blokach
+   * pozycje bez `roomId` — celowo NIE migrowane (kwoty wysłanych ofert
+   * zostają); edytor oznacza je i daje akcję „przypnij".
+   */
   roomId: z.string().uuid().nullable().default(null),
   /** Liczba kadrów — tylko dla `per_frame`. */
   frames: z.number().int().positive().optional(),

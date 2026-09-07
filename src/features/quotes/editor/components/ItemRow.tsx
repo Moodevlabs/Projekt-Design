@@ -7,12 +7,14 @@ import { InlineMoney } from './InlineMoney';
 import { ItemToggle } from './ItemToggle';
 import { DragHandle } from './DragHandle';
 import { ItemVariantSelect } from './ItemVariantSelect';
+import { PriceBreakdown } from './PriceBreakdown';
 import type { VariantOptions } from '../useVariantOptions';
 import type { ItemVariant } from '../editor.store';
 import type { LibraryItem } from '@/data/repos/library.repo';
 import { formatMoney } from '@/domain/money';
 import {
   calcItemCents,
+  isIndividualItem,
   itemTextContext,
   type PricingContext,
   renderText,
@@ -21,67 +23,36 @@ import {
   type Room,
 } from '@/domain/quote';
 import { formatQty, unitLabel } from '@/domain/library/units';
-import {
-  COL_ACTIONS,
-  COL_PRICE,
-  COL_QTY,
-  ITEM_ROW_GAP,
-} from './item-columns';
+import { COL_ACTIONS, COL_PRICE, COL_QTY, ITEM_ROW_GAP } from './item-columns';
 import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
 
 /**
- * Krótkie „skąd ta kwota” dla pozycji liczonej z reguły. `null` dla `flat` —
- * przy zwykłej pozycji cena jednostkowa jest widoczna wprost i dopisek byłby
- * szumem.
+ * Co pokazuje pole ceny w edycji i co robi wpis (T-127).
  *
- * Liczba pomieszczeń jest ta sama, którą widzi kalkulacja: filtrowana po
- * zasięgu reguły, więc „7 pom.” zgadza się z kwotą także wtedy, gdy część
- * pomieszczeń ma odznaczoną flagę.
+ * - `flat`: pole edytuje CENĘ JEDNOSTKOWĄ (`unitPriceCents`), jak w arkuszu —
+ *   obok stoi ilość, a wartość widać w podglądzie. Wyczyszczenie = „wycena
+ *   indywidualna" (T-115).
+ * - reguła parametryczna: pole pokazuje WYNIK (`calcItemCents`) — tę samą
+ *   kwotę, która idzie do sumy. Wpis to nadpisanie ręczne
+ *   (`priceOverrideCents`), a nie edycja bazy: człowiek, który widzi
+ *   1 750 zł i chce 1 500 zł, wpisuje 1 500 zł. Wyczyszczenie zdejmuje
+ *   nadpisanie i wraca do wyliczenia. „Wycena indywidualna" dla takiej
+ *   pozycji to jawna akcja w popoverze „Skąd ta kwota", a nie skutek
+ *   pustego pola — do T-127 puste pole zerowało bazę, ale stawki dalej
+ *   wchodziły do sumy, a wiersz mówił „indywidualna".
  */
-function pricingSummary(item: Item, rooms: Room[], currency: string): string | null {
-  const pricing = item.pricing;
-
-  if (pricing.mode === 'per_room') {
-    const liczone = rooms.filter((room) =>
-      pricing.roomScope === 'visual'
-        ? room.includedInVisual
-        : pricing.roomScope === 'technical'
-          ? room.includedInTechnical
-          : true,
-    );
-    const sztuk = liczone.reduce((sum, room) => sum + room.qty, 0);
-    return pl.editor.pricingFromRooms(formatMoney(pricing.baseCents, currency), sztuk);
-  }
-
-  if (pricing.mode === 'per_frame') {
-    return pl.editor.pricingFromFrames(item.frames ?? 1);
-  }
-
-  return null;
+function priceFieldCents(item: Item, valueCents: number): number | null {
+  if (isIndividualItem(item)) return null;
+  return item.pricing.mode === 'flat' ? item.unitPriceCents : valueCents;
 }
 
-/**
- * Co pokazuje pole ceny w edycji: cenę jednostkową dla `flat`, BAZĘ reguły
- * dla pozycji parametrycznej. `null` = wycena indywidualna w obu trybach.
- */
-function priceFieldCents(item: Item): number | null {
-  if (item.unitPriceCents === null) return null;
-  return item.pricing.mode === 'flat' ? item.unitPriceCents : item.pricing.baseCents;
-}
-
-/**
- * Łatka po wpisaniu kwoty w polu ceny. Dla reguły parametrycznej kwota idzie
- * w `baseCents`, a `unitPriceCents` dostaje tę samą liczbę tylko po to, żeby
- * pozycja przestała liczyć się jako „indywidualna" (`countIndividualItems`
- * patrzy na `unitPriceCents`). Wyczyszczenie (`null`) zeruje bazę.
- */
 function priceFieldPatch(item: Item, cents: number | null): Partial<Item> {
   if (item.pricing.mode === 'flat') return { unitPriceCents: cents };
-  return {
-    unitPriceCents: cents,
-    pricing: { ...item.pricing, baseCents: cents ?? 0 },
-  };
+  if (cents === null) return { priceOverrideCents: null };
+  // Pozycja „indywidualna" z nadpisaniem ma cenę — `unitPriceCents: 0`
+  // mówi to samo, co reguła: liczymy, tylko że ręcznie.
+  return { priceOverrideCents: cents, unitPriceCents: item.unitPriceCents ?? 0 };
 }
 
 /** Stała referencja: brak wariantów nie może przebijać `memo` na wierszach. */
@@ -96,6 +67,12 @@ export interface ItemRowProps {
   onRemove: (itemId: string) => void;
   /** Pomieszczenia wyceny — pozycja parametryczna bez nich policzy samą bazę. */
   rooms: Room[];
+  /**
+   * `roomId` bloku pomieszczenia, w którym wiersz leży (T-126). Z niego
+   * wynika ostrzeżenie „liczy wszystkie pomieszczenia" dla pozycji
+   * nieprzypiętej. Poza blokiem — pomijany.
+   */
+  blockRoomId?: string | null;
   /** Dane dokumentu do placeholderów w opisie (F4.2). Stabilna referencja. */
   textInfo: DocumentTextInfo;
   /** Tryb liczenia (F2.1) — w trybie godzinowym liczby są minutami. */
@@ -123,6 +100,7 @@ export const ItemRow = memo(function ItemRow({
   onPatch,
   onRemove,
   rooms,
+  blockRoomId,
   textInfo,
   pricing,
   variants,
@@ -135,7 +113,8 @@ export const ItemRow = memo(function ItemRow({
   const valueCents = calcItemCents(item, rooms, pricing);
   // Wiersz niepowiązany z biblioteką nie ma wariantów — i nie musi ich mieć.
   const itemVariants = (item.libraryItemId && variants.get(item.libraryItemId)) || EMPTY_VARIANTS;
-  const parametric = pricingSummary(item, rooms, currency);
+  const parametric = item.pricing.mode !== 'flat';
+  const individual = isIndividualItem(item);
   const godzinowa = pricing.pricingBasis === 'time';
 
   const {
@@ -233,7 +212,10 @@ export const ItemRow = memo(function ItemRow({
             const next = Number.parseInt(event.target.value, 10);
             if (Number.isInteger(next) && next > 0) onPatch(item.id, { frames: next });
           }}
-          className={cn(COL_QTY, 'inline-field price-field amount px-1 py-[2px] text-right text-[14.5px]')}
+          className={cn(
+            COL_QTY,
+            'inline-field price-field amount px-1 py-[2px] text-right text-[14.5px]',
+          )}
         />
       ) : editing ? (
         <input
@@ -246,7 +228,10 @@ export const ItemRow = memo(function ItemRow({
             const next = Number.parseFloat(event.target.value);
             onPatch(item.id, { qty: Number.isFinite(next) && next > 0 ? next : 1 });
           }}
-          className={cn(COL_QTY, 'inline-field price-field amount px-1 py-[2px] text-right text-[14.5px]')}
+          className={cn(
+            COL_QTY,
+            'inline-field price-field amount px-1 py-[2px] text-right text-[14.5px]',
+          )}
         />
       ) : item.qty !== 1 || unitLabel(item.unit, item.unitLabel) ? (
         /*
@@ -273,7 +258,7 @@ export const ItemRow = memo(function ItemRow({
           )}
         >
           {isDiscount ? <span aria-hidden>−</span> : null}
-          {editing && parametric === null && godzinowa ? (
+          {editing && !parametric && godzinowa ? (
             /*
              * W trybie godzinowym edytuje się MINUTY, a kwota jest wynikiem.
              * Pole ze złotówkami sugerowałoby, że da się ją wpisać wprost —
@@ -301,25 +286,19 @@ export const ItemRow = memo(function ItemRow({
               </span>
               <span className="amount">{formatMoney(valueCents, currency)}</span>
             </span>
-          ) : editing ? (
+          ) : editing && !(parametric && godzinowa) ? (
             /*
-             * Cena jest edytowalna ZAWSZE w trybie edycji (T-115) — także gdy
-             * pozycja przyszła z biblioteki lub szablonu bez ceny („wycena
-             * indywidualna") i także dla pozycji parametrycznej.
+             * Pole ceny jest w edycji ZAWSZE (T-115) — także dla pozycji bez
+             * ceny i dla parametrycznej. Co pokazuje i co robi wpis — patrz
+             * `priceFieldCents` / `priceFieldPatch` (T-127): dla reguły
+             * parametrycznej to WYNIK, a wpis jest nadpisaniem ręcznym.
              *
-             * Do tej pory `null` pokazywał sam napis, a pozycja parametryczna
-             * samą kwotę wynikową. Człowiek, który wziął szablon startowy
-             * (wszystkie ceny puste, połowa pozycji „za pomieszczenie"), nie
-             * miał gdzie wpisać stawki — musiał iść do biblioteki, żeby
-             * wycenić JEDNĄ ofertę. Teraz: puste pole z podpowiedzią, wpisanie
-             * kwoty nadaje cenę, wyczyszczenie wraca do „ustalimy osobno".
-             *
-             * Dla reguły `per_room`/`per_frame` pole edytuje BAZĘ (część
-             * niezależną od pomieszczeń); składniki za pomieszczenia dochodzą
-             * z cennika i są opisane dopiskiem pod kwotą.
+             * Pozycja parametryczna w trybie godzinowym nie ma pola: liczby
+             * w regule są minutami, a kwota — wynikiem po stawce; nadpisanie
+             * kwotą nie miałoby jednostki. Pokazujemy sam wynik.
              */
             <InlineMoney
-              cents={priceFieldCents(item)}
+              cents={priceFieldCents(item, valueCents)}
               currency={currency}
               nullable
               placeholder={pl.editor.individualPrice}
@@ -328,7 +307,7 @@ export const ItemRow = memo(function ItemRow({
               ariaLabel={pl.editor.itemPriceLabel}
               className="price-field inline-field amount w-[76px] text-[14.5px]"
             />
-          ) : item.unitPriceCents === null ? (
+          ) : individual ? (
             /*
              * „Wycena indywidualna" (T-60) — pozycja jest w ofercie, ale ceny
              * nie ma i NIE wchodzi do sumy. Zero w tym miejscu znaczyłoby
@@ -343,12 +322,18 @@ export const ItemRow = memo(function ItemRow({
         </div>
 
         {parametric ? (
-          // Skąd ta kwota. Bez tego pozycja liczona za pomieszczenie pokazuje
-          // liczbę, której użytkownik nie umie sprawdzić — a automatowi, którego
-          // nie da się prześledzić, nikt nie ufa.
-          <span className="text-[11px] whitespace-nowrap text-[var(--doc-ink-soft)]">
-            {parametric}
-          </span>
+          // Skąd ta kwota (T-128). Bez tego pozycja liczona za pomieszczenie
+          // pokazuje liczbę, której użytkownik nie umie sprawdzić — a
+          // automatowi, którego nie da się prześledzić, nikt nie ufa.
+          <PriceBreakdown
+            item={item}
+            rooms={rooms}
+            currency={currency}
+            pricing={pricing}
+            editing={editing}
+            blockRoomId={blockRoomId}
+            onPatch={onPatch}
+          />
         ) : null}
       </div>
 

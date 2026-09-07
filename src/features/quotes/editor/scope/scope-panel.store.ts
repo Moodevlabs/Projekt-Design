@@ -4,6 +4,11 @@ import { create } from 'zustand';
 export interface ScopeTarget {
   sectionId: string;
   groupId: string | null;
+  /**
+   * „Wszystkie pomieszczenia" (T-129): usługa trafia do bloku KAŻDEGO
+   * pomieszczenia sekcji (bloki powstają same). Wyklucza `groupId`.
+   */
+  allRooms?: boolean;
 }
 
 interface ScopePanelState {

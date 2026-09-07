@@ -277,7 +277,7 @@ export const helpPl = {
           kind: 'steps',
           items: [
             'Nagłówek obejmuje tytuł, podtytuł, datę, okres ważności, tekst wprowadzenia i opis projektu. Pola edytuje się bezpośrednio w dokumencie; w trybie edycji oznaczone są przerywaną ramką, w podglądzie pozostają niewidoczne.',
-            'Sekcja odpowiada etapowi prac (przykładowo „Koncepcja”, „Projekt techniczny”). Grupa stanowi podzbiór sekcji, najczęściej pomieszczenie. Pozycja to pojedyncza usługa z ceną.',
+            'Sekcja odpowiada etapowi prac (przykładowo „Koncepcja”, „Projekt techniczny”). Grupa stanowi podzbiór sekcji: tematyczna (np. ze słownika biblioteki) albo blok pomieszczenia założony poleceniem „Rozpisz na pomieszczenia”. Pozycja to pojedyncza usługa z ceną. Pozycja liczy się z miejsca, w którym leży: w bloku pomieszczenia — za to jedno pomieszczenie, poza blokiem — za wszystkie pomieszczenia objęte jej zakresem.',
             'Opcja „Dodaj usługi” otwiera panel z tabelą biblioteki: usługa · grupa · sposób wyceny · stawka. Przycisk „Dodaj” umieszcza usługę w dokumencie, a panel pozostaje otwarty; miejsce docelowe („Dodaj do: sekcja › grupa”) wybiera się w górnej części panelu. Przycisk „Gotowe” zamyka panel.',
             'Polecenie „Dodaj grupę” na końcu sekcji otwiera menu z trzema drogami: „Pusta grupa” (dotychczasowe zachowanie), „Z biblioteki (grupa)” — wybiera się grupę ze słownika, a następnie zaznacza, które jej usługi wejdą do wyceny (domyślnie wszystkie) — oraz „Z biblioteki (zestaw)”, wstawiający zapisany komplet jednym kliknięciem. Grupa wstawiona ze słownika pamięta swoje pochodzenie: w trybie edycji jej nagłówek nosi kropkę koloru i kod grupy. Dokument dla inwestora i PDF pozostają bez zmian — to oznaczenie robocze.',
             'Opcja „Pozycja ręcznie” dodaje pusty wiersz przeznaczony na pozycje spoza biblioteki.',
@@ -287,13 +287,13 @@ export const helpPl = {
         },
         {
           kind: 'p',
-          text: 'Pomieszczenia (prawa kolumna) opisują: nazwa, ilość, typ ze słownika oraz dwie flagi — W (część wizualna, czyli projekt aranżacji) i T (część techniczna, czyli rysunki wykonawcze). Usługi rozliczane według pomieszczeń pobierają z tej listy swoje składniki: stawka z biblioteki mnożona jest przez pomieszczenia objęte zakresem usługi. Pod listą prezentowane jest zdanie „Do części wizualnej liczy się N, do technicznej M” — są to dokładnie te wartości, którymi posługuje się cennik. Wiersz takiej pozycji zawiera pod kwotą adnotację „od X · N pom.”, wskazującą źródło wyliczenia.',
+          text: 'Pomieszczenia (prawa kolumna) opisują: nazwa, ilość, typ ze słownika oraz dwie flagi — W (część wizualna, czyli projekt aranżacji) i T (część techniczna, czyli rysunki wykonawcze). Usługi rozliczane według pomieszczeń pobierają z tej listy swoje składniki: stawka z biblioteki mnożona jest przez pomieszczenia objęte zakresem usługi. Pod listą prezentowane jest zdanie „Do części wizualnej liczy się N, do technicznej M” — są to dokładnie te wartości, którymi posługuje się cennik. Pole ceny takiej pozycji pokazuje wyliczoną kwotę, a pod nią stoi rachunek: „200,00 zł + 7 pom.” dla usługi liczonej za wszystkie pomieszczenia albo „kuchnia ×2: 2 × 350,00 zł” w bloku pomieszczenia. Kliknięcie rachunku otwiera pełne rozbicie po pomieszczeniach. Wpisanie kwoty w pole ceny nadpisuje wyliczenie ręcznie (pozycja dostaje dopisek „ręcznie”); „Przywróć z cennika” wraca do reguły, a „Wyceń indywidualnie” wyłącza pozycję z sumy.',
         },
         {
           kind: 'warn',
           title:
             'Usługa rozliczana za pomieszczenie przy braku pomieszczeń nalicza wyłącznie stawkę bazową',
-          text: 'Wynik wynosi wówczas najczęściej 0 zł. Panel „Dodaj usługi” sygnalizuje tę sytuację nad listą i udostępnia przycisk „Dodaj pomieszczenie”. Zalecane jest uzupełnienie listy pomieszczeń przed doborem usług; przy uzupełnieniu późniejszym kwoty przeliczane są automatycznie.',
+          text: 'Wynik wynosi wówczas najczęściej 0 zł, a pod kwotą stoi „brak pomieszczeń w wycenie”. Panel „Dodaj usługi” sygnalizuje tę sytuację nad listą i udostępnia przycisk „Dodaj pomieszczenie”. Usługa bez stawek w bibliotece pokazuje z kolei „brak stawek — uzupełnij w Bibliotece → Stawki”. Przy uzupełnieniu późniejszym kwoty przeliczane są automatycznie.',
         },
         {
           kind: 'list',
@@ -313,7 +313,7 @@ export const helpPl = {
         {
           kind: 'tip',
           title: 'Rozpisz na pomieszczenia',
-          text: 'W sekcji wyceny polecenie „Rozpisz na pomieszczenia” zakłada blok (grupę) dla każdego pomieszczenia z panelu obok, którego jeszcze nie ma — z nazwą pomieszczenia w nagłówku. „Dodaj usługi” w takim bloku celuje w konkretne pomieszczenie. Powtórne kliknięcie dokłada bloki tylko dla pomieszczeń dodanych później.',
+          text: 'W sekcji wyceny polecenie „Rozpisz na pomieszczenia” zakłada blok (grupę) dla każdego pomieszczenia z panelu obok, którego jeszcze nie ma — z nazwą pomieszczenia w nagłówku. Usługa dodana do takiego bloku liczy się wyłącznie za to pomieszczenie (stawka typu × ilość, bez stawki bazowej), a nagłówek bloku sumuje tylko jego pozycje. „Do wszystkich pomieszczeń” (w bloku albo jako cel w panelu „Dodaj usługi”) wstawia tę samą usługę do każdego bloku naraz. Powtórne kliknięcie „Rozpisz” dokłada bloki tylko dla pomieszczeń dodanych później. Pozycje wstawione do bloków w wycenach sprzed tej zmiany liczą nadal wszystkie pomieszczenia — są oznaczone „liczy wszystkie pomieszczenia” z akcją „Przypnij do: …”.',
         },
         {
           kind: 'tip',
@@ -653,7 +653,8 @@ export const helpPl = {
             },
             {
               keys: 'Przeciągnięcie za uchwyt ⋮⋮',
-              action: 'W edytorze: zmiana kolejności pozycji, grup i sekcji, także pomiędzy sekcjami',
+              action:
+                'W edytorze: zmiana kolejności pozycji, grup i sekcji, także pomiędzy sekcjami',
             },
             {
               keys: 'Strzałki ▲ ▼ w wierszu',
@@ -683,7 +684,7 @@ export const helpPl = {
             },
             {
               q: 'Usługa rozliczana według pomieszczenia nalicza 0 zł.',
-              a: 'Wycena nie zawiera pomieszczeń albo pomieszczenia nie są oznaczone w części, której usługa dotyczy (flagi W/T). Należy uzupełnić listę pomieszczeń w prawej kolumnie oraz zweryfikować zakres usługi na jej stronie w Bibliotece.',
+              a: 'Rachunek pod kwotą mówi wprost, czego brakuje: „brak pomieszczeń w wycenie” — dodaj je w prawej kolumnie; „brak stawek — uzupełnij w Bibliotece → Stawki” — usługa nie ma jeszcze cennika. Jeśli rachunek pokazuje „0 pom.”, pomieszczenia nie są oznaczone w części, której usługa dotyczy (flagi W/T) — sprawdź zakres usługi na jej stronie w Bibliotece.',
             },
             {
               q: 'Zmiana ceny w Bibliotece nie została przeniesiona do wyceny.',

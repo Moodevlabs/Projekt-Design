@@ -45,6 +45,30 @@ describe('LibraryItemSchema', () => {
   });
 });
 
+describe('libraryItemToQuoteItem — cena pusta (T-129)', () => {
+  const base = LibraryItemSchema.parse({ id: LI, workspaceId: WS, name: 'Usługa' });
+
+  it('flat z pustą ceną zostaje „indywidualna"', () => {
+    expect(libraryItemToQuoteItem({ ...base, unitPriceCents: null }).unitPriceCents).toBeNull();
+  });
+
+  it('parametryczna z pustą ceną (relikt seedów) dostaje 0 — liczy reguła', () => {
+    const item = libraryItemToQuoteItem({
+      ...base,
+      unitPriceCents: null,
+      pricing: {
+        mode: 'per_room',
+        baseCents: 0,
+        perRoomCents: {},
+        defaultPerRoomCents: 25_000,
+        roomScope: 'all',
+      },
+    });
+    expect(item.unitPriceCents).toBe(0);
+    expect(item.priceOverrideCents).toBeNull();
+  });
+});
+
 describe('LibraryGroupSchema', () => {
   it('domyślnie ma pustą listę pozycji', () => {
     expect(LibraryGroupSchema.parse({ id: LI, workspaceId: WS, name: 'Kuchnia' })).toMatchObject({

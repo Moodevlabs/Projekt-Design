@@ -87,14 +87,16 @@ function setup() {
 
   const onInsertItems = vi.fn();
   const onInsertGroup = vi.fn();
+  const onInsertItemToRoomBlocks = vi.fn();
   render(
     <ScopePanel
       pricing={AMOUNT_BASIS}
       onInsertItems={onInsertItems}
       onInsertGroup={onInsertGroup}
+      onInsertItemToRoomBlocks={onInsertItemToRoomBlocks}
     />,
   );
-  return { onInsertItems, onInsertGroup, user: userEvent.setup() };
+  return { onInsertItems, onInsertGroup, onInsertItemToRoomBlocks, user: userEvent.setup() };
 }
 
 function otworz() {
@@ -254,5 +256,24 @@ describe('ScopePanel — dodawanie usług z tabeli (T-71)', () => {
     act(() => useScopePanel.getState().setTarget({ sectionId: SECTION.id, groupId: 'grp' }));
     expect(screen.queryByRole('tab', { name: pl.editor.scopeTabSets })).not.toBeInTheDocument();
     expect(screen.getByText(pl.editor.scopeColService)).toBeInTheDocument();
+  });
+
+  it('cel „wszystkie pomieszczenia" wstawia klon do każdego bloku, a zestawy znikają (T-129)', async () => {
+    const { onInsertItems, onInsertItemToRoomBlocks, user } = setup();
+    act(() => {
+      useEditorStore.getState().addRoom({ label: 'Kuchnia' });
+      useScopePanel.getState().openFor({ sectionId: SECTION.id, groupId: null, allRooms: true });
+    });
+
+    await user.click(
+      await screen.findByRole('button', {
+        name: pl.editor.scopeAddLabel('Koncepcja funkcjonalna'),
+      }),
+    );
+
+    expect(onInsertItemToRoomBlocks).toHaveBeenCalledTimes(1);
+    expect(onInsertItemToRoomBlocks.mock.calls[0]![0]).toBe(SECTION.id);
+    expect(onInsertItems).not.toHaveBeenCalled();
+    expect(screen.queryByRole('tab', { name: pl.editor.scopeTabSets })).not.toBeInTheDocument();
   });
 });

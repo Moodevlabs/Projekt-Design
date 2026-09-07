@@ -246,6 +246,7 @@ export const GroupBlock = memo(function GroupBlock({
               onPatch={onPatchItem}
               onRemove={onRemoveItem}
               rooms={rooms}
+              blockRoomId={group.roomId}
               textInfo={textInfo}
               pricing={pricing}
               variants={variants}
@@ -260,6 +261,13 @@ export const GroupBlock = memo(function GroupBlock({
           <AddLink icon={Plus} onClick={() => openScope({ sectionId, groupId: group.id })}>
             {pl.editor.scopeOpen}
           </AddLink>
+          {room ? (
+            // Blok pomieszczenia: ta sama usługa zwykle idzie do każdego
+            // pomieszczenia (T-129). Bez tego „Rozpisz" to 7 × to samo klikanie.
+            <AddLink onClick={() => openScope({ sectionId, groupId: null, allRooms: true })}>
+              {pl.editor.scopeOpenAllRooms}
+            </AddLink>
+          ) : null}
           <AddLink onClick={() => onAddItem(sectionId, group.id)}>
             {pl.editor.addItemManual}
           </AddLink>

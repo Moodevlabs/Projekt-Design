@@ -11,13 +11,16 @@ import { useScopePanel, type ScopeTarget } from './scope-panel.store';
 import { pl } from '@/i18n/pl';
 
 const SEP = '::';
+/** Znacznik celu „wszystkie pomieszczenia" — nie koliduje z UUID grupy. */
+const ALL_ROOMS = '*';
 
 function encode(target: ScopeTarget): string {
-  return `${target.sectionId}${SEP}${target.groupId ?? ''}`;
+  return `${target.sectionId}${SEP}${target.allRooms ? ALL_ROOMS : (target.groupId ?? '')}`;
 }
 
 function decode(value: string): ScopeTarget {
   const [sectionId = '', groupId = ''] = value.split(SEP);
+  if (groupId === ALL_ROOMS) return { sectionId, groupId: null, allRooms: true };
   return { sectionId, groupId: groupId || null };
 }
 
@@ -43,6 +46,13 @@ export function ScopeTargetSelect() {
         value: encode({ sectionId: section.id, groupId: null }),
         label: pl.editor.scopeTargetLabel(sectionName, null),
       });
+      // „Wszystkie pomieszczenia" (T-129) ma sens tylko, gdy jakieś są.
+      if ((rooms?.length ?? 0) > 0) {
+        list.push({
+          value: encode({ sectionId: section.id, groupId: null, allRooms: true }),
+          label: pl.editor.scopeTargetLabel(sectionName, pl.editor.scopeTargetAllRooms),
+        });
+      }
       for (const group of section.groups) {
         const room = group.roomId ? rooms?.find((r) => r.id === group.roomId) : null;
         const groupName = room
