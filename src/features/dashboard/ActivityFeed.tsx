@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CheckCheck, CheckCircle2, Eye, MessageSquare, XCircle } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { CheckCheck } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { SectionHead } from './SectionHead';
 import { useActivity } from '@/data/queries/useActivity';
 import { useUpdateWorkspaceSettings, useWorkspace } from '@/data/queries/useWorkspace';
 import type { ActivityEvent, ActivityKind } from '@/data/repos/activity.repo';
@@ -17,18 +17,16 @@ import { cn } from '@/lib/utils';
 /** Ile zdarzeń mieści się na górze pulpitu, zanim przykryje resztę. */
 const LIMIT = 6;
 
-const ICONS: Record<ActivityKind, LucideIcon> = {
-  accepted: CheckCircle2,
-  rejected: XCircle,
-  comment: MessageSquare,
-  viewed: Eye,
-};
-
-const TONES: Record<ActivityKind, string> = {
-  accepted: 'text-[var(--status-accepted)]',
-  rejected: 'text-[var(--status-rejected)]',
-  comment: 'text-[var(--status-sent)]',
-  viewed: 'text-ink-soft',
+/**
+ * Kreska z lewej strony nowego wiersza — w kolorze statusu, który zdarzenie
+ * nadaje ofercie. To jedyna barwa w rejestrze; przejrzane wiersze jej nie
+ * mają (i są przygaszone), więc kolor niesie stan, a nie dekorację.
+ */
+const BAR: Record<ActivityKind, string> = {
+  accepted: 'var(--status-accepted)',
+  rejected: 'var(--status-rejected)',
+  comment: 'var(--status-sent)',
+  viewed: 'var(--hair-strong)',
 };
 
 /**
@@ -89,9 +87,10 @@ export function ActivityFeed() {
 
   if (activity.isLoading) {
     return (
-      <section className="card-surface space-y-3 p-5">
-        <Skeleton className="h-4 w-40" />
-        <Skeleton className="h-5 w-full" />
+      <section className="space-y-3">
+        <Skeleton className="h-5 w-40" />
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-12 w-full" />
       </section>
     );
   }
@@ -102,42 +101,37 @@ export function ActivityFeed() {
   if (activity.isError) return null;
 
   return (
-    <section className="card-surface p-5" aria-label={pl.dashboard.activityTitle}>
-      <header className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        {/* Krój display bez klasy wagi — nagłówek bloku, nie etykieta (T-133). */}
-        <h2 className="font-display text-ink text-[17px]">{pl.dashboard.activityTitle}</h2>
+    <section aria-label={pl.dashboard.activityTitle}>
+      <SectionHead
+        title={pl.dashboard.activityTitle}
+        action={
+          <div className="flex items-center gap-3">
+            <p className={cn('text-xs', unread > 0 ? 'text-ink font-medium' : 'text-ink-soft')}>
+              {unread > 0 ? pl.dashboard.activityUnread(unread) : pl.dashboard.activityUpToDate}
+            </p>
 
-        <div className="flex items-center gap-3">
-          <p
-            className={cn(
-              'rounded-[var(--radius-pill)] px-2.5 py-0.5 text-xs',
-              unread > 0 ? 'bg-beige text-ink font-medium' : 'text-ink-soft',
-            )}
-          >
-            {unread > 0 ? pl.dashboard.activityUnread(unread) : pl.dashboard.activityUpToDate}
-          </p>
-
-          {/*
+            {/*
             „Odhacz" pokazuje się tylko wtedy, gdy jest co odhaczać. Przycisk
             widoczny nad pustą listą byłby zaproszeniem do klikania w nic.
           */}
-          {fresh.length > 0 ? (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              disabled={updateSettings.isPending}
-              onClick={clear}
-            >
-              <CheckCheck className="size-3.5" aria-hidden />
-              {pl.dashboard.activityClear}
-            </Button>
-          ) : null}
-        </div>
-      </header>
+            {fresh.length > 0 ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                disabled={updateSettings.isPending}
+                onClick={clear}
+              >
+                <CheckCheck className="size-3.5" aria-hidden />
+                {pl.dashboard.activityClear}
+              </Button>
+            ) : null}
+          </div>
+        }
+      />
 
       {rows.length === 0 ? (
-        <p className="text-ink-soft text-sm">
+        <p className="text-ink-soft mt-3.5 text-sm">
           {all.length === 0 ? pl.dashboard.activityEmpty : pl.dashboard.activityUpToDate}
         </p>
       ) : (
@@ -175,61 +169,44 @@ export function ActivityFeed() {
 }
 
 function ActivityRow({ event, muted = false }: { event: ActivityEvent; muted?: boolean }) {
-  const Icon = ICONS[event.kind];
+  const who =
+    event.kind === 'viewed'
+      ? event.clientName || pl.dashboard.activitySomeone
+      : event.who || event.clientName || pl.dashboard.activitySomeone;
   const quoteLabel = [event.quoteNumber, event.quoteTitle].filter(Boolean).join(' · ');
 
   return (
-    <li className={cn('border-hair border-b last:border-0', muted && 'opacity-55')}>
+    <li className={cn('border-hair border-b', muted && 'opacity-55')}>
       <Link
         to={routes.quote(event.quoteId)}
-        className="hover:bg-surface-2/60 -mx-2 flex items-start gap-3 rounded-[var(--radius-control)] px-2 py-2.5 transition-colors"
+        className="hover:bg-surface-2/60 -mx-2 grid grid-cols-[3px_minmax(0,1fr)_auto] items-start gap-3.5 rounded-[var(--radius-control)] px-2 py-3 transition-colors"
       >
-        <Icon className={cn('mt-0.5 size-4 shrink-0', TONES[event.kind])} aria-hidden />
+        <span
+          aria-hidden
+          className="mt-0.5 h-full min-h-8 w-[3px] rounded-[2px]"
+          style={{ background: muted ? 'transparent' : BAR[event.kind] }}
+        />
 
-        <span className="min-w-0 flex-1">
+        <span className="min-w-0">
+          {/* Jedno zdanie: nazwisko półgrubym, rodzaj zdarzenia w tonie
+              drugorzędnym — rejestr, nie strumień wiadomości (T-97). */}
           <span className="text-ink block text-sm">
-            {headline(event)}
-            {/*
-              Kropka przy nieprzeczytanej uwadze, a nie pogrubienie całego
-              wiersza: pogrubienie krzyczy tym samym głosem co nagłówek,
-              a to jest informacja o stanie jednego wpisu.
-            */}
-            {event.unread ? (
-              <span
-                aria-label={pl.dashboard.activityUnreadMark}
-                className="ml-2 inline-block size-1.5 rounded-full align-middle"
-                style={{ background: 'var(--status-sent)' }}
-              />
-            ) : null}
+            <span className="font-medium">{who}</span>
+            {' — '}
+            <span className="text-ink-soft">{pl.dashboard.activityKind[event.kind]}</span>
           </span>
-          <span className="text-ink-soft block truncate text-xs">{quoteLabel}</span>
+          <span className="text-ink-soft block truncate text-[12.5px]">{quoteLabel}</span>
           {event.message ? (
-            <span className="text-ink-soft mt-0.5 block truncate text-xs italic">
+            <span className="bg-surface-2 text-ink mt-1.5 inline-block max-w-full truncate rounded-[6px] px-2.5 py-1.5 text-[13px]">
               „{event.message}"
             </span>
           ) : null}
         </span>
 
-        <span className="text-ink-soft shrink-0 text-xs whitespace-nowrap">
+        <span className="text-ink-faint pt-0.5 text-xs whitespace-nowrap">
           {formatRelativeDay(event.at)}
         </span>
       </Link>
     </li>
   );
-}
-
-/** Zdanie zdarzenia — podmiotem jest klient, bo to on coś zrobił. */
-function headline(event: ActivityEvent): string {
-  const who = event.who || event.clientName || pl.dashboard.activitySomeone;
-
-  switch (event.kind) {
-    case 'accepted':
-      return pl.dashboard.activityAccepted(who);
-    case 'rejected':
-      return pl.dashboard.activityRejected(who);
-    case 'comment':
-      return pl.dashboard.activityComment(who);
-    case 'viewed':
-      return pl.dashboard.activityViewed(event.clientName || pl.dashboard.activitySomeone);
-  }
 }

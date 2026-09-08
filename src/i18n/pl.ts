@@ -1636,17 +1636,23 @@ Z wyrazami szacunku`,
 
   dashboard: {
     activeProjects: 'Projekty w toku',
-    today: 'Dziś',
-    // Pasek „na co dziś czekam" (T-133) — liczy to, co CZEKA, nie bilans miesiąca.
-    pulseTitle: 'Na co dziś czekam',
-    pulseEvents: 'Nowe zdarzenia',
-    pulseEventsHint: 'Akceptacje, uwagi, otwarcia linków',
-    pulseSent: 'Oferty u klientów',
-    pulseSentHint: 'Wysłane, czekają na decyzję',
-    pulseExpiring: 'Wygasają wkrótce',
-    pulseExpiringHint: (days: number) => `Ważność kończy się w ciągu ${days} dni`,
-    pulseProjects: 'Projekty w toku',
-    pulseProjectsHint: 'Zapytania, oferty i realizacje',
+    activeProjectsAll: 'Klienci ›',
+    /** Teczka z przyjętą ofertą — ważniejsze niż status projektu. */
+    projectAccepted: 'Przyjęta oferta',
+    /** Zdanie otwierające (T-133) — treść buduje `lede.ts`. */
+    ledeLabel: 'Co dziś czeka',
+    recentQuotesAll: 'Rejestr dokumentów ›',
+    colNumber: 'Numer',
+    colDocument: 'Dokument',
+    colStatus: 'Status',
+    colNet: 'Netto',
+    /** Rejestr aktywności: rodzaj zdarzenia osobno od nazwiska (T-133). */
+    activityKind: {
+      accepted: 'akceptacja oferty',
+      rejected: 'odrzucenie oferty',
+      comment: 'uwagi do oferty',
+      viewed: 'otwarcie linku z ofertą',
+    },
     activeProjectsEmpty: 'Brak projektów w toku. Pracę rozpoczyna się od dodania klienta.',
     title: 'Pulpit',
     recentQuotes: 'Ostatnie wyceny',

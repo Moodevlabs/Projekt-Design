@@ -104,6 +104,16 @@ function mockActivity(rows: ActivityEvent[] = [], overrides: Record<string, unkn
   useActivity.mockReturnValue({ data: rows, isLoading: false, isError: false, ...overrides });
 }
 
+/**
+ * Wiersz rejestru sklada nazwisko i rodzaj zdarzenia z dwoch `span`ow (T-133),
+ * wiec domyslny matcher `getByText` (tylko wlasne wezly tekstowe) go nie widzi.
+ * Szukamy elementu, ktorego CALY tekst rowna sie zdaniu z i18n.
+ */
+const lineMatcher = (text: string) => (_: string, node: Element | null) =>
+  node?.tagName === 'SPAN' && node.textContent === text;
+const getLine = (text: string) => screen.getByText(lineMatcher(text));
+const queryLine = (text: string) => screen.queryByText(lineMatcher(text));
+
 function renderPage() {
   return render(
     <MemoryRouter>
@@ -173,7 +183,7 @@ describe('DashboardPage', () => {
     renderPage();
 
     expect(screen.getByText(pl.dashboard.activityTitle)).toBeInTheDocument();
-    expect(screen.getByText(pl.dashboard.activityAccepted('Anna Kowalska'))).toBeInTheDocument();
+    expect(getLine(pl.dashboard.activityAccepted('Anna Kowalska'))).toBeInTheDocument();
     expect(screen.getByText(pl.dashboard.activityUpToDate)).toBeInTheDocument();
   });
 
@@ -185,7 +195,7 @@ describe('DashboardPage', () => {
     renderPage();
 
     expect(screen.getByText(pl.dashboard.activityUnread(1))).toBeInTheDocument();
-    expect(screen.getByText(pl.dashboard.activityComment('Anna Kowalska'))).toBeInTheDocument();
+    expect(getLine(pl.dashboard.activityComment('Anna Kowalska'))).toBeInTheDocument();
   });
 
   it('„Odhacz wszystko" zapisuje znacznik z NAJNOWSZEGO zdarzenia, nie z chwili klikniecia', async () => {
@@ -217,13 +227,11 @@ describe('DashboardPage', () => {
     ]);
     renderPage();
 
-    expect(screen.getByText(pl.dashboard.activityAccepted('Ewa Nowa'))).toBeInTheDocument();
-    expect(
-      screen.queryByText(pl.dashboard.activityAccepted('Jan Odhaczony')),
-    ).not.toBeInTheDocument();
+    expect(getLine(pl.dashboard.activityAccepted('Ewa Nowa'))).toBeInTheDocument();
+    expect(queryLine(pl.dashboard.activityAccepted('Jan Odhaczony'))).not.toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: pl.dashboard.activityShowOlder(1) }));
-    expect(screen.getByText(pl.dashboard.activityAccepted('Jan Odhaczony'))).toBeInTheDocument();
+    expect(getLine(pl.dashboard.activityAccepted('Jan Odhaczony'))).toBeInTheDocument();
   });
 
   it('bez nowych zdarzen nie ma czego odhaczac', () => {

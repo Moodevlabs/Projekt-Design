@@ -63,63 +63,59 @@ export function OnboardingChecklist({ hasQuotes }: { hasQuotes: boolean }) {
   const zrobione = steps.filter((step) => step.done).length;
 
   return (
-    <section className="card-surface px-6 py-5" aria-labelledby="onboarding-title">
-      <div className="flex items-baseline justify-between gap-3">
-        <h2 id="onboarding-title" className="text-ink text-base font-semibold tracking-tight">
+    <nav
+      aria-labelledby="onboarding-title"
+      className="border-hair bg-surface flex flex-col overflow-hidden rounded-[var(--radius-control)] border sm:flex-row"
+    >
+      {/* Pasek, nie karta (T-133): trzy kroki w jednym rzędzie z tytułem
+          po lewej. Na pulpicie z treścią checklista jest przypomnieniem,
+          a nie blokiem, który konkuruje z pracą. */}
+      <div className="border-hair flex items-center gap-3 border-b px-4 py-2.5 sm:border-r sm:border-b-0">
+        <h2 id="onboarding-title" className="text-ink text-[13px] font-semibold whitespace-nowrap">
           {pl.onboarding.title}
         </h2>
         <span className="text-ink-soft text-xs tabular-nums">
           {pl.onboarding.progress(zrobione, steps.length)}
         </span>
       </div>
-      <p className="text-ink-soft mt-1 text-sm">{pl.onboarding.lead}</p>
 
-      <ol className="mt-5 flex flex-col gap-2">
-        {steps.map((step) => (
-          <li key={step.key}>
+      <ol className="flex flex-1 flex-col sm:flex-row">
+        {steps.map((step, index) => (
+          <li
+            key={step.key}
+            className="border-hair flex-1 border-b last:border-b-0 sm:border-r sm:border-b-0 sm:last:border-r-0"
+          >
             <Link
               to={step.to}
               className={cn(
-                'border-hair group flex items-center gap-3 rounded-md border px-4 py-3 transition-colors',
-                // `--primary`, nie `--doc-sage`: to jest kafel PULPITU, a paleta
-                // `--doc-*` należy do kartki wyceny i jest nadpisywana brand
-                // kitem klienta. Checklista zmieniałaby kolor razem z jego logo.
-                step.done ? 'opacity-60' : 'hover:border-primary',
+                'hover:bg-surface-2 flex items-center gap-2.5 px-3.5 py-2.5 text-[13px] transition-colors',
+                step.done ? 'text-ink-soft' : 'text-ink',
               )}
             >
               <span
                 className={cn(
                   'flex size-5 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold',
+                  // `--primary`, nie `--doc-sage`: to jest pasek PULPITU, a paleta
+                  // `--doc-*` należy do kartki wyceny i jest nadpisywana brand
+                  // kitem klienta.
                   step.done
                     ? 'bg-primary text-primary-foreground'
-                    : 'border-hair text-ink-soft border',
+                    : 'border-hair-strong text-ink-soft border',
                 )}
                 aria-hidden
               >
-                {step.done ? <Check className="size-3" /> : steps.indexOf(step) + 1}
+                {step.done ? <Check className="size-3" /> : index + 1}
               </span>
-
-              <span className="min-w-0 flex-1">
-                <span className="text-ink block text-sm font-medium">
-                  {pl.onboarding.steps[step.key].title}
-                </span>
-                <span className="text-ink-soft block text-xs">
-                  {pl.onboarding.steps[step.key].hint}
-                </span>
-              </span>
-
+              <span className="min-w-0 truncate">{pl.onboarding.steps[step.key].title}</span>
               {step.done ? (
-                <span className="text-ink-soft text-xs">{pl.onboarding.done}</span>
+                <span className="text-ink-faint ml-auto text-xs">{pl.onboarding.done}</span>
               ) : (
-                <ArrowRight
-                  className="text-ink-soft size-4 shrink-0 transition-transform group-hover:translate-x-0.5"
-                  aria-hidden
-                />
+                <ArrowRight className="text-ink-faint ml-auto size-3.5 shrink-0" aria-hidden />
               )}
             </Link>
           </li>
         ))}
       </ol>
-    </section>
+    </nav>
   );
 }

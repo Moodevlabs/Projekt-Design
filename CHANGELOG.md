@@ -3,6 +3,17 @@
 Format wg [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/).
 Wersje zgodne z [SemVer](https://semver.org/lang/pl/).
 
+## [1.2.9] – 2026-09-08
+
+### Zmienione
+
+**Pulpit od nowa.** Kafle z liczbami z wersji 1.2.8 zniknęły. Pulpit otwiera
+data dnia i jedno zdanie o tym, co czeka („Trzy oferty czekają na decyzję
+inwestorów, jedna z nich wygasa w czwartek. Dwie nowe uwagi od klientów.”),
+z odnośnikami w treści. Pod nim rejestr aktywności klientów wprost na tle,
+projekty w toku jako okładki teczek i tabela ostatnich wycen. Lista kontrolna
+konfiguracji stała się cienkim paskiem.
+
 ## [1.2.8] – 2026-09-08
 
 ### Dodane
