@@ -89,7 +89,7 @@ export function ActivityFeed() {
 
   if (activity.isLoading) {
     return (
-      <section className="card-surface mb-6 space-y-3 p-5">
+      <section className="card-surface space-y-3 p-5">
         <Skeleton className="h-4 w-40" />
         <Skeleton className="h-5 w-full" />
       </section>
@@ -102,12 +102,18 @@ export function ActivityFeed() {
   if (activity.isError) return null;
 
   return (
-    <section className="card-surface mb-6 p-5" aria-label={pl.dashboard.activityTitle}>
+    <section className="card-surface p-5" aria-label={pl.dashboard.activityTitle}>
       <header className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <h2 className="label-caps text-ink-soft">{pl.dashboard.activityTitle}</h2>
+        {/* Krój display bez klasy wagi — nagłówek bloku, nie etykieta (T-133). */}
+        <h2 className="font-display text-ink text-[17px]">{pl.dashboard.activityTitle}</h2>
 
         <div className="flex items-center gap-3">
-          <p className={cn('text-xs', unread > 0 ? 'text-ink' : 'text-ink-soft')}>
+          <p
+            className={cn(
+              'rounded-[var(--radius-pill)] px-2.5 py-0.5 text-xs',
+              unread > 0 ? 'bg-beige text-ink font-medium' : 'text-ink-soft',
+            )}
+          >
             {unread > 0 ? pl.dashboard.activityUnread(unread) : pl.dashboard.activityUpToDate}
           </p>
 

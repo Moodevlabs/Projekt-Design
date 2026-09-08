@@ -104,7 +104,7 @@ export const helpPl = {
         },
         {
           kind: 'p',
-          text: 'Pulpit rozpoczyna się paskiem „Aktywność klientów”, obejmującym akceptacje, odrzucenia, uwagi i otwarcia linków, z oznaczeniem pozycji nieprzejrzanych. Przy braku nowych zdarzeń wyświetlany jest komunikat „Brak nowych zdarzeń”. Poniżej znajdują się projekty w toku oraz pięć ostatnich wycen. Lista kontrolna konfiguracji znika po wykonaniu wszystkich trzech kroków. Informacja o subskrypcji nie jest prezentowana na pulpicie — okres próbny zgłaszany jest raz dziennie przy uruchomieniu aplikacji, a po opłaceniu subskrypcja obsługiwana jest z poziomu Ustawień.',
+          text: 'Pulpit otwiera data dnia i cztery liczby „na co dziś czekam”: nowe zdarzenia (akceptacje, uwagi, otwarcia linków), oferty u klientów (wysłane, bez decyzji), oferty wygasające w ciągu 7 dni oraz projekty w toku. Kafle z liczbą wymagającą reakcji noszą kropkę w kolorze statusu; kafle ofert i projektów prowadzą do rejestru i listy klientów. Poniżej po lewej: „Aktywność klientów” z oznaczeniem pozycji nieprzejrzanych (przy braku zdarzeń — „Brak nowych zdarzeń”) i pięć ostatnich wycen; po prawej: projekty w toku z okładkami oraz lista kontrolna konfiguracji, która znika po wykonaniu trzech kroków. Informacja o subskrypcji nie jest prezentowana na pulpicie — okres próbny zgłaszany jest raz dziennie przy uruchomieniu aplikacji, a po opłaceniu subskrypcja obsługiwana jest z poziomu Ustawień.',
         },
       ],
     },
