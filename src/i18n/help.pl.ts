@@ -72,7 +72,7 @@ export const helpPl = {
   tipLabel: 'Wskazówka',
   warnLabel: 'Uwaga',
   footer:
-    'W razie pytań nieujętych w podręczniku prosimy o kontakt — adres znajduje się w stopce ekranu logowania. Treść odpowiada wersji 1.0 aplikacji.',
+    'W razie pytań nieujętych w podręczniku prosimy o kontakt — adres znajduje się w stopce ekranu logowania. Treść odpowiada wersji 1.2.8 aplikacji.',
 
   sections: [
     {
@@ -287,18 +287,27 @@ export const helpPl = {
         },
         {
           kind: 'p',
-          text: 'Pomieszczenia (prawa kolumna) opisują: nazwa, ilość, typ ze słownika oraz dwie flagi — W (część wizualna, czyli projekt aranżacji) i T (część techniczna, czyli rysunki wykonawcze). Usługi rozliczane według pomieszczeń pobierają z tej listy swoje składniki: stawka z biblioteki mnożona jest przez pomieszczenia objęte zakresem usługi. Pod listą prezentowane jest zdanie „Do części wizualnej liczy się N, do technicznej M” — są to dokładnie te wartości, którymi posługuje się cennik. Pole ceny takiej pozycji pokazuje wyliczoną kwotę, a pod nią stoi rachunek: „200,00 zł + 7 pom.” dla usługi liczonej za wszystkie pomieszczenia albo „kuchnia ×2: 2 × 350,00 zł” w bloku pomieszczenia. Kliknięcie rachunku otwiera pełne rozbicie po pomieszczeniach. Wpisanie kwoty w pole ceny nadpisuje wyliczenie ręcznie (pozycja dostaje dopisek „ręcznie”); „Przywróć z cennika” wraca do reguły, a „Wyceń indywidualnie” wyłącza pozycję z sumy.',
+          text: 'Pomieszczenia (prawa kolumna) opisują: nazwa, ilość, typ ze słownika oraz dwie flagi — W (część wizualna, czyli projekt aranżacji) i T (część techniczna, czyli rysunki wykonawcze). Usługi rozliczane według pomieszczeń pobierają z tej listy swoje składniki. Pod listą prezentowane jest zdanie „Do części wizualnej liczy się N, do technicznej M” — są to dokładnie te wartości, którymi posługuje się cennik.',
+        },
+        {
+          kind: 'tip',
+          title: 'Pole ceny pokazuje wynik, a pod nim stoi rachunek',
+          text: 'Przy usłudze rozliczanej według pomieszczeń pole ceny prezentuje wyliczoną kwotę — tę samą, która wchodzi do sumy. Pod kwotą znajduje się jednowierszowy rachunek: „200,00 zł + 7 pom.” dla usługi liczonej za wszystkie pomieszczenia objęte jej zakresem, „kuchnia ×2: 2 × 350,00 zł” dla pozycji w bloku pomieszczenia, „pomieszczenie + 3 kadry” dla wizualizacji. Kliknięcie rachunku otwiera pełne rozbicie: stawka bazowa, każde pomieszczenie z jego stawką i ilością, suma. Rachunek mówi też wprost, czego brakuje: „brak pomieszczeń w wycenie” albo „brak stawek — uzupełnij w Bibliotece → Stawki”. Przy usłudze o stałej cenie rachunku nie ma — pole ceny to cena jednostkowa, a wartość wynika z ilości.',
+        },
+        {
+          kind: 'tip',
+          title: 'Kwota wpisana ręcznie',
+          text: 'Wpisanie innej kwoty w pole ceny usługi liczonej według pomieszczeń nadpisuje wyliczenie: pozycja otrzymuje dopisek „ręcznie”, a reguła i stawki pozostają zapamiętane. Polecenie „Przywróć z cennika” (w rozbiciu pod kwotą) wraca do wyliczenia — także po zmianie listy pomieszczeń. Wyczyszczenie pola również zdejmuje nadpisanie. Stawek nie zmienia się w wycenie; ich miejscem jest Biblioteka → Stawki.',
         },
         {
           kind: 'warn',
-          title:
-            'Usługa rozliczana za pomieszczenie przy braku pomieszczeń nalicza wyłącznie stawkę bazową',
-          text: 'Wynik wynosi wówczas najczęściej 0 zł, a pod kwotą stoi „brak pomieszczeń w wycenie”. Panel „Dodaj usługi” sygnalizuje tę sytuację nad listą i udostępnia przycisk „Dodaj pomieszczenie”. Usługa bez stawek w bibliotece pokazuje z kolei „brak stawek — uzupełnij w Bibliotece → Stawki”. Przy uzupełnieniu późniejszym kwoty przeliczane są automatycznie.',
+          title: 'Usługa według pomieszczenia daje 0 zł',
+          text: 'Dwie przyczyny, obie nazwane w rachunku pod kwotą. „Brak pomieszczeń w wycenie” — lista w prawej kolumnie jest pusta; panel „Dodaj usługi” sygnalizuje to nad listą i udostępnia przycisk „Dodaj pomieszczenie”. „Brak stawek” — usługa nie ma jeszcze cennika w Bibliotece → Stawki (tak startują usługi przykładowe i pozycje szablonów startowych). Po uzupełnieniu kwoty przeliczane są automatycznie; do czasu uzupełnienia można wpisać kwotę ręcznie.',
         },
         {
           kind: 'list',
           items: [
-            '„Wycena indywidualna” oznacza pozycję bez ceny. Pozostaje ona w ofercie, lecz nie wchodzi do sumy; podsumowanie zawiera adnotację „+ N pozycji wycenianych indywidualnie”.',
+            '„Wycena indywidualna” oznacza pozycję bez ceny — w każdym sposobie wyceny. Pozostaje ona w ofercie, lecz nie wchodzi do sumy; podsumowanie zawiera adnotację „+ N pozycji wycenianych indywidualnie”. Przy usłudze o stałej cenie wystarczy wyczyścić pole ceny; przy usłudze według pomieszczeń służy do tego polecenie „Wyceń indywidualnie” w rozbiciu pod kwotą. Powrót: wpisanie kwoty albo „Przywróć z cennika”.',
             'Rabaty umieszczane są na końcu dokumentu: kwotowe albo procentowe, obejmujące całą wycenę, sekcję lub wybrane pozycje, z opcjonalnym warunkiem wyboru wszystkich pozycji z zakresu oraz zaokrągleniem.',
             'Sposób naliczania (karta w górnej części prawej kolumny): kwotowo albo godzinowo. W trybie godzinowym w wierszu wprowadza się minuty, a kwota wynika ze stawki przypisanej do wyceny. Przełączenie trybu wymaga decyzji o przeliczeniu wartości.',
             'Warianty: usługa posiadająca warianty w bibliotece (przykładowo „Wizualizacja” / „Panorama 360”) prezentuje w wierszu listę rozwijaną zamiast samej nazwy.',
@@ -482,6 +491,8 @@ export const helpPl = {
             'Ustawienia → Branding: logo, kolor marki, dane pracowni, osoba kontaktowa, stopka. Podgląd oferty generuje się przyciskiem — „Otwórz podgląd” otwiera go w systemowej przeglądarce PDF, „Zapisz podgląd” zapisuje plik we wskazanym miejscu.',
             'Dokument wyceny zawiera nagłówek ze znakiem graficznym, dane inwestora, sekcje i pozycje wraz z ilością i jednostką, pozycje wyłączone prezentowane jako opcje (o ile ustawienie to jest włączone), rabaty, podsumowanie netto/VAT/brutto oraz adnotację o pozycjach wycenianych indywidualnie.',
             'Po zakończonym eksporcie plik zapisywany jest w Plikach klienta i projektu (filtr „Wygenerowane PDF”). Archiwum udostępnia zapisany plik, a nie generuje go ponownie. Karta „Wygenerowane PDF” w edytorze prezentuje trzy ostatnie pozycje.',
+            'Logo trafia na pas nagłówka każdej strony. Przyjmowane formaty: PNG, JPEG, SVG i WebP — plik SVG albo WebP jest przed złożeniem dokumentu zamieniany na PNG, więc znak wektorowy wygląda tak samo jak w podglądzie brandingu. Jeżeli wariant wskazany w ustawieniu „Znak na nagłówku dokumentu” nie został wgrany, na nagłówek trafia drugi wariant.',
+            'Pakiet dokumentów scalony w jeden plik numeruje strony ciągle, w prawym dolnym rogu; wycena w pakiecie nie drukuje wówczas własnego „n / N”. Pojedyncza wycena zachowuje własną numerację.',
             'Opisy pozycji obsługują pola automatyczne: {rooms} wstawia listę pomieszczeń („kuchnia, salon ×2”), a {frames|kadr|kadry|kadrów} liczbę kadrów z poprawną odmianą. Pole nierozpoznane pozostaje w treści dosłownie, aby błąd zapisu był widoczny. Listę pól udostępnia przycisk „{ }”.',
           ],
         },
@@ -501,7 +512,7 @@ export const helpPl = {
           kind: 'list',
           items: [
             'Osiem sposobów wyceny (pełna strona usługi, krok 4): Kwota stała · Za m² · Według pomieszczenia · Za kadr · Za godzinę · Za wizytę · Za element · Indywidualnie.',
-            'Sposób „Według pomieszczenia” obejmuje stawkę bazową powiększoną o stawkę przypisaną do typu pomieszczenia (krok 5: tabela pomieszczenie × stawka netto) oraz zakres: wszystkie pomieszczenia, wyłącznie część wizualna albo wyłącznie techniczna. Sposób „Za kadr” uwzględnia liczbę kadrów wprowadzoną w wycenie.',
+            'Sposób „Według pomieszczenia” obejmuje stawkę bazową powiększoną o stawkę przypisaną do typu pomieszczenia (krok 5: tabela pomieszczenie × stawka netto) oraz zakres: wszystkie pomieszczenia, wyłącznie część wizualna albo wyłącznie techniczna. Stawka bazowa i zakres dotyczą usługi wstawionej luzem albo do zwykłej grupy — liczonej za wszystkie pomieszczenia wyceny. Ta sama usługa wstawiona do bloku pomieszczenia (po „Rozpisz na pomieszczenia”) liczy wyłącznie stawkę swojego typu pomnożoną przez ilość tego pomieszczenia, bez stawki bazowej. Sposób „Za kadr” uwzględnia liczbę kadrów wprowadzoną w wycenie.',
             'Cena „od” prezentowana jest na listach oraz w panelu „Dodaj usługi” i nie wpływa na obliczenia. Przy braku wartości wprowadzonej ręcznie lista prezentuje najniższą stawkę wynikającą z reguły.',
             'Usługa nieaktywna nie jest dostępna w edytorze, lecz pozostaje w wycenach, które już ją zawierają.',
             'Grupa porządkuje bibliotekę: kod („01”), nazwa, kolor z palety oraz kolejność ustalana strzałkami w wierszu. Kolejność grup odpowiada kolejności w panelu „Dodaj usługi”. Licznik usług po prawej stronie wiersza jest przyciskiem — rozwija listę usług grupy, z możliwością dopięcia kolejnych („Dodaj usługę”) i odpięcia. Usługa należy do jednej grupy, więc dopięcie jej tutaj przenosi ją z poprzedniej; odpięcie nie usuwa usługi z biblioteki, lecz przenosi do kategorii „Bez grupy”. Usunięcie grupy również wyłącznie odpina usługi.',
@@ -520,7 +531,7 @@ export const helpPl = {
         {
           kind: 'tip',
           title: 'Biblioteka przykładowa',
-          text: 'Nowe konto otrzymuje 38 usług w 8 grupach, oznaczonych jako przykładowe i pozbawionych stawek. Edycja dowolnego pola usuwa to oznaczenie i włącza pozycję do biblioteki pracowni. Opcja Ustawienia → Biblioteka → „Usuń pozostałe przykładowe” kasuje pozycje niepoddane edycji.',
+          text: 'Nowe konto otrzymuje 38 usług w 8 grupach, oznaczonych jako przykładowe i pozbawionych stawek — usługi według pomieszczeń mają w wycenie kwotę 0 zł i dopisek „brak stawek”, dopóki macierz w zakładce Stawki nie zostanie wypełniona. Edycja dowolnego pola usuwa to oznaczenie i włącza pozycję do biblioteki pracowni. Opcja Ustawienia → Biblioteka → „Usuń pozostałe przykładowe” kasuje pozycje niepoddane edycji.',
         },
         {
           kind: 'warn',
@@ -542,6 +553,7 @@ export const helpPl = {
             'W edytorze szablonu nie ma numeru, statusu, klienta, udostępniania, wersji ani eksportu PDF — szablon to treść, nie dokument dla inwestora.',
             'Użycie: „Nowa wycena” → wybór szablonu jako punktu wyjścia, albo w sekcji Szablony polecenie „Nowa wycena z szablonu”. Dane klienta nie są kopiowane — uzupełnia je projekt.',
             'Karta szablonu prezentuje liczbę pozycji, sumę oraz oznaczenia zawartości (wycena · termin · dokumenty).',
+            'Szablony startowe (pięć teczek na nowym koncie) nie zawierają cen: pozycje o stałej cenie są „wyceniane indywidualnie”, a usługi według pomieszczeń pokazują „brak stawek”. Szablon jest kopią — późniejsze uzupełnienie stawek w Bibliotece nie przenosi się do niego samoczynnie; kwoty wpisuje się w wycenie z szablonu ręcznie albo aktualizuje z panelu biblioteki w edytorze.',
           ],
         },
         {
@@ -586,7 +598,7 @@ export const helpPl = {
         },
         {
           kind: 'p',
-          text: 'BRANDING (Ustawienia → Branding) obejmuje trzy elementy: znak graficzny, kolorystykę i krój pisma. Znak wgrywa się w dwóch wersjach — ciemnej (przeznaczonej na jasny nagłówek) i jasnej (na ciemny). Który z nich trafi na pas nagłówka, wskazuje ustawienie „Znak na nagłówku dokumentu”. Wyboru dokonuje użytkownik: program nie wylicza go z koloru marki, ponieważ przy znakach z własnym tłem lub wielobarwnych taka reguła prowadziła do błędnych rozstrzygnięć. Rezultat można sprawdzić przyciskiem podglądu w dolnej części strony.',
+          text: 'BRANDING (Ustawienia → Branding) obejmuje trzy elementy: znak graficzny, kolorystykę i krój pisma. Znak wgrywa się w dwóch wersjach — ciemnej (przeznaczonej na jasny nagłówek) i jasnej (na ciemny). Który z nich trafi na pas nagłówka, wskazuje ustawienie „Znak na nagłówku dokumentu”. Wyboru dokonuje użytkownik: program nie wylicza go z koloru marki, ponieważ przy znakach z własnym tłem lub wielobarwnych taka reguła prowadziła do błędnych rozstrzygnięć. Rezultat można sprawdzić przyciskiem podglądu w dolnej części strony. Gdy wskazanego wariantu nie wgrano, dokument bierze drugi — pas nagłówka nie zostaje pusty. Znak może być plikiem PNG, JPEG, SVG albo WebP; dwa ostatnie są zamieniane na PNG przy składaniu PDF.',
         },
         {
           kind: 'list',
@@ -685,6 +697,26 @@ export const helpPl = {
             {
               q: 'Usługa rozliczana według pomieszczenia nalicza 0 zł.',
               a: 'Rachunek pod kwotą mówi wprost, czego brakuje: „brak pomieszczeń w wycenie” — dodaj je w prawej kolumnie; „brak stawek — uzupełnij w Bibliotece → Stawki” — usługa nie ma jeszcze cennika. Jeśli rachunek pokazuje „0 pom.”, pomieszczenia nie są oznaczone w części, której usługa dotyczy (flagi W/T) — sprawdź zakres usługi na jej stronie w Bibliotece.',
+            },
+            {
+              q: 'Kwota pozycji różni się od stawki w Bibliotece.',
+              a: 'Stawka w Bibliotece to składnik, a kwota w wycenie — wynik. Usługa według pomieszczeń liczy stawkę bazową plus stawkę typu dla każdego pomieszczenia objętego zakresem (z uwzględnieniem ilości, np. „sypialnia ×2”). Rachunek pod kwotą i jego rozbicie pokazują każdy składnik; w panelu „Dodaj usługi” stawka poprzedzona jest słowem „od”, bo końcowa kwota zależy od listy pomieszczeń.',
+            },
+            {
+              q: 'Po „Rozpisz na pomieszczenia” suma wyceny jest zawyżona.',
+              a: 'W wycenach zapisanych przed wersją 1.2.6 pozycja w bloku pomieszczenia liczyła wszystkie pomieszczenia wyceny — siedem bloków dawało siedem pełnych sum. Takie pozycje mają dopisek „liczy wszystkie pomieszczenia” z akcją „Przypnij do: …”, która przełącza je na liczenie za jedno pomieszczenie. Nowe wyceny liczą poprawnie od razu; kwoty ofert już przekazanych inwestorom nie są zmieniane samoczynnie.',
+            },
+            {
+              q: 'Potrzebna jest własna kwota zamiast wyliczonej.',
+              a: 'Wystarczy wpisać ją w pole ceny — pozycja otrzymuje dopisek „ręcznie”, a reguła i stawki pozostają zapamiętane. „Przywróć z cennika” w rozbiciu pod kwotą wraca do wyliczenia.',
+            },
+            {
+              q: 'Logo nie pojawia się na dokumencie PDF.',
+              a: 'Do wersji 1.2.7 znak w formacie SVG albo WebP był pomijany bez komunikatu; obecnie jest zamieniany na PNG. Jeżeli logo nadal nie jest widoczne, należy sprawdzić w Ustawieniach → Branding, czy wgrany jest wariant wskazany w „Znak na nagłówku dokumentu” (przy jego braku używany jest drugi) i wygenerować podgląd przyciskiem w dolnej części strony.',
+            },
+            {
+              q: 'Pakiet dokumentów ma podwójną numerację stron.',
+              a: 'Dotyczy plików wygenerowanych przed wersją 1.2.7, w których wycena drukowała własny numer obok numeracji pakietu. Wystarczy wyeksportować pakiet ponownie — nowy plik ma jedną, ciągłą numerację.',
             },
             {
               q: 'Zmiana ceny w Bibliotece nie została przeniesiona do wyceny.',
