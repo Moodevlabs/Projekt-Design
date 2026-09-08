@@ -417,6 +417,8 @@ export const pl = {
       other: 'Inny',
     },
     statusLabel: 'Status',
+    /** Okładka projektu (T-131): rysunek wg typu zamiast pustej ramki. */
+    coverPlaceholder: (kind: string) => `Projekt bez zdjęcia — ${kind.toLowerCase()}`,
     status: {
       lead: 'Zapytanie',
       offer: 'Oferta',
@@ -454,8 +456,28 @@ export const pl = {
     notFoundDescription: 'Rekord został usunięty lub podany adres jest nieprawidłowy.',
     loadError: 'Nie udało się wczytać projektów.',
 
+    tabOverview: 'Przegląd',
     tabQuotes: 'Dokumenty',
     tabNotes: 'Notatki',
+
+    // Zakładka „Przegląd" (T-132): galeria, ostatnie pliki, w skrócie.
+    gallery: 'Zdjęcia projektu',
+    coverNoPhoto: 'Brak zdjęcia',
+    coverPlaceholderTag: (kind: string) => `placeholder „${kind}”`,
+    coverChosenTag: 'okładka wybrana ręcznie',
+    coverAutoTag: 'okładka: najnowszy obraz',
+    setCover: 'Ustaw zdjęcie',
+    addPhoto: 'Dodaj zdjęcie',
+    coverDialogTitle: 'Zdjęcie na okładkę',
+    coverDialogHint:
+      'Wybierz obraz z plików projektu. Bez wyboru na okładce stoi najnowszy obraz, a gdy obrazów nie ma — rysunek według typu inwestycji.',
+    coverAuto: 'Automatycznie — najnowszy obraz',
+    coverSaved: 'Zmieniono zdjęcie okładki',
+    recentFiles: 'Ostatnie pliki',
+    allFiles: (count: number) => `Wszystkie (${count}) ›`,
+    recentFilesEmpty:
+      'Jeszcze bez plików. Rzuty, zdjęcia z wizji i wygenerowane PDF-y pojawią się tutaj.',
+    summary: 'W skrócie',
     quotesEmptyTitle: 'Brak dokumentacji w tym projekcie',
     quotesEmptyDescription:
       'Utwórz pierwszą dokumentację — dane inwestora zostaną uzupełnione automatycznie.',

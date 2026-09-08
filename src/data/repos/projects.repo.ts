@@ -45,6 +45,7 @@ function mapProject(row: Row): Project {
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
     stageProgress: parseStageProgress(row.stage_progress),
+    coverFileId: (row.cover_file_id as string | null) ?? null,
   };
 }
 
@@ -53,6 +54,7 @@ function mapOverview(row: Row): ProjectOverview {
     ...mapProject(row),
     clientName: text(row.client_name),
     clientAvatarPath: (row.client_avatar_path as string | null) ?? null,
+    coverPath: (row.cover_path as string | null) ?? null,
     quotesCount: Number(row.quotes_count ?? 0),
     acceptedNetCents: Number(row.accepted_net_cents ?? 0),
     lastActivityAt: (row.last_activity_at as string) ?? (row.updated_at as string),
@@ -144,7 +146,8 @@ export async function createProject(input: CreateProjectInput): Promise<Project>
   return mapProject(row);
 }
 
-export type ProjectPatch = Partial<ProjectDraft>;
+/** Pola z formularza + okładka (T-130), która nie jest polem formularza. */
+export type ProjectPatch = Partial<ProjectDraft> & { coverFileId?: string | null };
 
 export async function updateProject(id: string, patch: ProjectPatch): Promise<Project> {
   const update: TablesUpdate<'projects'> = {};
@@ -154,6 +157,7 @@ export async function updateProject(id: string, patch: ProjectPatch): Promise<Pr
   if (patch.areaM2 !== undefined) update.area_m2 = parseArea(patch.areaM2);
   if (patch.kind !== undefined) update.kind = toColumn(patch.kind);
   if (patch.status !== undefined) update.status = patch.status;
+  if (patch.coverFileId !== undefined) update.cover_file_id = patch.coverFileId;
   if (patch.startDate !== undefined) update.start_date = toColumn(patch.startDate);
   if (patch.notes !== undefined) update.notes = toColumn(patch.notes);
 

@@ -2,11 +2,10 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
-import { initialsOf, PageSection } from '@/components/shared';
+import { PageSection } from '@/components/shared';
 import { ClientFormDialog } from '@/features/clients/ClientFormDialog';
-import { useClientAvatarUrl } from '@/data/queries/useClientAvatar';
+import { ProjectCover } from '@/features/projects/cover/ProjectCover';
 import { useProjects } from '@/data/queries/useProjects';
 import type { ProjectOverview } from '@/domain/project/schema';
 import { routes } from '@/app/routes';
@@ -79,8 +78,6 @@ export function ActiveProjects() {
 }
 
 function ProjectTile({ project }: { project: ProjectOverview }) {
-  const avatar = useClientAvatarUrl(project.clientAvatarPath);
-
   return (
     <li>
       <Link
@@ -88,12 +85,14 @@ function ProjectTile({ project }: { project: ProjectOverview }) {
         data-testid="project-tile"
         className="border-hair hover:border-ink/20 hover:bg-surface-2/60 flex min-w-0 items-center gap-3 rounded-[var(--radius-card)] border p-3 transition-colors"
       >
-        <Avatar className="size-9 shrink-0">
-          {avatar.data ? <AvatarImage src={avatar.data} alt={project.clientName} /> : null}
-          <AvatarFallback className="bg-surface-2 text-ink-soft text-[11px] font-medium">
-            {initialsOf(project.clientName, '??')}
-          </AvatarFallback>
-        </Avatar>
+        {/* Okładka projektu zamiast awatara klienta (T-131): kafel jest
+            o teczce, a nazwisko klienta stoi pod nazwą tekstem. */}
+        <ProjectCover
+          path={project.coverPath}
+          kind={project.kind}
+          alt=""
+          className="h-10 w-14 shrink-0"
+        />
 
         <span className="min-w-0 flex-1">
           <span className="text-ink block truncate text-sm font-medium">{project.name}</span>

@@ -925,6 +925,7 @@ export type Database = {
           area_m2: number | null
           city: string | null
           client_id: string
+          cover_file_id: string | null
           created_at: string
           created_by: string | null
           deleted_at: string | null
@@ -944,6 +945,7 @@ export type Database = {
           area_m2?: number | null
           city?: string | null
           client_id: string
+          cover_file_id?: string | null
           created_at?: string
           created_by?: string | null
           deleted_at?: string | null
@@ -963,6 +965,7 @@ export type Database = {
           area_m2?: number | null
           city?: string | null
           client_id?: string
+          cover_file_id?: string | null
           created_at?: string
           created_by?: string | null
           deleted_at?: string | null

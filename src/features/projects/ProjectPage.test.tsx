@@ -1,7 +1,9 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ProjectOverview } from '@/domain/project/schema';
+import type { StoredFile } from '@/domain/files/schema';
 import { pl } from '@/i18n/pl';
 
 const useProjectOverview = vi.hoisted(() => vi.fn());
@@ -14,8 +16,13 @@ const asyncMutationStub = vi.hoisted(() => () => ({
   isPending: false,
 }));
 
+const useFiles = vi.hoisted(() =>
+  vi.fn(() => ({ data: [] as StoredFile[], isLoading: false, isError: false })),
+);
+
 vi.mock('@/data/queries/useFiles', () => ({
-  useFiles: () => ({ data: [], isLoading: false, isError: false }),
+  useFiles,
+  useFileUrl: () => ({ data: null }),
   useStorageUsage: () => ({ data: { usedBytes: 0, quotaBytes: 1 }, isLoading: false }),
   useUploadFile: asyncMutationStub,
   useRenameFile: mutationStub,
@@ -29,6 +36,7 @@ vi.mock('@/data/queries/useProjects', () => ({
   useCreateProject: asyncMutationStub,
   useUpdateProject: asyncMutationStub,
   useSetProjectStatus: mutationStub,
+  useSetProjectCover: mutationStub,
   useDeleteProject: mutationStub,
   useMoveQuoteToProject: mutationStub,
 }));
@@ -44,6 +52,8 @@ vi.mock('@/data/queries/useClients', () => ({
 
 vi.mock('@/data/queries/useQuotes', () => ({
   useQuotesList,
+  // „W skrócie" (T-132) liczy etapy z harmonogramu zaakceptowanej wyceny.
+  useQuote: () => ({ data: null, isLoading: false }),
   useCreateQuote: asyncMutationStub,
   useSetQuoteRegisterFields: mutationStub,
   useDuplicateQuote: mutationStub,
@@ -83,8 +93,10 @@ function overview(partial: Partial<ProjectOverview> = {}): ProjectOverview {
     createdAt: '2026-08-01T10:00:00Z',
     updatedAt: '2026-08-01T10:00:00Z',
     stageProgress: {},
+    coverFileId: null,
     clientName: 'Marta i Piotr Kowalscy',
     clientAvatarPath: null,
+    coverPath: null,
     quotesCount: 2,
     acceptedNetCents: 450_000,
     lastActivityAt: new Date().toISOString(),
@@ -111,6 +123,7 @@ function renderPage(data: ProjectOverview | null) {
 describe('ProjectPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    useFiles.mockReturnValue({ data: [], isLoading: false, isError: false });
   });
 
   it('pokazuje nazwe, klienta, metraz i adres', () => {
@@ -137,7 +150,7 @@ describe('ProjectPage', () => {
     expect(links[0]).toHaveAttribute('href', '/klienci/c1');
   });
 
-  it('ma zakladki Wyceny, Wizja lokalna, Etapy, Dokumenty, Pliki i Notatki — i tylko te', () => {
+  it('ma zakladki Przeglad, Dokumenty, Wizja lokalna, Etapy, Pliki i Notatki — i tylko te', () => {
     // „Termin" jest zakladka WYCENY, nie projektu — harmonogram dotyczy
     // konkretnej oferty i duplikowanie go tutaj daloby dwa zrodla tej samej daty.
     //
@@ -152,6 +165,9 @@ describe('ProjectPage', () => {
 
     const tabs = screen.getAllByRole('tab').map((tab) => tab.textContent);
     expect(tabs).toEqual([
+      // „Przeglad" (T-132): kadr, ostatnie pliki i liczby — pierwsze, co
+      // widac po wejsciu; nie jest lista zadan ani kalendarzem.
+      pl.projects.tabOverview,
       pl.projects.tabQuotes,
       // „Wizja lokalna" (T-94) tez nie lamie zasady: to notatka ze STANU
       // ZASTANEGO — obmiar, instalacje, zdjecia — a nie drugi harmonogram
@@ -170,9 +186,60 @@ describe('ProjectPage', () => {
     expect(status).toHaveTextContent(pl.projects.status.lead);
   });
 
-  it('pusty projekt pokazuje pusty stan wycen z akcja', () => {
+  it('pusty projekt pokazuje pusty stan wycen z akcja', async () => {
+    const user = userEvent.setup();
     renderPage(overview({ quotesCount: 0 }));
+    await user.click(screen.getByRole('tab', { name: pl.projects.tabQuotes }));
     expect(screen.getByText(pl.projects.quotesEmptyTitle)).toBeInTheDocument();
+  });
+
+  it('przeglad: projekt bez zdjec ma placeholder wg typu, pusta liste plikow i liczby', () => {
+    renderPage(overview());
+
+    const covers = screen.getAllByTestId('project-cover');
+    expect(covers[0]).toHaveAttribute('data-source', 'placeholder');
+    expect(screen.getByRole('img', { name: /dom/i })).toBeInTheDocument();
+    expect(screen.getByText(pl.projects.recentFilesEmpty)).toBeInTheDocument();
+    expect(screen.getByText(pl.projects.summary)).toBeInTheDocument();
+    // Bez obrazow nie ma czego ustawiac na okladke.
+    expect(screen.queryByRole('button', { name: pl.projects.setCover })).not.toBeInTheDocument();
+  });
+
+  it('„Wszystkie" w ostatnich plikach przelacza na zakladke Pliki', async () => {
+    const user = userEvent.setup();
+    useFiles.mockReturnValue({
+      data: [
+        {
+          id: 'f1',
+          workspaceId: 'ws',
+          clientId: 'c1',
+          projectId: 'p1',
+          quoteId: null,
+          siteVisitId: null,
+          kind: 'upload',
+          docType: null,
+          quoteVersion: null,
+          name: 'rzut.pdf',
+          mime: 'application/pdf',
+          sizeBytes: 2048,
+          storagePath: 'ws/rzut.pdf',
+          createdBy: null,
+          createdAt: '2026-09-01T10:00:00Z',
+          updatedAt: '2026-09-01T10:00:00Z',
+          deletedAt: null,
+        },
+      ],
+      isLoading: false,
+      isError: false,
+    });
+    renderPage(overview());
+
+    expect(screen.getByText('rzut.pdf')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: pl.projects.allFiles(1) }));
+    expect(screen.getByRole('tab', { name: pl.files.tab })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
   });
 
   it('brak metrazu nie udaje zera', () => {

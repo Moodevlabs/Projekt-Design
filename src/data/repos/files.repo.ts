@@ -400,10 +400,13 @@ export async function purgeExpiredTrash(workspaceId: string): Promise<number> {
 }
 
 /** Podpisany URL do pobrania. Ważny minutę — tyle trzeba na kliknięcie. */
-export async function getDownloadUrl(storagePath: string): Promise<string> {
+export async function getDownloadUrl(
+  storagePath: string,
+  expiresInSeconds: number = SIGNED_URL_SECONDS,
+): Promise<string> {
   const { data, error } = await getSupabase()
     .storage.from(FILES_BUCKET)
-    .createSignedUrl(storagePath, SIGNED_URL_SECONDS);
+    .createSignedUrl(storagePath, expiresInSeconds);
 
   if (error) throw new RepoError(`Pobranie pliku: ${error.message}`, error);
   if (!data?.signedUrl) throw new RepoError('Plik niedostępny.');

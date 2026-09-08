@@ -48,6 +48,11 @@ export const ProjectSchema = z.object({
   updatedAt: z.string(),
   /** Postep realizacji etapow (T-68). Etapy zyja w harmonogramie wyceny. */
   stageProgress: StageProgressSchema.default({}),
+  /**
+   * Ręcznie wybrana okładka — plik projektu (T-130). `null` = automat:
+   * najnowszy obraz, a bez obrazu placeholder wg typu (`domain/project/cover.ts`).
+   */
+  coverFileId: z.string().uuid().nullable().default(null),
 });
 export type Project = z.infer<typeof ProjectSchema>;
 
@@ -60,6 +65,12 @@ export const ProjectOverviewSchema = ProjectSchema.extend({
    * byłoby N+1 po to, żeby pokazać obrazek.
    */
   clientAvatarPath: z.string().nullable().default(null),
+  /**
+   * Ścieżka okładki w buckecie `files` (T-130): wybrany plik albo najnowszy
+   * obraz — liczone w widoku, z tego samego powodu co avatar klienta.
+   * `null` = placeholder.
+   */
+  coverPath: z.string().nullable().default(null),
   quotesCount: z.number().int().nonnegative().default(0),
   acceptedNetCents: z.number().int().nonnegative().default(0),
   lastActivityAt: z.string(),

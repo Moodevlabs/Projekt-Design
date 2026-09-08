@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   deleteFilePermanently,
+  getDownloadUrl,
   getStorageUsage,
   listFiles,
   listTrash,
@@ -46,7 +47,29 @@ function useInvalidateFiles() {
     // Każdy upload i każde usunięcie zmienia licznik miejsca — pasek zużycia
     // ma się przestawić bez przeładowania Ustawień.
     void queryClient.invalidateQueries({ queryKey: queryKeys.storageUsage() });
+    // Okładka projektu (T-130) liczy się z plików — lista projektów i karta
+    // mają ją przeliczyć po wgraniu albo usunięciu obrazu.
+    void queryClient.invalidateQueries({ queryKey: queryKeys.projects() });
   };
+}
+
+/** Godzina — tyle żyje podpis okładki; odświeżamy z zapasem. */
+const COVER_URL_SECONDS = 60 * 60;
+
+/**
+ * Podpisany URL obrazu z bucketa `files` do pokazania w `<img>` (T-130).
+ *
+ * Godzinny podpis zamiast minutowego z `getDownloadUrl`: miniatura w liście
+ * projektów żyje na ekranie długo, a odświeżanie co minutę robiłoby z tabeli
+ * migotanie. `null` bez ścieżki — placeholder rysuje komponent.
+ */
+export function useFileUrl(storagePath: string | null) {
+  return useQuery({
+    queryKey: [...queryKeys.files(), 'url', storagePath],
+    queryFn: () => (storagePath ? getDownloadUrl(storagePath, COVER_URL_SECONDS) : null),
+    enabled: Boolean(storagePath),
+    staleTime: 45 * 60 * 1000,
+  });
 }
 
 export type UploadFileVars = Omit<UploadFileInput, 'workspaceId'>;
