@@ -72,7 +72,7 @@ export const helpPl = {
   tipLabel: 'Wskazówka',
   warnLabel: 'Uwaga',
   footer:
-    'W razie pytań nieujętych w podręczniku prosimy o kontakt — adres znajduje się w stopce ekranu logowania. Treść odpowiada wersji 1.2.8 aplikacji.',
+    'W razie pytań nieujętych w podręczniku prosimy o kontakt — adres znajduje się w stopce ekranu logowania. Treść odpowiada wersji 1.2.9 aplikacji.',
 
   sections: [
     {
@@ -104,7 +104,7 @@ export const helpPl = {
         },
         {
           kind: 'p',
-          text: 'Pulpit otwiera data dnia i cztery liczby „na co dziś czekam”: nowe zdarzenia (akceptacje, uwagi, otwarcia linków), oferty u klientów (wysłane, bez decyzji), oferty wygasające w ciągu 7 dni oraz projekty w toku. Kafle z liczbą wymagającą reakcji noszą kropkę w kolorze statusu; kafle ofert i projektów prowadzą do rejestru i listy klientów. Poniżej po lewej: „Aktywność klientów” z oznaczeniem pozycji nieprzejrzanych (przy braku zdarzeń — „Brak nowych zdarzeń”) i pięć ostatnich wycen; po prawej: projekty w toku z okładkami oraz lista kontrolna konfiguracji, która znika po wykonaniu trzech kroków. Informacja o subskrypcji nie jest prezentowana na pulpicie — okres próbny zgłaszany jest raz dziennie przy uruchomieniu aplikacji, a po opłaceniu subskrypcja obsługiwana jest z poziomu Ustawień.',
+          text: 'Pulpit otwiera data dnia i jedno zdanie o tym, co czeka: ile ofert leży u inwestorów i czy któraś wygasa w tym tygodniu, ile jest nowych uwag albo zdarzeń od klientów; gdy nic nie czeka, zdanie mówi to wprost i podaje liczbę projektów w toku. Liczby w zdaniu są odnośnikami. Poniżej po lewej rejestr „Aktywność klientów” (nowe wpisy mają kreskę w kolorze statusu, przejrzane są przygaszone; „Oznacz wszystkie jako przejrzane” nie usuwa wpisów), po prawej „Projekty w toku” jako okładki teczek, a na dole tabela pięciu ostatnich wycen. Lista kontrolna konfiguracji to cienki pasek pod zdaniem; znika po wykonaniu trzech kroków. Informacja o subskrypcji nie jest prezentowana na pulpicie — okres próbny zgłaszany jest raz dziennie przy uruchomieniu aplikacji, a po opłaceniu subskrypcja obsługiwana jest z poziomu Ustawień.',
         },
       ],
     },

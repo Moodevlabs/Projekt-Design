@@ -2,6 +2,14 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Money, StatusMark } from '@/components/shared';
 import type { QuoteSummary } from '@/data/repos/quotes.repo';
 import { routes } from '@/app/routes';
@@ -9,8 +17,11 @@ import { formatRelativeDay } from '@/lib/dates';
 import { pl } from '@/i18n/pl';
 
 /**
- * Ostatnie wyceny — główna kolumna pulpitu. Wiersze rozdzielone włosem,
- * kwoty tabularne przy prawej krawędzi; cały wiersz jest linkiem do edytora.
+ * Ostatnie wyceny — jedyna biała kartka na pulpicie (T-133).
+ *
+ * Prawdziwa tabela z kolumnami, nie lista wierszy: numer, dokument z klientem
+ * pod spodem, status naszym znacznikiem, kwota do prawej, data. Kartka jest
+ * tu na miejscu, bo to dokumenty — reszta pulpitu leży na kanwie.
  */
 export function RecentQuotes({
   quotes,
@@ -24,16 +35,16 @@ export function RecentQuotes({
   onRetry: () => void;
 }) {
   return (
-    <section className="card-surface p-6" aria-busy={loading || undefined}>
-      <header className="mb-3 flex items-baseline justify-between gap-4">
-        <h2 className="font-display text-ink text-[17px]">{pl.dashboard.recentQuotes}</h2>
-        <Button variant="ghost" size="sm" asChild>
-          <Link to={routes.quotes}>{pl.common.all}</Link>
-        </Button>
+    <section className="card-surface overflow-hidden" aria-busy={loading || undefined}>
+      <header className="border-hair flex items-baseline justify-between gap-4 border-b px-[18px] pt-3.5 pb-3">
+        <h2 className="text-ink text-[13px] font-semibold">{pl.dashboard.recentQuotes}</h2>
+        <Link to={routes.quotes} className="text-ink-soft hover:text-ink text-[12.5px] font-medium">
+          {pl.dashboard.recentQuotesAll}
+        </Link>
       </header>
 
       {error ? (
-        <div>
+        <div className="p-[18px]">
           <Alert variant="destructive">
             <AlertDescription>{pl.quotes.loadError}</AlertDescription>
           </Alert>
@@ -42,41 +53,59 @@ export function RecentQuotes({
           </Button>
         </div>
       ) : loading ? (
-        <div className="space-y-3">
+        <div className="space-y-3 p-[18px]">
           {[0, 1, 2, 3, 4].map((row) => (
-            <Skeleton key={row} className="h-12 w-full" />
+            <Skeleton key={row} className="h-10 w-full" />
           ))}
         </div>
       ) : (
-        <ul className="divide-hair divide-y">
-          {quotes.map((quote) => (
-            <li key={quote.id}>
-              <Link
-                to={routes.quote(quote.id)}
-                className="hover:bg-surface-2/70 focus-visible:outline-ring -mx-3 flex items-center gap-4 rounded-[var(--radius-control)] px-3 py-3 transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2"
-              >
-                <div className="min-w-0 flex-1">
-                  <p className="text-ink truncate text-sm font-medium">{quote.title}</p>
-                  <p className="text-ink-soft mt-0.5 truncate text-xs">
-                    {quote.number ?? pl.quotes.noNumber}
-                    {quote.clientName ? ` · ${quote.clientName}` : ''}
-                  </p>
-                </div>
-                {/* Stała szerokość, żeby znaczniki trzymały wspólną oś —
-                    to one są kotwicą wzroku przy skanowaniu listy. */}
-                <StatusMark status={quote.status} className="w-[9.5rem] shrink-0" />
-                <Money
-                  cents={quote.totalNetCents}
-                  currency={quote.currency}
-                  className="text-ink w-28 text-right text-sm font-semibold"
-                />
-                <span className="text-ink-soft w-20 text-right text-xs">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-surface-2 hover:bg-surface-2">
+              <TableHead className="w-44 px-[18px]">{pl.dashboard.colNumber}</TableHead>
+              <TableHead>{pl.dashboard.colDocument}</TableHead>
+              <TableHead className="w-44">{pl.dashboard.colStatus}</TableHead>
+              <TableHead className="w-36 text-right">{pl.dashboard.colNet}</TableHead>
+              <TableHead className="w-28 px-[18px] text-right" />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {quotes.map((quote) => (
+              <TableRow key={quote.id}>
+                <TableCell className="text-ink-soft px-[18px] text-[12.5px] whitespace-nowrap tabular-nums">
+                  {quote.number ?? pl.quotes.noNumber}
+                  {quote.version > 1 ? ` · v${quote.version}` : ''}
+                </TableCell>
+                <TableCell className="max-w-0">
+                  <Link
+                    to={routes.quote(quote.id)}
+                    className="text-ink block truncate font-medium underline-offset-4 hover:underline"
+                  >
+                    {quote.title}
+                  </Link>
+                  {quote.clientName ? (
+                    <span className="text-ink-soft block truncate text-[12.5px]">
+                      {quote.clientName}
+                    </span>
+                  ) : null}
+                </TableCell>
+                <TableCell>
+                  <StatusMark status={quote.status} />
+                </TableCell>
+                <TableCell className="text-right">
+                  <Money
+                    cents={quote.totalNetCents}
+                    currency={quote.currency}
+                    className="text-ink text-sm font-semibold whitespace-nowrap"
+                  />
+                </TableCell>
+                <TableCell className="text-ink-faint px-[18px] text-right text-[12.5px] whitespace-nowrap">
                   {formatRelativeDay(quote.updatedAt)}
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       )}
     </section>
   );
