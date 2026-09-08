@@ -3,9 +3,17 @@
 Format wg [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/).
 Wersje zgodne z [SemVer](https://semver.org/lang/pl/).
 
-## [Nieopublikowane]
+## [1.2.8] – 2026-09-08
 
 ### Dodane
+
+**Pulpit „na co dziś czekam”.** Nad resztą pulpitu stoją data dnia i cztery
+liczby: nowe zdarzenia od klientów, oferty czekające na decyzję, oferty
+wygasające w ciągu 7 dni i projekty w toku. Treść ułożona jest w dwóch
+kolumnach: aktywność klientów i ostatnie wyceny po lewej, projekty w toku
+z okładkami i lista kontrolna po prawej. Nagłówki bloków dostały krój
+tytułowy, żeby pulpit przestał być czterema jednakowymi kartami.
+
 
 **Karta projektu z okładką i zakładką „Przegląd”.** Po wejściu w projekt widać
 kadr ze zdjęciem, trzy miniatury, cztery ostatnie pliki i liczby w skrócie
@@ -23,6 +31,12 @@ w liście projektów u klienta i na pulpicie.
 **Nagłówek projektu.** Tytuł w kroju display, status jako pigułka obok, pod nim
 typ, metraż i adres, a po prawej „Nowa dokumentacja” i „Edytuj”. Liczby z
 nagłówka przeszły do karty „W skrócie”.
+
+**Pomoc.** Podręcznik opisuje nowe liczenie wyceny według pomieszczeń: pole
+ceny z wynikiem i rachunkiem „skąd ta kwota”, kwotę wpisaną ręcznie, „Rozpisz
+na pomieszczenia” i „Do wszystkich pomieszczeń”, a także formaty logo,
+numerację pakietu i nowy pulpit. Opisy poprzedniego zachowania zniknęły; FAQ
+ma pięć nowych odpowiedzi.
 
 > Migracja `0050`: kolumna `projects.cover_file_id` i widok `projects_overview`
 > z okładką.
