@@ -417,6 +417,8 @@ export const pl = {
       other: 'Inny',
     },
     statusLabel: 'Status',
+    /** Okładka projektu (T-131): rysunek wg typu zamiast pustej ramki. */
+    coverPlaceholder: (kind: string) => `Projekt bez zdjęcia — ${kind.toLowerCase()}`,
     status: {
       lead: 'Zapytanie',
       offer: 'Oferta',

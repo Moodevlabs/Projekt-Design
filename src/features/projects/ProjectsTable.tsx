@@ -10,6 +10,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Money } from '@/components/shared';
 import { ProjectStatusSelect } from './ProjectStatusSelect';
+import { ProjectCover } from './cover/ProjectCover';
 import { kindLabel } from './kind-label';
 import { ProjectRowMenu } from './ProjectRowMenu';
 import { formatArea, type ProjectOverview } from '@/domain/project/schema';
@@ -49,17 +50,32 @@ export function ProjectsTable({
             rows.map((project) => (
               <TableRow key={project.id}>
                 <TableCell className="max-w-0">
-                  <Link
-                    to={routes.project(project.clientId, project.id)}
-                    className="block truncate font-medium underline-offset-4 hover:underline"
-                  >
-                    {project.name}
-                  </Link>
-                  <span className="text-ink-soft block truncate text-sm">
-                    {[project.kind ? kindLabel(project.kind) : '', project.address, project.city]
-                      .filter(Boolean)
-                      .join(' · ') || '—'}
-                  </span>
+                  {/* Miniatura okładki (T-131) — ta sama, co kadr na karcie. */}
+                  <div className="flex min-w-0 items-center gap-3">
+                    <ProjectCover
+                      path={project.coverPath}
+                      kind={project.kind}
+                      alt=""
+                      className="h-10 w-14 shrink-0"
+                    />
+                    <div className="min-w-0">
+                      <Link
+                        to={routes.project(project.clientId, project.id)}
+                        className="block truncate font-medium underline-offset-4 hover:underline"
+                      >
+                        {project.name}
+                      </Link>
+                      <span className="text-ink-soft block truncate text-sm">
+                        {[
+                          project.kind ? kindLabel(project.kind) : '',
+                          project.address,
+                          project.city,
+                        ]
+                          .filter(Boolean)
+                          .join(' · ') || '—'}
+                      </span>
+                    </div>
+                  </div>
                 </TableCell>
                 <TableCell className="text-right tabular-nums">
                   {project.areaM2 === null ? pl.projects.noArea : formatArea(project.areaM2)}
