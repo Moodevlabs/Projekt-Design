@@ -3,6 +3,30 @@
 Format wg [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/).
 Wersje zgodne z [SemVer](https://semver.org/lang/pl/).
 
+## [Nieopublikowane]
+
+### Dodane
+
+**Karta projektu z okładką i zakładką „Przegląd”.** Po wejściu w projekt widać
+kadr ze zdjęciem, trzy miniatury, cztery ostatnie pliki i liczby w skrócie
+(dokumenty, zaakceptowane, etapy, ostatnia aktywność). Na okładkę idzie
+najnowszy obraz z plików projektu; „Ustaw zdjęcie” pozwala wskazać inny,
+„Dodaj zdjęcie” wgrywa nowe. Dokumenty, wizja lokalna, etapy, pliki i notatki
+zostają w kolejnych zakładkach.
+
+**Placeholdery projektu.** Projekt bez zdjęcia dostaje rysunek według typu
+inwestycji: mieszkanie, dom, lokal użytkowy albo inny. Ta sama miniatura stoi
+w liście projektów u klienta i na pulpicie.
+
+### Zmienione
+
+**Nagłówek projektu.** Tytuł w kroju display, status jako pigułka obok, pod nim
+typ, metraż i adres, a po prawej „Nowa dokumentacja” i „Edytuj”. Liczby z
+nagłówka przeszły do karty „W skrócie”.
+
+> Migracja `0050`: kolumna `projects.cover_file_id` i widok `projects_overview`
+> z okładką.
+
 ## [1.2.7] – 2026-09-07
 
 ### Naprawione
