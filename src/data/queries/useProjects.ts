@@ -97,6 +97,21 @@ export function useUpdateProject() {
   });
 }
 
+/** Okładka projektu (T-130): plik albo `null` = z powrotem automat. */
+export function useSetProjectCover() {
+  const queryClient = useQueryClient();
+  const invalidate = useInvalidateProjects();
+
+  return useMutation({
+    mutationFn: ({ id, coverFileId }: { id: string; coverFileId: string | null }) =>
+      updateProject(id, { coverFileId }),
+    onSuccess: (project) => {
+      queryClient.setQueryData<Project>(queryKeys.project(project.id), project);
+      invalidate(project.id);
+    },
+  });
+}
+
 export function useSetProjectStatus() {
   const invalidate = useInvalidateProjects();
 
