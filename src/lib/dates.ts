@@ -18,6 +18,16 @@ export function formatRelativeDay(value: string | Date): string {
   return pl.format(d);
 }
 
+const plLong = new Intl.DateTimeFormat('pl-PL', {
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+
+/** „wtorek, 8 września 2026" — nagłówek dnia na pulpicie. */
+export const formatLongDate = (value: string | Date): string => plLong.format(new Date(value));
+
 export function addDays(date: Date, days: number): Date {
   const next = new Date(date);
   next.setDate(next.getDate() + days);

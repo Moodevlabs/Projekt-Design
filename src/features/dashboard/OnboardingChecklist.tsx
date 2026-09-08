@@ -63,7 +63,7 @@ export function OnboardingChecklist({ hasQuotes }: { hasQuotes: boolean }) {
   const zrobione = steps.filter((step) => step.done).length;
 
   return (
-    <section className="card-surface mb-6 px-7 py-6" aria-labelledby="onboarding-title">
+    <section className="card-surface px-6 py-5" aria-labelledby="onboarding-title">
       <div className="flex items-baseline justify-between gap-3">
         <h2 id="onboarding-title" className="text-ink text-base font-semibold tracking-tight">
           {pl.onboarding.title}

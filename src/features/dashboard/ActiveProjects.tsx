@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { Plus, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { PageSection } from '@/components/shared';
 import { ClientFormDialog } from '@/features/clients/ClientFormDialog';
 import { ProjectCover } from '@/features/projects/cover/ProjectCover';
 import { useProjects } from '@/data/queries/useProjects';
@@ -11,19 +10,20 @@ import type { ProjectOverview } from '@/domain/project/schema';
 import { routes } from '@/app/routes';
 import { pl } from '@/i18n/pl';
 
-/** Ile teczek mieści się na pulpicie, zanim zacznie zasłaniać resztę. */
+/** Ile teczek mieści się w prawej kolumnie, zanim zacznie zasłaniać resztę. */
 const LIMIT = 6;
 
 /**
- * „Aktywni klienci i projekty" — teczki w toku (K3, T-58).
+ * „Projekty w toku" — prawa kolumna pulpitu (K3, T-58; układ z T-133).
  *
  * Pokazujemy **projekty**, nie klientów: klient bez inwestycji to kontakt,
- * a nie praca.
+ * a nie praca. Od T-131 każdy wiersz ma okładkę teczki (zdjęcie z plików
+ * projektu albo rysunek wg typu) — tę samą, co karta projektu i lista
+ * u klienta, więc teczkę poznaje się po obrazie, zanim przeczyta się nazwę.
  *
- * Od 2026-08-27 (poprawka 6) mają postać kart w tym samym języku, co lista
- * klientów: zdjęcie osoby, nazwa teczki, stan. Dwa różne kształty dla tej
- * samej rzeczy — „czyja to robota i na czym stoi" — kazałyby uczyć się
- * aplikacji dwa razy.
+ * Lista pionowa, nie siatka kafli: kolumna ma 340 px i wiersz z okładką,
+ * nazwą i statusem mieści się w niej w całości, a siatka łamałaby się na
+ * jedną kolumnę i tak.
  */
 export function ActiveProjects() {
   const projects = useProjects({ limit: LIMIT });
@@ -38,23 +38,22 @@ export function ActiveProjects() {
 
   return (
     <>
-      <PageSection
-        title={pl.dashboard.activeProjects}
-        action={
+      <section className="card-surface p-5" aria-label={pl.dashboard.activeProjects}>
+        <header className="mb-3 flex items-center justify-between gap-3">
+          <h2 className="font-display text-ink text-[17px]">{pl.dashboard.activeProjects}</h2>
           <Button variant="outline" size="sm" onClick={() => setNewClientOpen(true)}>
             <Plus className="size-4" aria-hidden />
             {pl.clients.new}
           </Button>
-        }
-        className="mb-6"
-      >
+        </header>
+
         {projects.isLoading ? (
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-3">
-            <Skeleton className="h-[72px] rounded-[var(--radius-card)]" />
-            <Skeleton className="h-[72px] rounded-[var(--radius-card)]" />
+          <div className="space-y-2">
+            <Skeleton className="h-14 rounded-[var(--radius-control)]" />
+            <Skeleton className="h-14 rounded-[var(--radius-control)]" />
           </div>
         ) : rows.length === 0 ? (
-          <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="space-y-3">
             <p className="text-ink-soft text-sm">{pl.dashboard.activeProjectsEmpty}</p>
             <Button variant="outline" size="sm" asChild>
               <Link to={routes.clients}>
@@ -64,29 +63,27 @@ export function ActiveProjects() {
             </Button>
           </div>
         ) : (
-          <ul className="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-3">
+          <ul className="divide-hair -mx-2 divide-y">
             {rows.map((project) => (
-              <ProjectTile key={project.id} project={project} />
+              <ProjectRow key={project.id} project={project} />
             ))}
           </ul>
         )}
-      </PageSection>
+      </section>
 
       <ClientFormDialog open={newClientOpen} onOpenChange={setNewClientOpen} client={null} />
     </>
   );
 }
 
-function ProjectTile({ project }: { project: ProjectOverview }) {
+function ProjectRow({ project }: { project: ProjectOverview }) {
   return (
     <li>
       <Link
         to={routes.project(project.clientId, project.id)}
         data-testid="project-tile"
-        className="border-hair hover:border-ink/20 hover:bg-surface-2/60 flex min-w-0 items-center gap-3 rounded-[var(--radius-card)] border p-3 transition-colors"
+        className="hover:bg-surface-2/70 focus-visible:ring-ring flex min-w-0 items-center gap-3 rounded-[var(--radius-control)] px-2 py-2.5 transition-colors focus-visible:ring-2 focus-visible:outline-none"
       >
-        {/* Okładka projektu zamiast awatara klienta (T-131): kafel jest
-            o teczce, a nazwisko klienta stoi pod nazwą tekstem. */}
         <ProjectCover
           path={project.coverPath}
           kind={project.kind}
@@ -99,7 +96,7 @@ function ProjectTile({ project }: { project: ProjectOverview }) {
           <span className="text-ink-soft block truncate text-xs">{project.clientName}</span>
         </span>
 
-        <span className="text-ink-soft shrink-0 text-xs whitespace-nowrap">
+        <span className="bg-beige text-ink shrink-0 rounded-[var(--radius-pill)] px-2 py-0.5 text-[11px] font-medium whitespace-nowrap">
           {pl.projects.status[project.status]}
         </span>
       </Link>
