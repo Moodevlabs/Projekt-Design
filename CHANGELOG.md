@@ -3,6 +3,22 @@
 Format wg [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/).
 Wersje zgodne z [SemVer](https://semver.org/lang/pl/).
 
+## [1.3.2] – 2026-09-09
+
+### Naprawione
+
+**Eksport terminu, etapów, cennika i pakietu w zbudowanej aplikacji.** Od
+wersji 1.3.1 te eksporty kończyły się toastem „Generowanie PDF trwa zbyt
+długo”, a wcześniej cicho wyszarzały menu. Wycena przechodziła, bo składa się
+w Web Workerze. Przyczyna: polityka CSP aplikacji blokowała dwie rzeczy, po
+które react-pdf sięga na głównym wątku: worker `blob:` tworzony przez fflate
+przy dekompresji logo PNG (callback nigdy nie wracał, pdfkit nie domykał
+dokumentu) oraz `fetch` adresu `data:` z modułem WebAssembly silnika układu
+Yoga. Worker renderujący nie podlega CSP dokumentu, a w `pnpm tauri dev` Tauri
+nie wstrzykuje CSP do strony z serwera Vite — dlatego wada była widoczna tylko
+po zbudowaniu. CSP dopuszcza teraz `worker-src 'self' blob:` i `data:`/`blob:`
+w `connect-src`.
+
 ## [1.3.1] – 2026-09-09
 
 ### Zmienione
