@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { formatQty, minRuleCents, priceSuffix, pricingChoiceFor, unitLabel } from './units';
+import {
+  formatQty,
+  minRuleCents,
+  priceSuffix,
+  pricingChoiceFor,
+  rateLine,
+  unitLabel,
+} from './units';
 import { calcItemCents, countIndividualItems, newItem, newQuoteBody, newSection } from '../quote';
+import { formatMoney } from '../money';
 import { AMOUNT_BASIS } from '../quote/calc';
 
 describe('unitLabel / formatQty', () => {
@@ -143,5 +151,32 @@ describe('cena „indywidualna" w obliczeniach', () => {
       ],
     });
     expect(countIndividualItems(body)).toBe(2);
+  });
+});
+
+describe('rateLine — stawka zamiast „1 m² ×"', () => {
+  it('ryczalt z iloscia 1 nie drukuje nic', () => {
+    expect(rateLine(1, 'lump', null, 200_000)).toBe('');
+  });
+
+  it('jednostka przy ilosci 1 daje sama stawke z sufiksem', () => {
+    expect(rateLine(1, 'm2', null, 200_000)).toBe(`${formatMoney(200_000)} / m²`);
+    expect(rateLine(1, 'hour', null, 15_000)).toBe(`${formatMoney(15_000)} / h`);
+  });
+
+  it('ilosc inna niz 1 stoi przed stawka, bez znaku mnozenia', () => {
+    expect(rateLine(80, 'm2', null, 1_200)).toBe(`80 m² · ${formatMoney(1_200)} / m²`);
+    expect(rateLine(3, 'lump', null, 50_000)).toBe(`3 · ${formatMoney(50_000)}`);
+  });
+
+  it('bez stawki (tryb godzinowy) zostaje sama ilosc z jednostka', () => {
+    expect(rateLine(80, 'm2', null, null)).toBe('80 m²');
+    expect(rateLine(1, 'm2', null, null)).toBe('');
+  });
+
+  it('wlasna jednostka idzie do sufiksu', () => {
+    expect(rateLine(2, 'custom', 'kondygnacja', 90_000)).toBe(
+      `2 kondygnacja · ${formatMoney(90_000)} / kondygnacja`,
+    );
   });
 });

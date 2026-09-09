@@ -20,7 +20,14 @@ vi.mock('@/lib/tauri', () => ({
 vi.mock('@tauri-apps/plugin-dialog', () => ({ save: saveDialog }));
 
 vi.mock('sonner', () => ({
-  toast: { success: toastSuccess, error: toastError, info: vi.fn() },
+  toast: {
+    success: toastSuccess,
+    error: toastError,
+    info: vi.fn(),
+    loading: vi.fn(),
+    dismiss: vi.fn(),
+    warning: vi.fn(),
+  },
 }));
 
 const { deliverPdf } = await import('./export');

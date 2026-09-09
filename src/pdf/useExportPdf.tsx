@@ -1,5 +1,4 @@
 import { useCallback, useState } from 'react';
-import { toast } from 'sonner';
 import { useBrandKit } from '@/data/queries/useBrandKit';
 import { defaultBrandKit } from '@/domain/brand/schema';
 import type { QuoteBody } from '@/domain/quote';
@@ -8,6 +7,7 @@ import { pickHeaderLogoPath } from '@/domain/brand/logo-pick';
 import { fetchLogoAsDataUrl } from './logo';
 import { quoteFileName } from './file-name';
 import { deliverPdf, type ArchiveRequest } from './export';
+import { runPdfExport } from './export-run';
 import { renderQuotePdf } from './render';
 import { buildPdfTheme } from './theme';
 import { isPdfFontRegistered, registerPdfFonts } from './fonts/register';
@@ -50,6 +50,8 @@ export interface ExportArgs {
  * eksporcie: to kilkaset kilobajtów, których nie ma sensu wciągać do bundla
  * ekranu logowania. Dzięki temu koszt płaci tylko ten, kto naprawdę drukuje
  * ofertę.
+ *
+ * Postęp, limity czasu i komunikaty błędów — `runPdfExport` (2026-09-09).
  */
 export function useExportPdf() {
   const brandKit = useBrandKit();
@@ -67,7 +69,7 @@ export function useExportPdf() {
       versionLabel = null,
     }: ExportArgs) => {
       setExporting(true);
-      try {
+      await runPdfExport(log, 'Eksport PDF nieudany', async () => {
         const kit = brandKit.data ?? defaultBrandKit();
         registerPdfFonts();
         const theme = buildPdfTheme(kit, isPdfFontRegistered(kit.fontFamily));
@@ -78,7 +80,7 @@ export function useExportPdf() {
         const logoDataUrl = await fetchLogoAsDataUrl(logoPath);
 
         // Render idzie do Web Workera, a przy jego niepowodzeniu na glowny
-        // watek — patrz `render.ts`. Eksport nie ma prawa polec dlatego, ze
+        // watek — patrz `render.tsx`. Eksport nie ma prawa polec dlatego, ze
         // optymalizacja nie wypalila.
         const bytes = await renderQuotePdf({
           body,
@@ -104,12 +106,8 @@ export function useExportPdf() {
 
         // „Oznaczyc jako wyslana?" tylko po pliku, ktory naprawde powstal.
         if (saved) onExported?.();
-      } catch (error) {
-        log.error('Eksport PDF nieudany', error);
-        toast.error(error instanceof Error ? error.message : pl.editor.pdfFailed);
-      } finally {
-        setExporting(false);
-      }
+      });
+      setExporting(false);
     },
     [brandKit.data],
   );

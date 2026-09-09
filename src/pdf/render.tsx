@@ -1,10 +1,21 @@
+import type { ReactElement } from 'react';
+import type { DocumentProps } from '@react-pdf/renderer';
 import { createLogger } from '@/lib/logger';
+import { withTimeout } from '@/lib/with-timeout';
+import { pl } from '@/i18n/pl';
 import type { PdfRenderPayload, PdfWorkerResponse } from './render-payload';
 
 const log = createLogger('pdf.render');
 
 /** Po ilu ms uznajemy, że worker nie odpowie, i liczymy sami. */
 const WORKER_TIMEOUT_MS = 30_000;
+
+/**
+ * Limit renderu na głównym wątku. Dziesięciostronicowa oferta z fontami
+ * liczy się kilka sekund; po półtorej minuty to już nie „wolno", tylko
+ * „nigdy" — a wtedy lepszy komunikat niż wyszarzone menu bez końca.
+ */
+const RENDER_TIMEOUT_MS = 90_000;
 
 /**
  * Czy worker okazał się bezużyteczny.
@@ -71,12 +82,23 @@ function renderInWorker(payload: PdfRenderPayload): Promise<Uint8Array> {
 }
 
 async function renderOnMainThread(payload: PdfRenderPayload): Promise<Uint8Array> {
-  const [{ pdf }, { QuotePdfDocument }] = await Promise.all([
-    import('@react-pdf/renderer'),
-    import('./QuotePdfDocument'),
-  ]);
+  const { QuotePdfDocument } = await import('./QuotePdfDocument');
+  return renderElementToBytes(<QuotePdfDocument {...payload} />);
+}
 
-  const blob = await pdf(<QuotePdfDocument {...payload} />).toBlob();
+/**
+ * Dowolny dokument `@react-pdf` do bajtów, na głównym wątku, z limitem czasu.
+ *
+ * Wspólne wyjście dla terminu, etapów, cennika i pakietu — one nie mają
+ * workera, a bez limitu zawieszony render zostawiał menu wyszarzone bez
+ * komunikatu. Sam `@react-pdf` ładujemy dynamicznie, jak wszędzie: to kilkaset
+ * kilobajtów, których ekran logowania nie potrzebuje.
+ */
+export async function renderElementToBytes(
+  element: ReactElement<DocumentProps>,
+): Promise<Uint8Array> {
+  const { pdf } = await import('@react-pdf/renderer');
+  const blob = await withTimeout(pdf(element).toBlob(), RENDER_TIMEOUT_MS, pl.pdf.renderTimedOut);
   return new Uint8Array(await blob.arrayBuffer());
 }
 

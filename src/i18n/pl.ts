@@ -631,6 +631,8 @@ export const pl = {
     saveToClient: 'Zapisz w dokumentach klienta',
     archived: 'Zapisano w dokumentach klienta',
     archiveFailed: 'Nie udało się zapisać w dokumentach klienta.',
+    archiveTimedOut:
+      'Zapis w dokumentach klienta trwa zbyt długo — sprawdź połączenie i kliknij „Ponów".',
 
     // Karta w prawej kolumnie edytora.
     recent: 'Wygenerowane PDF',
@@ -2370,6 +2372,12 @@ Z wyrazami szacunku`,
       priceList: 'Cennik usług dodatkowych',
     },
     packageNothingSelected: 'Nie wybrano żadnego dokumentu.',
+
+    // Przebieg eksportu (2026-09-09): postęp i limity czasu — patrz pdf/export-run.ts.
+    generating: 'Generowanie PDF…',
+    renderTimedOut: 'Generowanie PDF trwa zbyt długo. Spróbuj ponownie.',
+    saveTimedOut: 'Zapis pliku trwa zbyt długo — sprawdź, czy wybrany dysk jest dostępny.',
+    logoSkipped: 'Nie udało się pobrać logo — dokument powstał bez niego.',
     packageExport: 'Eksportuj',
     packagePageLabel: (page: number, total: number) => `${page} / ${total}`,
     packageSaved: 'Zapisano pakiet dokumentów',

@@ -14,7 +14,8 @@ import {
 import { createLogger } from '@/lib/logger';
 import { pickHeaderLogoPath } from '@/domain/brand/logo-pick';
 import { fetchLogoAsDataUrl } from './logo';
-import { renderQuotePdf } from './render';
+import { renderElementToBytes, renderQuotePdf } from './render';
+import { PDF_PROGRESS_TOAST, runPdfExport } from './export-run';
 import { buildPdfTheme, type PdfTheme } from './theme';
 import { isPdfFontRegistered, registerPdfFonts } from './fonts/register';
 import { mergePdfs } from './merge';
@@ -91,7 +92,7 @@ export function usePackageExport() {
       }
 
       setExporting(true);
-      try {
+      await runPdfExport(log, 'Eksport pakietu nieudany', async () => {
         const kit = brandKit.data ?? defaultBrandKit();
         registerPdfFonts();
         const theme = buildPdfTheme(kit, isPdfFontRegistered(kit.fontFamily));
@@ -147,12 +148,8 @@ export function usePackageExport() {
         }
 
         await saveMany(czesci);
-      } catch (error) {
-        log.error('Eksport pakietu nieudany', error);
-        toast.error(error instanceof Error ? error.message : pl.editor.pdfFailed);
-      } finally {
-        setExporting(false);
-      }
+      });
+      setExporting(false);
     },
     [brandKit.data],
   );
@@ -186,39 +183,31 @@ async function renderPart(kind: PackageDocKind, ctx: RenderContext): Promise<Uin
     });
   }
 
-  const { pdf } = await import('@react-pdf/renderer');
-
   if (kind === 'schedule') {
     const { SchedulePdfDocument } = await import('./SchedulePdfDocument');
     // `packagePlan` przepuscil ten dokument tylko dlatego, ze istnieje.
     if (!ctx.schedule) throw new Error('Brak harmonogramu');
-    return toBytes(
-      pdf(
-        <SchedulePdfDocument
-          schedule={ctx.schedule}
-          rooms={ctx.rooms}
-          validDays={ctx.scheduleValidDays}
-          {...wspolne}
-        />,
-      ).toBlob(),
+    return renderElementToBytes(
+      <SchedulePdfDocument
+        schedule={ctx.schedule}
+        rooms={ctx.rooms}
+        validDays={ctx.scheduleValidDays}
+        {...wspolne}
+      />,
     );
   }
 
   if (kind === 'stages') {
     const { StagesPdfDocument } = await import('./StagesPdfDocument');
     if (!ctx.stages) throw new Error('Brak dokumentu etapow');
-    return toBytes(pdf(<StagesPdfDocument doc={ctx.stages} {...wspolne} />).toBlob());
+    return renderElementToBytes(<StagesPdfDocument doc={ctx.stages} {...wspolne} />);
   }
 
   const { PriceListPdfDocument } = await import('./PriceListPdfDocument');
   if (!ctx.priceList) throw new Error('Brak cennika');
-  return toBytes(
-    pdf(<PriceListPdfDocument doc={ctx.priceList} currency={ctx.currency} {...wspolne} />).toBlob(),
+  return renderElementToBytes(
+    <PriceListPdfDocument doc={ctx.priceList} currency={ctx.currency} {...wspolne} />,
   );
-}
-
-async function toBytes(blob: Promise<Blob>): Promise<Uint8Array> {
-  return new Uint8Array(await (await blob).arrayBuffer());
 }
 
 /**
@@ -234,6 +223,8 @@ async function saveMany(parts: { fileName: string; bytes: Uint8Array }[]) {
   }
 
   const { open } = await import('@tauri-apps/plugin-dialog');
+  // Dokumenty sa gotowe — od tej chwili czeka czlowiek, nie program.
+  toast.dismiss(PDF_PROGRESS_TOAST);
   const folder = await open({ directory: true, multiple: false });
   if (typeof folder !== 'string') return;
 

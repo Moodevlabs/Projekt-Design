@@ -1,4 +1,5 @@
 import { UnitSchema, type PricingRule, type Unit } from '../quote/schema';
+import { formatMoney } from '../money';
 
 export { UnitSchema };
 export type { Unit };
@@ -108,4 +109,37 @@ export function minRuleCents(rule: PricingRule): number | null {
   const stawki = [...perRoom, ...domyslna];
   if (stawki.length === 0) return baza > 0 ? baza : null;
   return Math.min(...stawki) + baza;
+}
+
+/**
+ * Wiersz stawki pod nazwą pozycji: „80 m² · 25,00 zł / m²", „2 000,00 zł / m²",
+ * „3 · 500,00 zł". Pusty string, gdy nic nie wnosi — ryczałt z ilością 1.
+ *
+ * Zastąpił „1 m² ×" przed kwotą (2026-09-09): znak mnożenia przy jedynce
+ * wyglądał jak błąd składu, a nie mówił, ile kosztuje metr. Tutaj ilość
+ * i stawka stoją obok siebie, a kwota pozostaje kwotą.
+ *
+ * `unitPriceCents = null` drukuje samą ilość z jednostką — tak jest w trybie
+ * godzinowym, gdzie liczba w polu ceny to minuty, nie stawka.
+ */
+export function rateLine(
+  qty: number,
+  unit: Unit,
+  customLabel: string | null | undefined,
+  unitPriceCents: number | null,
+  currency = 'PLN',
+): string {
+  const label = unitLabel(unit, customLabel);
+  const qtyMatters = qty !== 1;
+  if (!qtyMatters && !label) return '';
+
+  const parts: string[] = [];
+  if (qtyMatters) parts.push(formatQty(qty, unit, customLabel));
+  if (unitPriceCents !== null) {
+    parts.push(formatMoney(unitPriceCents, currency) + priceSuffix(unit, customLabel));
+  } else if (!qtyMatters) {
+    // Sama etykieta bez ilości i bez stawki („m²") nic nie mówi.
+    return '';
+  }
+  return parts.join(' · ');
 }

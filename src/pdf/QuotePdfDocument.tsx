@@ -16,7 +16,7 @@ import {
   type Room,
 } from '@/domain/quote';
 import { formatMoney } from '@/domain/money';
-import { formatQty, unitLabel } from '@/domain/library/units';
+import { rateLine } from '@/domain/library/units';
 import { addDays, formatDate } from '@/lib/dates';
 import type { BrandKit } from '@/domain/brand/schema';
 import type { PdfTheme } from './theme';
@@ -166,7 +166,17 @@ export function QuotePdfDocument({
         </View>
 
         <View style={styles.body}>
-          <Text style={{ fontSize: theme.sizes.title, fontWeight: 700, color: theme.ink }}>
+          {/* Wersaliki jak w podglądzie edytora (`QuoteHeader`): do 2026-09-09
+              podgląd pokazywał tytuł WIELKIMI literami, a PDF tak, jak wpisano —
+              i wyglądało to na dwa różne dokumenty. */}
+          <Text
+            style={{
+              fontSize: theme.sizes.title,
+              fontWeight: 700,
+              color: theme.ink,
+              textTransform: 'uppercase',
+            }}
+          >
             {body.title}
           </Text>
           {body.subtitle ? (
@@ -223,6 +233,7 @@ export function QuotePdfDocument({
                   rooms={body.rooms}
                   theme={theme}
                   money={money}
+                  currency={currency}
                   describeItem={describeItem}
                   pricing={pricing}
                 />
@@ -235,6 +246,7 @@ export function QuotePdfDocument({
                   rooms={body.rooms}
                   theme={theme}
                   money={money}
+                  currency={currency}
                   visibleItems={visibleItems}
                   showDisabledItems={body.showDisabledItems}
                   describeItem={describeItem}
@@ -377,6 +389,7 @@ function GroupBlockPdf({
   rooms,
   theme,
   money,
+  currency,
   visibleItems,
   showDisabledItems,
   describeItem,
@@ -386,6 +399,7 @@ function GroupBlockPdf({
   rooms: Room[];
   theme: PdfTheme;
   money: (cents: number) => string;
+  currency: string;
   visibleItems: (items: Item[]) => Item[];
   showDisabledItems: boolean;
   describeItem: (item: Item) => string;
@@ -416,6 +430,7 @@ function GroupBlockPdf({
           rooms={rooms}
           theme={theme}
           money={money}
+          currency={currency}
           describeItem={describeItem}
           pricing={pricing}
         />
@@ -429,6 +444,7 @@ function ItemLine({
   rooms,
   theme,
   money,
+  currency,
   describeItem,
   pricing,
 }: {
@@ -437,6 +453,7 @@ function ItemLine({
   pricing: PricingContext;
   theme: PdfTheme;
   money: (cents: number) => string;
+  currency: string;
   describeItem: (item: Item) => string;
 }) {
   const description = describeItem(item);
@@ -444,6 +461,22 @@ function ItemLine({
   const valueCents = calcItemCents(item, rooms, pricing);
   const off = !item.enabled;
   const individual = isIndividualItem(item);
+  /*
+   * Stawka nad kwotą: „80 m² · 12,00 zł / m²" zamiast „1 m² ×" przed nią
+   * (2026-09-09) — ta sama funkcja i te same warunki co w `ItemRow`, żeby
+   * podgląd i PDF mówiły to samo. W trybie godzinowym cena to minuty, więc
+   * zostaje sama ilość z jednostką; reguła parametryczna nie ma jednej stawki.
+   */
+  const stawka =
+    item.pricing.mode === 'flat' && !individual
+      ? rateLine(
+          item.qty,
+          item.unit,
+          item.unitLabel,
+          pricing.pricingBasis === 'time' ? null : item.unitPriceCents,
+          currency,
+        )
+      : '';
 
   return (
     <View
@@ -467,32 +500,39 @@ function ItemLine({
         ) : null}
       </View>
 
-      {/* Ilość z JEDNOSTKĄ (T-60): „80 m² ×" zamiast samego „80 ×". Ryczałt
-          nie ma etykiety, więc przy qty = 1 dalej nic nie drukujemy. */}
-      {item.qty !== 1 || unitLabel(item.unit, item.unitLabel) ? (
-        <Text style={{ fontSize: theme.sizes.small, color: theme.inkSoft, marginRight: 8 }}>
-          {`${formatQty(item.qty, item.unit, item.unitLabel)} x`}
-        </Text>
-      ) : null}
+      <View style={[styles.rowAmount, { alignItems: 'flex-end' }]}>
+        {/* Ilość z jednostką i stawka (T-60, układ 2026-09-09): nad kwotą,
+            bez znaku mnożenia. Ryczałt z ilością 1 nie drukuje nic. */}
+        {stawka ? (
+          <Text
+            style={{
+              fontSize: theme.sizes.individual,
+              color: theme.inkSoft,
+              textAlign: 'right',
+              marginBottom: 1,
+            }}
+          >
+            {stawka}
+          </Text>
+        ) : null}
 
-      {/* „Wycena indywidualna" zamiast kwoty (T-60) — pozycja jest w ofercie,
-          ale ceny nie ma. Zero drukowałoby „0,00 zł", czyli „gratis".
+        {/* „Wycena indywidualna" zamiast kwoty (T-60) — pozycja jest w ofercie,
+            ale ceny nie ma. Zero drukowałoby „0,00 zł", czyli „gratis".
 
-          Ten napis dostaje WŁASNY, mniejszy rozmiar: w kolumnie szerokiej na
-          90 pt nie mieścił się w rozmiarze kwoty i łamał się przez dywiz
-          w środku wyrazu („indywidual-na"). Kwoty zostają w `body` — to one
-          mają być czytelne z drugiego końca stołu. */}
-      <Text
-        style={[
-          styles.rowAmount,
-          {
+            Ten napis dostaje WŁASNY, mniejszy rozmiar: w kolumnie szerokiej na
+            90 pt nie mieścił się w rozmiarze kwoty i łamał się przez dywiz
+            w środku wyrazu („indywidual-na"). Kwoty zostają w `body` — to one
+            mają być czytelne z drugiego końca stołu. */}
+        <Text
+          style={{
             fontSize: individual ? theme.sizes.individual : theme.sizes.body,
             color: off ? theme.inkSoft : theme.ink,
-          },
-        ]}
-      >
-        {individual ? pl.pdf.individualPrice : money(valueCents)}
-      </Text>
+            textAlign: 'right',
+          }}
+        >
+          {individual ? pl.pdf.individualPrice : money(valueCents)}
+        </Text>
+      </View>
     </View>
   );
 }

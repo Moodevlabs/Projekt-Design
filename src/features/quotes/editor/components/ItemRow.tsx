@@ -22,7 +22,7 @@ import {
   type Item,
   type Room,
 } from '@/domain/quote';
-import { formatQty, unitLabel } from '@/domain/library/units';
+import { rateLine } from '@/domain/library/units';
 import { COL_ACTIONS, COL_PRICE, COL_QTY, ITEM_ROW_GAP } from './item-columns';
 import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
@@ -116,6 +116,22 @@ export const ItemRow = memo(function ItemRow({
   const parametric = item.pricing.mode !== 'flat';
   const individual = isIndividualItem(item);
   const godzinowa = pricing.pricingBasis === 'time';
+  /*
+   * Stawka w podglądzie: „80 m² · 12,00 zł / m²" nad kwotą zamiast „1 m² ×"
+   * przed nią (2026-09-09). W trybie godzinowym pole ceny to minuty, więc
+   * zostaje sama ilość z jednostką. Pozycja parametryczna ma własne „Skąd
+   * ta kwota", a indywidualna — nie ma stawki.
+   */
+  const stawka =
+    !editing && !parametric && !individual
+      ? rateLine(
+          item.qty,
+          item.unit,
+          item.unitLabel,
+          godzinowa ? null : item.unitPriceCents,
+          currency,
+        )
+      : '';
 
   const {
     attributes,
@@ -233,18 +249,14 @@ export const ItemRow = memo(function ItemRow({
             'inline-field price-field amount px-1 py-[2px] text-right text-[14.5px]',
           )}
         />
-      ) : item.qty !== 1 || unitLabel(item.unit, item.unitLabel) ? (
-        /*
-         * W podgladzie ilosc pokazujemy, gdy wnosi informacje: albo jest inna
-         * niz 1, albo ma jednostke („80 m²"). „1 ×" przy kazdej pozycji tylko
-         * zasmiecaloby wiersz, ale „1 wizyta ×" juz cos mowi.
-         */
-        <span className="amount text-[13px] text-[var(--doc-ink-soft)]">
-          {formatQty(item.qty, item.unit, item.unitLabel)} ×
-        </span>
       ) : null}
 
       <div className={cn(COL_PRICE, 'flex flex-col items-end')}>
+        {stawka ? (
+          <span className="amount text-[11.5px] leading-tight whitespace-nowrap text-[var(--doc-ink-soft)]">
+            {stawka}
+          </span>
+        ) : null}
         <div
           className={cn(
             'flex items-center justify-end gap-0.5 text-[14.5px]',

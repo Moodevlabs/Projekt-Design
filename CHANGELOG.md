@@ -3,6 +3,29 @@
 Format wg [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/).
 Wersje zgodne z [SemVer](https://semver.org/lang/pl/).
 
+## [Nieopublikowane]
+
+### Zmienione
+
+**Stawka zamiast „1 m² ×”.** W podglądzie wyceny i w PDF przy pozycji nie ma
+już „1 m² ×” ani „1 h ×” przed kwotą. Nad kwotą stoi drobna stawka:
+„2 000,00 zł / m²”, a przy ilości innej niż 1 — „80 m² · 12,00 zł / m²”.
+Ryczałt z ilością 1 nadal pokazuje samą kwotę.
+
+**Tytuł wyceny w PDF wersalikami.** Podgląd w edytorze pokazywał tytuł
+wielkimi literami, a wygenerowany PDF tak, jak wpisano — dwa dokumenty
+wyglądały inaczej. PDF drukuje teraz tytuł tak samo jak podgląd.
+
+### Naprawione
+
+**Eksport PDF, który „nic nie robi”.** Kroki przed dialogiem zapisu (logo,
+archiwizacja w dokumentach klienta, render) potrafiły nie odpowiedzieć
+nigdy; pozycje menu zostawały wyszarzone bez komunikatu. Teraz:
+w trakcie widać toast „Generowanie PDF…”, każdy krok ma limit czasu
+i kończy się czytelnym błędem, archiwizacja nie blokuje dialogu zapisu
+(leci równolegle, z „Ponów” po niepowodzeniu), a brak logo daje ostrzeżenie
+zamiast cichej oferty bez znaku.
+
 ## [1.2.9] – 2026-09-08
 
 ### Zmienione

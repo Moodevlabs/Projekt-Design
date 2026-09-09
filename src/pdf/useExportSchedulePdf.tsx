@@ -11,6 +11,8 @@ import { buildPdfTheme } from './theme';
 import { isPdfFontRegistered, registerPdfFonts } from './fonts/register';
 import { scheduleFileName } from './file-name';
 import { deliverPdf, type ArchiveRequest } from './export';
+import { runPdfExport } from './export-run';
+import { renderElementToBytes } from './render';
 import { pl } from '@/i18n/pl';
 
 const log = createLogger('pdf.schedule');
@@ -57,7 +59,7 @@ export function useExportSchedulePdf() {
       }
 
       setExporting(true);
-      try {
+      await runPdfExport(log, 'Eksport terminu nieudany', async () => {
         const kit = brandKit.data ?? defaultBrandKit();
         registerPdfFonts();
         const theme = buildPdfTheme(kit, isPdfFontRegistered(kit.fontFamily));
@@ -65,12 +67,8 @@ export function useExportSchedulePdf() {
         const logoPath = pickHeaderLogoPath(kit, theme.headerLogo);
         const logoDataUrl = await fetchLogoAsDataUrl(logoPath);
 
-        const [{ pdf }, { SchedulePdfDocument }] = await Promise.all([
-          import('@react-pdf/renderer'),
-          import('./SchedulePdfDocument'),
-        ]);
-
-        const blob = await pdf(
+        const { SchedulePdfDocument } = await import('./SchedulePdfDocument');
+        const bytes = await renderElementToBytes(
           <SchedulePdfDocument
             schedule={schedule}
             rooms={rooms}
@@ -81,24 +79,17 @@ export function useExportSchedulePdf() {
             validDays={validDays}
             logoDataUrl={logoDataUrl}
           />,
-        ).toBlob();
-
-        const bytes = new Uint8Array(await blob.arrayBuffer());
-        const fileName = scheduleFileName(number, version);
+        );
 
         await deliverPdf({
           bytes,
-          fileName,
+          fileName: scheduleFileName(number, version),
           docType: 'schedule',
           savedToast: pl.pdf.scheduleSaved,
           archive: archive ?? null,
         });
-      } catch (error) {
-        log.error('Eksport terminu nieudany', error);
-        toast.error(error instanceof Error ? error.message : pl.editor.pdfFailed);
-      } finally {
-        setExporting(false);
-      }
+      });
+      setExporting(false);
     },
     [brandKit.data],
   );

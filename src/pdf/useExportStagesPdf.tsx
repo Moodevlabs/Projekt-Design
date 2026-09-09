@@ -10,6 +10,8 @@ import { buildPdfTheme } from './theme';
 import { isPdfFontRegistered, registerPdfFonts } from './fonts/register';
 import { stagesFileName } from './file-name';
 import { deliverPdf, type ArchiveRequest } from './export';
+import { runPdfExport } from './export-run';
+import { renderElementToBytes } from './render';
 import { pl } from '@/i18n/pl';
 
 const log = createLogger('pdf.stages');
@@ -45,7 +47,7 @@ export function useExportStagesPdf() {
       }
 
       setExporting(true);
-      try {
+      await runPdfExport(log, 'Eksport etapow nieudany', async () => {
         const kit = brandKit.data ?? defaultBrandKit();
         registerPdfFonts();
         const theme = buildPdfTheme(kit, isPdfFontRegistered(kit.fontFamily));
@@ -53,12 +55,8 @@ export function useExportStagesPdf() {
         const logoPath = pickHeaderLogoPath(kit, theme.headerLogo);
         const logoDataUrl = await fetchLogoAsDataUrl(logoPath);
 
-        const [{ pdf }, { StagesPdfDocument }] = await Promise.all([
-          import('@react-pdf/renderer'),
-          import('./StagesPdfDocument'),
-        ]);
-
-        const blob = await pdf(
+        const { StagesPdfDocument } = await import('./StagesPdfDocument');
+        const bytes = await renderElementToBytes(
           <StagesPdfDocument
             doc={doc}
             theme={theme}
@@ -67,24 +65,17 @@ export function useExportStagesPdf() {
             issueDate={issueDate}
             logoDataUrl={logoDataUrl}
           />,
-        ).toBlob();
-
-        const bytes = new Uint8Array(await blob.arrayBuffer());
-        const fileName = stagesFileName(number, version);
+        );
 
         await deliverPdf({
           bytes,
-          fileName,
+          fileName: stagesFileName(number, version),
           docType: 'stages',
           savedToast: pl.pdf.stagesSaved,
           archive: archive ?? null,
         });
-      } catch (error) {
-        log.error('Eksport etapow nieudany', error);
-        toast.error(error instanceof Error ? error.message : pl.editor.pdfFailed);
-      } finally {
-        setExporting(false);
-      }
+      });
+      setExporting(false);
     },
     [brandKit.data],
   );

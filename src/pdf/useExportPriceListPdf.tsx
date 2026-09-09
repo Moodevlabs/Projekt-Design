@@ -10,6 +10,8 @@ import { buildPdfTheme } from './theme';
 import { isPdfFontRegistered, registerPdfFonts } from './fonts/register';
 import { priceListFileName } from './file-name';
 import { deliverPdf, type ArchiveRequest } from './export';
+import { runPdfExport } from './export-run';
+import { renderElementToBytes } from './render';
 import { pl } from '@/i18n/pl';
 
 const log = createLogger('pdf.priceList');
@@ -39,7 +41,7 @@ export function useExportPriceListPdf() {
       }
 
       setExporting(true);
-      try {
+      await runPdfExport(log, 'Eksport cennika nieudany', async () => {
         const kit = brandKit.data ?? defaultBrandKit();
         registerPdfFonts();
         const theme = buildPdfTheme(kit, isPdfFontRegistered(kit.fontFamily));
@@ -47,12 +49,8 @@ export function useExportPriceListPdf() {
         const logoPath = pickHeaderLogoPath(kit, theme.headerLogo);
         const logoDataUrl = await fetchLogoAsDataUrl(logoPath);
 
-        const [{ pdf }, { PriceListPdfDocument }] = await Promise.all([
-          import('@react-pdf/renderer'),
-          import('./PriceListPdfDocument'),
-        ]);
-
-        const blob = await pdf(
+        const { PriceListPdfDocument } = await import('./PriceListPdfDocument');
+        const bytes = await renderElementToBytes(
           <PriceListPdfDocument
             doc={doc}
             theme={theme}
@@ -62,24 +60,17 @@ export function useExportPriceListPdf() {
             currency={currency}
             logoDataUrl={logoDataUrl}
           />,
-        ).toBlob();
-
-        const bytes = new Uint8Array(await blob.arrayBuffer());
-        const fileName = priceListFileName(number, version);
+        );
 
         await deliverPdf({
           bytes,
-          fileName,
+          fileName: priceListFileName(number, version),
           docType: 'price_list',
           savedToast: pl.pdf.priceListSaved,
           archive: archive ?? null,
         });
-      } catch (error) {
-        log.error('Eksport cennika nieudany', error);
-        toast.error(error instanceof Error ? error.message : pl.editor.pdfFailed);
-      } finally {
-        setExporting(false);
-      }
+      });
+      setExporting(false);
     },
     [brandKit.data],
   );

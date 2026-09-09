@@ -1,5 +1,8 @@
+import { toast } from 'sonner';
 import { getLogoUrl } from '@/data/repos/brand.repo';
 import { createLogger } from '@/lib/logger';
+import { withTimeout } from '@/lib/with-timeout';
+import { pl } from '@/i18n/pl';
 
 const log = createLogger('pdf.logo');
 
@@ -11,6 +14,13 @@ const log = createLogger('pdf.logo');
  * `<Image>`. Tak wyglądało „logo w ogóle się nie wyświetla" (2026-09-07):
  * znak studia jest wektorowy, więc każda oferta wychodziła bez niego.
  */
+/**
+ * Ile czekamy na podpisanie URL-a i pobranie pliku. Logo to kilkadziesiąt
+ * kilobajtów; jeśli po 10 s go nie ma, to nie ma go wcale — a oferta bez
+ * logotypu jest lepsza niż eksport, który nigdy się nie kończy.
+ */
+const LOGO_TIMEOUT_MS = 10_000;
+
 const NATIVE_TYPES = new Set(['image/png', 'image/jpeg', 'image/jpg']);
 
 /** Czy obrazek trzeba najpierw zamienić na PNG, żeby trafił do PDF-u. */
@@ -89,10 +99,18 @@ export async function fetchLogoAsDataUrl(path: string | null): Promise<string | 
   if (!path) return null;
 
   try {
-    const url = await getLogoUrl(path);
+    const url = await withTimeout(
+      getLogoUrl(path),
+      LOGO_TIMEOUT_MS,
+      'Podpisanie URL logo trwało zbyt długo.',
+    );
     if (!url) return null;
 
-    const response = await fetch(url);
+    const response = await withTimeout(
+      fetch(url),
+      LOGO_TIMEOUT_MS,
+      'Pobranie logo trwało zbyt długo.',
+    );
     if (!response.ok) throw new Error(`Pobranie logo: HTTP ${response.status}`);
     const blob = await response.blob();
 
@@ -108,6 +126,9 @@ export async function fetchLogoAsDataUrl(path: string | null): Promise<string | 
     return await blobToDataUrl(blob);
   } catch (error) {
     log.warn('Nie udało się wczytać logo do PDF', error);
+    // Człowiek ma wiedzieć, że oferta wyszła bez znaku — inaczej zauważy to
+    // dopiero inwestor.
+    toast.warning(pl.pdf.logoSkipped);
     return null;
   }
 }

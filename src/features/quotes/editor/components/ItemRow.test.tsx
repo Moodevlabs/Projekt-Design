@@ -98,7 +98,7 @@ describe('ItemRow', () => {
     expect(amount.closest('div')?.className).toContain('--doc-terracotta');
   });
 
-  it('w podgladzie pokazuje ilosc tylko wtedy, gdy rozna od jedynki', () => {
+  it('w podgladzie pokazuje stawke tylko wtedy, gdy ilosc jest rozna od jedynki', () => {
     const a = newItem({ name: 'A', qty: 1, unitPriceCents: 1000 });
     const { unmount } = render(
       <Dnd ids={[a.id]}>
@@ -114,7 +114,9 @@ describe('ItemRow', () => {
         />
       </Dnd>,
     );
+    // Ryczalt z iloscia 1: ani „1 ×", ani stawki — sama kwota.
     expect(screen.queryByText(/×/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/·/)).not.toBeInTheDocument();
     unmount();
 
     const b = newItem({ name: 'B', qty: 2.5, unitPriceCents: 1000 });
@@ -132,8 +134,10 @@ describe('ItemRow', () => {
         />
       </Dnd>,
     );
-    // Od T-60 ilosc idzie przez `formatQty` — ulamek z przecinkiem, jak w PL.
-    expect(screen.getByText('2,5 ×')).toBeInTheDocument();
+    // Od 2026-09-09 stawka stoi NAD kwota, bez znaku mnozenia: „2,5 · 10,00 zl".
+    // Ulamek z przecinkiem, jak w PL (T-60).
+    expect(screen.getByText(/^2,5 · 10,00\s?zł$/)).toBeInTheDocument();
+    expect(screen.queryByText(/×/)).not.toBeInTheDocument();
   });
 
   it('w podgladzie pokazuje wartosc pozycji, czyli ilosc razy cena', () => {
