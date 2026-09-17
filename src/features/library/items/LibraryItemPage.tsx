@@ -26,7 +26,12 @@ import {
   useUpdateLibraryItem,
 } from '@/data/queries/useLibrary';
 import { useLibraryCategoryList } from '@/data/queries/useLibraryCategories';
-import { PRICING_CHOICES, pricingChoiceFor, type PricingChoiceId } from '@/domain/library/units';
+import {
+  pricingChoiceFor,
+  pricingRuleForChoice,
+  unitForChoice,
+  type PricingChoiceId,
+} from '@/domain/library/units';
 import { categoryLabel } from '@/domain/library/schema';
 import type { LibraryItem } from '@/data/repos/library.repo';
 import { routes } from '@/app/routes';
@@ -129,14 +134,22 @@ export function LibraryItemPage() {
 
   const patch = (next: Partial<Draft>) => setDraft((current) => ({ ...current!, ...next }));
 
-  const choice = PRICING_CHOICES.find((option) => option.id === draft.choice);
   const showRates = draft.choice === 'per_room' || draft.choice === 'per_frame';
   const individual = draft.choice === 'individual';
+  // Pole nazwy jednostki zależy od KAFELKA, nie od tego, czy tekst jest
+  // niepusty — inaczej znikało w chwili skasowania ostatniej litery. Przy
+  // „Indywidualnie" zostaje dla usług, które własną jednostkę już mają.
+  const customUnit = draft.choice === 'flat_custom' || (individual && item?.unit === 'custom');
+  const unitFields = unitForChoice(draft.choice, customUnit ? draft.unitLabel : null);
 
   const save = () => {
     const name = draft.name.trim();
     if (!name) {
       toast.error(pl.library.nameRequired);
+      return;
+    }
+    if (draft.choice === 'flat_custom' && !unitFields.unitLabel) {
+      toast.error(pl.library.customUnitRequired);
       return;
     }
 
@@ -149,8 +162,10 @@ export function LibraryItemPage() {
       // „Indywidualnie" to `flat` z ceną `null` — jedno i drugie ustawia się
       // razem, bo osobno dałoby pozycję bez ceny w trybie parametrycznym.
       unitPriceCents: individual ? null : (draft.unitPriceCents ?? 0),
-      unit: choice?.unit ?? 'lump',
-      unitLabel: draft.unitLabel.trim() || null,
+      ...unitFields,
+      // Kafelek wybiera też TRYB liczenia — bez tego „Według pomieszczenia"
+      // zapisywało się jako kwota stała.
+      pricing: pricingRuleForChoice(draft.choice, item?.pricing ?? { mode: 'flat' }),
       minPriceCents: draft.minPriceCents,
       active: draft.active,
     };
@@ -233,15 +248,34 @@ export function LibraryItemPage() {
               onChange={(next) => patch({ choice: next })}
             />
 
-            {!showRates && !individual ? (
-              <div className="mt-3 max-w-48">
-                <Label htmlFor="item-price">{pl.library.itemPriceLabel}</Label>
-                <MoneyInput
-                  cents={draft.unitPriceCents ?? 0}
-                  onChange={(unitPriceCents) => patch({ unitPriceCents })}
-                  ariaLabel={pl.library.itemPriceLabel}
-                  className="mt-1"
-                />
+            {!showRates && (!individual || customUnit) ? (
+              <div className="mt-3 flex flex-wrap items-start gap-4">
+                {!individual ? (
+                  <div className="w-48">
+                    <Label htmlFor="item-price">{pl.library.itemPriceLabel}</Label>
+                    <MoneyInput
+                      cents={draft.unitPriceCents ?? 0}
+                      onChange={(unitPriceCents) => patch({ unitPriceCents })}
+                      ariaLabel={pl.library.itemPriceLabel}
+                      className="mt-1"
+                    />
+                  </div>
+                ) : null}
+
+                {/* Stoi przy cenie, bo razem czyta się je jako „120 zł / rysunek". */}
+                {customUnit ? (
+                  <div className="w-48">
+                    <Label htmlFor="item-unit-label">{pl.library.customUnitLabel}</Label>
+                    <Input
+                      id="item-unit-label"
+                      value={draft.unitLabel}
+                      placeholder={pl.library.customUnitPlaceholder}
+                      onChange={(event) => patch({ unitLabel: event.target.value })}
+                      className="mt-1"
+                    />
+                    <p className="text-ink-soft mt-1 text-xs">{pl.library.customUnitHint}</p>
+                  </div>
+                ) : null}
               </div>
             ) : null}
           </Section>
@@ -274,24 +308,6 @@ export function LibraryItemPage() {
                 <p className="text-ink-soft mt-1 text-xs">{pl.library.minPriceHint}</p>
               </div>
 
-              {/*
-                Pole „własna jednostka" ma sens tylko przy `unit: 'custom'`.
-                Żaden z ośmiu kafelków go dziś nie ustawia — zostawiamy je
-                widoczne dla usług, które taką jednostkę już mają (import,
-                edycja w bazie), zamiast po cichu ją gubić przy zapisie.
-              */}
-              {draft.unitLabel ? (
-                <div className="max-w-48">
-                  <Label htmlFor="item-unit-label">{pl.library.customUnitLabel}</Label>
-                  <Input
-                    id="item-unit-label"
-                    value={draft.unitLabel}
-                    onChange={(event) => patch({ unitLabel: event.target.value })}
-                    className="mt-1"
-                  />
-                </div>
-              ) : null}
-
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-0.5">
                   <Label htmlFor="item-active">{pl.library.activeLabel}</Label>
@@ -319,8 +335,8 @@ export function LibraryItemPage() {
             name={draft.name}
             description={draft.description}
             unitPriceCents={individual ? null : draft.unitPriceCents}
-            unit={choice?.unit ?? 'lump'}
-            unitLabel={draft.unitLabel}
+            unit={unitFields.unit}
+            unitLabel={unitFields.unitLabel ?? ''}
           />
           <HowItWorks choice={draft.choice} />
           {item ? <ItemUsageCard itemId={item.id} /> : null}

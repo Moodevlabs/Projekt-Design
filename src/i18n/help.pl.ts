@@ -511,7 +511,8 @@ export const helpPl = {
         {
           kind: 'list',
           items: [
-            'Osiem sposobów wyceny (pełna strona usługi, krok 4): Kwota stała · Za m² · Według pomieszczenia · Za kadr · Za godzinę · Za wizytę · Za element · Indywidualnie.',
+            'Dziewięć sposobów wyceny (pełna strona usługi, krok 4): Kwota stała · Za m² · Według pomieszczenia · Za kadr · Za godzinę · Za wizytę · Za element · Własna jednostka · Indywidualnie.',
+            'Sposób „Własna jednostka” działa jak kwota stała mnożona przez ilość, z nazwą jednostki wpisaną ręcznie obok ceny — przykładowo „rysunek” daje w ofercie „120 zł / rysunek”. Wybór innego sposobu wyceny usuwa tę nazwę.',
             'Sposób „Według pomieszczenia” obejmuje stawkę bazową powiększoną o stawkę przypisaną do typu pomieszczenia (krok 5: tabela pomieszczenie × stawka netto) oraz zakres: wszystkie pomieszczenia, wyłącznie część wizualna albo wyłącznie techniczna. Stawka bazowa i zakres dotyczą usługi wstawionej luzem albo do zwykłej grupy — liczonej za wszystkie pomieszczenia wyceny. Ta sama usługa wstawiona do bloku pomieszczenia (po „Rozpisz na pomieszczenia”) liczy wyłącznie stawkę swojego typu pomnożoną przez ilość tego pomieszczenia, bez stawki bazowej. Sposób „Za kadr” uwzględnia liczbę kadrów wprowadzoną w wycenie.',
             'Cena „od” prezentowana jest na listach oraz w panelu „Dodaj usługi” i nie wpływa na obliczenia. Przy braku wartości wprowadzonej ręcznie lista prezentuje najniższą stawkę wynikającą z reguły.',
             'Usługa nieaktywna nie jest dostępna w edytorze, lecz pozostaje w wycenach, które już ją zawierają.',

@@ -130,6 +130,102 @@ describe('LibraryItemPage', () => {
     expect(updateMutate.mock.calls[0]?.[0]).toMatchObject({ patch: { unit: 'hour' } });
   });
 
+  it('usluga „za rysunek" zapisuje sie BEZ zgubienia jednostki', async () => {
+    // Regresja: `custom` nie mial kafelka, wiec strona wybierala „Kwote stala"
+    // i kazdy zapis zamienial jednostke na `lump`.
+    const user = userEvent.setup();
+    renderPage([item({ unit: 'custom', unitLabel: 'rysunek' })]);
+
+    expect(
+      screen.getByRole('radio', { name: pl.library.pricingChoices.flat_custom }),
+    ).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByLabelText(pl.library.customUnitLabel)).toHaveValue('rysunek');
+
+    await user.click(screen.getByRole('button', { name: pl.library.saveChanges }));
+    expect(updateMutate.mock.calls[0]?.[0]).toMatchObject({
+      patch: { unit: 'custom', unitLabel: 'rysunek' },
+    });
+  });
+
+  it('usluga BEZ CENY „za rysunek" tez zachowuje jednostke', async () => {
+    // Tak wygladaja trzy pozycje biblioteki przykladowej.
+    const user = userEvent.setup();
+    renderPage([item({ unitPriceCents: null, unit: 'custom', unitLabel: 'rysunek' })]);
+
+    await user.click(screen.getByRole('button', { name: pl.library.saveChanges }));
+    expect(updateMutate.mock.calls[0]?.[0]).toMatchObject({
+      patch: { unitPriceCents: null, unit: 'custom', unitLabel: 'rysunek' },
+    });
+  });
+
+  it('kafelek „Wlasna jednostka" pokazuje pole nazwy i wymaga jej przy zapisie', async () => {
+    const user = userEvent.setup();
+    renderPage([item()]);
+
+    expect(screen.queryByLabelText(pl.library.customUnitLabel)).not.toBeInTheDocument();
+    await user.click(screen.getByRole('radio', { name: pl.library.pricingChoices.flat_custom }));
+
+    await user.click(screen.getByRole('button', { name: pl.library.saveChanges }));
+    expect(updateMutate).not.toHaveBeenCalled();
+
+    await user.type(screen.getByLabelText(pl.library.customUnitLabel), 'kondygnacja');
+    await user.click(screen.getByRole('button', { name: pl.library.saveChanges }));
+    expect(updateMutate.mock.calls[0]?.[0]).toMatchObject({
+      patch: { unit: 'custom', unitLabel: 'kondygnacja', unitPriceCents: 1_200 },
+    });
+  });
+
+  it('pole nazwy NIE znika po skasowaniu tekstu', async () => {
+    // Dawniej widocznosc zalezala od niepustej wartosci — ostatni Backspace
+    // zabieral pole spod kursora.
+    const user = userEvent.setup();
+    renderPage([item({ unit: 'custom', unitLabel: 'rysunek' })]);
+
+    await user.clear(screen.getByLabelText(pl.library.customUnitLabel));
+    expect(screen.getByLabelText(pl.library.customUnitLabel)).toBeInTheDocument();
+  });
+
+  it('inny kafelek zeruje wlasna nazwe jednostki', async () => {
+    const user = userEvent.setup();
+    renderPage([item({ unit: 'custom', unitLabel: 'rysunek' })]);
+
+    await user.click(screen.getByRole('radio', { name: pl.library.pricingChoices.flat_m2 }));
+    await user.click(screen.getByRole('button', { name: pl.library.saveChanges }));
+
+    expect(updateMutate.mock.calls[0]?.[0]).toMatchObject({
+      patch: { unit: 'm2', unitLabel: null },
+    });
+  });
+
+  it('kafelek zapisuje tez TRYB liczenia, nie tylko jednostke', async () => {
+    // Regresja: `pricing` nie trafial do zapisu, wiec „Wedlug pomieszczenia"
+    // zostawalo kwota stala.
+    const user = userEvent.setup();
+    renderPage([item()]);
+
+    await user.click(screen.getByRole('radio', { name: pl.library.pricingChoices.per_room }));
+    await user.click(screen.getByRole('button', { name: pl.library.saveChanges }));
+
+    expect(updateMutate.mock.calls[0]?.[0]).toMatchObject({
+      patch: { pricing: { mode: 'per_room', perRoomCents: {}, roomScope: 'all' } },
+    });
+  });
+
+  it('zapis bez zmiany trybu NIE rusza stawek z macierzy', async () => {
+    const user = userEvent.setup();
+    const pricing = {
+      mode: 'per_room' as const,
+      baseCents: 0,
+      perRoomCents: { kuchnia: 30_000 },
+      defaultPerRoomCents: 10_000,
+      roomScope: 'all' as const,
+    };
+    renderPage([item({ unit: 'lump', unitPriceCents: 0, pricing })]);
+
+    await user.click(screen.getByRole('button', { name: pl.library.saveChanges }));
+    expect(updateMutate.mock.calls[0]?.[0]).toMatchObject({ patch: { pricing } });
+  });
+
   it('podglad odswieza sie BEZ zapisu', async () => {
     const user = userEvent.setup();
     renderPage([item()]);

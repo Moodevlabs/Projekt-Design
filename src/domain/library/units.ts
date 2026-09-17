@@ -50,9 +50,11 @@ export function priceSuffix(unit: Unit, customLabel?: string | null): string {
 }
 
 /**
- * Osiem opcji „sposobu wyceny" — jeden wybór w UI, para `(mode, unit)` pod spodem.
+ * Dziewięć opcji „sposobu wyceny" — jeden wybór w UI, para `(mode, unit)` pod spodem.
  *
- * Kolejność jak w inspiracji: od najczęstszego do najrzadszego.
+ * Kolejność jak w inspiracji: od najczęstszego do najrzadszego. „Własna
+ * jednostka" (`flat` + `custom`) doszła po T-61: bez niej pozycji „za rysunek"
+ * nie dało się ani utworzyć, ani zapisać bez zgubienia jednostki.
  */
 export const PRICING_CHOICES = [
   { id: 'flat_lump', mode: 'flat', unit: 'lump' },
@@ -62,13 +64,14 @@ export const PRICING_CHOICES = [
   { id: 'flat_hour', mode: 'flat', unit: 'hour' },
   { id: 'flat_visit', mode: 'flat', unit: 'visit' },
   { id: 'flat_element', mode: 'flat', unit: 'element' },
+  { id: 'flat_custom', mode: 'flat', unit: 'custom' },
   { id: 'individual', mode: 'flat', unit: 'lump' },
 ] as const;
 
 export type PricingChoiceId = (typeof PRICING_CHOICES)[number]['id'];
 
 /**
- * Który z ośmiu wyborów odpowiada zapisanej parze.
+ * Który z dziewięciu wyborów odpowiada zapisanej parze.
  *
  * „Indywidualnie" poznajemy po **braku ceny**, a nie po trybie: to `flat`
  * z ceną `null`. Bez tego rozróżnienia karta usługi pokazywałaby „Kwota
@@ -87,6 +90,54 @@ export function pricingChoiceFor(
     (choice) => choice.id !== 'individual' && choice.mode === mode && choice.unit === unit,
   );
   return match?.id ?? 'flat_lump';
+}
+
+/**
+ * Jednostka do zapisu dla wybranego kafelka.
+ *
+ * Własna nazwa obowiązuje przy „Własnej jednostce" oraz przy „Indywidualnie",
+ * jeśli pozycja ją miała — biblioteka przykładowa ma usługi bez ceny liczone
+ * „za rysunek", a „Indywidualnie" rozpoznajemy po braku ceny, nie po jednostce.
+ * Każdy inny kafelek **zeruje** nazwę: `unit_label` przy `m2` to martwy zapis,
+ * który wróciłby po zmianie kafelka jako jednostka, której nikt nie wpisał.
+ */
+export function unitForChoice(
+  id: PricingChoiceId,
+  customLabel: string | null,
+): { unit: Unit; unitLabel: string | null } {
+  const label = customLabel?.trim() ?? '';
+  if (id === 'flat_custom' || (id === 'individual' && label)) {
+    return { unit: 'custom', unitLabel: label || null };
+  }
+
+  const choice = PRICING_CHOICES.find((option) => option.id === id);
+  return { unit: choice?.unit ?? 'lump', unitLabel: null };
+}
+
+/**
+ * Reguła liczenia dla wybranego kafelka.
+ *
+ * Ten sam tryb → reguła wraca **nietknięta**: stawki edytuje się w macierzy
+ * i zapis karty usługi nie może ich wyzerować. Przejście między trybami
+ * parametrycznymi przenosi stawki, bo to te same liczby pod innym mnożnikiem.
+ */
+export function pricingRuleForChoice(id: PricingChoiceId, current: PricingRule): PricingRule {
+  const mode = PRICING_CHOICES.find((option) => option.id === id)?.mode ?? 'flat';
+  if (mode === current.mode) return current;
+  if (mode === 'flat') return { mode: 'flat' };
+
+  const rates =
+    current.mode === 'flat'
+      ? { baseCents: 0, perRoomCents: {}, defaultPerRoomCents: 0 }
+      : {
+          baseCents: current.baseCents,
+          perRoomCents: current.perRoomCents,
+          defaultPerRoomCents: current.defaultPerRoomCents,
+        };
+
+  return mode === 'per_room'
+    ? { mode: 'per_room', ...rates, roomScope: 'all' }
+    : { mode: 'per_frame', ...rates };
 }
 
 /**
