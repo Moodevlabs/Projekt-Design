@@ -4,9 +4,9 @@ import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
 
 /**
- * „Sposób wyceny" — **jeden wybór**, osiem kafelków (koncepcja §5 reguła 1).
+ * „Sposób wyceny" — **jeden wybór**, dziewięć kafelków (koncepcja §5 reguła 1).
  *
- * Pod spodem to nie osiem algorytmów, tylko trzy tryby liczenia skrzyżowane
+ * Pod spodem to nie dziewięć algorytmów, tylko trzy tryby liczenia skrzyżowane
  * z jednostką: „Za m²" to `flat` + `m2`, a „Indywidualnie" to `flat` z ceną
  * `null`. Użytkownik nie musi o tym wiedzieć — i o to chodzi. Rozbicie tego
  * na dwie kontrolki („tryb" + „jednostka") zmuszałoby go do tłumaczenia

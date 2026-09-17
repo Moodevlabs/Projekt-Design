@@ -4,9 +4,12 @@ import {
   minRuleCents,
   priceSuffix,
   pricingChoiceFor,
+  pricingRuleForChoice,
   rateLine,
+  unitForChoice,
   unitLabel,
 } from './units';
+import type { PricingRule } from '../quote/schema';
 import { calcItemCents, countIndividualItems, newItem, newQuoteBody, newSection } from '../quote';
 import { formatMoney } from '../money';
 import { AMOUNT_BASIS } from '../quote/calc';
@@ -59,6 +62,73 @@ describe('pricingChoiceFor', () => {
 
   it('nieznana para spada do kwoty stalej, a nie wywala sie', () => {
     expect(pricingChoiceFor('flat', 'mb', 1000)).toBe('flat_lump');
+  });
+
+  it('wlasna jednostka z cena ma SWOJ kafelek, nie „Kwote stala"', () => {
+    // Spadanie do `flat_lump` konczylo sie zapisem `unit: 'lump'` — „/ rysunek"
+    // znikal z listy, z wyceny i z PDF po pierwszej edycji uslugi.
+    expect(pricingChoiceFor('flat', 'custom', 12_000)).toBe('flat_custom');
+  });
+});
+
+describe('unitForChoice', () => {
+  it('„Wlasna jednostka" zapisuje `custom` z przycieta nazwa', () => {
+    expect(unitForChoice('flat_custom', '  rysunek ')).toEqual({
+      unit: 'custom',
+      unitLabel: 'rysunek',
+    });
+  });
+
+  it('kazdy inny kafelek ZERUJE nazwe — przy `m2` to martwy zapis', () => {
+    expect(unitForChoice('flat_m2', 'rysunek')).toEqual({ unit: 'm2', unitLabel: null });
+    expect(unitForChoice('per_room', 'rysunek')).toEqual({ unit: 'lump', unitLabel: null });
+  });
+
+  it('„Indywidualnie" zachowuje wlasna jednostke, jesli ja dostanie', () => {
+    // Biblioteka przykladowa: „Aktualizacja dokumentacji" — bez ceny, za rysunek.
+    expect(unitForChoice('individual', 'rysunek')).toEqual({
+      unit: 'custom',
+      unitLabel: 'rysunek',
+    });
+    expect(unitForChoice('individual', null)).toEqual({ unit: 'lump', unitLabel: null });
+  });
+});
+
+describe('pricingRuleForChoice', () => {
+  const perRoom: PricingRule = {
+    mode: 'per_room',
+    baseCents: 500,
+    perRoomCents: { kuchnia: 30_000 },
+    defaultPerRoomCents: 10_000,
+    roomScope: 'all',
+  };
+
+  it('ten sam tryb oddaje regule NIETKNIETA — stawki edytuje macierz', () => {
+    expect(pricingRuleForChoice('per_room', perRoom)).toBe(perRoom);
+    expect(pricingRuleForChoice('flat_custom', { mode: 'flat' })).toEqual({ mode: 'flat' });
+  });
+
+  it('z kwoty stalej na pomieszczenia daje pusta regule parametryczna', () => {
+    expect(pricingRuleForChoice('per_room', { mode: 'flat' })).toEqual({
+      mode: 'per_room',
+      baseCents: 0,
+      perRoomCents: {},
+      defaultPerRoomCents: 0,
+      roomScope: 'all',
+    });
+  });
+
+  it('miedzy trybami parametrycznymi przenosi stawki', () => {
+    expect(pricingRuleForChoice('per_frame', perRoom)).toEqual({
+      mode: 'per_frame',
+      baseCents: 500,
+      perRoomCents: { kuchnia: 30_000 },
+      defaultPerRoomCents: 10_000,
+    });
+  });
+
+  it('powrot do kwoty stalej porzuca stawki', () => {
+    expect(pricingRuleForChoice('flat_hour', perRoom)).toEqual({ mode: 'flat' });
   });
 });
 

@@ -1,4 +1,14 @@
-import { Box, Clock, Frame, Grid3x3, HelpCircle, Home, Package, Ruler } from 'lucide-react';
+import {
+  Box,
+  Clock,
+  Frame,
+  Grid3x3,
+  HelpCircle,
+  Home,
+  Package,
+  PencilRuler,
+  Ruler,
+} from 'lucide-react';
 import type { PricingChoiceId } from '@/domain/library/units';
 
 /**
@@ -14,5 +24,6 @@ export const PRICING_CHOICE_ICONS: Record<PricingChoiceId, typeof Box> = {
   flat_hour: Clock,
   flat_visit: Grid3x3,
   flat_element: Box,
+  flat_custom: PencilRuler,
   individual: HelpCircle,
 };
