@@ -3,6 +3,26 @@
 Format wg [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/).
 Wersje zgodne z [SemVer](https://semver.org/lang/pl/).
 
+## [1.3.3] – 2026-09-21
+
+### Dodane
+
+**Kafelek „Własna jednostka” w edytorze usługi.** Obok ośmiu sposobów wyceny
+jest dziewiąty: własna nazwa jednostki, np. „rysunek” albo „wizualizacja”.
+Pole nazwy stoi obok ceny i pokazuje się tylko przy tym kafelku; pusta nazwa
+blokuje zapis.
+
+### Naprawione
+
+**Usługa „za rysunek” nie traci już jednostki.** Pole własnej jednostki
+pojawiało się tylko przy wcześniej wpisanej nazwie, a żaden kafelek jej nie
+ustawiał — zapis zamieniał jednostkę na ryczałt i gubił ją na liście,
+w wycenie i w PDF.
+
+**„Według pomieszczenia” i „Za kadr” zapisują swój tryb wyceny.** Edytor
+usługi zapisywał je jako zwykłą stawkę. Teraz wysyła wybrany tryb, a zapis
+w tym samym trybie zostawia stawki z macierzy nietknięte.
+
 ## [1.3.2] – 2026-09-09
 
 ### Naprawione
