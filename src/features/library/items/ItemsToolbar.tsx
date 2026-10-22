@@ -1,4 +1,5 @@
-import { Plus, Search, Sparkles, X } from 'lucide-react';
+import { Plus, Search, X } from 'lucide-react';
+import { AiMark } from '@/features/ai';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { categorySwatch } from '../categories/swatches';
@@ -98,7 +99,7 @@ export function ItemsToolbar({
             w jednym rzędzie wyglądają jak błąd składu. */}
         {onAiImport ? (
           <Button type="button" variant="outline" onClick={onAiImport}>
-            <Sparkles className="size-4" aria-hidden />
+            <AiMark size="xs" />
             {pl.ai.import.action}
           </Button>
         ) : null}

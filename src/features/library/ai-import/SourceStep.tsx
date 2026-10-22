@@ -1,12 +1,11 @@
 import { useCallback, useState } from 'react';
-import { Sparkles } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import type { AiError } from '@/data/repos/ai.repo';
 import type { AiFileSource } from '@/domain/ai';
-import { AiErrorNote, AiUsageHint, AiWorking } from '@/features/ai';
+import { AiErrorNote, AiMark, AiUsageHint, AiWorking } from '@/features/ai';
 import { pl } from '@/i18n/pl';
 import { AI_TEXT_MAX_CHARS } from '@/lib/ai-file-source';
 import { DropZone } from './DropZone';
@@ -114,7 +113,7 @@ export function SourceStep({
           disabled={!ready}
           className="transition-transform duration-150 ease-out active:scale-[0.98]"
         >
-          <Sparkles className="size-4" aria-hidden />
+          <AiMark size="xs" />
           {pl.ai.import.analyze}
         </Button>
         <AiUsageHint />

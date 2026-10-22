@@ -2715,7 +2715,7 @@ Z wyrazami szacunku`,
 
   ai: {
     assistant: 'Asystent AI',
-    badge: 'Propozycja AI',
+    badge: 'Propozycja',
     working: 'Asystent pracuje…',
     workingHint:
       'Zwykle 20–60 sekund. Zostaw to okno otwarte — wynik nie jest zapisywany w tle i po zamknięciu trzeba pytać od nowa.',

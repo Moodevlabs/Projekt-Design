@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ComponentType } from 'react';
 import {
   ArrowRight,
   CalendarDays,
@@ -17,14 +17,13 @@ import {
   MailCheck,
   Ruler,
   Settings,
-  Sparkles,
   Upload,
   Users,
-  type LucideIcon,
 } from 'lucide-react';
 import { helpPl, type HelpSection } from '@/i18n/help.pl';
 import { HelpBlockView } from './HelpBlocks';
 import { cn } from '@/lib/utils';
+import { AiMark } from '@/features/ai';
 
 /*
  * Te same ikony, ktore uzytkownik widzi w aplikacji: pasek boczny (Pulpit,
@@ -32,7 +31,14 @@ import { cn } from '@/lib/utils';
  * pliki", eksport, zegar pracochlonnosci. Poradnik ma byc mapa do ekranow,
  * a nie osobnym zestawem piktogramow do nauczenia.
  */
-const ICONS: Record<HelpSection['icon'], LucideIcon> = {
+/** Monogram asystenta w spisie i nagłówku sekcji — ten sam znak, co na przyciskach. */
+function AiHelpMark({ className }: { className?: string }) {
+  return <AiMark size="xs" className={cn(className, 'h-4 w-auto')} />;
+}
+
+type SectionIcon = ComponentType<{ className?: string; 'aria-hidden'?: boolean }>;
+
+const ICONS: Record<HelpSection['icon'], SectionIcon> = {
   start: LayoutDashboard,
   clients: Users,
   // Brief i wizja lokalna (poprawki 9 i 10).
@@ -52,7 +58,7 @@ const ICONS: Record<HelpSection['icon'], LucideIcon> = {
   templates: LayoutTemplate,
   files: Upload,
   // Asystent AI (T-135…T-139) — ta sama iskra co na przyciskach akcji AI.
-  ai: Sparkles,
+  ai: AiHelpMark,
   settings: Settings,
   billing: CreditCard,
   keys: Keyboard,

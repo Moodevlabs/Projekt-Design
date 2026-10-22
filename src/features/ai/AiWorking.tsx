@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Sparkles } from 'lucide-react';
+import { AiMark } from './AiMark';
 
 import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
@@ -35,7 +35,7 @@ export function AiWorking({
   return (
     <div className={cn('space-y-3', className)} aria-busy="true" aria-live="polite">
       <p className="text-ink-soft flex items-center gap-2 text-sm">
-        <Sparkles className="size-4 motion-safe:animate-pulse" aria-hidden />
+        <AiMark size="xs" pulse />
         <span className="min-w-0 flex-1">{label ?? pl.ai.working}</span>
         {showElapsed ? (
           <span className="tabular text-ink-faint text-xs">{pl.ai.elapsed(seconds)}</span>

@@ -1,7 +1,5 @@
-import { Sparkles } from 'lucide-react';
-
 import { useAiQuota } from '@/data/queries/useAi';
-import { aiErrorMessage } from '@/features/ai';
+import { AiMark, aiErrorMessage } from '@/features/ai';
 import { formatDate } from '@/lib/dates';
 import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
@@ -31,7 +29,7 @@ export function AiSection({ canWrite }: { canWrite: boolean }) {
       <header className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <h2 className="text-ink flex items-center gap-2 text-sm font-semibold">
-            <Sparkles className="size-4" aria-hidden />
+            <AiMark size="sm" />
             {pl.ai.settings.title}
           </h2>
           <p className="text-ink-soft mt-1 max-w-prose text-sm">{pl.ai.settings.intro}</p>

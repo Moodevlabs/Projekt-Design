@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Sparkles } from 'lucide-react';
+import { AiMark } from '@/features/ai';
 import { useShallow } from 'zustand/react/shallow';
 
 import { Button } from '@/components/ui/button';
@@ -38,7 +38,7 @@ export function CommentAiAction({ comment }: { comment: QuoteComment }) {
         className="h-7 px-2 text-[12px]"
         onClick={() => setOpen(true)}
       >
-        <Sparkles aria-hidden />
+        <AiMark size="xs" />
         {pl.ai.comments.action}
       </Button>
       {open ? (
