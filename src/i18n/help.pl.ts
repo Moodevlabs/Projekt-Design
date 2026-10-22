@@ -59,7 +59,7 @@ export const helpPl = {
   eyebrow: 'Podręcznik',
   heading: 'Obsługa aplikacji Toolier',
   intro:
-    'Toolier jest środowiskiem pracy pracowni projektowania wnętrz: klienci → projekty → wyceny, termin, dokumenty i pliki. Poniżej opis wszystkich obszarów aplikacji — od pierwszego logowania po przekazanie inwestorowi kompletu dokumentów.',
+    'Toolier jest środowiskiem pracy pracowni projektowania wnętrz: klienci → projekty → wyceny, termin, dokumenty i pliki, a nad nimi asystent AI, który z tych danych przygotowuje propozycje do zatwierdzenia. Poniżej opis wszystkich obszarów aplikacji — od pierwszego logowania po przekazanie inwestorowi kompletu dokumentów.',
   tocLabel: 'Spis treści',
   quickTitle: 'Najczęściej wyszukiwane',
   quick: [
@@ -69,6 +69,7 @@ export const helpPl = {
     { label: 'Dobór usług do wyceny', target: 'quote' },
     { label: 'Link i decyzja inwestora', target: 'status' },
     { label: 'Powiadomienia e-mail', target: 'notifications' },
+    { label: 'Asystent AI', target: 'ai' },
     { label: 'Skróty klawiszowe', target: 'keys' },
   ],
   tipLabel: 'Wskazówka',
@@ -586,34 +587,124 @@ export const helpPl = {
       id: 'ai',
       icon: 'ai',
       title: 'Asystent AI',
-      lead: 'Asystent wykonuje pięć powtarzalnych czynności na danych, które już są w aplikacji. Każdy wynik jest propozycją: trafia na ekran do przejrzenia i zapisuje się dopiero po zatwierdzeniu. Miejsca asystenta oznacza monogram „AI” w ramce.',
+      lead: 'Asystent wykonuje pięć powtarzalnych czynności na danych, które już są w aplikacji: czyta cennik z pliku, wiadomość od inwestora, brief, uwagi pod ofertą i teksty dokumentu. Każdy wynik jest propozycją: trafia na ekran do przejrzenia i zapisuje się dopiero po zatwierdzeniu. Miejsca asystenta oznacza monogram „AI” w ramce.',
       blocks: [
         {
-          kind: 'list',
+          kind: 'p',
+          text: 'Trzy zasady obowiązują w każdej z pięciu funkcji. Asystent nie ustala cen: każda kwota w propozycji pochodzi z biblioteki pracowni albo z wgranego dokumentu, a brak ceny pozostaje brakiem ceny („wycena indywidualna”). Asystent nie kontaktuje się z inwestorem: pracuje wyłącznie po stronie pracowni, a pytania otwarte są listą dla projektanta, nie szkicem odpowiedzi. Asystent nie zapisuje niczego sam: propozycję można poprawić w każdym polu albo odrzucić w całości.',
+        },
+        {
+          kind: 'p',
+          text: 'TECZKA Z WIADOMOŚCI. Pierwszy kontakt z inwestorem przychodzi zwykle e-mailem albo przez komunikator. Wklejona treść zamienia się w propozycję klienta, teczki projektu, pomieszczeń i zakresu usług z biblioteki.',
+        },
+        {
+          kind: 'steps',
           items: [
-            'Teczka z wiadomości — Pulpit → „Z wiadomości” (także na karcie klienta). Wklejony e-mail albo wiadomość od inwestora zamienia się w propozycję klienta, teczki projektu, pomieszczeń i zakresu z biblioteki oraz listę pytań do dopytania. Adres e-mail i numer telefonu są wycinane z tekstu jeszcze w aplikacji i trafiają prosto do karty klienta — model ich nie otrzymuje. Jeśli klient o tym samym adresie lub nazwie już istnieje, teczka może zostać podpięta do niego. Szkic wyceny powstaje tylko wtedy, gdy wiadomość mówi o zakresie prac i pole wyboru pozostanie zaznaczone.',
-            'Import biblioteki z pliku — Biblioteka → „Dodaj” → „Importuj z pliku (AI)”. Cennik w PDF, na zdjęciu, w arkuszu Excel albo w CSV zostaje odczytany jako lista usług z grupą, sposobem wyceny i ceną. Przed zapisem lista jest tabelą do poprawienia; pozycje już obecne w bibliotece są oznaczone i odznaczone.',
-            'Szkic wyceny z briefu — karta klienta → Brief → przy odesłanym briefie „Zaproponuj wycenę (AI)”. Z odpowiedzi inwestora powstają pomieszczenia, zakres usług z biblioteki pracowni (włączone i zaproponowane jako opcja), opis projektu oraz lista pytań, na które brief nie odpowiada. Wycena powstaje w wybranym projekcie jako szkic w wersji pierwszej.',
-            'Zmiany z uwag inwestora — edytor wyceny → karta uwag → „Przełóż na zmiany (AI)”. Treść uwagi zamienia się w listę zmian w pozycjach: wyłączenie, włączenie, dodanie z biblioteki, zmiana ilości. Zaznaczone zmiany trafiają do nowej wersji dokumentu; uwagi, których nie da się przełożyć na pozycje (np. dotyczące ceny), zbierane są w bloku „Do omówienia z klientem”.',
-            'Dopracowanie tekstu — znak „AI” przy wstępie oferty, opisie projektu i opisie usługi w bibliotece. Podgląd „było / będzie”, zastosowanie wpisuje tekst do pola; zapis następuje zwykłą drogą. Placeholdery w nawiasach klamrowych pozostają nietknięte — propozycja, która którykolwiek zgubi, jest odrzucana.',
+            'Pulpit → „Z wiadomości” (przycisk przy dacie oraz w pustym stanie konta). Ta sama opcja stoi w nagłówku karty klienta; wtedy teczka powstaje u tego klienta, a asystent nie rozpoznaje nadawcy.',
+            'Wklejenie treści i „Odczytaj wiadomość”. Adres e-mail i numer telefonu są wycinane z tekstu jeszcze w aplikacji i trafiają prosto do karty klienta; notka pod propozycją podaje, ile ich wycięto. Model otrzymuje tekst ze znacznikami w miejscu danych.',
+            'Przegląd propozycji: czego dotyczy wiadomość, klient (nazwa, miasto i adres inwestycji z treści, kontakt z wycięcia), teczka (nazwa, metraż, rodzaj obiektu), pomieszczenia, zakres z biblioteki, pytania do dopytania. Każde pole jest edytowalne.',
+            'Jeśli w bazie istnieje klient o tym samym adresie e-mail albo nazwie, propozycja pokazuje pasek „W bazie jest już klient” z wyborem: podpiąć teczkę do niego albo założyć nowego.',
+            'Pole „Utwórz też szkic wyceny” jest zaznaczone, gdy wiadomość mówi o zakresie prac. Gdy mówi tylko o chęci rozmowy, pole pozostaje wyłączone, a powstaje sam klient i teczka.',
+            '„Utwórz teczkę” zapisuje klienta, projekt w statusie „lead” z treścią wiadomości w notatkach i, przy zaznaczonym polu, wycenę w wersji pierwszej. Aplikacja otwiera edytor wyceny albo stronę teczki.',
           ],
         },
         {
           kind: 'p',
-          text: 'Asystent nie ustala cen. Każda kwota w propozycji pochodzi z biblioteki pracowni albo z wgranego dokumentu; brak ceny pozostaje brakiem ceny („wycena indywidualna”). Asystent nie kontaktuje się z inwestorem i nie zapisuje niczego bez zatwierdzenia.',
+          text: 'IMPORT BIBLIOTEKI Z PLIKU. Cennik w PDF, na zdjęciu, w arkuszu Excel, w CSV albo wklejony jako tekst zostaje odczytany jako lista usług z grupą, sposobem wyceny i ceną.',
+        },
+        {
+          kind: 'steps',
+          items: [
+            'Biblioteka → Usługi → „Importuj z pliku (AI)” obok przycisku „Dodaj”.',
+            'Upuszczenie pliku, wybór z dysku albo zakładka „Wklej tekst”. Obsługiwane: PDF, PNG, JPG, XLSX, CSV, TXT; limit 20 MB i 200 000 znaków tekstu. Plik Word należy zapisać jako PDF.',
+            'Tabela propozycji: nazwa, grupa (istniejąca albo nowa), sposób wyceny, cena. Wszystko edytowalne w wierszu. Pozycje oznaczone jako „niepewne” pochodzą z wierszy, w których dokument podawał widełki cenowe albo nie określał sposobu wyceny. Usługi już obecne w bibliotece są oznaczone „już masz” i odznaczone.',
+            '„Dodaj N usług” zapisuje najpierw brakujące grupy, potem usługi, z paskiem postępu. Przerwany zapis nie tworzy duplikatów przy ponowieniu: zapisane wiersze są odznaczane.',
+          ],
         },
         {
           kind: 'p',
-          text: 'Do modelu przekazywane są wyłącznie dane potrzebne do zadania: treść wgranego pliku, pytania i odpowiedzi z briefu, nazwy i ceny usług, treść uwagi. Dane kontaktowe klienta, adres inwestycji i adresy IP nie są przekazywane nigdy. Zapytania obsługuje Anthropic (model Claude); szczegóły w Polityce prywatności.',
+          text: 'SZKIC WYCENY Z BRIEFU. Z odpowiedzi inwestora w briefie powstają pomieszczenia, zakres usług z biblioteki pracowni, opis projektu oraz lista pytań, na które brief nie odpowiada.',
+        },
+        {
+          kind: 'steps',
+          items: [
+            'Karta klienta → zakładka „Brief” → przy odesłanym briefie „Zaproponuj wycenę (AI)”. Biblioteka musi zawierać usługi; pustą uzupełnia opcja „Wczytaj bibliotekę przykładową” w Ustawieniach.',
+            'Arkusz propozycji: tytuł, szablon (gdy lista pozycji szablonu pokrywa zakres), pomieszczenia z ilościami, zakres z pozycjami „w ofercie” i „jako opcja” wraz z uzasadnieniem, opis projektu, „Czego brakuje w briefie”.',
+            'Wybór teczki: istniejąca albo nowa, nazwana tytułem propozycji. „Utwórz wycenę w projekcie” tworzy szkic w wersji pierwszej z kopią danych klienta, terminem i dokumentami z szablonu, a następnie otwiera edytor.',
+          ],
+        },
+        {
+          kind: 'p',
+          text: 'ZMIANY Z UWAG INWESTORA. Uwaga zostawiona pod ofertą przez link zamienia się w listę zmian w pozycjach: wyłączenie, włączenie, usunięcie pozycji wyłączonej, dodanie z biblioteki, zmiana ilości.',
+        },
+        {
+          kind: 'steps',
+          items: [
+            'Edytor wyceny → karta „Uwagi” → przy uwadze „Przełóż na zmiany (AI)”. Analiza rusza od razu.',
+            'Lista zmian z polami wyboru; każda zmiana jest zdaniem z nazwą pozycji i powodem. Zmiany, których nie da się nałożyć przy bieżącym zaznaczeniu (np. usunięcie pozycji, która pozostaje włączona), są wyszarzone z powodem i wracają po zaznaczeniu zależności.',
+            'Uwagi bez przełożenia na pozycje, w szczególności dotyczące ceny, trafiają do bloku „Do omówienia z klientem”. Asystent nie zmienia cen i nie proponuje rabatów.',
+            '„Utwórz wersję v2 z zaznaczonymi” tworzy nową wersję dokumentu z naniesionymi zmianami i otwiera ją w edytorze. Poprzednia wersja staje się archiwalna, a dokument już zaakceptowany pozostaje nietknięty.',
+          ],
+        },
+        {
+          kind: 'p',
+          text: 'DOPRACOWANIE TEKSTU. Znak „AI” przy wstępie oferty, opisie projektu i opisie usługi w bibliotece poprawia formę tekstu bez zmiany jego treści: bez dopisywania cen, terminów ani usług.',
+        },
+        {
+          kind: 'steps',
+          items: [
+            'Przycisk stoi obok menu placeholderów „{ }” przy polu wstępu i w wierszu „Opis projektu” (tryb edycji) oraz pod polem opisu w edytorze usługi.',
+            'Okno „Było / Będzie” prezentuje oryginał i propozycję. „Zastosuj” wpisuje tekst do pola; zapis następuje zwykłą drogą (autozapis wyceny albo zapis usługi). „Odrzuć” zamyka okno bez zmian.',
+            'Placeholdery w nawiasach klamrowych, np. {rooms} albo {client}, pozostają nietknięte. Propozycja, która którykolwiek zgubi, jest odrzucana z komunikatem. Tekst dłuższy niż limit pola jest skracany, o czym informuje linijka pod podglądem.',
+          ],
+        },
+        {
+          kind: 'list',
+          items: [
+            'Do modelu trafiają wyłącznie dane potrzebne do zadania: treść wgranego pliku, pytania i odpowiedzi z briefu, nazwy, grupy i ceny usług z biblioteki, treść uwagi bez autora, struktura pozycji wyceny bez danych inwestora, tekst wiadomości ze znacznikami w miejscu e-maila i telefonu.',
+            'Do modelu nie trafiają nigdy: dane kontaktowe z kart klientów, adresy IP, lista klientów pracowni, pliki z teczek, dane logowania ani treść innych wycen.',
+            'Zapytania obsługuje Anthropic (modele Claude). Szczegóły i podstawa prawna opisane są w Polityce prywatności.',
+            'Wynik nie jest zapisywany w tle. Zamknięcie okna w trakcie analizy przerywa pracę; ponowne otwarcie pyta model od nowa i liczy się do limitu.',
+          ],
+        },
+        {
+          kind: 'tip',
+          title: 'Czas odpowiedzi',
+          text: 'Analiza trwa zwykle od 20 do 60 sekund; okno pokazuje licznik sekund i podpowiedź, by nie zamykać go w trakcie. Po 150 sekundach bez odpowiedzi pojawia się komunikat z przyciskiem „Spróbuj ponownie”. Druga próba jest zwykle szybsza.',
         },
         {
           kind: 'warn',
           title: 'Limit miesięczny',
-          text: 'Liczba wywołań asystenta w miesiącu jest ograniczona. Bieżące zużycie i datę odnowienia pokazuje sekcja „Asystent AI” w Ustawieniach → Aplikacja. Po wyczerpaniu limitu przyciski asystenta zgłaszają komunikat z datą odnowienia; reszta aplikacji działa bez zmian. Asystent dostępny jest w aktywnej subskrypcji oraz w okresie próbnym.',
+          text: 'Liczba wywołań asystenta w miesiącu kalendarzowym jest ograniczona. Bieżące zużycie i datę odnowienia prezentuje sekcja „Asystent AI” w Ustawieniach → Aplikacja; ta sama liczba stoi pod przyciskami asystenta. Po wyczerpaniu limitu przyciski zgłaszają komunikat z datą odnowienia, a reszta aplikacji działa bez zmian. Asystent dostępny jest w aktywnej subskrypcji oraz w okresie próbnym.',
         },
         {
-          kind: 'tip',
-          text: 'Pozycje oznaczone w tabeli importu jako „niepewne” warto sprawdzić w pierwszej kolejności — to wiersze, w których dokument podawał widełki cenowe albo nie określał jednoznacznie sposobu wyceny.',
+          kind: 'faq',
+          items: [
+            {
+              q: 'Czy asystent może samodzielnie wysłać ofertę albo odpowiedzieć inwestorowi?',
+              a: 'Nie. Asystent przygotowuje propozycje wyłącznie dla pracowni. Ofertę nadal przekazuje projektant, własną pocztą albo linkiem.',
+            },
+            {
+              q: 'Skąd asystent bierze ceny w propozycjach?',
+              a: 'Z biblioteki pracowni albo z wgranego cennika. Nie szacuje, nie uśrednia i nie podpowiada stawek rynkowych; pozycja bez ceny pozostaje „wyceną indywidualną”.',
+            },
+            {
+              q: 'Dlaczego propozycja z briefu albo z wiadomości trwa dłużej niż dopracowanie tekstu?',
+              a: 'Asystent czyta wtedy całą bibliotekę usług i szablony, żeby dobrać zakres, a dopracowanie tekstu dotyczy kilku zdań. Różne zadania obsługują różne modele dobrane do wymagań.',
+            },
+            {
+              q: 'Co oznacza komunikat „Asystent odmówił wykonania tego zadania”?',
+              a: 'Zabezpieczenia modelu zatrzymały zapytanie. Zdarza się to rzadko i zwykle wynika z treści wgranego dokumentu albo wiadomości. Pomaga zmiana danych wejściowych, np. skrócenie tekstu do fragmentu dotyczącego projektu.',
+            },
+            {
+              q: 'Czy propozycja asystenta jest widoczna dla inwestora?',
+              a: 'Nie. Inwestor widzi wyłącznie to, co pracownia zapisze i udostępni. Propozycja do chwili zatwierdzenia istnieje tylko na ekranie projektanta.',
+            },
+            {
+              q: 'Czy z asystenta można zrezygnować?',
+              a: 'Tak, przez nieużywanie: żadna funkcja nie uruchamia się sama. Bez kliknięcia w przycisk asystenta do modelu nie trafia nic.',
+            },
+          ],
         },
       ],
     },
