@@ -1,4 +1,5 @@
 export { AiBadge } from './AiBadge';
+export { AiMark, type AiMarkSize } from './AiMark';
 export { AiErrorNote } from './AiErrorNote';
 export { AiPolishButton, type AiPolishButtonProps } from './AiPolishButton';
 export { AiPolishPreview } from './AiPolishPreview';

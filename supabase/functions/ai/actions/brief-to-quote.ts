@@ -22,7 +22,7 @@ export const briefToQuote = defineAction({
   payloadSchema: BriefToQuotePayloadSchema,
   outputSchema: BriefProposalSchema,
   model: AI_MODELS.reasoning,
-  effort: 'high',
+  effort: 'medium',
   system: SYSTEM,
   messages(payload) {
     const brief = payload.brief.questions

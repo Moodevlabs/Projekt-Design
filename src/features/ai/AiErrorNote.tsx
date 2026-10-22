@@ -22,7 +22,10 @@ export function AiErrorNote({
   className?: string;
 }) {
   const retryable =
-    error.code === 'upstream' || error.code === 'network' || error.code === 'invalid_output';
+    error.code === 'upstream' ||
+    error.code === 'network' ||
+    error.code === 'timeout' ||
+    error.code === 'invalid_output';
 
   return (
     <div

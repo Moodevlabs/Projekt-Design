@@ -92,7 +92,9 @@ export function CommentChangesDialog({
           </p>
         </blockquote>
 
-        {state.phase === 'loading' ? <AiWorking label={pl.ai.comments.analyzing} /> : null}
+        {state.phase === 'loading' ? (
+          <AiWorking label={pl.ai.comments.analyzing} hint={pl.ai.workingHint} showElapsed />
+        ) : null}
         {state.phase === 'error' && state.error ? (
           <AiErrorNote error={state.error} onRetry={state.retry} />
         ) : null}

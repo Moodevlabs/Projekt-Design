@@ -1,4 +1,4 @@
-import type Anthropic from 'npm:@anthropic-ai/sdk@1.1.0';
+import type Anthropic from 'npm:@anthropic-ai/sdk@0.137.0';
 import { ImportLibraryPayloadSchema, LibraryImportProposalSchema } from '../schemas.ts';
 import { AI_MODELS } from '../../_shared/anthropic.ts';
 import { defineAction, ROLE_PREAMBLE, textBlock } from './types.ts';

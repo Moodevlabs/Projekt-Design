@@ -2715,8 +2715,11 @@ Z wyrazami szacunku`,
 
   ai: {
     assistant: 'Asystent AI',
-    badge: 'Propozycja AI',
+    badge: 'Propozycja',
     working: 'Asystent pracuje…',
+    workingHint:
+      'Zwykle 20–60 sekund. Zostaw to okno otwarte — wynik nie jest zapisywany w tle i po zamknięciu trzeba pytać od nowa.',
+    elapsed: (seconds: number) => `${seconds} s`,
     retry: 'Spróbuj ponownie',
     quota: (used: number, limit: number) => `${used} z ${limit} wywołań w tym miesiącu`,
     quotaResets: (date: string) => `Licznik odnowi się ${date}.`,
@@ -2731,6 +2734,8 @@ Z wyrazami szacunku`,
       upstream: 'Asystent nie odpowiedział. Spróbuj za chwilę.',
       bad_request: 'Dane do asystenta mają zły kształt.',
       network: 'Brak połączenia z asystentem. Sprawdź internet i spróbuj ponownie.',
+      timeout:
+        'Asystent nie zdążył odpowiedzieć w dwie i pół minuty. Spróbuj ponownie — druga próba jest zwykle szybsza.',
     },
     settings: {
       title: 'Asystent AI',
@@ -2885,6 +2890,59 @@ Z wyrazami szacunku`,
         enabled_item: 'Pominięta: pozycja jest włączona — asystent może ją tylko wyłączyć.',
         bad_qty: 'Pominięta: ilość musi być większa od zera.',
       },
+    },
+    // T-140 — wiadomość od klienta → teczka
+    intake: {
+      action: 'Z wiadomości',
+      title: 'Teczka z wiadomości',
+      intro:
+        'Wklej e-mail albo wiadomość od klienta. Asystent rozpozna, kto pisze i o jaki obiekt chodzi, zaproponuje pomieszczenia i zakres z Twojej biblioteki. Przejrzysz wszystko przed zapisem.',
+      placeholder: 'Wklej tutaj treść wiadomości od klienta…',
+      analyze: 'Odczytaj wiadomość',
+      analyzing: 'Czytam wiadomość…',
+      tooLong: (chars: number, limit: number) =>
+        `Wiadomość ma ${chars.toLocaleString('pl-PL')} znaków, limit to ${limit.toLocaleString('pl-PL')}. Skróć ją do istotnej części.`,
+      masked: (emails: number, phones: number) =>
+        emails + phones === 0
+          ? 'W wiadomości nie ma adresu e-mail ani telefonu.'
+          : `Przed wysłaniem do asystenta wycięto ${emails} ${emails === 1 ? 'adres e-mail' : 'adresy e-mail'} i ${phones} ${phones === 1 ? 'telefon' : 'telefony'} — trafią prosto do karty klienta.`,
+      summary: 'Czego dotyczy wiadomość',
+      client: 'Klient',
+      project: 'Teczka',
+      scope: 'Zakres',
+      openQuestions: 'O co dopytać klienta',
+      fields: {
+        clientName: 'Nazwa klienta',
+        city: 'Miasto inwestycji',
+        address: 'Adres inwestycji',
+        email: 'E-mail',
+        phone: 'Telefon',
+        projectName: 'Nazwa teczki',
+        areaM2: 'Metraż (m²)',
+        kind: 'Rodzaj obiektu',
+      },
+      existingClient: (name: string) => `W bazie jest już klient „${name}”.`,
+      useExisting: 'Podepnij do istniejącego',
+      createNew: 'Załóż nowego klienta',
+      knownClient: (name: string) => `Teczka powstanie u klienta „${name}”.`,
+      withQuote: 'Utwórz też szkic wyceny z tego zakresu',
+      noScope:
+        'Wiadomość nie mówi, co ma być zrobione — powstanie klient i teczka, a wycenę dodasz, gdy klient doprecyzuje zakres.',
+      create: 'Utwórz teczkę',
+      creating: 'Tworzę teczkę…',
+      created: 'Teczka utworzona.',
+      createdWithQuote: 'Teczka i szkic wyceny utworzone.',
+      failed: 'Nie udało się utworzyć teczki.',
+      nameRequired: 'Podaj nazwę klienta i nazwę teczki.',
+      sourceNote: 'Treść wiadomości zostanie zapisana w notatkach teczki.',
+      /** Licznik przy zbliżaniu się do limitu — pokazywany od 80 % długości. */
+      charCount: (chars: number, limit: number) =>
+        `${chars.toLocaleString('pl-PL')} / ${limit.toLocaleString('pl-PL')} znaków`,
+      back: 'Wróć do wiadomości',
+      prerequisitesFailed:
+        'Nie udało się wczytać biblioteki, szablonów albo typów pomieszczeń. Bez nich asystent nie ma z czego proponować zakresu.',
+      noLibrary:
+        'Biblioteka jest pusta. Asystent rozpozna klienta i teczkę, ale zakresu nie zaproponuje — dodaj usługi w Bibliotece.',
     },
     // T-139 — dopracowanie tekstów
     text: {

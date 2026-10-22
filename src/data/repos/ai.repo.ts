@@ -72,9 +72,26 @@ async function toAiError(failure: unknown): Promise<AiError> {
         : null;
     return new AiError(body?.error ?? failure.message, code, quota?.success ? quota.data : null);
   }
+  // Przerwanie przez `AbortSignal.timeout` wraca z functions-js jako błąd
+  // relay z oryginalnym wyjątkiem w `context` (`TimeoutError` / `AbortError`).
+  const inner: unknown = (failure as { context?: unknown }).context;
+  const name = [failure, inner].find((e): e is Error => e instanceof Error)?.name;
+  if (name === 'TimeoutError' || name === 'AbortError') {
+    return new AiError('Asystent nie zdążył odpowiedzieć.', 'timeout');
+  }
   const message = failure instanceof Error ? failure.message : 'Asystent AI nie odpowiedział.';
   return new AiError(message, 'network');
 }
+
+/**
+ * Ile czekamy na odpowiedź modelu.
+ *
+ * Brama funkcji brzegowych Supabase i tak ucina żądanie po ~150 s; bez
+ * własnego limitu `fetch` w webview potrafił wisieć bez końca i arkusz
+ * pokazywał „Czytam brief…" długo po tym, jak serwer skończył (2026-10-22).
+ * Z limitem użytkownik dostaje czytelny błąd i przycisk „Spróbuj ponownie".
+ */
+export const AI_TIMEOUT_MS = 150_000;
 
 export interface AiInvocation<A extends AiAction> {
   data: AiResultOf<A>;
@@ -89,7 +106,7 @@ export async function invokeAi<A extends AiAction>(
     ok?: boolean;
     data?: unknown;
     usage?: unknown;
-  }>('ai', { body: { action, payload } });
+  }>('ai', { body: { action, payload }, signal: AbortSignal.timeout(AI_TIMEOUT_MS) });
 
   if (response.error) throw await toAiError(response.error);
 

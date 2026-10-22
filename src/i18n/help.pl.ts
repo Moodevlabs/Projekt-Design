@@ -586,15 +586,16 @@ export const helpPl = {
       id: 'ai',
       icon: 'ai',
       title: 'Asystent AI',
-      lead: 'Asystent wykonuje cztery powtarzalne czynności na danych, które już są w aplikacji. Każdy wynik jest propozycją: trafia na ekran do przejrzenia i zapisuje się dopiero po zatwierdzeniu.',
+      lead: 'Asystent wykonuje pięć powtarzalnych czynności na danych, które już są w aplikacji. Każdy wynik jest propozycją: trafia na ekran do przejrzenia i zapisuje się dopiero po zatwierdzeniu. Miejsca asystenta oznacza monogram „AI” w ramce.',
       blocks: [
         {
           kind: 'list',
           items: [
+            'Teczka z wiadomości — Pulpit → „Z wiadomości” (także na karcie klienta). Wklejony e-mail albo wiadomość od inwestora zamienia się w propozycję klienta, teczki projektu, pomieszczeń i zakresu z biblioteki oraz listę pytań do dopytania. Adres e-mail i numer telefonu są wycinane z tekstu jeszcze w aplikacji i trafiają prosto do karty klienta — model ich nie otrzymuje. Jeśli klient o tym samym adresie lub nazwie już istnieje, teczka może zostać podpięta do niego. Szkic wyceny powstaje tylko wtedy, gdy wiadomość mówi o zakresie prac i pole wyboru pozostanie zaznaczone.',
             'Import biblioteki z pliku — Biblioteka → „Dodaj” → „Importuj z pliku (AI)”. Cennik w PDF, na zdjęciu, w arkuszu Excel albo w CSV zostaje odczytany jako lista usług z grupą, sposobem wyceny i ceną. Przed zapisem lista jest tabelą do poprawienia; pozycje już obecne w bibliotece są oznaczone i odznaczone.',
             'Szkic wyceny z briefu — karta klienta → Brief → przy odesłanym briefie „Zaproponuj wycenę (AI)”. Z odpowiedzi inwestora powstają pomieszczenia, zakres usług z biblioteki pracowni (włączone i zaproponowane jako opcja), opis projektu oraz lista pytań, na które brief nie odpowiada. Wycena powstaje w wybranym projekcie jako szkic w wersji pierwszej.',
             'Zmiany z uwag inwestora — edytor wyceny → karta uwag → „Przełóż na zmiany (AI)”. Treść uwagi zamienia się w listę zmian w pozycjach: wyłączenie, włączenie, dodanie z biblioteki, zmiana ilości. Zaznaczone zmiany trafiają do nowej wersji dokumentu; uwagi, których nie da się przełożyć na pozycje (np. dotyczące ceny), zbierane są w bloku „Do omówienia z klientem”.',
-            'Dopracowanie tekstu — ikona iskry przy wstępie oferty, opisie projektu i opisie usługi w bibliotece. Podgląd „było / będzie”, zastosowanie wpisuje tekst do pola; zapis następuje zwykłą drogą. Placeholdery w nawiasach klamrowych pozostają nietknięte — propozycja, która którykolwiek zgubi, jest odrzucana.',
+            'Dopracowanie tekstu — znak „AI” przy wstępie oferty, opisie projektu i opisie usługi w bibliotece. Podgląd „było / będzie”, zastosowanie wpisuje tekst do pola; zapis następuje zwykłą drogą. Placeholdery w nawiasach klamrowych pozostają nietknięte — propozycja, która którykolwiek zgubi, jest odrzucana.',
           ],
         },
         {

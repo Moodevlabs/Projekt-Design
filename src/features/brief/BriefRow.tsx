@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Copy, FileText, Mail, Sparkles, Trash2 } from 'lucide-react';
+import { Copy, FileText, Mail, Trash2 } from 'lucide-react';
+import { AiMark } from '@/features/ai';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -130,7 +131,7 @@ export function BriefRow({ brief, clientId }: { brief: Brief; clientId: string }
 
         {submitted ? (
           <Button size="sm" variant="outline" onClick={() => setProposalOpen(true)}>
-            <Sparkles className="size-4" aria-hidden />
+            <AiMark size="xs" />
             {pl.ai.brief.action}
           </Button>
         ) : null}

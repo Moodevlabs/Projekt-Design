@@ -100,7 +100,12 @@ export function BriefProposalSheet({
           ) : state.error ? (
             <AiErrorNote error={state.error} onRetry={state.retry} />
           ) : !proposal ? (
-            <AiWorking label={pl.ai.brief.analyzing} rows={4} />
+            <AiWorking
+              label={pl.ai.brief.analyzing}
+              hint={pl.ai.workingHint}
+              showElapsed
+              rows={4}
+            />
           ) : (
             <div className="space-y-6">
               <div className="space-y-2">

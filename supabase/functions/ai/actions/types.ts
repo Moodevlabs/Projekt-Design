@@ -1,5 +1,5 @@
-import type Anthropic from 'npm:@anthropic-ai/sdk@1.1.0';
-import type { z } from 'npm:zod@3.25.67';
+import type Anthropic from 'npm:@anthropic-ai/sdk@0.137.0';
+import type { z } from 'npm:zod@3.25.67/v4';
 import type { AiModel, Effort } from '../../_shared/anthropic.ts';
 
 /**
@@ -10,7 +10,7 @@ import type { AiModel, Effort } from '../../_shared/anthropic.ts';
  * tym zajmuje się `index.ts` i `_shared/anthropic.ts`. `model` wybiera się
  * z `AI_MODELS` po rodzaju pracy, nie po nazwie modelu.
  */
-export interface ActionDef<P extends z.ZodTypeAny, O extends z.ZodTypeAny> {
+export interface ActionDef<P extends z.ZodType, O extends z.ZodType> {
   payloadSchema: P;
   outputSchema: O;
   model: AiModel;
@@ -19,7 +19,7 @@ export interface ActionDef<P extends z.ZodTypeAny, O extends z.ZodTypeAny> {
   messages(payload: z.infer<P>): Anthropic.Beta.BetaMessageParam[];
 }
 
-export function defineAction<P extends z.ZodTypeAny, O extends z.ZodTypeAny>(
+export function defineAction<P extends z.ZodType, O extends z.ZodType>(
   def: ActionDef<P, O>,
 ): ActionDef<P, O> {
   return def;

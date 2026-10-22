@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Sparkles } from 'lucide-react';
+import { AiMark } from './AiMark';
 
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -103,10 +103,7 @@ export function AiPolishButton({
             className,
           )}
         >
-          <Sparkles
-            className={cn('size-3.5', polish.isPending && 'motion-safe:animate-pulse')}
-            aria-hidden
-          />
+          <AiMark size={size === 'icon' ? 'sm' : 'xs'} pulse={polish.isPending} />
           {size === 'sm' ? pl.ai.text.action : null}
         </Button>
       </PopoverTrigger>

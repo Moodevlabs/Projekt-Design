@@ -55,6 +55,13 @@ vi.mock('@/data/queries/useWorkspace', () => ({
   useWorkspaceId: () => 'ws',
 }));
 
+// „Z wiadomości" w naglowku (T-140): dialog montuje sie po kliknieciu,
+// ale modul hookow asystenta laduje sie razem ze strona.
+vi.mock('@/data/queries/useAi', () => ({
+  useAiMessageToProject: () => ({ mutate: vi.fn(), reset: vi.fn(), isPending: false }),
+  useAiQuota: () => ({ data: undefined }),
+}));
+
 const { ClientPage } = await import('./ClientPage');
 
 function overview(partial: Partial<ClientOverview> = {}): ClientOverview {
@@ -111,6 +118,8 @@ describe('ClientPage', () => {
     expect(screen.getByText('2')).toBeInTheDocument();
     // 980 000 gr = 9 800 zl.
     expect(screen.getByText(/9\s?800,00/)).toBeInTheDocument();
+    // Teczka z maila od TEGO klienta (T-140) — obok „Nowa wycena".
+    expect(screen.getByRole('button', { name: pl.ai.intake.action })).toBeInTheDocument();
   });
 
   it('ma zakladki Projekty, Wyceny, Pliki i Notatki', () => {

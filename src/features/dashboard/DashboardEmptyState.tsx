@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Money } from '@/components/shared';
+import { MessageIntakeButton } from '@/features/intake';
 import { useCountUp } from './useCountUp';
 import { routes } from '@/app/routes';
 import { pl } from '@/i18n/pl';
@@ -21,12 +22,17 @@ export function DashboardEmptyState() {
 
       <DemoQuote />
 
-      <Button size="lg" className="mt-8" asChild>
-        <Link to={routes.quoteNew}>
-          <Plus className="size-4" aria-hidden />
-          {pl.quotes.new}
-        </Link>
-      </Button>
+      {/* Dwie drogi startu (T-140): ręcznie od wyceny albo z wklejonego maila
+          od klienta — druga jest ramkowa, bo pierwsza jest sednem produktu. */}
+      <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+        <Button size="lg" asChild>
+          <Link to={routes.quoteNew}>
+            <Plus className="size-4" aria-hidden />
+            {pl.quotes.new}
+          </Link>
+        </Button>
+        <MessageIntakeButton size="lg" />
+      </div>
     </section>
   );
 }

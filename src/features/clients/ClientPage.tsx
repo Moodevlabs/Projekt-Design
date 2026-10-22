@@ -12,6 +12,7 @@ import { ClientNotesTab } from './ClientNotesTab';
 import { ClientProjectsTab } from '@/features/projects/ClientProjectsTab';
 import { ClientBriefTab } from '@/features/brief/ClientBriefTab';
 import { FilesTab } from '@/features/files/FilesTab';
+import { MessageIntakeButton } from '@/features/intake';
 import { ClientRowMenu } from './ClientRowMenu';
 import { useClientOverview } from '@/data/queries/useClients';
 import { useNewQuoteForClient } from './useNewQuoteForClient';
@@ -109,6 +110,8 @@ export function ClientPage() {
               <Pencil className="size-4" aria-hidden />
               {pl.common.edit}
             </Button>
+            {/* Teczka z maila od TEGO klienta (T-140) — model nie zgaduje nadawcy. */}
+            <MessageIntakeButton knownClient={data} />
             <Button disabled={!ready} onClick={() => newQuote(data)}>
               <Plus className="size-4" aria-hidden />
               {pl.clients.newQuote}

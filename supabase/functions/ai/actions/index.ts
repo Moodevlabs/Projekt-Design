@@ -1,6 +1,7 @@
 import { briefToQuote } from './brief-to-quote.ts';
 import { commentsToChanges } from './comments-to-changes.ts';
 import { importLibrary } from './import-library.ts';
+import { messageToProject } from './message-to-project.ts';
 import { polishText } from './polish-text.ts';
 
 /**
@@ -12,6 +13,7 @@ export const ACTIONS = {
   'brief-to-quote': briefToQuote,
   'comments-to-changes': commentsToChanges,
   'polish-text': polishText,
+  'message-to-project': messageToProject,
 } as const;
 
 export type ActionName = keyof typeof ACTIONS;

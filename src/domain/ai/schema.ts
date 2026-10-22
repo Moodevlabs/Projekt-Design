@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { PRICING_CHOICES } from '../library/units';
+import { ProjectKindSchema } from '../project/schema';
 
 /**
  * Asystent AI — schematy odpowiedzi modelu (FEATURES-AI.md §1.3).
@@ -25,6 +26,7 @@ export const AI_ACTIONS = [
   'brief-to-quote',
   'comments-to-changes',
   'polish-text',
+  'message-to-project',
 ] as const;
 export type AiAction = (typeof AI_ACTIONS)[number];
 
@@ -37,6 +39,8 @@ export const AI_ERROR_CODES = [
   'upstream',
   'bad_request',
   'network',
+  /** Klient przerwał oczekiwanie (`AI_TIMEOUT_MS` w `ai.repo`) — model nie zdążył. */
+  'timeout',
 ] as const;
 export type AiErrorCode = (typeof AI_ERROR_CODES)[number];
 
@@ -173,6 +177,46 @@ export const BriefProposalSchema = z.object({
 export type BriefProposal = z.infer<typeof BriefProposalSchema>;
 
 // ---------------------------------------------------------------------------
+// T-140 wiadomość → teczka (klient + projekt + opcjonalnie wycena)
+// ---------------------------------------------------------------------------
+
+/**
+ * To samo, co propozycja z briefu, plus to, czego brief nie potrzebował: kto
+ * pisze i o jaki obiekt chodzi. Kolejność kluczy = kolejność w kopii Deno
+ * (test parytetu porównuje listy).
+ */
+export const MessageProposalSchema = BriefProposalSchema.extend({
+  /** Jedno zdanie: czego dotyczy wiadomość. */
+  summary: z.string().default(''),
+  client: z
+    .object({
+      name: z.string().default(''),
+      city: z.string().default(''),
+      /** Adres inwestycji — nie zamieszkania. */
+      address: z.string().default(''),
+    })
+    .default({}),
+  project: z
+    .object({
+      name: z.string().default(''),
+      areaM2: z
+        .preprocess(
+          (value) =>
+            typeof value === 'number' && Number.isFinite(value) && value > 0
+              ? Math.round(value * 10) / 10
+              : null,
+          z.number().positive().nullable(),
+        )
+        .default(null),
+      kind: ProjectKindSchema.nullable().catch(null).default(null),
+    })
+    .default({}),
+  /** Czy wiadomość mówi o zakresie prac — bez tego nie ma sensu tworzyć wyceny. */
+  hasScope: z.boolean().default(false),
+});
+export type MessageProposal = z.infer<typeof MessageProposalSchema>;
+
+// ---------------------------------------------------------------------------
 // T-138 uwagi → zmiany
 // ---------------------------------------------------------------------------
 
@@ -238,6 +282,7 @@ export const AI_RESULT_SCHEMAS = {
   'brief-to-quote': BriefProposalSchema,
   'comments-to-changes': CommentChangesSchema,
   'polish-text': PolishedTextSchema,
+  'message-to-project': MessageProposalSchema,
 } as const satisfies Record<AiAction, z.ZodTypeAny>;
 
 export type AiResultOf<A extends AiAction> = z.infer<(typeof AI_RESULT_SCHEMAS)[A]>;
