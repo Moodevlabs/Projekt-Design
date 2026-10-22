@@ -2717,6 +2717,9 @@ Z wyrazami szacunku`,
     assistant: 'Asystent AI',
     badge: 'Propozycja AI',
     working: 'Asystent pracuje…',
+    workingHint:
+      'Zwykle 20–60 sekund. Zostaw to okno otwarte — wynik nie jest zapisywany w tle i po zamknięciu trzeba pytać od nowa.',
+    elapsed: (seconds: number) => `${seconds} s`,
     retry: 'Spróbuj ponownie',
     quota: (used: number, limit: number) => `${used} z ${limit} wywołań w tym miesiącu`,
     quotaResets: (date: string) => `Licznik odnowi się ${date}.`,
@@ -2731,6 +2734,8 @@ Z wyrazami szacunku`,
       upstream: 'Asystent nie odpowiedział. Spróbuj za chwilę.',
       bad_request: 'Dane do asystenta mają zły kształt.',
       network: 'Brak połączenia z asystentem. Sprawdź internet i spróbuj ponownie.',
+      timeout:
+        'Asystent nie zdążył odpowiedzieć w dwie i pół minuty. Spróbuj ponownie — druga próba jest zwykle szybsza.',
     },
     settings: {
       title: 'Asystent AI',

@@ -116,6 +116,16 @@ export function useBriefProposal(brief: Pick<Brief, 'template' | 'answers'>) {
     mutate(payload, { onSuccess: (result) => setProposal(result.data) });
   }, [loaded, libraryEmpty, brief, activeItems, categories, templateRows, roomTypes.data, mutate]);
 
+  // Wynik czytamy TAKŻE ze stanu mutacji, nie tylko z callbacku
+  // `mutate(…, { onSuccess })`: TanStack nie woła per-wywołaniowych callbacków,
+  // gdy obserwator zdążył się przepiąć (StrictMode, ponowne zamontowanie) —
+  // a wtedy arkusz pokazywałby „Czytam brief…" mimo gotowej odpowiedzi
+  // (2026-10-22). Oba źródła ustawiają tę samą propozycję.
+  const received = ask.data?.data ?? null;
+  useEffect(() => {
+    if (received) setProposal(received);
+  }, [received]);
+
   // Start, gdy dane wstępne są w pamięci — raz na zamontowanie, stąd strażnik
   // w ref (dane mogą się odświeżyć i zmienić referencje, a to nie powód, żeby
   // pytać model drugi raz).

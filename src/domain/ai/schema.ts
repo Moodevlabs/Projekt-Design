@@ -37,6 +37,8 @@ export const AI_ERROR_CODES = [
   'upstream',
   'bad_request',
   'network',
+  /** Klient przerwał oczekiwanie (`AI_TIMEOUT_MS` w `ai.repo`) — model nie zdążył. */
+  'timeout',
 ] as const;
 export type AiErrorCode = (typeof AI_ERROR_CODES)[number];
 

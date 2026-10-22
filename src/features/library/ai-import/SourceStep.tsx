@@ -60,7 +60,15 @@ export function SourceStep({
   };
 
   if (analyzing) {
-    return <AiWorking label={pl.ai.import.analyzing} rows={4} className="py-2" />;
+    return (
+      <AiWorking
+        label={pl.ai.import.analyzing}
+        hint={pl.ai.workingHint}
+        showElapsed
+        rows={4}
+        className="py-2"
+      />
+    );
   }
 
   return (
