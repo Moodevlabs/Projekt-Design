@@ -1,5 +1,6 @@
 import { InlineText } from './InlineText';
 import { PlaceholderMenu } from '@/components/shared';
+import { AiPolishButton } from '@/features/ai';
 import { documentTextInfo, quoteTextContext, renderText, type QuoteBody } from '@/domain/quote';
 import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
@@ -9,6 +10,8 @@ export interface QuoteHeaderProps {
   editing: boolean;
   /** Data utworzenia rekordu — używana, gdy `body.issueDate` jest puste. */
   createdAt: string;
+  /** Nazwa studia z brand kitu — kontekst dla asystenta (T-139). */
+  companyName?: string;
   onPatch: (patch: Partial<QuoteBody>) => void;
   onPatchClient: (patch: Partial<QuoteBody['client']>) => void;
 }
@@ -35,6 +38,7 @@ export function QuoteHeader({
   body,
   editing,
   createdAt,
+  companyName = '',
   onPatch,
   onPatchClient,
 }: QuoteHeaderProps) {
@@ -44,6 +48,12 @@ export function QuoteHeader({
   // podstawione, w edycji surowe.
   const docText = (template: string) =>
     renderText(template, quoteTextContext(documentTextInfo(body)));
+  // Kontekst dla asystenta (T-139): same etykiety pomieszczeń, bez danych
+  // klienta — model ma wiedzieć, O CZYM jest oferta, nie DLA KOGO (A7).
+  const aiContext = {
+    companyName,
+    rooms: body.rooms.map((room) => (room.qty > 1 ? `${room.label} ×${room.qty}` : room.label)),
+  };
 
   return (
     <header>
@@ -160,11 +170,20 @@ export function QuoteHeader({
             className="inline-field max-w-[560px] text-[14.5px] leading-[1.6] text-[var(--doc-ink-soft)]"
           />
           {editing ? (
-            <PlaceholderMenu
-              value={body.intro}
-              onInsert={(intro) => onPatch({ intro })}
-              className="mt-1"
-            />
+            <>
+              <PlaceholderMenu
+                value={body.intro}
+                onInsert={(intro) => onPatch({ intro })}
+                className="mt-1"
+              />
+              <AiPolishButton
+                field="intro"
+                text={body.intro}
+                context={aiContext}
+                onApply={(intro) => onPatch({ intro })}
+                className="mt-1"
+              />
+            </>
           ) : null}
         </div>
       ) : null}
@@ -177,10 +196,18 @@ export function QuoteHeader({
               {pl.editor.projectDescription}
             </p>
             {editing ? (
-              <PlaceholderMenu
-                value={body.projectDescription}
-                onInsert={(projectDescription) => onPatch({ projectDescription })}
-              />
+              <>
+                <PlaceholderMenu
+                  value={body.projectDescription}
+                  onInsert={(projectDescription) => onPatch({ projectDescription })}
+                />
+                <AiPolishButton
+                  field="projectDescription"
+                  text={body.projectDescription}
+                  context={aiContext}
+                  onApply={(projectDescription) => onPatch({ projectDescription })}
+                />
+              </>
             ) : null}
           </div>
           <InlineText

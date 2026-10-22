@@ -40,6 +40,21 @@ vi.mock('@/data/queries/useLibraryCategories', () => ({
 
 vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn(), info: vi.fn() } }));
 
+// Asystent tekstów (T-139) przy opisie usługi: mutacja i brand kit idą przez
+// TanStack Query — bez atrap strona wymagałaby QueryClientProvider.
+vi.mock('@/data/queries/useAi', () => ({
+  useAiPolishText: () => ({
+    mutate: vi.fn(),
+    isPending: false,
+    data: undefined,
+    error: null,
+    reset: vi.fn(),
+  }),
+}));
+vi.mock('@/data/queries/useBrandKit', () => ({
+  useBrandKit: () => ({ data: null }),
+}));
+
 const { LibraryItemPage } = await import('./LibraryItemPage');
 
 function item(partial: Partial<LibraryItem> = {}): LibraryItem {

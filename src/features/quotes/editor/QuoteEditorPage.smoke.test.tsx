@@ -6,6 +6,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { newItem, newQuoteBody, newSection } from '@/domain/quote';
 import { defaultWorkspaceSettings } from '@/domain/brand/schema';
 import type { Quote } from '@/data/repos/quotes.repo';
+import { pl } from '@/i18n/pl';
 
 /**
  * Test dymny edytora: **czy strona w ogóle się otwiera**.
@@ -120,6 +121,18 @@ vi.mock('@/data/queries/useShares', () => ({
   useMarkCommentRead: () => ({ mutate: vi.fn() }),
   // Od poprawki 7a os „Na czym stoimy" pyta tez o linki.
   useShares: () => ({ data: [], isLoading: false }),
+}));
+
+// Asystent tekstów (T-139) przy wstępie i opisie projektu — mutacja TanStack
+// Query, ta sama przyczyna co wyżej.
+vi.mock('@/data/queries/useAi', () => ({
+  useAiPolishText: () => ({
+    mutate: vi.fn(),
+    isPending: false,
+    data: undefined,
+    error: null,
+    reset: vi.fn(),
+  }),
 }));
 
 vi.mock('@/data/queries/useBrandKit', () => ({
@@ -276,6 +289,8 @@ describe('QuoteEditorPage — otwieranie', () => {
   it('renderuje edytor istniejącej wyceny', () => {
     renderEditor();
     expect(screen.getByDisplayValue('Wycena testowa')).toBeInTheDocument();
+    // Asystent tekstów (T-139) stoi przy wstępie i przy opisie projektu.
+    expect(screen.getAllByRole('button', { name: pl.ai.text.action })).toHaveLength(2);
   });
 
   it('renderuje wycenę BEZ harmonogramu i bez pomieszczeń', () => {

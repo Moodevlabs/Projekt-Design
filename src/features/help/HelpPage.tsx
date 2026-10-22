@@ -17,6 +17,7 @@ import {
   MailCheck,
   Ruler,
   Settings,
+  Sparkles,
   Upload,
   Users,
   type LucideIcon,
@@ -50,6 +51,8 @@ const ICONS: Record<HelpSection['icon'], LucideIcon> = {
   library: Library,
   templates: LayoutTemplate,
   files: Upload,
+  // Asystent AI (T-135…T-139) — ta sama iskra co na przyciskach akcji AI.
+  ai: Sparkles,
   settings: Settings,
   billing: CreditCard,
   keys: Keyboard,

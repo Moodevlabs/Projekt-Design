@@ -1,4 +1,4 @@
-import { Plus, Search, X } from 'lucide-react';
+import { Plus, Search, Sparkles, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { categorySwatch } from '../categories/swatches';
@@ -18,6 +18,8 @@ type ItemsToolbarProps = {
   count: number;
   onAdd: () => void;
   adding?: boolean;
+  /** „Importuj z pliku (AI)" — otwiera `AiImportDialog` (T-136). */
+  onAiImport?: () => void;
 };
 
 /**
@@ -33,6 +35,7 @@ export function ItemsToolbar({
   count,
   onAdd,
   adding = false,
+  onAiImport,
 }: ItemsToolbarProps) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
@@ -89,6 +92,16 @@ export function ItemsToolbar({
           ) : null}
         </div>
 
+        {/* Obok „Dodaj", nie pod nim w menu: przycisk „Dodaj" jest zwykłym
+            przyciskiem, a import to osobna droga wejścia, nie wariant dodawania.
+            Ta sama wysokość co sąsiad — dwa przyciski różnej wysokości
+            w jednym rzędzie wyglądają jak błąd składu. */}
+        {onAiImport ? (
+          <Button type="button" variant="outline" onClick={onAiImport}>
+            <Sparkles className="size-4" aria-hidden />
+            {pl.ai.import.action}
+          </Button>
+        ) : null}
         <Button type="button" onClick={onAdd} disabled={adding}>
           <Plus className="size-4" aria-hidden />
           {pl.library.addItem}

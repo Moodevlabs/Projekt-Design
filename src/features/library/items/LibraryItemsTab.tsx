@@ -11,6 +11,7 @@ import {
 } from '@/data/queries/useLibrary';
 import { useLibraryCategoryList } from '@/data/queries/useLibraryCategories';
 import type { LibraryItem } from '@/data/repos/library.repo';
+import { AiImportDialog } from '../ai-import/AiImportDialog';
 import { CardsSkeleton, LoadError } from '../components/LibraryStates';
 import { ItemsToolbar } from './ItemsToolbar';
 import { LibraryItemCard } from './LibraryItemCard';
@@ -31,6 +32,8 @@ export function LibraryItemsTab() {
   const [pendingDelete, setPendingDelete] = useState<LibraryItem | null>(null);
   /** Rozwinięty wiersz (T-72) — co najwyżej jeden naraz. */
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  /** Import z pliku przez asystenta (T-136). */
+  const [aiImportOpen, setAiImportOpen] = useState(false);
 
   // Filtry idą do zapytania — szuka i filtruje baza, nie przeglądarka.
   const filters = useMemo(
@@ -102,7 +105,10 @@ export function LibraryItemsTab() {
         count={rows.length}
         adding={createItem.isPending}
         onAdd={handleAdd}
+        onAiImport={() => setAiImportOpen(true)}
       />
+
+      <AiImportDialog open={aiImportOpen} onOpenChange={setAiImportOpen} />
 
       {items.isError ? <LoadError onRetry={() => void items.refetch()} /> : null}
 

@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 import { Button } from '@/components/ui/button';
 import { useMarkCommentRead } from '@/data/queries/useShares';
 import type { QuoteComment } from '@/domain/share/schema';
@@ -24,9 +26,15 @@ import { cn } from '@/lib/utils';
 export function CommentsBlock({
   comments,
   quoteId,
+  renderActions,
 }: {
   comments: QuoteComment[];
   quoteId: string;
+  /**
+   * Dodatkowe akcje przy uwadze (T-138: „Przełóż na zmiany (AI)"). Wstrzyknięte
+   * z zewnątrz, bo blok stoi też w oknie „Udostępnij", gdzie nie ma edytora.
+   */
+  renderActions?: (comment: QuoteComment) => ReactNode;
 }) {
   const markRead = useMarkCommentRead(quoteId);
   if (comments.length === 0) return null;
@@ -80,16 +88,19 @@ export function CommentsBlock({
                 {comment.message}
               </p>
 
-              {isUnread ? (
-                <div className="mt-1 pl-2">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-7 px-1.5 text-[12px]"
-                    onClick={() => markRead.mutate(comment.id)}
-                  >
-                    {pl.share.markRead}
-                  </Button>
+              {isUnread || renderActions ? (
+                <div className="mt-1 flex flex-wrap items-center gap-1 pl-2">
+                  {isUnread ? (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 px-1.5 text-[12px]"
+                      onClick={() => markRead.mutate(comment.id)}
+                    >
+                      {pl.share.markRead}
+                    </Button>
+                  ) : null}
+                  {renderActions?.(comment)}
                 </div>
               ) : null}
             </li>

@@ -2713,6 +2713,194 @@ Z wyrazami szacunku`,
     },
   },
 
+  ai: {
+    assistant: 'Asystent AI',
+    badge: 'Propozycja AI',
+    working: 'Asystent pracuje…',
+    retry: 'Spróbuj ponownie',
+    quota: (used: number, limit: number) => `${used} z ${limit} wywołań w tym miesiącu`,
+    quotaResets: (date: string) => `Licznik odnowi się ${date}.`,
+    quotaUnavailable: 'Nie udało się odczytać limitu asystenta.',
+    errors: {
+      unauthorized: 'Zaloguj się ponownie, żeby użyć asystenta.',
+      read_only: 'Asystent AI działa w aktywnej subskrypcji albo w trakcie okresu próbnego.',
+      limit_reached: (limit: number, resetsAt: string) =>
+        `Wyczerpany limit ${limit} wywołań asystenta w tym miesiącu. Licznik odnowi się ${resetsAt}.`,
+      refused: 'Asystent odmówił wykonania tego zadania. Zmień dane wejściowe i spróbuj ponownie.',
+      invalid_output: 'Odpowiedź asystenta miała nieoczekiwany kształt. Spróbuj ponownie.',
+      upstream: 'Asystent nie odpowiedział. Spróbuj za chwilę.',
+      bad_request: 'Dane do asystenta mają zły kształt.',
+      network: 'Brak połączenia z asystentem. Sprawdź internet i spróbuj ponownie.',
+    },
+    settings: {
+      title: 'Asystent AI',
+      intro:
+        'Importuje cennik z pliku, pisze szkic wyceny z briefu, przekłada uwagi inwestora na zmiany w pozycjach i dopracowuje teksty oferty. Każdy wynik jest propozycją, którą zatwierdzasz ręcznie.',
+      dataTitle: 'Co trafia do modelu',
+      dataNote:
+        'Tylko to, czego wymaga zadanie: treść wgranego pliku, pytania i odpowiedzi z briefu, nazwy i ceny usług z biblioteki, treść uwag. Nigdy dane kontaktowe klienta, adresy inwestycji ani adresy IP.',
+      providerNote:
+        'Zapytania obsługuje Anthropic (model Claude). Szczegóły i podstawa prawna w Polityce prywatności.',
+      usageTitle: 'Zużycie w tym miesiącu',
+      rulesTitle: 'Czego asystent nie robi',
+      rules: [
+        'Nie ustala cen. Każda kwota pochodzi z Twojej biblioteki albo z pliku, który wgrałeś.',
+        'Nie pisze do inwestora. Pracuje wyłącznie po Twojej stronie.',
+        'Nie zapisuje niczego sam. Propozycję przeglądasz i zatwierdzasz.',
+      ],
+    },
+    // T-136 — import biblioteki z pliku
+    import: {
+      action: 'Importuj z pliku (AI)',
+      title: 'Import usług z pliku',
+      intro:
+        'Wgraj cennik w PDF, zdjęciu, Excelu albo CSV. Asystent odczyta usługi, ceny i grupy, a Ty przejrzysz listę przed zapisem.',
+      dropHint: 'Upuść plik tutaj albo',
+      pickFile: 'wybierz z dysku',
+      pasteTab: 'Wklej tekst',
+      fileTab: 'Plik',
+      pastePlaceholder: 'Wklej tutaj treść cennika…',
+      analyze: 'Odczytaj usługi',
+      analyzing: 'Czytam dokument…',
+      unsupported: (ext: string) =>
+        `Plik .${ext} nie jest obsługiwany. Użyj PDF, obrazu (PNG, JPG), XLSX, CSV albo TXT.`,
+      tooLarge: 'Plik jest za duży. Limit to 20 MB.',
+      tooLong: (chars: number, limit: number) =>
+        `Tekst ma ${chars.toLocaleString('pl-PL')} znaków, limit to ${limit.toLocaleString('pl-PL')}. Podziel plik na części.`,
+      /** Lista pod strefą upuszczania — test pilnuje, że każdy wpis jest w `AI_FILE_ACCEPT`. */
+      formats: 'PDF · PNG · JPG · XLSX · CSV · TXT',
+      docxHint: 'Pliki Word zapisz jako PDF i wgraj ponownie.',
+      empty: 'Nie udało się odczytać żadnej usługi z tego dokumentu.',
+      found: (n: number) => `Odczytano ${n} ${n === 1 ? 'usługę' : n < 5 ? 'usługi' : 'usług'}`,
+      alreadyHave: 'już masz',
+      newCategory: 'nowa grupa',
+      noCategory: 'bez grupy',
+      confidence: { high: 'pewne', medium: 'do sprawdzenia', low: 'niepewne' },
+      warnings: 'Pominięte',
+      columns: {
+        name: 'Usługa',
+        category: 'Grupa',
+        pricing: 'Sposób wyceny',
+        price: 'Cena',
+        confidence: 'Pewność',
+      },
+      selectAll: 'Zaznacz wszystkie',
+      selectedCount: (selected: number, total: number) => `Zaznaczono ${selected} z ${total}`,
+      fileRead: (name: string) => `Odczytano plik ${name}`,
+      readingFile: 'Czytam plik…',
+      changeFile: 'Zmień plik',
+      priceIndividual: 'indywidualnie',
+      fromPrice: (price: string) => `od ${price}`,
+      unitLabelPlaceholder: 'jednostka',
+      duplicatesSkipped: (n: number) =>
+        `${n === 1 ? 'Pominięto 1 powtórzoną nazwę' : `Pominięto ${n} powtórzone nazwy`} — biblioteka ma już taką usługę.`,
+      save: (n: number) => `Dodaj ${n} ${n === 1 ? 'usługę' : n < 5 ? 'usługi' : 'usług'}`,
+      saving: (done: number, total: number) => `Zapisuję ${done} z ${total}…`,
+      done: (n: number) =>
+        `Dodano ${n} ${n === 1 ? 'usługę' : n < 5 ? 'usługi' : 'usług'} do biblioteki.`,
+      failed: 'Nie udało się zapisać części usług.',
+      back: 'Wróć do pliku',
+    },
+    // T-137 — brief → szkic wyceny
+    brief: {
+      action: 'Zaproponuj wycenę (AI)',
+      title: 'Szkic wyceny z briefu',
+      intro:
+        'Asystent czyta odpowiedzi klienta i proponuje pomieszczenia, zakres z Twojej biblioteki oraz opis projektu. Ceny biorą się z biblioteki.',
+      analyzing: 'Czytam brief…',
+      rooms: 'Pomieszczenia',
+      scope: 'Zakres',
+      description: 'Opis projektu',
+      openQuestions: 'Czego brakuje w briefie',
+      template: (name: string) => `Na bazie szablonu „${name}”`,
+      noTemplate: 'Bez szablonu',
+      enabled: 'w ofercie',
+      disabled: 'jako opcja',
+      create: 'Utwórz wycenę w projekcie',
+      chooseProject: 'Wybierz projekt',
+      newProject: 'Nowy projekt',
+      created: 'Wycena utworzona.',
+      failed: 'Nie udało się utworzyć wyceny.',
+      noLibrary: 'Biblioteka jest pusta. Dodaj usługi, żeby asystent miał z czego wybierać.',
+      prerequisitesFailed:
+        'Nie udało się wczytać biblioteki, szablonów lub typów pomieszczeń. Sprawdź połączenie i spróbuj ponownie.',
+      titleField: 'Tytuł wyceny',
+      roomLabel: 'Nazwa pomieszczenia',
+      roomQty: 'Ilość',
+      addRoom: 'Dodaj pomieszczenie',
+      removeRoom: (label: string) => `Usuń „${label}”`,
+      noRooms: 'Asystent nie wskazał pomieszczeń. Możesz dodać je ręcznie.',
+      noItems: 'Asystent nie wybrał żadnej usługi z biblioteki.',
+      withoutGroup: 'Bez grupy',
+      individual: 'indywidualnie',
+      scopeSummary: (enabled: number, total: number) => `${enabled} z ${total} w ofercie`,
+      templateLabel: 'Szablon',
+      project: 'Projekt',
+      newProjectHint: (name: string) => `Nowy projekt „${name}” powstanie w kartotece klienta.`,
+      creating: 'Tworzę wycenę…',
+      skipped: (count: number) =>
+        count === 1
+          ? 'Pominięto 1 pozycję spoza biblioteki.'
+          : `Pominięto ${count} pozycji spoza biblioteki.`,
+    },
+    // T-138 — uwagi inwestora → nowa wersja
+    comments: {
+      action: 'Przełóż na zmiany (AI)',
+      title: 'Zmiany z uwag inwestora',
+      analyzing: 'Czytam uwagi…',
+      summary: 'Czego chce klient',
+      changes: 'Proponowane zmiany',
+      unresolved: 'Do omówienia z klientem',
+      kinds: {
+        disable: (name: string) => `Wyłącz „${name}”`,
+        enable: (name: string) => `Włącz „${name}”`,
+        remove: (name: string) => `Usuń „${name}”`,
+        add: (name: string, section: string) => `Dodaj „${name}” do sekcji „${section}”`,
+        qty: (name: string, qty: number) => `Zmień ilość „${name}” na ${qty}`,
+      },
+      createVersion: (version: string) => `Utwórz wersję ${version} z zaznaczonymi`,
+      nothingSelected: 'Zaznacz co najmniej jedną zmianę.',
+      created: (version: string) => `Utworzono wersję ${version}.`,
+      failed: 'Nie udało się utworzyć wersji.',
+      noChanges: 'Asystent nie znalazł w uwagach zmian do pozycji.',
+      intro:
+        'Asystent czyta uwagę i proponuje zmiany w pozycjach tej wyceny. Ceny biorą się z biblioteki. Zaznaczone zmiany trafią do nowej wersji — ta pozostaje nietknięta.',
+      comment: 'Uwaga klienta',
+      selected: (checked: number, total: number) => `Zaznaczono ${checked} z ${total}`,
+      creating: 'Tworzę wersję…',
+      cannotVersion:
+        'Z wersji archiwalnej nie da się zrobić nowej. Otwórz najnowszą wersję tej oferty.',
+      applyFailed: 'Wersja powstała, ale zmian nie udało się zapisać. Nanieś je ręcznie.',
+      appliedWithSkips: (applied: number, skipped: number) => {
+        const few =
+          applied % 10 >= 2 && applied % 10 <= 4 && (applied % 100 < 12 || applied % 100 > 14);
+        const noun = applied === 1 ? 'zmianę' : few ? 'zmiany' : 'zmian';
+        return `Naniesiono ${applied} ${noun}, pominięto ${skipped} — powody stoją przy zmianach na liście.`;
+      },
+      unknownName: 'nieznana pozycja',
+      skipped: {
+        unknown_item: 'Pominięta: pozycja nie istnieje w tej wycenie.',
+        unknown_section: 'Pominięta: sekcja nie istnieje w tej wycenie.',
+        unknown_library: 'Pominięta: usługi nie ma w bibliotece.',
+        enabled_item: 'Pominięta: pozycja jest włączona — asystent może ją tylko wyłączyć.',
+        bad_qty: 'Pominięta: ilość musi być większa od zera.',
+      },
+    },
+    // T-139 — dopracowanie tekstów
+    text: {
+      action: 'Dopracuj tekst (AI)',
+      title: 'Dopracowany tekst',
+      working: 'Piszę…',
+      before: 'Było',
+      after: 'Będzie',
+      apply: 'Zastosuj',
+      discard: 'Odrzuć',
+      lostPlaceholders: (tokens: string) =>
+        `Propozycja zgubiła placeholdery: ${tokens}. Odrzucona.`,
+      empty: 'Asystent nie zaproponował tekstu.',
+      truncated: (limit: number) => `Skrócono do ${limit} znaków.`,
+    },
+  },
   errors: {
     generic: 'Wystąpił nieoczekiwany błąd.',
     notFound: 'Nie znaleziono strony.',

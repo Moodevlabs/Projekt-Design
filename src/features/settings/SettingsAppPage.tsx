@@ -5,6 +5,7 @@ import { useEntitlement } from '@/features/billing/useEntitlement';
 import { StorageUsageSection } from '@/features/files/StorageUsageSection';
 import { pl } from '@/i18n/pl';
 
+import { AiSection } from './AiSection';
 import { SampleLibrarySection } from './SampleLibrarySection';
 import { UpdateSection } from './UpdateSection';
 import { WorkspaceSettingsSection } from './WorkspaceSettingsSection';
@@ -61,6 +62,10 @@ export function SettingsAppPage() {
       {/* Powiadomienia (T-116) zaraz pod ustawieniami wycen: jedno i drugie
           dotyczy tego, co dzieje się z ofertą, a nie tego, jak wygląda. */}
       <NotificationsSection canWrite={canWrite} />
+      {/* Asystent AI (T-135) pod powiadomieniami: to drugie miejsce, w którym
+          aplikacja wysyła coś poza siebie — tu dane do modelu — i ma być równie
+          jawne, co trafia na zewnątrz i w jakiej ilości. */}
+      <AiSection canWrite={canWrite} />
       {/* Typy pomieszczen mieszkaja w Bibliotece → Pomieszczenia (T-73) —
           jedno miejsce do personalizacji, nie dwa. */}
       <SampleLibrarySection />
