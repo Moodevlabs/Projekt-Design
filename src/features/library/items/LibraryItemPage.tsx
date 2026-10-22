@@ -26,6 +26,8 @@ import {
   useUpdateLibraryItem,
 } from '@/data/queries/useLibrary';
 import { useLibraryCategoryList } from '@/data/queries/useLibraryCategories';
+import { useBrandKit } from '@/data/queries/useBrandKit';
+import { AiPolishButton } from '@/features/ai';
 import {
   pricingChoiceFor,
   pricingRuleForChoice,
@@ -88,6 +90,7 @@ export function LibraryItemPage() {
   const categories = useLibraryCategoryList();
   const create = useCreateLibraryItem();
   const update = useUpdateLibraryItem();
+  const companyName = useBrandKit().data?.companyName ?? '';
 
   const item = useMemo(
     () => (isNew ? null : ((items.data ?? []).find((row) => row.id === id) ?? null)),
@@ -218,9 +221,21 @@ export function LibraryItemPage() {
               onChange={(event) => patch({ description: event.target.value })}
               aria-label={pl.library.itemDescriptionLabel}
             />
-            <p className="text-ink-soft mt-1 text-right text-xs tabular-nums">
-              {draft.description.length}/{DESCRIPTION_LIMIT}
-            </p>
+            <div className="mt-1 flex items-center justify-between gap-3">
+              <AiPolishButton
+                field="itemDescription"
+                size="sm"
+                text={draft.description}
+                context={{ companyName, itemName: draft.name.trim() || undefined }}
+                maxLength={DESCRIPTION_LIMIT}
+                onApply={(description) => patch({ description })}
+                disabled={create.isPending || update.isPending}
+                className="-ml-2"
+              />
+              <p className="text-ink-soft text-right text-xs tabular-nums">
+                {draft.description.length}/{DESCRIPTION_LIMIT}
+              </p>
+            </div>
           </Section>
 
           <Section number={3} title={pl.library.categories} hint={pl.library.categoryHint}>

@@ -66,6 +66,7 @@ import { usePackageExport } from '@/pdf/usePackageExport';
 import { ExportPackageDialog } from './components/ExportPackageDialog';
 import { ReadOnlyBanner } from '@/features/billing/ReadOnlyBanner';
 import { useEntitlement } from '@/features/billing/useEntitlement';
+import { useBrandKit } from '@/data/queries/useBrandKit';
 import { routes } from '@/app/routes';
 import { pl } from '@/i18n/pl';
 import { cn } from '@/lib/utils';
@@ -542,6 +543,8 @@ function EditorSurface({
   // Stawka z ustawien — wycena kwotowa jej nie ma, a szacunek czasu (F2.3)
   // musi ja skads wziac.
   const workspaceRate = useWorkspace().data?.settings.hourlyRateCents ?? null;
+  // Nazwa studia dla asystenta tekstów (T-139) — ton „w imieniu studia".
+  const companyName = useBrandKit().data?.companyName ?? '';
   const markAsSent = useMarkAsSentPrompt();
   const basisChange = usePricingBasisChange();
   /*
@@ -826,6 +829,7 @@ function EditorSurface({
                 body={body}
                 editing={editing}
                 createdAt={createdAt}
+                companyName={companyName}
                 onPatch={patchHeader}
                 onPatchClient={patchClient}
               />
