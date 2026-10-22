@@ -43,6 +43,8 @@ export interface HelpSection {
     | 'library'
     | 'templates'
     | 'files'
+    // Asystent AI (T-135…T-139).
+    | 'ai'
     | 'settings'
     | 'billing'
     | 'keys'
@@ -577,6 +579,40 @@ export const helpPl = {
             'Filtr nad listą: Wszystkie · Wgrane · Wygenerowane PDF. Kolumna „Typ” wskazuje rodzaj pliku wygenerowanego (Wycena / Termin / Etapy / Cennik / Pakiet) wraz z wersją dokumentu.',
             'Usunięty plik trafia do Kosza, dostępnego jako osobna pozycja nawigacji, i przechowywany jest tam przez 30 dni. W tym czasie możliwe jest jego przywrócenie; zajmowane miejsce zwalniane jest dopiero po trwałym usunięciu.',
           ],
+        },
+      ],
+    },
+    {
+      id: 'ai',
+      icon: 'ai',
+      title: 'Asystent AI',
+      lead: 'Asystent wykonuje cztery powtarzalne czynności na danych, które już są w aplikacji. Każdy wynik jest propozycją: trafia na ekran do przejrzenia i zapisuje się dopiero po zatwierdzeniu.',
+      blocks: [
+        {
+          kind: 'list',
+          items: [
+            'Import biblioteki z pliku — Biblioteka → „Dodaj” → „Importuj z pliku (AI)”. Cennik w PDF, na zdjęciu, w arkuszu Excel albo w CSV zostaje odczytany jako lista usług z grupą, sposobem wyceny i ceną. Przed zapisem lista jest tabelą do poprawienia; pozycje już obecne w bibliotece są oznaczone i odznaczone.',
+            'Szkic wyceny z briefu — karta klienta → Brief → przy odesłanym briefie „Zaproponuj wycenę (AI)”. Z odpowiedzi inwestora powstają pomieszczenia, zakres usług z biblioteki pracowni (włączone i zaproponowane jako opcja), opis projektu oraz lista pytań, na które brief nie odpowiada. Wycena powstaje w wybranym projekcie jako szkic w wersji pierwszej.',
+            'Zmiany z uwag inwestora — edytor wyceny → karta uwag → „Przełóż na zmiany (AI)”. Treść uwagi zamienia się w listę zmian w pozycjach: wyłączenie, włączenie, dodanie z biblioteki, zmiana ilości. Zaznaczone zmiany trafiają do nowej wersji dokumentu; uwagi, których nie da się przełożyć na pozycje (np. dotyczące ceny), zbierane są w bloku „Do omówienia z klientem”.',
+            'Dopracowanie tekstu — ikona iskry przy wstępie oferty, opisie projektu i opisie usługi w bibliotece. Podgląd „było / będzie”, zastosowanie wpisuje tekst do pola; zapis następuje zwykłą drogą. Placeholdery w nawiasach klamrowych pozostają nietknięte — propozycja, która którykolwiek zgubi, jest odrzucana.',
+          ],
+        },
+        {
+          kind: 'p',
+          text: 'Asystent nie ustala cen. Każda kwota w propozycji pochodzi z biblioteki pracowni albo z wgranego dokumentu; brak ceny pozostaje brakiem ceny („wycena indywidualna”). Asystent nie kontaktuje się z inwestorem i nie zapisuje niczego bez zatwierdzenia.',
+        },
+        {
+          kind: 'p',
+          text: 'Do modelu przekazywane są wyłącznie dane potrzebne do zadania: treść wgranego pliku, pytania i odpowiedzi z briefu, nazwy i ceny usług, treść uwagi. Dane kontaktowe klienta, adres inwestycji i adresy IP nie są przekazywane nigdy. Zapytania obsługuje Anthropic (model Claude); szczegóły w Polityce prywatności.',
+        },
+        {
+          kind: 'warn',
+          title: 'Limit miesięczny',
+          text: 'Liczba wywołań asystenta w miesiącu jest ograniczona. Bieżące zużycie i datę odnowienia pokazuje sekcja „Asystent AI” w Ustawieniach → Aplikacja. Po wyczerpaniu limitu przyciski asystenta zgłaszają komunikat z datą odnowienia; reszta aplikacji działa bez zmian. Asystent dostępny jest w aktywnej subskrypcji oraz w okresie próbnym.',
+        },
+        {
+          kind: 'tip',
+          text: 'Pozycje oznaczone w tabeli importu jako „niepewne” warto sprawdzić w pierwszej kolejności — to wiersze, w których dokument podawał widełki cenowe albo nie określał jednoznacznie sposobu wyceny.',
         },
       ],
     },

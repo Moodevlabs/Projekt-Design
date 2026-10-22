@@ -28,6 +28,7 @@ describe('HelpPage — poradnik (T-73)', () => {
       'library',
       'templates',
       'files',
+      'ai',
       'settings',
       'billing',
       'keys',

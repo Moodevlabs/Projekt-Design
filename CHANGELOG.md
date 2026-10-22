@@ -3,6 +3,38 @@
 Format wg [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/).
 Wersje zgodne z [SemVer](https://semver.org/lang/pl/).
 
+## [Nieopublikowane]
+
+### Dodane
+
+**Asystent AI.** Cztery czynności na danych, które już są w aplikacji; każdy
+wynik jest propozycją do przejrzenia i zapisuje się dopiero po zatwierdzeniu.
+Asystent nie ustala cen (kwoty pochodzą z biblioteki pracowni albo z wgranego
+pliku) i nie kontaktuje się z inwestorem.
+
+- **Import biblioteki z pliku** (Biblioteka → „Dodaj” → „Importuj z pliku
+  (AI)”): cennik w PDF, na zdjęciu, w Excelu albo CSV zostaje odczytany jako
+  lista usług z grupą, sposobem wyceny i ceną; przed zapisem tabela do
+  poprawienia, duplikaty oznaczone.
+- **Szkic wyceny z briefu** (karta klienta → Brief → „Zaproponuj wycenę
+  (AI)”): pomieszczenia, zakres z biblioteki, opis projektu i pytania otwarte;
+  wycena powstaje w wybranym projekcie jako szkic v1.
+- **Zmiany z uwag inwestora** (edytor → karta uwag → „Przełóż na zmiany
+  (AI)”): uwaga zamienia się w listę zmian w pozycjach, zaznaczone trafiają do
+  nowej wersji dokumentu.
+- **Dopracowanie tekstu** (ikona iskry przy wstępie, opisie projektu i opisie
+  usługi): podgląd „było / będzie”, placeholdery zostają nietknięte.
+
+**Ustawienia → Aplikacja → „Asystent AI”.** Zużycie w bieżącym miesiącu z datą
+odnowienia limitu oraz opis tego, co trafia do modelu, a co nigdy.
+
+**Pomoc: sekcja „Asystent AI”.**
+
+### Wdrożenie
+
+Nowa migracja `0051_ai_usage` i funkcja brzegowa `ai`; sekrety
+`ANTHROPIC_API_KEY` i `AI_MONTHLY_LIMIT` (domyślnie 300 wywołań na miesiąc).
+
 ## [1.3.3] – 2026-09-21
 
 ### Dodane
