@@ -53,6 +53,22 @@ vi.mock('@/data/queries/useNotifications', () => ({
   useSendTestNotification: () => ({ mutate: testMutate, isPending: false }),
 }));
 
+// Asystent AI (T-135). Licznik limitu idzie przez `useQuery` — ta sama
+// przyczyna co wyzej: bez atrapy strona chcialaby QueryClientProvider.
+type AiQuotaMock = {
+  data: { used: number; limit: number; resetsAt: string } | undefined;
+  error: unknown;
+};
+const aiQuota = vi.hoisted((): { value: AiQuotaMock } => ({
+  value: {
+    data: { used: 12, limit: 300, resetsAt: '2026-11-01T00:00:00.000Z' },
+    error: null,
+  },
+}));
+vi.mock('@/data/queries/useAi', () => ({
+  useAiQuota: () => aiQuota.value,
+}));
+
 vi.mock('@/features/auth/auth-context', () => ({
   useAuth: () => ({ session: { user: { email: 'projektant@przyklad.pl' } } }),
 }));
@@ -278,5 +294,28 @@ describe('podzial Ustawien (2026-08-27)', () => {
 
     expect(screen.queryByText(pl.files.trashTitle)).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: pl.files.trashEmpty })).not.toBeInTheDocument();
+  });
+});
+
+describe('Asystent AI (T-135)', () => {
+  /**
+   * Limit ma byc widoczny ZANIM sie skonczy — nie dopiero w bledzie przy
+   * imporcie. Sekcja pokazuje zuzycie i date odnowienia z odpowiedzi funkcji.
+   */
+  it('pokazuje zuzycie w tym miesiacu i co trafia do modelu', () => {
+    render(<SettingsAppPage />);
+
+    expect(screen.getByText(pl.ai.settings.title)).toBeInTheDocument();
+    expect(screen.getByText('12')).toBeInTheDocument();
+    expect(screen.getByText('/ 300')).toBeInTheDocument();
+    expect(screen.getByText(pl.ai.settings.dataNote)).toBeInTheDocument();
+  });
+
+  it('po wygasnieciu dostepu mowi, ze asystent wymaga subskrypcji', () => {
+    canWrite.value = false;
+    aiQuota.value = { data: undefined, error: new Error('403') };
+    render(<SettingsAppPage />);
+
+    expect(screen.getByText(pl.ai.errors.read_only)).toBeInTheDocument();
   });
 });

@@ -126,5 +126,13 @@ inspector_port = 8083
 [functions.notify]
 verify_jwt = false
 
+# Asystent AI (T-135, FEATURES-AI.md). Token uzytkownika obowiazkowy; gating
+# subskrypcji i limit miesieczny sa w srodku funkcji.
+#
+# Sekrety: supabase secrets set ANTHROPIC_API_KEY=... AI_MONTHLY_LIMIT=300
+# Wdrozenie: supabase functions deploy ai
+[functions.ai]
+verify_jwt = true
+
 [analytics]
 enabled = false
