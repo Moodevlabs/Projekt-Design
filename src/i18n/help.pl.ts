@@ -75,7 +75,7 @@ export const helpPl = {
   tipLabel: 'Wskazówka',
   warnLabel: 'Uwaga',
   footer:
-    'W razie pytań nieujętych w podręczniku prosimy o kontakt — adres znajduje się w stopce ekranu logowania. Treść odpowiada wersji 1.2.9 aplikacji.',
+    'W razie pytań nieujętych w podręczniku prosimy o kontakt — adres znajduje się w stopce ekranu logowania. Treść odpowiada wersji 1.4.0 aplikacji.',
 
   sections: [
     {
