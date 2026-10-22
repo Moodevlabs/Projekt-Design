@@ -2935,6 +2935,14 @@ Z wyrazami szacunku`,
       failed: 'Nie udało się utworzyć teczki.',
       nameRequired: 'Podaj nazwę klienta i nazwę teczki.',
       sourceNote: 'Treść wiadomości zostanie zapisana w notatkach teczki.',
+      /** Licznik przy zbliżaniu się do limitu — pokazywany od 80 % długości. */
+      charCount: (chars: number, limit: number) =>
+        `${chars.toLocaleString('pl-PL')} / ${limit.toLocaleString('pl-PL')} znaków`,
+      back: 'Wróć do wiadomości',
+      prerequisitesFailed:
+        'Nie udało się wczytać biblioteki, szablonów albo typów pomieszczeń. Bez nich asystent nie ma z czego proponować zakresu.',
+      noLibrary:
+        'Biblioteka jest pusta. Asystent rozpozna klienta i teczkę, ale zakresu nie zaproponuje — dodaj usługi w Bibliotece.',
     },
     // T-139 — dopracowanie tekstów
     text: {

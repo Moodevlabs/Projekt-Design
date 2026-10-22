@@ -10,6 +10,7 @@ import { useActivity } from '@/data/queries/useActivity';
 import { useProjects } from '@/data/queries/useProjects';
 import { useQuotesList } from '@/data/queries/useQuotes';
 import { useWorkspace } from '@/data/queries/useWorkspace';
+import { MessageIntakeButton } from '@/features/intake';
 import { formatLongDate } from '@/lib/dates';
 import { pl } from '@/i18n/pl';
 
@@ -73,7 +74,12 @@ export function DashboardPage() {
 
   return (
     <div className="mx-auto w-full max-w-[1160px]">
-      <p className="text-ink-soft text-[13px]">{formatLongDate(new Date())}</p>
+      {/* Data po lewej, cicha akcja „Z wiadomości" po prawej (T-140): mail od
+          klienta to zwykle pierwsza rzecz, którą pracownia robi rano. */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-ink-soft text-[13px]">{formatLongDate(new Date())}</p>
+        <MessageIntakeButton size="sm" />
+      </div>
       {/* Krój display bez klasy wagi — Faculty Glyphic ma jedną (05-UI §1). */}
       <p
         className="font-display text-ink mt-2 max-w-[46ch] text-[24px] leading-[1.3] text-balance"

@@ -30,11 +30,20 @@ vi.mock('@/data/queries/useWorkspace', () => ({
 // Blok „Aktywni klienci i projekty" (T-58) pyta o teczki.
 vi.mock('@/data/queries/useProjects', () => ({
   useProjects: () => ({ data: [], isLoading: false, isError: false }),
+  useCreateProject: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }));
 
 vi.mock('@/data/queries/useClients', () => ({
+  useClients: () => ({ data: [] }),
   useCreateClient: () => ({ mutateAsync: vi.fn(), isPending: false }),
   useUpdateClient: () => ({ mutateAsync: vi.fn(), isPending: false }),
+}));
+
+// „Z wiadomości" (T-140): przycisk montuje dialog dopiero po kliknięciu,
+// ale moduł hooków asystenta ładuje się razem ze strona.
+vi.mock('@/data/queries/useAi', () => ({
+  useAiMessageToProject: () => ({ mutate: vi.fn(), reset: vi.fn(), isPending: false }),
+  useAiQuota: () => ({ data: undefined }),
 }));
 
 vi.mock('@/data/queries/useClientAvatar', () => ({
@@ -151,6 +160,15 @@ describe('DashboardPage', () => {
 
     const cta = screen.getByRole('link', { name: new RegExp(pl.quotes.new) });
     expect(cta).toHaveAttribute('href', '/wyceny/nowa');
+    // Druga droga startu (T-140): teczka z wklejonego maila.
+    expect(screen.getByRole('button', { name: pl.ai.intake.action })).toBeInTheDocument();
+  });
+
+  it('obok daty stoi cicha akcja „Z wiadomości" (T-140)', () => {
+    mockQuotes([quote()]);
+    renderPage();
+
+    expect(screen.getByRole('button', { name: pl.ai.intake.action })).toBeInTheDocument();
   });
 
   it('pokazuje ostatnie wyceny i prowadzi do edytora', () => {

@@ -50,3 +50,8 @@ export function useAiCommentsToChanges() {
 export function useAiPolishText() {
   return useAiAction('polish-text');
 }
+
+/** Wiadomość od klienta → klient, teczka i szkic wyceny (T-140). */
+export function useAiMessageToProject() {
+  return useAiAction('message-to-project');
+}

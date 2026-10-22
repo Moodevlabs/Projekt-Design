@@ -7,11 +7,17 @@ Wersje zgodne z [SemVer](https://semver.org/lang/pl/).
 
 ### Dodane
 
-**Asystent AI.** Cztery czynności na danych, które już są w aplikacji; każdy
+**Asystent AI.** Pięć czynności na danych, które już są w aplikacji; każdy
 wynik jest propozycją do przejrzenia i zapisuje się dopiero po zatwierdzeniu.
 Asystent nie ustala cen (kwoty pochodzą z biblioteki pracowni albo z wgranego
-pliku) i nie kontaktuje się z inwestorem.
+pliku) i nie kontaktuje się z inwestorem. Miejsca asystenta oznacza monogram
+„AI” w ramce.
 
+- **Teczka z wiadomości** (Pulpit → „Z wiadomości”, także na karcie klienta):
+  wklejony e-mail od inwestora zamienia się w klienta, teczkę projektu,
+  pomieszczenia i zakres z biblioteki; e-mail i telefon są wycinane z tekstu
+  w aplikacji i trafiają do karty klienta, model ich nie widzi. Szkic wyceny
+  powstaje opcjonalnie, gdy wiadomość mówi o zakresie prac.
 - **Import biblioteki z pliku** (Biblioteka → „Dodaj” → „Importuj z pliku
   (AI)”): cennik w PDF, na zdjęciu, w Excelu albo CSV zostaje odczytany jako
   lista usług z grupą, sposobem wyceny i ceną; przed zapisem tabela do
@@ -22,7 +28,7 @@ pliku) i nie kontaktuje się z inwestorem.
 - **Zmiany z uwag inwestora** (edytor → karta uwag → „Przełóż na zmiany
   (AI)”): uwaga zamienia się w listę zmian w pozycjach, zaznaczone trafiają do
   nowej wersji dokumentu.
-- **Dopracowanie tekstu** (ikona iskry przy wstępie, opisie projektu i opisie
+- **Dopracowanie tekstu** (znak „AI” przy wstępie, opisie projektu i opisie
   usługi): podgląd „było / będzie”, placeholdery zostają nietknięte.
 
 **Ustawienia → Aplikacja → „Asystent AI”.** Zużycie w bieżącym miesiącu z datą
@@ -32,7 +38,7 @@ odnowienia limitu oraz opis tego, co trafia do modelu, a co nigdy.
 
 ### Wdrożenie
 
-Nowa migracja `0051_ai_usage` i funkcja brzegowa `ai`; sekrety
+Nowe migracje `0051_ai_usage` i `0052_ai_usage_message_action` oraz funkcja brzegowa `ai`; sekrety
 `ANTHROPIC_API_KEY` i `AI_MONTHLY_LIMIT` (domyślnie 300 wywołań na miesiąc).
 
 ## [1.3.3] – 2026-09-21
