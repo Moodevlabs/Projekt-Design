@@ -1,5 +1,6 @@
 import type { QuoteComment } from '@/domain/share/schema';
 
+import { CommentAiAction } from './ai/CommentAiAction';
 import { CommentsBlock } from './CommentsBlock';
 
 /**
@@ -28,7 +29,13 @@ export function QuoteFeedbackCard({
 
   return (
     <section className="card-surface p-5">
-      <CommentsBlock comments={comments} quoteId={quoteId} />
+      {/* Karta stoi wyłącznie w edytorze, więc akcja AI może czytać dokument
+          z magazynu edytora (T-138). Okno „Udostępnij" używa samego bloku. */}
+      <CommentsBlock
+        comments={comments}
+        quoteId={quoteId}
+        renderActions={(comment) => <CommentAiAction comment={comment} />}
+      />
     </section>
   );
 }
