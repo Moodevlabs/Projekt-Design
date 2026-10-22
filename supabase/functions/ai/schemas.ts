@@ -1,4 +1,4 @@
-import { z } from 'npm:zod@3.25.67';
+import { z } from 'npm:zod@3.25.67/v4';
 
 /**
  * Schematy odpowiedzi modelu — KOPIA `src/domain/ai/schema.ts` bez `.default()`.

@@ -1,6 +1,6 @@
-import Anthropic from 'npm:@anthropic-ai/sdk@1.1.0';
-import { zodOutputFormat } from 'npm:@anthropic-ai/sdk@1.1.0/helpers/beta/zod';
-import type { z } from 'npm:zod@3.25.67';
+import Anthropic from 'npm:@anthropic-ai/sdk@0.137.0';
+import { betaZodOutputFormat } from 'npm:@anthropic-ai/sdk@0.137.0/helpers/beta/zod';
+import type { z } from 'npm:zod@3.25.67/v4';
 
 /**
  * Klient Anthropic dla funkcji brzegowych (FEATURES-AI.md §1.1).
@@ -63,7 +63,7 @@ export type StructuredResult<T> =
   | { kind: 'refused'; explanation: string | null }
   | { kind: 'invalid'; detail: string };
 
-export interface StructuredRequest<S extends z.ZodTypeAny> {
+export interface StructuredRequest<S extends z.ZodType> {
   model: AiModel;
   system: string;
   messages: Anthropic.Beta.BetaMessageParam[];
@@ -71,7 +71,7 @@ export interface StructuredRequest<S extends z.ZodTypeAny> {
   effort: Effort;
 }
 
-export async function runStructured<S extends z.ZodTypeAny>(
+export async function runStructured<S extends z.ZodType>(
   request: StructuredRequest<S>,
 ): Promise<StructuredResult<z.infer<S>>> {
   const client = anthropicClient();
@@ -87,7 +87,7 @@ export async function runStructured<S extends z.ZodTypeAny>(
     // użytkownika zawsze idą w `messages`, za punktem cache.
     system: [{ type: 'text', text: request.system, cache_control: { type: 'ephemeral' } }],
     messages: request.messages,
-    output_config: { format: zodOutputFormat(request.schema), effort: request.effort },
+    output_config: { format: betaZodOutputFormat(request.schema), effort: request.effort },
   });
 
   if (response.stop_reason === 'refusal') {
