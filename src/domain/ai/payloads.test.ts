@@ -147,3 +147,26 @@ describe('quoteView', () => {
     });
   });
 });
+
+describe('quoteView — kwota pozycji liczona jak w podsumowaniu', () => {
+  it('nadpisanie ręczne i tryb godzinowy dają tę samą kwotę, którą widzi klient', () => {
+    const overridden = newItem({
+      name: 'Ręcznie',
+      qty: 3,
+      unitPriceCents: 10000,
+      priceOverrideCents: 50,
+    });
+    const hourly = newItem({ name: 'Godzinowa', qty: 1, unitPriceCents: 90 });
+    const body = newQuoteBody({
+      pricingBasis: 'time',
+      hourlyRateCents: 20000,
+      sections: [newSection({ title: 'Projekt', items: [overridden, hourly] })],
+    });
+
+    const [first, second] = quoteView(body).sections[0]!.items;
+    // Nadpisanie to wartość pozycji w jednostkach dokumentu (minuty) → 50 min × 200 zł/h = 166,67 zł.
+    expect(first!.amount).toMatch(/166,67/);
+    // 90 minut × 200 zł/h = 300 zł, a nie „90 × 1".
+    expect(second!.amount).toMatch(/300,00/);
+  });
+});

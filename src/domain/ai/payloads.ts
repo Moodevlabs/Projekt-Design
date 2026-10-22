@@ -2,6 +2,8 @@ import type { Brief } from '../brief/schema';
 import { categoryLabel, type LibraryCategory } from '../library/schema';
 import { PRICING_CHOICES, pricingChoiceFor, type PricingChoiceId } from '../library/units';
 import { formatMoney } from '../money';
+import { calcItemCents, pricingContextOf, type PricingContext } from '../quote/calc';
+import { isIndividualItem } from '../quote/individual';
 import type { Item, PricingRule, QuoteBody, Unit } from '../quote/schema';
 import type { AiAction, PolishField } from './schema';
 
@@ -176,17 +178,25 @@ export function briefQuestions(
   return { questions };
 }
 
-function itemView(item: Item, rooms: QuoteBody['rooms'], currency: string): AiQuoteItemView {
+function itemView(
+  item: Item,
+  rooms: QuoteBody['rooms'],
+  context: PricingContext,
+  currency: string,
+): AiQuoteItemView {
   const room = item.roomId ? rooms.find((candidate) => candidate.id === item.roomId) : null;
   return {
     id: item.id,
     name: item.name,
     enabled: item.enabled,
     qty: item.qty,
-    amount:
-      item.unitPriceCents === null
-        ? 'indywidualnie'
-        : formatMoney(item.unitPriceCents * item.qty, currency),
+    // Ta sama kalkulacja co w podsumowaniu (`calcItemCents`): cennik per
+    // pomieszczenie, tryb godzinowy i nadpisanie ręczne liczą się tu tak samo
+    // jak w edytorze — model ma dostać kwotę, którą widzi klient, a nie
+    // `cena × ilość` liczone na skróty.
+    amount: isIndividualItem(item)
+      ? 'indywidualnie'
+      : formatMoney(calcItemCents(item, rooms, context), currency),
     roomLabel: room?.label ?? null,
   };
 }
@@ -196,16 +206,17 @@ function itemView(item: Item, rooms: QuoteBody['rooms'], currency: string): AiQu
  * Bez danych klienta z `body.client` — uwagi dotyczą pozycji, nie osoby.
  */
 export function quoteView(body: QuoteBody, currency = 'PLN'): CommentsToChangesPayload['quote'] {
+  const context = pricingContextOf(body);
   return {
     rooms: body.rooms.map((room) => ({ id: room.id, label: room.label, qty: room.qty })),
     sections: body.sections.map((section) => ({
       id: section.id,
       title: section.title,
-      items: section.items.map((item) => itemView(item, body.rooms, currency)),
+      items: section.items.map((item) => itemView(item, body.rooms, context, currency)),
       groups: section.groups.map((group) => ({
         id: group.id,
         name: group.name,
-        items: group.items.map((item) => itemView(item, body.rooms, currency)),
+        items: group.items.map((item) => itemView(item, body.rooms, context, currency)),
       })),
     })),
   };

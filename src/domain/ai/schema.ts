@@ -65,11 +65,62 @@ const PRICING_CHOICE_IDS = PRICING_CHOICES.map((choice) => choice.id) as [
 export const PricingChoiceIdSchema = z.enum(PRICING_CHOICE_IDS);
 
 // ---------------------------------------------------------------------------
+// Tolerancja na drobne odchylenia modelu
+//
+// Format wyjścia w Deno nie zna ograniczeń liczbowych ani długości (JSON
+// Schema dla modelu to same typy), więc model może oddać nazwę na 170 znaków,
+// ujemną kwotę albo pomieszczenie bez etykiety. Odrzucenie CAŁEJ odpowiedzi
+// z tego powodu kosztowałoby użytkownika wywołanie z puli i pokazało „zły
+// kształt" tam, gdzie 39 z 40 wierszy było dobrych. Dlatego pola są
+// normalizowane (przycięcie, zaokrąglenie, `null` zamiast ujemnej), a wiersze,
+// których nie da się uratować, odpadają pojedynczo.
+// ---------------------------------------------------------------------------
+
+const clampedText = (max: number) =>
+  z.preprocess(
+    (value) => (typeof value === 'string' ? value.trim().slice(0, max) : value),
+    z.string().min(1).max(max),
+  );
+
+const centsOrNull = z
+  .preprocess(
+    (value) =>
+      typeof value === 'number' && Number.isFinite(value)
+        ? value < 0
+          ? null
+          : Math.round(value)
+        : value,
+    z.number().int().nonnegative().nullable(),
+  )
+  .default(null);
+
+const positiveInt = (fallback: number) =>
+  z
+    .preprocess(
+      (value) =>
+        typeof value === 'number' && Number.isFinite(value)
+          ? Math.max(1, Math.round(value))
+          : value,
+      z.number().int().positive(),
+    )
+    .default(fallback);
+
+/** Tablica, z której wypadają elementy niezgodne ze schematem — zamiast wywracać całość. */
+const dropInvalid = <T extends z.ZodTypeAny>(element: T) =>
+  z
+    .preprocess(
+      (value) =>
+        Array.isArray(value) ? value.filter((entry) => element.safeParse(entry).success) : value,
+      z.array(element),
+    )
+    .default([]);
+
+// ---------------------------------------------------------------------------
 // T-136 import biblioteki
 // ---------------------------------------------------------------------------
 
 export const LibraryImportItemSchema = z.object({
-  name: z.string().min(1).max(160),
+  name: clampedText(160),
   description: z.string().default(''),
   /** Istniejąca grupa (dokładna nazwa) albo nowa; `null` = bez grupy. */
   categoryName: z.string().nullable().default(null),
@@ -77,9 +128,9 @@ export const LibraryImportItemSchema = z.object({
   /** Tylko przy `flat_custom`. */
   unitLabel: z.string().nullable().default(null),
   /** Grosze. `null` = brak ceny w dokumencie albo „indywidualnie". */
-  unitPriceCents: z.number().int().nonnegative().nullable().default(null),
+  unitPriceCents: centsOrNull,
   /** „od …" — informacja, nie reguła liczenia. */
-  minPriceCents: z.number().int().nonnegative().nullable().default(null),
+  minPriceCents: centsOrNull,
   confidence: AiConfidenceSchema.default('medium'),
   /** Skąd wiersz („wiersz 14", „tabela 2") — do podglądu, nie do zapisu. */
   sourceNote: z.string().default(''),
@@ -87,7 +138,7 @@ export const LibraryImportItemSchema = z.object({
 export type LibraryImportItem = z.infer<typeof LibraryImportItemSchema>;
 
 export const LibraryImportProposalSchema = z.object({
-  items: z.array(LibraryImportItemSchema).default([]),
+  items: dropInvalid(LibraryImportItemSchema),
   newCategories: z.array(z.string()).default([]),
   warnings: z.array(z.string()).default([]),
 });
@@ -99,8 +150,8 @@ export type LibraryImportProposal = z.infer<typeof LibraryImportProposalSchema>;
 
 export const BriefProposalRoomSchema = z.object({
   roomTypeId: z.string().nullable().default(null),
-  label: z.string().min(1),
-  qty: z.number().int().positive().default(1),
+  label: clampedText(80),
+  qty: positiveInt(1),
 });
 export type BriefProposalRoom = z.infer<typeof BriefProposalRoomSchema>;
 
@@ -115,8 +166,8 @@ export const BriefProposalSchema = z.object({
   title: z.string().default(''),
   projectDescription: z.string().default(''),
   templateId: z.string().nullable().default(null),
-  rooms: z.array(BriefProposalRoomSchema).default([]),
-  items: z.array(BriefProposalItemSchema).default([]),
+  rooms: dropInvalid(BriefProposalRoomSchema),
+  items: dropInvalid(BriefProposalItemSchema),
   openQuestions: z.array(z.string()).default([]),
 });
 export type BriefProposal = z.infer<typeof BriefProposalSchema>;
@@ -150,7 +201,8 @@ export const CommentChangeSchema = z.discriminatedUnion('kind', [
   z.object({
     kind: z.literal('qty'),
     itemId: z.string().min(1),
-    qty: z.number().positive(),
+    /** Zero i ujemne przechodzą przez schemat — `applyCommentChanges` odrzuca je jako `bad_qty` z widocznym powodem. */
+    qty: z.number(),
     reason: z.string().default(''),
   }),
 ]);
@@ -158,7 +210,7 @@ export type CommentChange = z.infer<typeof CommentChangeSchema>;
 
 export const CommentChangesSchema = z.object({
   summary: z.string().default(''),
-  changes: z.array(CommentChangeSchema).default([]),
+  changes: dropInvalid(CommentChangeSchema),
   /** Fragmenty uwag bez przełożenia na pozycje („za drogo"). */
   unresolved: z.array(z.string()).default([]),
 });
