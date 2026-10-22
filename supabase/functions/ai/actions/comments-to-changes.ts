@@ -1,4 +1,5 @@
 import { CommentChangesSchema, CommentsToChangesPayloadSchema } from '../schemas.ts';
+import { AI_MODELS } from '../../_shared/anthropic.ts';
 import { defineAction, ROLE_PREAMBLE, textBlock } from './types.ts';
 
 /**
@@ -40,6 +41,7 @@ function itemLine(item: {
 export const commentsToChanges = defineAction({
   payloadSchema: CommentsToChangesPayloadSchema,
   outputSchema: CommentChangesSchema,
+  model: AI_MODELS.extraction,
   effort: 'medium',
   system: SYSTEM,
   messages(payload) {

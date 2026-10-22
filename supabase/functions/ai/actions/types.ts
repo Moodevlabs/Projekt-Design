@@ -1,17 +1,19 @@
 import type Anthropic from 'npm:@anthropic-ai/sdk@1.1.0';
 import type { z } from 'npm:zod@3.25.67';
-import type { Effort } from '../../_shared/anthropic.ts';
+import type { AiModel, Effort } from '../../_shared/anthropic.ts';
 
 /**
- * Definicja akcji asystenta: co przyjmuje, co odpowiada, jak pyta.
+ * Definicja akcji asystenta: co przyjmuje, co odpowiada, jak pyta, którym modelem.
  *
  * `system` jest **stałym tekstem** (cache prefix), `messages` buduje
  * wiadomość użytkownika z ładunku. Akcja nie wie nic o HTTP ani o SDK —
- * tym zajmuje się `index.ts` i `_shared/anthropic.ts`.
+ * tym zajmuje się `index.ts` i `_shared/anthropic.ts`. `model` wybiera się
+ * z `AI_MODELS` po rodzaju pracy, nie po nazwie modelu.
  */
 export interface ActionDef<P extends z.ZodTypeAny, O extends z.ZodTypeAny> {
   payloadSchema: P;
   outputSchema: O;
+  model: AiModel;
   effort: Effort;
   system: string;
   messages(payload: z.infer<P>): Anthropic.Beta.BetaMessageParam[];

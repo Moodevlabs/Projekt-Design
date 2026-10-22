@@ -1,4 +1,5 @@
 import { BriefProposalSchema, BriefToQuotePayloadSchema } from '../schemas.ts';
+import { AI_MODELS } from '../../_shared/anthropic.ts';
 import { defineAction, ROLE_PREAMBLE, textBlock } from './types.ts';
 
 /**
@@ -20,6 +21,7 @@ Reguły:
 export const briefToQuote = defineAction({
   payloadSchema: BriefToQuotePayloadSchema,
   outputSchema: BriefProposalSchema,
+  model: AI_MODELS.reasoning,
   effort: 'high',
   system: SYSTEM,
   messages(payload) {

@@ -1,4 +1,5 @@
 import { PolishedTextSchema, PolishTextPayloadSchema } from '../schemas.ts';
+import { AI_MODELS } from '../../_shared/anthropic.ts';
 import { defineAction, ROLE_PREAMBLE, textBlock } from './types.ts';
 
 /**
@@ -26,6 +27,7 @@ const FIELD_WORDS: Record<'intro' | 'projectDescription' | 'itemDescription', st
 export const polishText = defineAction({
   payloadSchema: PolishTextPayloadSchema,
   outputSchema: PolishedTextSchema,
+  model: AI_MODELS.writing,
   effort: 'low',
   system: SYSTEM,
   messages(payload) {

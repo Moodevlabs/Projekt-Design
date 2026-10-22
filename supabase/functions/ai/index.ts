@@ -1,6 +1,6 @@
 import { corsHeaders, jsonResponse } from '../_shared/http.ts';
 import { adminClient, ownedWorkspace, userClient } from '../_shared/supabase.ts';
-import { AI_MODEL, runStructured } from '../_shared/anthropic.ts';
+import { runStructured } from '../_shared/anthropic.ts';
 import { ACTIONS, isActionName } from './actions/index.ts';
 
 /**
@@ -115,6 +115,7 @@ Deno.serve(async (request) => {
     }
 
     const result = await runStructured({
+      model: action.model,
       system: action.system,
       // `safeParse` zwraca typ konkretnej akcji; `messages` każdej akcji przyjmuje
       // swój własny ładunek, więc rzutowanie przez `never` jest tu bezpieczne —
@@ -137,7 +138,7 @@ Deno.serve(async (request) => {
     const { error: insertError } = await admin.from('ai_usage').insert({
       workspace_id: workspace.id,
       action: body.action,
-      model: AI_MODEL,
+      model: result.model,
       input_tokens: result.usage.inputTokens,
       output_tokens: result.usage.outputTokens,
     });
