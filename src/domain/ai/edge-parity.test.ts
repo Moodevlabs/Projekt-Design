@@ -10,6 +10,7 @@ import {
   CommentChangesSchema,
   LibraryImportItemSchema,
   LibraryImportProposalSchema,
+  MessageProposalSchema,
   PolishedTextSchema,
 } from './schema';
 
@@ -69,6 +70,7 @@ describe('parytet domena ↔ funkcja brzegowa ai', () => {
     ['BriefProposalSchema', BriefProposalSchema],
     ['CommentChangesSchema', CommentChangesSchema],
     ['PolishedTextSchema', PolishedTextSchema],
+    ['MessageProposalSchema', MessageProposalSchema],
   ] as const)('%s ma te same klucze po obu stronach', (name, schema) => {
     expect(topLevelKeys(edgeSchemas, name)).toEqual(domainKeys(schema));
   });

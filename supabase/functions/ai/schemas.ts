@@ -177,3 +177,51 @@ export const PolishTextPayloadSchema = z.object({
     rooms: z.array(z.string()).optional(),
   }),
 });
+
+// ---------------------------------------------------------------------------
+// T-140 wiadomość → teczka. Kolejność kluczy = `MessageProposalSchema` w domenie
+// (pola briefu, potem summary/client/project/hasScope).
+// ---------------------------------------------------------------------------
+
+export const MessageProposalSchema = z.object({
+  title: z.string(),
+  projectDescription: z.string(),
+  templateId: z.string().nullable(),
+  rooms: z.array(
+    z.object({
+      roomTypeId: z.string().nullable(),
+      label: z.string(),
+      qty: z.number().int(),
+    }),
+  ),
+  items: z.array(
+    z.object({
+      libraryItemId: z.string(),
+      enabled: z.boolean(),
+      reason: z.string(),
+    }),
+  ),
+  openQuestions: z.array(z.string()),
+  summary: z.string(),
+  client: z.object({
+    name: z.string(),
+    city: z.string(),
+    address: z.string(),
+  }),
+  project: z.object({
+    name: z.string(),
+    areaM2: z.number().nullable(),
+    kind: z.enum(['apartment', 'house', 'commercial', 'other']).nullable(),
+  }),
+  hasScope: z.boolean(),
+});
+
+export const MessageToProjectPayloadSchema = z.object({
+  message: z.string().min(1).max(20_000),
+  knownClient: z.object({ name: z.string(), city: z.string() }).nullable(),
+  library: z.array(LibraryEntry).max(1000),
+  templates: z
+    .array(z.object({ id: z.string(), name: z.string(), itemNames: z.array(z.string()) }))
+    .max(100),
+  roomTypes: z.array(z.object({ id: z.string(), name: z.string() })).max(200),
+});

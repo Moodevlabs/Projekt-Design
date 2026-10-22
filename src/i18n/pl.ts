@@ -2891,6 +2891,51 @@ Z wyrazami szacunku`,
         bad_qty: 'Pominięta: ilość musi być większa od zera.',
       },
     },
+    // T-140 — wiadomość od klienta → teczka
+    intake: {
+      action: 'Z wiadomości',
+      title: 'Teczka z wiadomości',
+      intro:
+        'Wklej e-mail albo wiadomość od klienta. Asystent rozpozna, kto pisze i o jaki obiekt chodzi, zaproponuje pomieszczenia i zakres z Twojej biblioteki. Przejrzysz wszystko przed zapisem.',
+      placeholder: 'Wklej tutaj treść wiadomości od klienta…',
+      analyze: 'Odczytaj wiadomość',
+      analyzing: 'Czytam wiadomość…',
+      tooLong: (chars: number, limit: number) =>
+        `Wiadomość ma ${chars.toLocaleString('pl-PL')} znaków, limit to ${limit.toLocaleString('pl-PL')}. Skróć ją do istotnej części.`,
+      masked: (emails: number, phones: number) =>
+        emails + phones === 0
+          ? 'W wiadomości nie ma adresu e-mail ani telefonu.'
+          : `Przed wysłaniem do asystenta wycięto ${emails} ${emails === 1 ? 'adres e-mail' : 'adresy e-mail'} i ${phones} ${phones === 1 ? 'telefon' : 'telefony'} — trafią prosto do karty klienta.`,
+      summary: 'Czego dotyczy wiadomość',
+      client: 'Klient',
+      project: 'Teczka',
+      scope: 'Zakres',
+      openQuestions: 'O co dopytać klienta',
+      fields: {
+        clientName: 'Nazwa klienta',
+        city: 'Miasto inwestycji',
+        address: 'Adres inwestycji',
+        email: 'E-mail',
+        phone: 'Telefon',
+        projectName: 'Nazwa teczki',
+        areaM2: 'Metraż (m²)',
+        kind: 'Rodzaj obiektu',
+      },
+      existingClient: (name: string) => `W bazie jest już klient „${name}”.`,
+      useExisting: 'Podepnij do istniejącego',
+      createNew: 'Załóż nowego klienta',
+      knownClient: (name: string) => `Teczka powstanie u klienta „${name}”.`,
+      withQuote: 'Utwórz też szkic wyceny z tego zakresu',
+      noScope:
+        'Wiadomość nie mówi, co ma być zrobione — powstanie klient i teczka, a wycenę dodasz, gdy klient doprecyzuje zakres.',
+      create: 'Utwórz teczkę',
+      creating: 'Tworzę teczkę…',
+      created: 'Teczka utworzona.',
+      createdWithQuote: 'Teczka i szkic wyceny utworzone.',
+      failed: 'Nie udało się utworzyć teczki.',
+      nameRequired: 'Podaj nazwę klienta i nazwę teczki.',
+      sourceNote: 'Treść wiadomości zostanie zapisana w notatkach teczki.',
+    },
     // T-139 — dopracowanie tekstów
     text: {
       action: 'Dopracuj tekst (AI)',

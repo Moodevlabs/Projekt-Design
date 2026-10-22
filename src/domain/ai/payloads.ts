@@ -90,13 +90,29 @@ export interface PolishTextPayload {
   };
 }
 
+/**
+ * Wiadomość od klienta → teczka (T-140). `message` jest już PO
+ * `maskContacts` — e-mail i telefon nigdy nie opuszczają aplikacji.
+ * `knownClient` jest ustawiony, gdy akcja startuje z karty istniejącego
+ * klienta: model nie zgaduje wtedy, kto pisze, tylko czyta o inwestycji.
+ */
+export interface MessageToProjectPayload {
+  message: string;
+  knownClient: { name: string; city: string } | null;
+  library: AiLibraryEntry[];
+  templates: Array<{ id: string; name: string; itemNames: string[] }>;
+  roomTypes: Array<{ id: string; name: string }>;
+}
+
 export type AiPayloadOf<A extends AiAction> = A extends 'import-library'
   ? ImportLibraryPayload
   : A extends 'brief-to-quote'
     ? BriefToQuotePayload
     : A extends 'comments-to-changes'
       ? CommentsToChangesPayload
-      : PolishTextPayload;
+      : A extends 'message-to-project'
+        ? MessageToProjectPayload
+        : PolishTextPayload;
 
 // ---------------------------------------------------------------------------
 // Budowniczy
